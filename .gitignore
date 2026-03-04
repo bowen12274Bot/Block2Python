@@ -1,0 +1,4 @@
+.block2python/
+.venv/
+__pycache__/
+*.pyc

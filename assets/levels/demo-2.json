@@ -1,0 +1,15 @@
+{
+  "level_id": "demo-2",
+  "title": "條件判斷（Stub）",
+  "prompt": "讀入一個整數，若大於 0 輸出 'POS'，否則輸出 'NONPOS'。",
+  "prerequisite_level_ids": ["demo-1"],
+  "testcases": [
+    { "name": "pos", "stdin": "1\n", "expected_stdout": "POS\n" },
+    { "name": "nonpos", "stdin": "0\n", "expected_stdout": "NONPOS\n" }
+  ],
+  "metadata": {
+    "stub_judge": { "status": "WA", "summary": "StubJudge: forced WA for demo-2 (demo only)." },
+    "stub_analysis": { "status": "PASS", "summary": "StubAnalyzer: forced PASS for demo-2." }
+  }
+}
+

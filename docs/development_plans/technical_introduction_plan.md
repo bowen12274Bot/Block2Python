@@ -24,10 +24,10 @@
 
 以 Demo 端到端可展示為優先，建議順序是：
 
-1. **程式執行與判題（Execution/Judge）**：先能跑、先能判定 AC/WA（這是所有回饋與解鎖的底座）
-2. **應用整合層（PySide6 App Shell）**：先做關卡流程/頁面狀態/回饋面板（確保展示載體穩定）
-3. **程式分析層（AST 結構檢查）**：補上「不只看輸出」的教學型驗證（與關卡目標對齊）
-4. **視覺化編程層（Blockly 嵌入與資料流）**：把積木產物（Block JSON / 生成 Python）接進分析/判題
+1. **應用整合層（PySide6 App Shell）**：先做關卡流程/頁面狀態/回饋面板（確保展示載體穩定）
+2. **程式分析層（AST 結構檢查）**：先用「結構規則」完成可解釋的教學回饋（先不依賴執行 sandbox）
+3. **視覺化編程層（Blockly 嵌入與資料流）**：把積木產物（Block JSON / 生成 Python）接進分析與回饋呈現
+4. **程式執行與判題（Execution/Judge）**：技術未定前先用 StubJudge 繞過；定案後再替換為真實 sandbox/judge
 5. **AI 語意輔助層（Hint 生成）**：最後再接 AI（避免在核心流程未穩定前引入不確定性）
 
 ---
@@ -60,25 +60,22 @@
 
 ### 3.1 要引入什麼
 
-- `SandboxRunner`：以 subprocess 執行 Python、帶 timeout、擷取 stdout/stderr
-- `TestcaseJudge`：多組測資執行 + 輸出正規化 + AC/WA
-- `JudgeResult`：統一回傳格式（包含失敗測資索引、預期/實際、stderr、耗時）
+- `Judge` 抽象介面：`Submission + LevelSpec -> JudgeResult`
+- `StubJudge`：可配置的假判題（先繞過「實際執行/安全隔離」的技術決策）
+- `JudgeResult`：統一回傳格式（AC/WA/TLE/RE + 差異/摘要）
 
 ### 3.2 怎麼引入
 
-- 先只支援需求文件 MVP 範圍的 I/O（`input`/`print`）與純運算
-- 先不做重型 sandbox（Demo 以 timeout + 基本隔離為主）；把「限制策略」抽象成選項，後續可加強
+- 先以 `LevelSpec.metadata` 或 feature flag 配置 StubJudge 回傳結果，用來打通 UI 與關卡解鎖流程
+- 真正的 sandbox/judge 定案後，保留同一個 `Judge` 介面，將 StubJudge 直接替換掉即可
 
 ### 3.3 如何確認成功（最小驗收）
 
-- 自動驗證：
-  - 以 2～3 個測資測一題（例如：讀兩數相加輸出）
-  - 測到至少 4 種結果：AC / WA / TLE / RE
-- 手動驗證：
-  - 在 UI/CLI 提交一段 Python，能看到：
-    - 通過/失敗
-    - 哪筆測資失敗與差異（正規化後）
-    - 超時有明確訊息
+- 手動驗證（Stub）：
+  - 在 UI/CLI 提交一段 Python，能看到通過/失敗（由 stub 控制）
+  - 通過後能解鎖下一關（關卡流程可驗證）
+- 替換驗證（未來真實 Judge 定案時）：
+  - StubJudge 可在不改 UI/Analysis/AI 的情況下被真實 Judge 取代
 
 ---
 
@@ -94,12 +91,14 @@
 
 - UI 先接 Phase 1 的 Judge，確保端到端 demo 能跑
 - Editor 元件先用最簡可用（純文字輸入也可），避免早期被編輯器選型卡住
+  - 若 Judge 技術未定：先接 StubJudge，確保關卡流程與解鎖可被驗證，待定案後再替換
 
 ### 4.3 如何確認成功（最小驗收）
 
 - 從啟動到通關至少 1 題的流程可重複跑通
 - 通關後能解鎖下一題（即使下一題內容先占位）
 - 任何失敗都能在 UI 明確顯示原因（WA/TLE/RE）
+  - 初期可先以 StubJudge/StubAnalyzer 驗證 UI 與流程（不綁真實 sandbox/AST 實作）
 
 ---
 
@@ -191,4 +190,3 @@
 - Blockly ↔ Desktop 橋接：先驗證 JS↔Python 通訊，再擴積木；避免先做大量積木定義
 - 編輯器選型：先可用再優化；避免在 UI 體驗上過早重投入
 - AI 不確定性：最後引入 + feature flag + 模板保底
-
