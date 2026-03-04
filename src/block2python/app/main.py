@@ -12,8 +12,12 @@ def main() -> int:
     for view in app.list_levels():
         print(f"- {view.level_id}: {view.title} [{view.state}]")
 
+    app.mark_block_passed("demo-1")
     outcome = app.submit(Submission(level_id="demo-1", python_code="print(3)"))
-    print(f"Submit demo-1 -> analysis={outcome.analysis.status}, judge={outcome.judge.status}, cleared={outcome.cleared}")
+    print(
+        f"Submit demo-1 -> analysis={outcome.analysis.status}, judge={outcome.judge.status}, "
+        f"block_passed={outcome.block_passed}, cleared={outcome.cleared}"
+    )
 
     for view in app.list_levels():
         print(f"- {view.level_id}: {view.title} [{view.state}]")

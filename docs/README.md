@@ -5,6 +5,7 @@
 - 專案計畫：`docs/project_plan.md`
 - 需求文件：`docs/requirements.md`
 - 技術策略說明：`docs/technical_rationale.md`
+- 專案架構：`docs/project_architecture.md`
 - 開發進度安排（待補）：`docs/development_timeline.md`
 - 貢獻指南：`docs/contributing.md`
 - 規格（Specs）：`docs/specs/`

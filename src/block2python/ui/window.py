@@ -22,11 +22,14 @@ try:
         QPlainTextEdit,
         QSizePolicy,
         QSplitter,
+        QTabWidget,
         QVBoxLayout,
         QWidget,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
     raise RuntimeError("PySide6 is required to use the UI. Install: pip install PySide6") from e
+
+from .blockly_embed import BlocklyEmbed, BlocklyOutput
 
 
 class MainWindow(QMainWindow):
@@ -37,6 +40,8 @@ class MainWindow(QMainWindow):
 
         self._levels: dict[str, LevelSpec] = {}
         self._app = AppCore({}, progress=JsonFileProgress(self._progress_path()))
+        self._block_json_by_level: dict[str, dict] = {}
+        self._draft_code_by_level: dict[str, str] = {}
 
         root = QWidget()
         self.setCentralWidget(root)
@@ -73,11 +78,34 @@ class MainWindow(QMainWindow):
 
         right_layout.addWidget(header_row)
 
+        self._content_tabs = QTabWidget()
+
         self._prompt = QPlainTextEdit()
         self._prompt.setReadOnly(True)
-        self._prompt.setPlaceholderText("Prompt")
-        self._prompt.setMinimumHeight(120)
-        right_layout.addWidget(self._prompt)
+        self._prompt.setPlaceholderText("任務 / 題目敘述")
+        self._content_tabs.addTab(self._prompt, "任務")
+
+        self._blockly = BlocklyEmbed()
+        self._blockly.output_received.connect(self._on_blockly_output)
+        self._content_tabs.addTab(self._blockly, "積木（WebEngine）")
+
+        self._learning = QPlainTextEdit()
+        self._learning.setReadOnly(True)
+        self._learning.setPlaceholderText("教學內容（暫以純文字顯示）")
+        self._content_tabs.addTab(self._learning, "教學")
+
+        self._story_intro = QPlainTextEdit()
+        self._story_intro.setReadOnly(True)
+        self._story_intro.setPlaceholderText("劇情（開場）")
+        self._content_tabs.addTab(self._story_intro, "劇情（前）")
+
+        self._story_outro = QPlainTextEdit()
+        self._story_outro.setReadOnly(True)
+        self._story_outro.setPlaceholderText("劇情（結尾）")
+        self._content_tabs.addTab(self._story_outro, "劇情（後）")
+
+        self._content_tabs.setMinimumHeight(180)
+        right_layout.addWidget(self._content_tabs)
 
         self._code = QPlainTextEdit()
         self._code.setPlaceholderText("Write Python code here...")
@@ -88,6 +116,10 @@ class MainWindow(QMainWindow):
         actions_layout = QHBoxLayout(actions_row)
         actions_layout.setContentsMargins(0, 0, 0, 0)
         actions_layout.setSpacing(8)
+
+        self._pass_block_button = QPushButton("Pass Block Step (stub)")
+        self._pass_block_button.clicked.connect(self._pass_block_step)
+        actions_layout.addWidget(self._pass_block_button)
 
         self._submit_button = QPushButton("Submit")
         self._submit_button.clicked.connect(self._submit)
@@ -126,6 +158,7 @@ class MainWindow(QMainWindow):
             return
 
         self._app = AppCore(self._levels, progress=JsonFileProgress(self._progress_path()))
+        self._blockly.load_placeholder(Path("assets") / "blockly" / "index.html")
         self._levels_list.clear()
 
         for view in self._app.list_levels():
@@ -146,6 +179,13 @@ class MainWindow(QMainWindow):
         return str(level_id) if level_id else None
 
     def _on_level_selected(self, _current: QListWidgetItem | None, _previous: QListWidgetItem | None) -> None:
+        prev_level_id = None
+        if _previous is not None:
+            prev_level_id_raw = _previous.data(Qt.ItemDataRole.UserRole)
+            prev_level_id = str(prev_level_id_raw) if prev_level_id_raw else None
+        if prev_level_id:
+            self._draft_code_by_level[prev_level_id] = self._code.toPlainText()
+
         self._feedback.clear()
         self._status.setText("")
 
@@ -154,38 +194,65 @@ class MainWindow(QMainWindow):
         if not level:
             self._level_title.setText("No level selected")
             self._prompt.setPlainText("")
+            self._learning.setPlainText("")
+            self._story_intro.setPlainText("")
+            self._story_outro.setPlainText("")
             self._submit_button.setEnabled(False)
             return
 
         self._level_title.setText(f"{level.level_id} — {level.title}")
         self._prompt.setPlainText(level.prompt)
+        self._learning.setPlainText(level.learning_markdown)
+        self._story_intro.setPlainText(level.story_intro_markdown)
+        self._story_outro.setPlainText(level.story_outro_markdown)
+
+        if level.level_id in self._draft_code_by_level:
+            self._code.setPlainText(self._draft_code_by_level[level.level_id])
         self._refresh_ui_state()
 
     def _refresh_ui_state(self) -> None:
         level_id = self._selected_level_id()
         if not level_id:
             self._submit_button.setEnabled(False)
+            self._pass_block_button.setEnabled(False)
             return
 
         states = {v.level_id: v.state for v in self._app.list_levels()}
         state = states.get(level_id, LevelState.LOCKED)
+        block_passed = self._app.is_block_passed(level_id)
 
         if state is LevelState.LOCKED:
             self._submit_button.setEnabled(False)
-            self._status.setText("Locked (clear prerequisites first)")
+            self._pass_block_button.setEnabled(False)
+            self._status.setText(f"State: LOCKED | block={'OK' if block_passed else 'TODO'} | cleared=NO")
         elif state is LevelState.CLEARED:
             self._submit_button.setEnabled(True)
-            self._status.setText("Cleared (you can resubmit)")
+            self._pass_block_button.setEnabled(not block_passed)
+            self._status.setText(f"State: CLEARED | block={'OK' if block_passed else 'TODO'} | cleared=YES")
         else:
-            self._submit_button.setEnabled(True)
-            self._status.setText("Unlocked")
+            self._pass_block_button.setEnabled(not block_passed)
+            if block_passed:
+                self._submit_button.setEnabled(True)
+                self._status.setText("State: UNLOCKED | block=OK | cleared=NO")
+            else:
+                self._submit_button.setEnabled(False)
+                self._status.setText("State: UNLOCKED | block=TODO | cleared=NO (complete block step first)")
 
     def _submit(self) -> None:
         level_id = self._selected_level_id()
         if not level_id:
             return
         code = self._code.toPlainText()
-        submission = Submission(level_id=level_id, python_code=code)
+        block_json = self._block_json_by_level.get(level_id)
+        block_schema_version = None
+        if isinstance(block_json, dict) and "schema_version" in block_json:
+            block_schema_version = str(block_json.get("schema_version"))
+        submission = Submission(
+            level_id=level_id,
+            python_code=code,
+            block_json=block_json,
+            block_schema_version=block_schema_version,
+        )
         outcome = self._app.submit(submission)
 
         lines: list[str] = []
@@ -197,9 +264,41 @@ class MainWindow(QMainWindow):
 
         lines.append(f"judge: {outcome.judge.status} — {outcome.judge.summary}")
         lines.append(f"cleared: {outcome.cleared}")
+        lines.append(f"block_passed: {outcome.block_passed}")
+        if block_schema_version:
+            lines.append(f"block_schema_version: {block_schema_version}")
+        if outcome.judge.case_results:
+            lines.append(f"cases: {len(outcome.judge.case_results)} (failed={outcome.judge.failed_case_index})")
+            for idx, cr in enumerate(outcome.judge.case_results[:5]):
+                if cr.status == "PASS":
+                    continue
+                lines.append(f"- case[{idx}] {cr.status}")
+                lines.append(f"  expected: {cr.expected_stdout!r}")
+                lines.append(f"  actual:   {cr.actual_stdout!r}")
         self._feedback.setPlainText("\n".join(lines))
 
         self._reload_levels()
+
+    def _pass_block_step(self) -> None:
+        level_id = self._selected_level_id()
+        if not level_id:
+            return
+        ok = self._app.mark_block_passed(level_id)
+        if not ok:
+            QMessageBox.information(self, "Block Step", "Cannot mark block step passed (locked/unknown level).")
+        self._reload_levels()
+
+    def _on_blockly_output(self, output: BlocklyOutput) -> None:
+        level_id = self._selected_level_id()
+        if not level_id:
+            return
+        self._block_json_by_level[level_id] = output.block_json
+        self._code.setPlainText(output.python_code)
+        self._draft_code_by_level[level_id] = output.python_code
+
+        self._app.mark_block_passed(level_id)
+        self._refresh_ui_state()
+        self._feedback.setPlainText("已從積木頁收到輸出：已填入 Python 並標記積木步驟通過。")
 
     def _reset_progress(self) -> None:
         reply = QMessageBox.question(
@@ -220,4 +319,3 @@ class MainWindow(QMainWindow):
             return
 
         self._reload_levels()
-

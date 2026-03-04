@@ -97,6 +97,15 @@ Blockly schema（預留）：
 - `metadata`：object（預設 `{}`）
   - 允許放任何自訂 key，程式會原樣帶入 `LevelSpec.metadata`
 
+#### 3.2.1 建立期：analysis 規則（metadata hook）
+
+建立期可以先用 `metadata.analysis` 提供最小 AST 規則（不算正式 schema 欄位；未來可升級為一級欄位或獨立規格）。
+
+- `metadata.analysis.required_keywords`：array[string]
+- `metadata.analysis.forbidden_keywords`：array[string]
+
+若未提供或格式不正確，程式會忽略並使用預設（不額外檢查）。
+
 ### 3.3 目前「寬鬆載入」的注意事項
 
 - 只有上述欄位會被載入；不在清單中的欄位目前會被忽略（不會自動併入 `metadata`）。
@@ -109,6 +118,8 @@ Blockly schema（預留）：
 - `metadata.stub_judge`：供 `StubJudge` 使用
   - `status`：`"AC"|"WA"|"TLE"|"RE"`
   - `summary`：string
+  - `fail_case_index`：number|string（可選；指定哪一筆測資視為失敗，用於展示 case diff）
+  - `actual_stdout_by_case`：array[string]（可選；指定每筆測資的實際輸出，用於展示 diff）
 - `metadata.stub_analysis`：供 `StubAnalyzer` 使用
   - `status`：`"PASS"|"FAIL"|"SYNTAX_ERROR"`
   - `summary`：string
@@ -117,4 +128,3 @@ Blockly schema（預留）：
 ### 3.5 範例
 
 參考：`assets/levels/demo-1.json`、`assets/levels/demo-2.json`
-

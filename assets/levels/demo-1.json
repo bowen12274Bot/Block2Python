@@ -2,6 +2,9 @@
   "level_id": "demo-1",
   "title": "兩數相加（Stub）",
   "prompt": "讀入兩個整數並輸出相加結果。",
+  "learning_markdown": "目標：熟悉 input/print 與整數加法。\n\n提示：可以用 `a, b = map(int, input().split())` 讀入兩個數。",
+  "story_intro_markdown": "你收到一個任務：幫基地計算補給箱的總數。",
+  "story_outro_markdown": "任務完成！你解鎖了下一關。",
   "testcases": [
     { "name": "basic", "stdin": "1 2\n", "expected_stdout": "3\n" }
   ],
@@ -13,4 +16,3 @@
     "block_schema_version_note": "Schema not fixed yet; keep using metadata until decided."
   }
 }
-

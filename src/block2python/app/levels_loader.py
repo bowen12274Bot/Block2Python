@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from block2python.contracts import LevelSpec, Testcase
+from block2python.contracts import AnalysisPolicy, LevelSpec, Testcase
 
 
 class LevelsLoadError(Exception):
@@ -75,6 +75,8 @@ def _load_level_file(level_path: Path) -> LevelSpec:
     if isinstance(md_raw, dict):
         metadata.update(md_raw)
 
+    analysis_policy = _analysis_policy_from_metadata(metadata)
+
     return LevelSpec(
         level_id=level_id,
         title=title,
@@ -88,6 +90,7 @@ def _load_level_file(level_path: Path) -> LevelSpec:
         prerequisite_level_ids=prerequisite_level_ids,
         next_level_ids=next_level_ids,
         testcases=tuple(testcases),
+        analysis_policy=analysis_policy,
         block_schema_version=_opt_str(raw.get("block_schema_version")),
         metadata=metadata,
     )
@@ -110,3 +113,31 @@ def _opt_int(v: object) -> int | None:
     except ValueError:
         return None
 
+
+def _analysis_policy_from_metadata(metadata: dict[str, Any]) -> AnalysisPolicy:
+    """
+    Establishment-phase hook:
+      - Allow per-level analysis rules to be configured via level.metadata
+      - If absent/malformed, fall back to empty AnalysisPolicy (no extra rules)
+
+    Supported (optional) shapes:
+      - metadata["analysis"]["required_keywords"] = ["for", "input"]
+      - metadata["analysis"]["forbidden_keywords"] = ["import", "while"]
+    """
+
+    analysis = metadata.get("analysis")
+    if not isinstance(analysis, dict):
+        return AnalysisPolicy()
+
+    required_raw = analysis.get("required_keywords", ())
+    forbidden_raw = analysis.get("forbidden_keywords", ())
+
+    required: list[str] = []
+    if isinstance(required_raw, list):
+        required = [str(x) for x in required_raw if str(x)]
+
+    forbidden: list[str] = []
+    if isinstance(forbidden_raw, list):
+        forbidden = [str(x) for x in forbidden_raw if str(x)]
+
+    return AnalysisPolicy(required_keywords=tuple(required), forbidden_keywords=tuple(forbidden))

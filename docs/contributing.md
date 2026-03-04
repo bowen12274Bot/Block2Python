@@ -38,6 +38,33 @@ powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
 
 若看到「Missing .venv」，先跑 `tools/setup_dev_env.ps1`。
 
+### 1.4 Blockly 靜態檔（Vendor）
+
+本專案採用 `QWebEngineView` 內嵌 Web 方式承載 Blockly。Demo 建立期可先用 placeholder（仍可測 Web↔Desktop 橋接）；若要啟用真正 Blockly workspace，需把 Blockly dist 靜態檔放到 `assets/blockly/vendor/`。
+
+取得方式（需網路；URL 由團隊自行決定版本來源）：
+
+```powershell
+$env:BLOCKLY_DIST_URL = "https://github.com/RaspberryPiFoundation/blockly/releases/download/blockly-v12.4.1/blockly-12.4.1.tgz"
+powershell -ExecutionPolicy Bypass -File tools/vendor_blockly.ps1
+```
+
+完成後重新啟動 UI。
+
+若你是手動下載 zip（推薦），可改用本機路徑：
+
+```powershell
+$env:BLOCKLY_DIST_ZIP = "C:\\path\\to\\blockly_dist.zip"
+powershell -ExecutionPolicy Bypass -File tools/vendor_blockly.ps1
+```
+
+若你已經有「解壓後的 dist 資料夾」（裡面直接包含 `blockly_compressed.js` 等檔案），可用目錄方式 vendor：
+
+```powershell
+$env:BLOCKLY_DIST_DIR = ".block2python\\blockly-12.4.1\\package"
+powershell -ExecutionPolicy Bypass -File tools/vendor_blockly_from_dir.ps1
+```
+
 ## 2. 本機資料（進度保存）
 
 本機進度會寫入：
@@ -45,6 +72,32 @@ powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
 - `.block2python/progress.json`
 
 此資料夾已被 `.gitignore` 忽略，不會進版控。
+
+### 2.1 `.block2python/` 的定位（不進版控）
+
+`.block2python/` 是本專案的「本機狀態 / 暫存區」，用途類似：
+
+- Node 專案的本機狀態（但不等同 `node_modules`）
+- 建置或下載的暫存（可重建）
+- 每個人/每台機器不同的執行期資料（不應進 Git）
+
+目前我們放的內容包含：
+
+- `progress.json`：關卡進度（執行期狀態）
+- `blockly_dist.zip`、`blockly_dist_tmp/` 等：工具腳本下載與解壓的暫存
+- `.block2python/blockly-12.4.1/`：你手動下載/解壓的 Blockly dist 來源資料（**來源暫存**，可刪）
+
+注意：
+
+- UI 真正載入的頁面是 `assets/blockly/index.html`；它會引用 `assets/blockly/vendor/` 下的檔案（見下方 2.2）
+- `.block2python/` 內的來源資料只用來「拷貝/匯入」到 `assets/blockly/vendor/`，不是 UI 的直接依賴路徑
+
+### 2.2 Blockly 靜態檔（vendor）為什麼不進版控
+
+本專案目前將 `assets/blockly/vendor/` 設為不進版控（避免 repo 變大）。因此：
+
+- 每位開發者需要自行執行一次 vendor 流程，把 dist 檔放到 `assets/blockly/vendor/`
+- 若未 vendor，UI 仍可用 placeholder 模式（用於驗證 Web↔Desktop 橋接）
 
 重置進度：
 

@@ -3,8 +3,10 @@
 - 文件版本：0.1
 - 建立日期：2026-03-03
 - 適用範圍：Demo（僅學生端）
+- 文件狀態：已完成（建立期技術引入已達標；未完成項已移交至下一階段規劃）
+- 完成審核：`docs/development_plans/technical_introduction_plan_verification.md`
 - 參考文件：
-  - 技術策略：`docs/technical_rationale_document.md`
+  - 技術策略：`docs/technical_rationale.md`
   - 架構圖：`docs/uml/system_architecture.md`
   - 需求：`docs/requirements.md`
 
@@ -92,6 +94,8 @@
 - UI 先接 Phase 1 的 Judge，確保端到端 demo 能跑
 - Editor 元件先用最簡可用（純文字輸入也可），避免早期被編輯器選型卡住
   - 若 Judge 技術未定：先接 StubJudge，確保關卡流程與解鎖可被驗證，待定案後再替換
+  - 建立期先用 UI 按鈕 stub「積木步驟通過」對齊需求流程；建立期結束後需改為資料驅動（由關卡資料/Blockly 驗證結果驅動）
+  - UI 可先提供「積木區占位頁」與「狀態列」以對齊需求流程（先能動即可，不做精細介面）
 
 ### 4.3 如何確認成功（最小驗收）
 
@@ -117,6 +121,8 @@
 
 - 規則先以「關卡規格（LevelSpec）設定」驅動，而不是把規則寫死在程式碼各處
 - 先做「可解釋」：回傳差異原因（哪條規則、哪個節點）比做很聰明的比對更重要
+  - 專案建立期（MVP）先做：Syntax check + out-of-scope 禁用（`docs/requirements.md`）+ 關鍵字 required/forbidden
+  - 後期再逐步加入：`for range` 形狀檢查、結構拓樸一致性、DiffProducer 精緻化、Blockly ↔ AST 映射
 
 ### 5.3 如何確認成功（最小驗收）
 
@@ -136,7 +142,8 @@
 - JS ↔ Python 橋接：能取回
   - Block JSON
   - 生成的 Python code
-- 最小積木集合：對齊 MVP scope（I/O、變數、運算、if/else、for range）
+- 建立期最小積木集合（先驗證引入管線可跑）：`print` / 數字 / 算術（能生成 Python 並回填即可）
+- 後續擴充積木集合（再對齊需求範圍）：I/O、變數、運算、if/else、for range（依 `docs/requirements.md` 逐步加入）
 
 ### 6.2 怎麼引入
 
@@ -144,6 +151,7 @@
 - 先做單向流程：
   - 積木 → 生成 Python → 交給 AST/Judge
   - 不急著做 Python → 積木 的逆向映射（Demo 後續再評估）
+  - 建立期可先用 QWebEngineView + placeholder page 驗證 Web↔Desktop 橋接，後續再替換成正式 Blockly 靜態檔與自訂 blocks
 
 ### 6.3 如何確認成功（最小驗收）
 

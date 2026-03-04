@@ -1,6 +1,6 @@
 # 系統架構圖（System Architecture Diagram）
 
-> 依據 [技術策略說明文件](../technical_rationale_document.md) v0.1 繪製  
+> 依據 [技術策略說明文件](../technical_rationale.md) v0.1 繪製  
 > 更新日期：2026-03-03
 
 ## 系統架構圖（圖片版）

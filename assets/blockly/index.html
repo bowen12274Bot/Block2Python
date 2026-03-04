@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Block2Python - Blockly Placeholder</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 16px; }
+      .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+      textarea { width: 100%; min-height: 140px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .hint { color: #444; font-size: 12px; }
+      button { padding: 8px 10px; }
+      code { background: #f2f2f2; padding: 1px 4px; border-radius: 4px; }
+    </style>
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="./vendor/blockly_compressed.js"></script>
+    <script src="./vendor/blocks_compressed.js"></script>
+    <script src="./vendor/python_compressed.js"></script>
+    <script src="./vendor/msg/zh-hant.js"></script>
+  </head>
+  <body>
+    <h2>積木區</h2>
+    <p class="hint">
+      建立期目標：先打通 <code>QWebEngineView</code> 與 Desktop 的資料橋接。
+      若你已放入 Blockly 靜態檔（<code>assets/blockly/vendor/</code>），此頁會顯示 Workspace；否則退回 placeholder 模式。
+    </p>
+
+    <div class="row">
+      <button id="btn-sample">填入範例</button>
+      <button id="btn-send">送回 App（標記積木通過）</button>
+      <span id="status" class="hint"></span>
+    </div>
+
+    <div id="blocklyArea" style="margin-top: 12px; display:none;">
+      <div id="blocklyDiv" style="height: 360px; width: 100%; border: 1px solid #ddd;"></div>
+      <p class="hint">Workspace 模式：請用右側按鈕生成 Python 與 Block JSON。</p>
+    </div>
+
+    <div class="grid" style="margin-top: 12px;">
+      <div>
+        <h3 style="margin: 8px 0;">Block JSON（placeholder）</h3>
+        <textarea id="blockJson" placeholder="{ ... }"></textarea>
+      </div>
+      <div>
+        <h3 style="margin: 8px 0;">Python Code（generated）</h3>
+        <textarea id="pythonCode" placeholder="print('hello')"></textarea>
+      </div>
+    </div>
+
+    <script>
+      let bridge = null;
+
+      function setStatus(msg) {
+        document.getElementById("status").textContent = msg;
+      }
+
+      function fillSample() {
+        document.getElementById("blockJson").value = JSON.stringify(
+          {
+            schema_version: "0.1",
+            blocks: [{ type: "print", fields: { TEXT: "Hello" } }],
+          },
+          null,
+          2
+        );
+        document.getElementById("pythonCode").value = "print('Hello')";
+        setStatus("已填入範例");
+      }
+
+      function sendToApp() {
+        if (!bridge) {
+          setStatus("bridge 尚未就緒");
+          return;
+        }
+        const blockJson = document.getElementById("blockJson").value || "{}";
+        const pythonCode = document.getElementById("pythonCode").value || "";
+        bridge.setBlocklyOutput(pythonCode, blockJson);
+        setStatus("已送出");
+      }
+
+      document.getElementById("btn-sample").addEventListener("click", fillSample);
+      document.getElementById("btn-send").addEventListener("click", sendToApp);
+
+      // If Blockly is available, initialize a minimal workspace.
+      function initBlocklyIfAvailable() {
+        if (typeof Blockly === "undefined") {
+          setStatus("Blockly 靜態檔未就緒：使用 placeholder 模式");
+          return;
+        }
+        try {
+          Blockly.setLocale(Blockly.Msg);
+        } catch (e) {}
+
+        document.getElementById("blocklyArea").style.display = "block";
+        const toolbox = {
+          kind: "flyoutToolbox",
+          contents: [
+            { kind: "block", type: "text_print" },
+            { kind: "block", type: "math_number" },
+            { kind: "block", type: "math_arithmetic" }
+          ],
+        };
+        const workspace = Blockly.inject("blocklyDiv", { toolbox });
+
+        function updateOutputs() {
+          let python = "";
+          try {
+            python = Blockly.Python.workspaceToCode(workspace) || "";
+            document.getElementById("pythonCode").value = python;
+          } catch (e) {
+            // Ignore generator errors.
+          }
+
+          try {
+            // Prefer new serialization API if present.
+            let saved = null;
+            if (Blockly.serialization && Blockly.serialization.workspaces) {
+              saved = Blockly.serialization.workspaces.save(workspace);
+            }
+            const payload = {
+              schema_version: "0.1",
+              workspace: saved,
+              generated: { python },
+              metadata: {
+                locale: "zh-hant",
+                blockly_version: (Blockly && Blockly.VERSION) ? Blockly.VERSION : undefined
+              }
+            };
+            document.getElementById("blockJson").value = JSON.stringify(payload, null, 2);
+          } catch (e) {
+            // Ignore JSON errors.
+          }
+        }
+
+        workspace.addChangeListener(function () {
+          updateOutputs();
+        });
+        updateOutputs();
+        setStatus("Blockly workspace 已就緒");
+      }
+
+      if (typeof qt !== "undefined") {
+        new QWebChannel(qt.webChannelTransport, function (channel) {
+          bridge = channel.objects.bridge || null;
+          setStatus(bridge ? "bridge 已就緒" : "bridge 缺失");
+          initBlocklyIfAvailable();
+        });
+      } else {
+        setStatus("此頁需在 QWebEngineView 中開啟");
+      }
+    </script>
+  </body>
+</html>

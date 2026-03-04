@@ -1,8 +1,9 @@
 # 規格（Specs）
 
-本資料夾用於存放「詳細實作細節」與「API 規範」等較偏規格書性質的文件，避免與 `docs/Technical_rationale_document.md`（技術策略/合理性）混在一起。
+本資料夾用於存放「詳細實作細節」與「API 規範」等較偏規格書性質的文件，避免與 `docs/technical_rationale.md`（技術策略/合理性）混在一起。
 
 - 關卡檔 schema（v0.1）：`docs/specs/levels_schema_v0_1.md`
+- Block JSON schema（v0.1）：`docs/specs/block_json_schema_v0_1.md`
 
 建議內容範例（依實際需要增修）：
 
