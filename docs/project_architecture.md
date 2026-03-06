@@ -1,6 +1,7 @@
 # 專案架構（Project Structure）
 
-本文件用於說明 Block2Python（Demo）專案的資料夾結構，以及各文件之間的依賴/引用關係，方便團隊協作與交接。
+- 更新日期：2026-03-06
+- 文件定位：本文件用於說明 Block2Python（Demo）專案的資料夾結構，以及各文件之間的依賴/引用關係，方便團隊協作與交接。
 
 ## 1. 專案根目錄（Top-level）
 
@@ -86,6 +87,17 @@ docs/
   - `index.html`：建立期 placeholder + workspace（vendor 後可用）
   - `vendor/`：Blockly dist 檔（目前不進版控；由工具腳本擺放）
 
+## 4.1 執行期資料與狀態（Runtime State）
+
+以下資料屬於系統執行期狀態，不建議放在 `requirements.md`，而應在架構/資料設計文件中管理：
+
+- 關卡解鎖狀態
+- 章節／任務進度
+- 已讀對話或劇情節點狀態
+- 關卡路線的選擇結果或節點進度
+
+目前本機狀態主要存放在 `.block2python/`（見 `docs/contributing.md`），後續若資料結構擴充，應再獨立補充 schema 或狀態格式文件。
+
 ## 5. 工具腳本（tools/）
 
 - `tools/setup_dev_env.ps1`：建立 `.venv` 並安裝依賴
@@ -93,4 +105,3 @@ docs/
 - `tools/run_ui.ps1`：啟動 UI smoke
 - `tools/reset_progress.ps1`：清除本機進度
 - `tools/vendor_blockly.ps1` / `tools/vendor_blockly_from_dir.ps1`：擺放 Blockly dist 到 `assets/blockly/vendor/`
-
