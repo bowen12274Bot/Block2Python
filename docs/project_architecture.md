@@ -1,29 +1,42 @@
-# 專案架構（Project Structure）
+# 專案架構（Project Architecture）
 
-- 更新日期：2026-03-06
-- 文件定位：本文件用於說明 Block2Python（Demo）專案的資料夾結構，以及各文件之間的依賴/引用關係，方便團隊協作與交接。
+- 最後更新：2026-03-08
+- 本文件說明 Block2Python 專案目前的目錄結構、主要模組分工、靜態資源配置、工具腳本，以及 agent skills 的使用方式。
 
-## 1. 專案根目錄（Top-level）
+## 1. 專案根目錄
 
-```
+```text
 Block2Python/
-  src/            # 主要 Python 程式碼（package）
-  assets/         # 靜態資源（關卡資料、Blockly web 檔等）
-  tools/          # 開發輔助腳本（setup、run、vendor）
-  tests/          # 測試（目前以 smoke/預留為主）
-  docs/           # 文件（需求、技術策略、計畫、規格、UML）
-  .block2python/  # 本機狀態/暫存（不進版控）
-  .venv/          # 開發用虛擬環境（不進版控）
+  .agent/         # 唯一的 canonical agent skills source
+  .agents/        # 其餘模型入口
+  .block2python/  # 專案本機執行期狀態，不進版控
+  .claude/        # Claude Code 模型入口
+  .codex/         # Codex 模型入口
+  .venv/          # 開發用 Python 虛擬環境，不進版控
+  assets/         # 靜態資源，例如關卡資料與 Blockly vendor 檔案
+  docs/           # 架構、規格、開發計畫與協作文件
+  src/            # 核心 Python 程式碼
+  tests/          # 測試與 smoke test
+  tools/          # 開發與維運腳本
+  .gitignore      # Git 忽略規則
+  README.md       # 專案入口說明
+  skills-lock.json  # skills 鎖定資訊
 ```
 
 ### 1.1 不進版控資料夾
 
-- `.venv/`：每位開發者本機的 Python 虛擬環境（見 `docs/contributing.md`）
-- `.block2python/`：本機進度檔、下載/解壓暫存等（見 `docs/contributing.md`）
+- `.venv/`：本機 Python 開發環境，建立與使用方式見 `docs/contributing.md`。
+- `.block2python/`：本機執行期狀態、快取與暫存資料，細節見 `docs/contributing.md`。
+
+### 1.2 Agent Skills 入口
+
+- `.agent/`：skills 的唯一來源，真正的 `SKILL.md` 與 bundled resources 都放在這裡。
+- `.agents/`、`.claude/`、`.codex/`：不同 AI 模型的入口層，用來讓各模型接上 `.agent` 這份 canonical skills；它們不是獨立的 skill source。
+- `skills-lock.json`：記錄已安裝或已鎖定的 skill 來源與 hash。
 
 ## 2. 文件資料夾（docs/）
 
-```
+```text
 docs/
   README.md
   requirements.md
@@ -31,77 +44,91 @@ docs/
   project_plan.md
   development_timeline.md
   contributing.md
+  project_architecture.md
   development_plans/
   specs/
   uml/
 ```
 
-### 2.1 文件角色與關係（建議閱讀順序）
+### 2.1 文件分工
 
-1) **需求（What）**：`docs/requirements.md`  
-定義 MVP scope、學習流程、功能需求與非功能需求。
-
-2) **技術策略（Why）**：`docs/technical_rationale.md`  
-說明分層架構與技術選型理由（不等同實作規格）。
-
-3) **規格（Exact）**：`docs/specs/`  
-把跨層資料格式、schema、API 等細節獨立收斂（避免混進技術策略文件）。
-
-4) **UML（視覺化對齊）**：`docs/uml/system_architecture.md`  
-用元件圖對齊分層與資料流（對應技術策略文件的分層章節）。
-
-### 2.2 docs/ 子資料夾
-
-- `docs/development_plans/`：更細的開發/引入計畫與驗證  
-  - `technical_introduction_plan.md`：建立期技術引入計畫  
-  - `technical_introduction_plan_verification.md`：建立期完成驗證與狀態說明
-
-- `docs/specs/`：可被實作依賴的「格式/規格」文件  
-  - `levels_schema_v0_1.md`：關卡檔 schema（v0.1，建立期寬鬆版）  
-  - `block_json_schema_v0_1.md`：Block JSON schema（v0.1，建立期）
-
-- `docs/uml/`：架構圖與圖檔  
-  - `system_architecture.md`：Mermaid 元件圖  
-  - `system_architecture.png`：輸出圖片版
+- `requirements.md`：定義需求、目標與 MVP 範圍。
+- `technical_rationale.md`：說明技術選型與架構考量。
+- `project_plan.md`、`development_timeline.md`：記錄整體開發規劃與時程。
+- `contributing.md`：整理開發環境、Git 流程、Blockly vendor、smoke test 等協作規範。
+- `development_plans/`：各主題的實作計畫、驗證與 review 文件。
+- `specs/`：資料格式與 JSON schema。
+- `uml/`：系統架構圖與相關視覺化文件。
 
 ## 3. 程式碼（src/）
 
-主要 package：`src/block2python/`
+核心 package 位於 `src/block2python/`，目前主要分成下列模組：
 
-對應分層（與 `docs/technical_rationale.md`、`docs/uml/system_architecture.md` 一致）：
-
-- `src/block2python/app/`：應用整合層（關卡流程、解鎖、提交管線）
-- `src/block2python/ui/`：桌面 UI（PySide6 Widgets + WebEngine）
-- `src/block2python/contracts/`：資料契約（跨層資料結構）
-- `src/block2python/analysis/`：AST 分析（建立期最小規則 + 可擴充）
-- `src/block2python/judge/`：判題介面與 stub（真實 sandbox/judge 後續替換）
-- `src/block2python/blockly/`：預留（未來可放 Blockly adapter/抽象）
-- `src/block2python/ai/`：預留（Phase 5）
+- `app/`：應用程式啟動與組裝流程。
+- `ui/`：PySide6 視窗、Widget 與 UI 整合。
+- `blockly/`：Blockly 與 WebEngine 之間的橋接層。
+- `analysis/`：分析或 AST 相關能力。
+- `judge/`：評測或執行結果檢查相關能力。
+- `contracts/`：模組間共用的介面與資料契約。
+- `ai/`：與 AI 能力相關的擴充模組。
 
 ## 4. 資料與靜態資源（assets/）
 
-- `assets/levels/`：關卡資料（由程式載入）
-  - `index.json`：關卡索引
-  - `*.json`：單關卡內容（對應 `docs/specs/levels_schema_v0_1.md`）
-- `assets/blockly/`：WebEngine 載入的 web 資源
-  - `index.html`：建立期 placeholder + workspace（vendor 後可用）
-  - `vendor/`：Blockly dist 檔（目前不進版控；由工具腳本擺放）
+```text
+assets/
+  README.md
+  blockly/
+    README.md
+    index.html
+    vendor/
+  levels/
+    index.json
+    demo-1.json
+    demo-2.json
+```
 
-## 4.1 執行期資料與狀態（Runtime State）
+### 4.1 `assets/levels/`
 
-以下資料屬於系統執行期狀態，不建議放在 `requirements.md`，而應在架構/資料設計文件中管理：
+- 儲存關卡索引與範例關卡資料。
+- `index.json` 作為關卡入口。
+- `demo-1.json`、`demo-2.json` 提供目前的示範內容。
 
-- 關卡解鎖狀態
-- 章節／任務進度
-- 已讀對話或劇情節點狀態
-- 關卡路線的選擇結果或節點進度
+### 4.2 `assets/blockly/`
 
-目前本機狀態主要存放在 `.block2python/`（見 `docs/contributing.md`），後續若資料結構擴充，應再獨立補充 schema 或狀態格式文件。
+- `index.html` 提供 Blockly Web 端載入入口。
+- `vendor/` 放置 vendored Blockly dist，供 UI 端直接載入。
+
+### 4.3 執行期資料與狀態
+
+- `.block2python/` 用來保存本機執行期資料，不納入版控。
+- 這類資料應與 `assets/` 的靜態內容分離，避免將本機狀態混入正式資源。
 
 ## 5. 工具腳本（tools/）
 
-- `tools/setup_dev_env.ps1`：建立 `.venv` 並安裝依賴
-- `tools/run_demo.ps1`：跑 CLI smoke
-- `tools/run_ui.ps1`：啟動 UI smoke
-- `tools/reset_progress.ps1`：清除本機進度
-- `tools/vendor_blockly.ps1` / `tools/vendor_blockly_from_dir.ps1`：擺放 Blockly dist 到 `assets/blockly/vendor/`
+- `setup_dev_env.ps1`：建立 `.venv` 與安裝開發依賴。
+- `run_demo.ps1`：執行 CLI demo 或 smoke flow。
+- `run_ui.ps1`：啟動 UI smoke flow。
+- `reset_progress.ps1`：重置本機進度與狀態資料。
+- `vendor_blockly.ps1`：從下載來源匯入 Blockly dist。
+- `vendor_blockly_from_dir.ps1`：從本機目錄匯入 Blockly dist。
+
+## 6. Agent Skills
+
+本專案採用單一來源的 skills 架構，讓多個 AI 模型都共用同一份 canonical skill 定義。
+
+```text
+Block2Python/
+  .agent/
+    skills/                 # 唯一 canonical skills source
+    README.md               # 維護原則與各個skills的說明
+  .agents/                  # 其餘模型入口
+  .claude/                  # Claude Code 模型入口
+  .codex/                   # Codex 模型入口
+  skills-lock.json          # skills 鎖定資訊
+```
+
+### 6.1 分層原則
+
+- `.agent/skills/` 存放真正的 skill 定義與 bundled resources。
+- `.agents/`、`.claude/`、`.codex/` 只負責讓不同 AI 模型接上同一套 canonical skills，不應作為獨立 skill source。
+- `skills-lock.json` 是 skill 的 lock layer，用來記錄已安裝或已鎖定 skill 的來源與 hash 中繼資料。
