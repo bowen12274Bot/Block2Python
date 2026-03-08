@@ -16,4 +16,4 @@
 - 回顧文件：`<topic>_plan_review.md`
 - 需要保留快照時：`<topic>_plan_YYYY_MM_DD.md`
 
-更完整的撰寫與管理規則請見 `docs/contributing.md`。
+更完整的撰寫與管理規則請見 `docs/contributing/ai_collaboration.md` 與對應的 `development-planning` skill。
