@@ -22,6 +22,7 @@ class OutputNormalization:
 @dataclass(frozen=True, slots=True)
 class JudgePolicy:
     time_limit_ms: int = 2000
+    memory_limit_kb: int | None = None
     output_normalization: OutputNormalization = field(default_factory=OutputNormalization)
 
 
@@ -71,13 +72,14 @@ class JudgeStatus(str, Enum):
     AC = "AC"
     WA = "WA"
     TLE = "TLE"
+    MLE = "MLE"
     RE = "RE"
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
 
 @dataclass(frozen=True, slots=True)
 class CaseResult:
-    status: Literal["PASS", "FAIL", "ERROR", "TIMEOUT"]
+    status: Literal["PASS", "FAIL", "ERROR", "TIMEOUT", "MEMORY_LIMIT"]
     stdin: str
     expected_stdout: str
     actual_stdout: str = ""

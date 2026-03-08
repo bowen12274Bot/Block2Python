@@ -1,0 +1,9 @@
+levels:
+  - id: add-two-numbers
+    file: add-two-numbers.yaml
+  - id: fizzbuzz-simple
+    file: fizzbuzz-simple.yaml
+  - id: demo-1
+    file: demo-1.json
+  - id: demo-2
+    file: demo-2.json
