@@ -8,7 +8,7 @@
 
 ### 0.1 環境
 
-依 `docs/contributing.md` 建立 `.venv`：
+依 `docs/contributing/environment_setup.md` 建立 `.venv`：
 
 - `powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1`
 
@@ -132,7 +132,7 @@
   - 標記積木步驟通過（建立期 gate）
 - Blockly 靜態檔 vendor 流程已文件化，並可用工具腳本從目錄/zip 匯入：
   - `tools/vendor_blockly.ps1` / `tools/vendor_blockly_from_dir.ps1`
-  - `docs/contributing.md`
+  - `docs/contributing/environment_setup.md`
 
 **未做到 / 跳過**
 - 完整最小積木集合（I/O、變數、if/else、for range）未做（已在計畫中延後到後續階段）。
@@ -188,4 +188,3 @@
 
 - AIClient/Gemini 串接（feature flag）
 - hint policy/邊界規格與教案橋接（Agent Skill 等）
-

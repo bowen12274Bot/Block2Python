@@ -7,20 +7,20 @@ description: 說明如何參與 Block2Python 專案。用於開發環境設定�
 
 使用此 skill 處理 Block2Python 的協作、貢獻與開發流程問題。
 
-完整協作指南：[`docs/contributing.md`](../../../docs/contributing.md)
+協作指南入口：[`docs/contributing.md`](../../../docs/contributing.md)
 
-當問題涉及以下主題時，應先讀完整的 `docs/contributing.md`。
+當問題涉及以下主題時，應依需要讀對應子文件，而不是每次都讀完整協作文件。
 
 ## 快速對照
 
-| 主題 | 對應內容 |
+| 主題 | 對應文件 |
 |---|---|
-| 開發環境設定與初始化 | 開發環境、`.venv`、setup 流程 |
-| Blockly dist vendor | Blockly vendoring 流程與相關腳本 |
-| Git workflow | branch、commit、PR、review |
-| 開發規範 | 程式風格、依賴管理、協作規則 |
-| 驗證流程 | smoke test、Definition of Done |
-| 開發計畫文件 | `docs/development_plans/` 的使用方式 |
+| 快速開始與文件導覽 | `docs/contributing.md` |
+| 開發環境設定與 Blockly vendor | `docs/contributing/environment_setup.md` |
+| Git workflow、PR、驗證 | `docs/contributing/developer_workflow.md` |
+| 開發規範 | `docs/contributing/code_guidelines.md` |
+| AI 協作與 planning 入口 | `docs/contributing/ai_collaboration.md` |
+| 開發計畫文件 | `docs/development_plans/README.md` |
 
 ## 核心命令（Windows PowerShell）
 
@@ -49,4 +49,4 @@ powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1    # UI
 - Python 開發環境以 repo 內的 `.venv` 為主。
 - `assets/blockly/vendor/` 是 Blockly dist 的目標位置，不應手動隨意變更來源。
 - `.block2python/` 屬於本機執行期狀態，不應納入版控。
-- 若 setup 或執行流程失敗，優先回頭檢查 `tools/` 內的既有腳本與 `docs/contributing.md`。
+- 若 setup 或執行流程失敗，優先回頭檢查 `tools/` 內的既有腳本與 `docs/contributing/environment_setup.md`。

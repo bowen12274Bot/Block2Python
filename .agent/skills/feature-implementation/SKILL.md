@@ -19,7 +19,10 @@ description: 用於 Block2Python 的功能實作、重構與維護工作。當�
 在開始實作前，先建立最小必要上下文：
 
 - 架構總覽：[`docs/project_architecture.md`](../../../docs/project_architecture.md)
-- 協作規範：[`docs/contributing.md`](../../../docs/contributing.md)
+- 協作入口：[`docs/contributing.md`](../../../docs/contributing.md)
+- AI 協作規範：[`docs/contributing/ai_collaboration.md`](../../../docs/contributing/ai_collaboration.md)
+- 開發流程與驗證：[`docs/contributing/developer_workflow.md`](../../../docs/contributing/developer_workflow.md)
+- 代碼規範：[`docs/contributing/code_guidelines.md`](../../../docs/contributing/code_guidelines.md)
 - 既有開發計畫：`docs/development_plans/`
 
 如果任務已經有對應的開發計畫，先讀計畫再開始動手。

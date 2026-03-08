@@ -16,7 +16,9 @@ description: 判斷 Block2Python 的開發任務需要哪種計畫強度。用�
 ## 先讀
 
 - 架構總覽：[`docs/project_architecture.md`](../../../docs/project_architecture.md)
-- 協作規範：[`docs/contributing.md`](../../../docs/contributing.md)
+- 協作入口：[`docs/contributing.md`](../../../docs/contributing.md)
+- AI 協作規範：[`docs/contributing/ai_collaboration.md`](../../../docs/contributing/ai_collaboration.md)
+- 開發計畫管理：[`docs/development_plans/README.md`](../../../docs/development_plans/README.md)
 - 既有開發計畫：`docs/development_plans/`
 
 ## 判斷流程

@@ -39,7 +39,8 @@ description: {description}
 ## 先讀
 
 - 專案架構：[`docs/project_architecture.md`](../../../docs/project_architecture.md)
-- 協作規範：[`docs/contributing.md`](../../../docs/contributing.md)
+- 協作入口：[`docs/contributing.md`](../../../docs/contributing.md)
+- AI 協作規範：[`docs/contributing/ai_collaboration.md`](../../../docs/contributing/ai_collaboration.md)
 
 ## 操作指引
 

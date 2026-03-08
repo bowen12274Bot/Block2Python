@@ -25,8 +25,8 @@ Block2Python/
 
 ### 1.1 不進版控資料夾
 
-- `.venv/`：本機 Python 開發環境，建立與使用方式見 `docs/contributing.md`。
-- `.block2python/`：本機執行期狀態、快取與暫存資料，細節見 `docs/contributing.md`。
+- `.venv/`：本機 Python 開發環境，建立與使用方式見 `docs/contributing/environment_setup.md`。
+- `.block2python/`：本機執行期狀態、快取與暫存資料，細節見 `docs/contributing/environment_setup.md`。
 
 ### 1.2 Agent Skills 入口
 
@@ -44,6 +44,7 @@ docs/
   project_plan.md
   development_timeline.md
   contributing.md
+  contributing/
   project_architecture.md
   development_plans/
   specs/
@@ -55,7 +56,8 @@ docs/
 - `requirements.md`：定義需求、目標與 MVP 範圍。
 - `technical_rationale.md`：說明技術選型與架構考量。
 - `project_plan.md`、`development_timeline.md`：記錄整體開發規劃與時程。
-- `contributing.md`：整理開發環境、Git 流程、Blockly vendor、smoke test 等協作規範。
+- `contributing.md`：人類開發者入口，提供快速開始與文件導覽。
+- `contributing/`：拆分後的協作細則，分別處理環境、開發流程、AI 協作與代碼規範。
 - `development_plans/`：各主題的實作計畫、驗證與 review 文件。
 - `specs/`：資料格式與 JSON schema。
 - `uml/`：系統架構圖與相關視覺化文件。
