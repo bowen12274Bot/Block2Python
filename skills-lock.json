@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "skill-creator": {
+      "source": "openclaw/openclaw",
+      "sourceType": "github",
+      "computedHash": "9bd2926a59dec7aa6038e3784186972ecc2feab1b672308079ca725bd01c670f"
+    }
+  }
+}
