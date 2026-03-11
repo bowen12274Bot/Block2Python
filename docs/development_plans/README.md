@@ -7,6 +7,7 @@
 - `technical_introduction_plan.md`
 - `technical_introduction_plan_verification.md`
 - `mvp_development_plan.md`
+- `wasm_judge_plan.md`
 - `ai_tutor_skills_plan.md`
 
 ## 檔名規則（摘要）

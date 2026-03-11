@@ -1,0 +1,53 @@
+level_id: fizzbuzz-simple
+title: FizzBuzz 簡化版
+chapter_id: conditional
+order_index: 2
+prerequisite_level_ids:
+  - add-two-numbers
+
+prompt: |
+  讀取一個整數 n，根據以下規則輸出：
+  - 如果 n 能被 3 整除，輸出 "Fizz"
+  - 如果 n 能被 5 整除，輸出 "Buzz"
+  - 如果 n 同時被 3 和 5 整除，輸出 "FizzBuzz"
+  - 否則輸出 n 本身
+
+learning_markdown: |
+  # 條件判斷
+  
+  使用 `if`、`elif`、`else` 來做條件判斷：
+  ```python
+  n = int(input())
+  if n % 15 == 0:
+      print("FizzBuzz")
+  elif n % 3 == 0:
+      print("Fizz")
+  elif n % 5 == 0:
+      print("Buzz")
+  else:
+      print(n)
+  ```
+
+testcases:
+  - name: case-01
+    stdin_file: cases/fizzbuzz/01.in
+    expected_stdout_file: cases/fizzbuzz/01.out
+  - name: case-02
+    stdin_file: cases/fizzbuzz/02.in
+    expected_stdout_file: cases/fizzbuzz/02.out
+  - name: case-03
+    stdin_file: cases/fizzbuzz/03.in
+    expected_stdout_file: cases/fizzbuzz/03.out
+  - name: case-04
+    stdin_file: cases/fizzbuzz/04.in
+    expected_stdout_file: cases/fizzbuzz/04.out
+
+judge_policy:
+  time_limit_ms: 1000
+  memory_limit_mb: 32
+
+metadata:
+  difficulty: easy
+  topics:
+    - 條件判斷
+    - 模運算
