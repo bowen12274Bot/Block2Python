@@ -1,6 +1,6 @@
 # 專案架構（Project Architecture）
 
-- 最後更新：2026-03-08
+- 最後更新：2026-03-11
 - 本文件說明 Block2Python 專案目前的目錄結構、主要模組分工、靜態資源配置、工具腳本，以及 agent skills 的使用方式。
 
 ## 1. 專案根目錄
@@ -84,16 +84,20 @@ assets/
     index.html
     vendor/
   levels/
-    index.json
-    demo-1.json
-    demo-2.json
+    index.yaml
+    demo-1.yaml
+    add-two-numbers.yaml
+    demo-2.yaml
+    fizzbuzz-simple.yaml
+    cases/
 ```
 
 ### 4.1 `assets/levels/`
 
 - 儲存關卡索引與範例關卡資料。
-- `index.json` 作為關卡入口。
-- `demo-1.json`、`demo-2.json` 提供目前的示範內容。
+- `index.yaml` 作為目前題庫入口。
+- 關卡檔已統一為 `.yaml`。
+- `demo-1.yaml`、`add-two-numbers.yaml`、`demo-2.yaml`、`fizzbuzz-simple.yaml` 共同組成目前的 prototype flow。
 
 ### 4.2 `assets/blockly/`
 

@@ -24,7 +24,7 @@ python -m block2python
 
 ### 使用與開發
 - **快速啟動指南**：[docs/QUICKSTART.md](docs/QUICKSTART.md)
-- **Wasm Judge 配置**：[docs/WASM_SETUP.md](docs/WASM_SETUP.md)
+- **環境與 Wasm 設定**：[docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)
 - **貢獻指南**：[docs/contributing.md](docs/contributing.md)
 
 ### 規劃與設計
@@ -72,4 +72,4 @@ $env:BLOCK2PYTHON_JUDGE_MODE = "stub"
 python -m block2python
 ```
 
-完整配置指南請見 [docs/WASM_SETUP.md](docs/WASM_SETUP.md)。
+完整配置指南請見 [docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)。
