@@ -2,7 +2,8 @@
   "schema_version": "0.1",
   "levels": [
     { "id": "demo-1", "file": "demo-1.json" },
-    { "id": "demo-2", "file": "demo-2.json" }
+    { "id": "add-two-numbers", "file": "add-two-numbers.yaml" },
+    { "id": "demo-2", "file": "demo-2.json" },
+    { "id": "fizzbuzz-simple", "file": "fizzbuzz-simple.yaml" }
   ]
 }
-

@@ -4,13 +4,16 @@
   "prompt": "讀入一個整數，若大於 0 輸出 'POS'，否則輸出 'NONPOS'。",
   "learning_markdown": "目標：熟悉 if/else。\n\n提示：先把輸入轉成 int，再用 if 判斷。",
   "story_intro_markdown": "基地警報響起：請判斷感測器讀值是否正常。",
-  "prerequisite_level_ids": ["demo-1"],
+  "prerequisite_level_ids": ["add-two-numbers"],
+  "next_level_ids": ["fizzbuzz-simple"],
   "testcases": [
     { "name": "pos", "stdin": "1\n", "expected_stdout": "POS\n" },
     { "name": "nonpos", "stdin": "0\n", "expected_stdout": "NONPOS\n" }
   ],
   "metadata": {
-    "stub_judge": { "status": "WA", "summary": "StubJudge: forced WA for demo-2 (demo only)." },
+    "stage": "prototype",
+    "track": "demo-flow",
+    "stub_judge": { "status": "AC", "summary": "StubJudge: forced AC for demo-2 to keep the prototype flow connected." },
     "stub_analysis": { "status": "PASS", "summary": "StubAnalyzer: forced PASS for demo-2." }
   }
 }
