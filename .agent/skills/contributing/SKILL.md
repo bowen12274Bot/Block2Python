@@ -40,6 +40,11 @@ powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
 - `docs/contributing/environment_setup.md`
 - `docs/contributing/developer_workflow.md`
 
+目前驗證原則：
+
+- `pytest` 是主要測試入口
+- `tools/run_demo.ps1`、`tools/run_ui.ps1`、`tools/run_wasm_smoke.ps1` 是輔助 smoke 驗證
+
 ## 使用原則
 
 - 問題如果屬於「怎麼加入專案、怎麼操作流程、怎麼遵守規範」，使用此 skill。

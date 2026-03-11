@@ -1,6 +1,6 @@
 # 貢獻指南
 
-- 文件版本：1.1.0
+- 文件版本：1.1.1
 - 更新日期：2026-03-11
 
 本文件是 Block2Python 的人類協作入口。目標是讓新加入的開發者知道應該先看哪些文件、如何參與開發，以及協作變更的最小原則。
@@ -25,7 +25,7 @@ cd Block2Python
 - `docs/project_architecture.md`
   - 模組分層與責任邊界
 - `docs/contributing/developer_workflow.md`
-  - 分支、commit、PR、驗證與合併規則
+  - 分支、commit、PR、pytest 驗證與合併規則
 
 如果你的目標只是把專案跑起來，先看 `docs/QUICKSTART.md` 即可。
 
@@ -43,6 +43,7 @@ cd Block2Python
 - `docs/` 與 `.agent/skills/` 的修改也應走分支與 PR
 - 每個 PR 盡量聚焦單一主題
 - 合併前至少提供一次可重現的驗證結果
+- 驗證以 `pytest` 為主，smoke script 為輔
 
 更完整的 Git、PR、squash 與驗證規則請見 `docs/contributing/developer_workflow.md`。
 
@@ -61,7 +62,7 @@ cd Block2Python
 - `docs/contributing/environment_setup.md`
   - 本機環境、依賴管理、Blockly vendor、`.block2python/`
 - `docs/contributing/developer_workflow.md`
-  - 分支、commit、PR、squash、驗證、DoD
+  - 分支、commit、PR、pytest 驗證、DoD
 - `docs/contributing/code_guidelines.md`
   - 代碼一致性與基本寫法
 - `docs/contributing/ai_collaboration.md`
