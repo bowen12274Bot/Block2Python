@@ -3,9 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from block2python.app.core import AppCore, LevelState
-from block2python.app.demo_levels import demo_levels
-from block2python.app.judge_factory import build_judge_from_env
-from block2python.app.progress import JsonFileProgress
+from block2python.app.runtime import build_configured_app, default_progress_path
 from block2python.contracts import LevelSpec, Submission
 
 try:
@@ -35,12 +33,12 @@ from .blockly_embed import BlocklyEmbed, BlocklyOutput
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Block2Python (Demo)")
+        self.setWindowTitle("Block2Python")
         self.resize(1100, 700)
 
         self._levels: dict[str, LevelSpec] = {}
         self._judge_info: str = ""
-        self._app = AppCore({}, progress=JsonFileProgress(self._progress_path()))
+        self._app = AppCore({})
         self._block_json_by_level: dict[str, dict] = {}
         self._draft_code_by_level: dict[str, str] = {}
 
@@ -118,7 +116,7 @@ class MainWindow(QMainWindow):
         actions_layout.setContentsMargins(0, 0, 0, 0)
         actions_layout.setSpacing(8)
 
-        self._pass_block_button = QPushButton("Pass Block Step (stub)")
+        self._pass_block_button = QPushButton("Complete Block Step")
         self._pass_block_button.clicked.connect(self._pass_block_step)
         actions_layout.addWidget(self._pass_block_button)
 
@@ -149,23 +147,14 @@ class MainWindow(QMainWindow):
         self._reload_levels()
 
     def _progress_path(self) -> Path:
-        return Path(".block2python") / "progress.json"
+        return default_progress_path()
 
     def _reload_levels(self) -> None:
         try:
-            self._levels = demo_levels()
+            self._app, self._levels, self._judge_info = build_configured_app()
         except Exception as e:  # noqa: BLE001
             QMessageBox.critical(self, "Failed to Load Levels", str(e))
             return
-
-        try:
-            judge, self._judge_info = build_judge_from_env()
-        except Exception as e:  # noqa: BLE001
-            QMessageBox.warning(self, "Judge Config", f"Failed to build judge from env: {e}\nFallback to StubJudge.")
-            self._judge_info = "judge=StubJudge(fallback due to configuration error)"
-            self._app = AppCore(self._levels, progress=JsonFileProgress(self._progress_path()))
-        else:
-            self._app = AppCore(self._levels, judge=judge, progress=JsonFileProgress(self._progress_path()))
 
         self._blockly.load_placeholder(Path("assets") / "blockly" / "index.html")
         self._levels_list.clear()
