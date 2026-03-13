@@ -1,6 +1,6 @@
 # 專案架構（Project Architecture）
 
-- 最後更新：2026-03-11
+- 最後更新：2026-03-12
 - 本文件說明 Block2Python 專案目前的目錄結構、主要模組分工、靜態資源配置、工具腳本，以及 agent skills 的使用方式。
 
 ## 1. 專案根目錄
@@ -66,11 +66,11 @@ docs/
 
 核心 package 位於 `src/block2python/`，目前主要分成下列模組：
 
-- `app/`：應用程式啟動與組裝流程。
+- `app/`：應用程式啟動與組裝流程；包含 `JudgeFactory`，依環境變數在啟動時選擇評測後端。
 - `ui/`：PySide6 視窗、Widget 與 UI 整合。
 - `blockly/`：Blockly 與 WebEngine 之間的橋接層。
 - `analysis/`：分析或 AST 相關能力。
-- `judge/`：評測或執行結果檢查相關能力。
+- `judge/`：評測與沙盒執行層。核心實作為 `WasmtimeRunner`（透過 `wasmtime` CLI 在 WASI 沙盒中執行 `python.wasm`）與 `WasmJudge`（測資比對與判定）；`StubJudge` 作為 wasm 不可用時的 fallback。
 - `contracts/`：模組間共用的介面與資料契約。
 - `ai/`：與 AI 能力相關的擴充模組。
 
@@ -90,6 +90,8 @@ assets/
     demo-2.yaml
     fizzbuzz-simple.yaml
     cases/
+  wasm/
+    python.wasm    # WASI 沙盒執行環境，不進版控（體積過大）
 ```
 
 ### 4.1 `assets/levels/`
@@ -104,7 +106,13 @@ assets/
 - `index.html` 提供 Blockly Web 端載入入口。
 - `vendor/` 放置 vendored Blockly dist，供 UI 端直接載入。
 
-### 4.3 執行期資料與狀態
+### 4.3 `assets/wasm/`
+
+- `python.wasm`：CPython 的 WASI 版本，由 `WasmtimeRunner` 在執行期透過 `wasmtime` CLI 呼叫。
+- 體積過大，**不進版控**；需手動下載或由 setup 腳本取得。
+- 路徑可透過環境變數 `BLOCK2PYTHON_WASM_PATH` 覆寫（預設 `assets/wasm/python.wasm`）。
+
+### 4.4 執行期資料與狀態
 
 - `.block2python/` 用來保存本機執行期資料，不納入版控。
 - 這類資料應與 `assets/` 的靜態內容分離，避免將本機狀態混入正式資源。
@@ -114,6 +122,10 @@ assets/
 - `setup_dev_env.ps1`：建立 `.venv` 與安裝開發依賴。
 - `run_demo.ps1`：執行 CLI demo 或 smoke flow。
 - `run_ui.ps1`：啟動 UI smoke flow。
+- `run_tests.ps1`：執行完整 pytest 測試套件（含覆蓋率報告）。
+- `run_wasm_smoke.ps1`：執行 WASM 沙盒的 smoke test，驗證 `python.wasm` + `wasmtime` 是否可用。
+- `verify_wasm_setup.ps1`：檢查 WASM 執行環境的設定是否正確（路徑、wasmtime 版本等）。
+- `test_wasm_edge_cases.ps1`：WASM 沙盒的 edge case 測試腳本（超時、記憶體限制等）。
 - `reset_progress.ps1`：重置本機進度與狀態資料。
 - `vendor_blockly.ps1`：從下載來源匯入 Blockly dist。
 - `vendor_blockly_from_dir.ps1`：從本機目錄匯入 Blockly dist。
@@ -126,7 +138,12 @@ assets/
 Block2Python/
   .agent/
     skills/                 # 唯一 canonical skills source
-    README.md               # 維護原則與各個skills的說明
+      contributing/         # 協作流程、環境、Git workflow
+      development-planning/ # 判斷開發任務應直接進行或先規劃
+      feature-implementation/ # 功能實作、重構、維護
+      project-architecture/ # 全局架構理解與功能落點判斷
+      skill-creator/        # 建立與維護 agent skills
+    README.md               # 維護原則與各個 skills 的說明
   .agents/                  # 其餘模型入口
   .claude/                  # Claude Code 模型入口
   .codex/                   # Codex 模型入口
@@ -138,3 +155,13 @@ Block2Python/
 - `.agent/skills/` 存放真正的 skill 定義與 bundled resources。
 - `.agents/`、`.claude/`、`.codex/` 只負責讓不同 AI 模型接上同一套 canonical skills，不應作為獨立 skill source。
 - `skills-lock.json` 是 skill 的 lock layer，用來記錄已安裝或已鎖定 skill 的來源與 hash 中繼資料。
+
+### 6.2 Skills 說明
+
+| Skill | 用途 |
+|-------|------|
+| `contributing` | 協作流程、環境設定、Git workflow、smoke test |
+| `development-planning` | 判斷任務應直接實作、聊天框簡短計畫或完整開發計畫文件 |
+| `feature-implementation` | 功能實作、bug 修正、重構；協調「要先規劃還是直接做」 |
+| `project-architecture` | 全局架構理解、功能落點判斷、文件與 repo 差異比對 |
+| `skill-creator` | 建立與維護 canonical skills（SKILL.md 結構、scripts、references）|
