@@ -3,11 +3,14 @@ def main() -> int:
 
     from .core import AppCore
     from .demo_levels import demo_levels
+    from .judge_factory import build_judge_from_env
     from .progress import JsonFileProgress
 
-    print("Block2Python (Demo) - app core placeholder (no real judge/analyzer yet)")
+    judge, judge_info = build_judge_from_env()
+    print("Block2Python (Demo)")
+    print(judge_info)
     progress = JsonFileProgress(path=__progress_path())
-    app = AppCore(demo_levels(), progress=progress)
+    app = AppCore(demo_levels(), judge=judge, progress=progress)
 
     for view in app.list_levels():
         print(f"- {view.level_id}: {view.title} [{view.state}]")
