@@ -1,7 +1,7 @@
 # 系統架構圖（System Architecture Diagram）
 
-> 依據 [技術策略說明文件](../technical_rationale.md) v0.1 繪製  
-> 更新日期：2026-03-03
+> 依據 [技術策略說明文件](../technical_rationale.md) 與目前整併後的 MVP 架構整理
+> 更新日期：2026-03-12
 
 ## 系統架構圖（圖片版）
 
@@ -13,90 +13,103 @@
 graph TB
     subgraph APP["應用整合層（Application Integration Layer）\nPySide6 / Qt6"]
         direction TB
-        AppCtrl["AppController\n（關卡流程 / 頁面狀態管理）"]
-        UI_Panel["UI Panels\n（關卡選單 / 回饋面板 / 解鎖流程）"]
-        AppCtrl <--> UI_Panel
+        Runtime["Runtime / App 組裝\n（載入題庫、建立 AppCore、選擇 Judge）"]
+        MainUI["Main UI\n（關卡列表、內容頁籤、Blockly、Python、Feedback）"]
+        Progress["Progress Store\n（本機進度與解鎖狀態）"]
+        Runtime --> MainUI
+        Progress --> Runtime
+    end
+
+    subgraph LEVELS["題庫管理層（Level Management Layer）\nYAML / JSON"]
+        direction TB
+        LevelsLoader["Levels Loader\n（index.yaml 讀取 / 關卡檔解析）"]
+        LevelSpec["LevelSpec\n（關卡資料契約）"]
+        Policies["Policies\n（JudgePolicy / AnalysisPolicy / ConceptPolicy）"]
+        Testcases["Testcases\n（inline 或 cases 目錄）"]
+        LevelsLoader --> LevelSpec
+        LevelSpec --> Policies
+        LevelSpec --> Testcases
     end
 
     subgraph VIS["視覺化編程層（Visual Programming Layer）\nBlockly + QWebEngineView"]
         direction TB
-        BlocklyEmbed["BlocklyEmbed\n（QWebEngineView 嵌入）"]
-        BlockDef["CustomBlockDefs\n（關卡積木定義）"]
-        BlockGen["Block → Python Generator\n（積木程式碼生成）"]
-        BlocklyEmbed --> BlockDef
-        BlocklyEmbed --> BlockGen
+        BlocklyEmbed["BlocklyEmbed\n（QWebEngineView / WebChannel）"]
+        BlocklyPage["Blockly Page\n（workspace / block JSON / generated Python）"]
+        FutureBlocks["Future Block Scope\n（自訂 blocks / toolbox 限制 / generator 策略）"]
+        BlocklyEmbed --> BlocklyPage
+        FutureBlocks -.保留規劃.-> BlocklyPage
     end
 
-    subgraph PY["Python 編程層（Python Programming Layer）\nPySide6 Editor Widget"]
+    subgraph PY["Python 編程層（Python Programming Layer）\nPySide6 Editor UI"]
         direction TB
-        Editor["CodeEditor\n（程式碼輸入 / 編輯）"]
-        Submitter["SubmitHandler\n（送出 / 執行觸發）"]
-        FeedbackView["FeedbackView\n（結果 / 錯誤 / 提示呈現）"]
-        Editor --> Submitter
-        Submitter --> FeedbackView
+        Editor["Python Editor\n（手寫程式 / 編輯）"]
+        SubmitFlow["Submit Flow\n（送出、分析、評測、結果整理）"]
+        Feedback["Feedback Panel\n（Analysis / Judge / 後續 tutor）"]
+        Editor --> SubmitFlow
+        SubmitFlow --> Feedback
     end
 
     subgraph ANALYSIS["程式分析層（Program Analysis Layer）\nPython ast"]
         direction TB
-        ASTParser["ASTParser\n（Python → AST）"]
-        StructChecker["StructureChecker\n（結構規則檢查）"]
-        BlockMapper["Block ↔ AST Mapper\n（積木結構映射）"]
-        DiffProducer["DiffProducer\n（差異資訊產出）"]
-        ASTParser --> StructChecker
-        ASTParser --> BlockMapper
-        StructChecker --> DiffProducer
-        BlockMapper --> DiffProducer
+        Analyzer["AstAnalyzer\n（syntax check / 關鍵字規則 / 範圍限制）"]
+        FutureAnalysis["Future Analysis\n（結構比對 / block mapping / diff 產出）"]
+        Analyzer -.預留擴充.-> FutureAnalysis
     end
 
-    subgraph EXEC["程式執行與安全層（Execution & Security Layer）\nPython Sandbox"]
+    subgraph EXEC["程式執行與安全層（Execution & Security Layer）\npython.wasm + Wasmtime CLI (WASI)"]
         direction TB
-        Sandbox["SandboxRunner\n（隔離執行 / 資源限制 / 超時）"]
-        TestJudge["TestcaseJudge\n（測資比對 / 正規化）"]
-        JudgeResult["JudgeResult\n（AC / WA / 差異回傳）"]
-        Sandbox --> TestJudge
-        TestJudge --> JudgeResult
+        JudgeFactory["JudgeFactory\n（依環境變數選擇後端）"]
+        WasmRunner["WasmtimeRunner\n（WASI 沙盒 / 超時 / 記憶體限制）"]
+        WasmJudge["WasmJudge\n（測資比對 / 輸出正規化）"]
+        StubJudge["StubJudge\n（fallback）"]
+        JudgeResult["JudgeResult\n（AC / WA / TLE / MLE / RE）"]
+        JudgeFactory --> WasmJudge
+        JudgeFactory --> StubJudge
+        WasmRunner --> WasmJudge
+        WasmJudge --> JudgeResult
+        StubJudge --> JudgeResult
     end
 
-    subgraph AI["AI 語意輔助層（Semantic Assistant Layer）\nGemini API + Agent Skill"]
+    subgraph AI["AI 語意輔助層（Semantic Assistant Layer）\n預留擴充"]
         direction TB
-        SkillExtractor["AgentSkill\n（教案綱要提取）"]
-        HintGen["HintGenerator\n（提示語意生成）"]
-        ErrExplainer["ErrorExplainer\n（錯誤說明 / 引導）"]
-        SkillExtractor --> HintGen
-        DiffInput(["DiffInput\n（差異資訊輸入）"])
-        DiffInput --> HintGen
-        DiffInput --> ErrExplainer
+        TutorContext["Tutor Context\n（學生程式、block JSON、關卡資料、Analysis/Judge 結果）"]
+        TutorPolicy["Tutor Policy / Teaching Skills\n（提示邊界、拒答策略、教學綱要）"]
+        TutorService["Tutor Service\n（提示生成 / 錯誤說明）"]
+        TutorContext --> TutorService
+        TutorPolicy --> TutorService
     end
 
-    %% 跨層資料流
-    APP -->|"載入關卡\n啟動積木環境"| VIS
-    APP -->|"啟動 Python 編輯"| PY
-    VIS -->|"Block JSON / 生成程式碼"| ANALYSIS
-    PY -->|"Python 原始碼"| ANALYSIS
-    PY -->|"Python 原始碼"| EXEC
-    ANALYSIS -->|"結構差異 / AST 結果"| AI
-    EXEC -->|"AC / WA / 執行差異"| AI
-    EXEC -->|"判定結果"| PY
-    AI -->|"語意提示 / 引導訊息"| PY
-    ANALYSIS -->|"結構驗證結果"| APP
-    EXEC -->|"最終判定"| APP
+    LEVELS -->|"LevelSpec / policies / testcases"| APP
+    APP -->|"載入 Blockly 頁面"| VIS
+    APP -->|"顯示 Python 與 Feedback 流程"| PY
+    VIS -->|"block JSON / generated Python"| PY
+    PY -->|"Submission"| ANALYSIS
+    PY -->|"Submission"| EXEC
+    ANALYSIS -->|"AnalysisResult"| PY
+    EXEC -->|"JudgeResult"| PY
+    ANALYSIS -.未來可提供結構資訊.-> AI
+    EXEC -.未來可提供執行結果.-> AI
+    AI -.預留 tutor 回饋.-> PY
 ```
 
 ## 各層職責摘要
 
 | 層別 | 核心技術 | 主要職責 |
 |------|----------|----------|
-| 應用整合層 | PySide6 / Qt6 | 關卡流程控制、頁面狀態管理、模組整合 |
-| 視覺化編程層 | Blockly + QWebEngineView | 積木操作、自訂積木定義、積木→程式碼生成 |
-| Python 編程層 | PySide6 Editor Widget | 程式碼編輯送出、結果與回饋呈現 |
-| 程式分析層 | Python `ast` | AST 解析、結構規則檢查、積木↔AST 映射、差異產出 |
-| 程式執行與安全層 | Python Sandbox | 隔離執行、測資比對、AC/WA 判定、超時控制 |
-| AI 語意輔助層 | Gemini API + Agent Skill | 差異語意轉換、學習提示生成、錯誤說明引導 |
+| 應用整合層 | PySide6 / Qt6 | 啟動 runtime、組裝 `AppCore`、載入題庫、串接 UI 與本機進度 |
+| 題庫管理層 | YAML / JSON / PyYAML | 載入 `index.yaml`、解析關卡、組裝 `LevelSpec`、政策與測資 |
+| 視覺化編程層 | Blockly + QWebEngineView | 提供 Blockly workspace，輸出 block JSON 與 generated Python；自訂 blocks 與限制策略屬後續規劃 |
+| Python 編程層 | PySide6 Editor UI | 提供 Python 編輯、送出、結果呈現與主互動流程 |
+| 程式分析層 | Python `ast` | 目前以 syntax check、關鍵字規則、範圍限制為主；更深的結構分析屬後續擴充 |
+| 程式執行與安全層 | python.wasm + Wasmtime CLI (WASI) | 以 WASI 沙盒執行 Python、做測資比對、正規化、超時與記憶體限制；wasm 不可用時 fallback 至 `StubJudge` |
+| AI 語意輔助層 | 待定 provider + teaching skills | 保留給 tutor、提示策略與教學綱要整合；目前屬預留擴充層 |
 
 ## 資料流說明
 
-1. **積木 → 分析**：Blockly 輸出 Block JSON 或產生 Python 程式碼，送至程式分析層進行結構映射與驗證。
-2. **Python → 執行**：學生送出程式碼後，沙盒執行並以測資比對取得 AC/WA 判定。
-3. **差異 → AI 引導**：程式分析與執行層產出的結構差異與執行錯誤，輸入 AI 層轉為可理解之學習提示。
-4. **提示 → 回饋呈現**：AI 語意提示回傳至 Python 編程層的回饋面板，呈現給學生。
-5. **流程控制**：應用整合層統籌關卡解鎖與流程推進，接收驗證結果後決定是否進入下一關。
+1. **題庫載入**：啟動時由題庫 loader 讀取 `assets/levels/index.yaml` 與各關卡檔，組成 `LevelSpec`、政策與測資資料，交由 runtime 與 `AppCore` 使用。
+2. **Blockly 互動**：Blockly 透過 `QWebEngineView` 與 WebChannel 嵌入桌面 UI，輸出 block JSON 與 generated Python，供主介面接收。
+3. **Python 提交**：學生在編輯區撰寫或調整 Python 程式後送出，形成 `Submission` 進入分析與評測流程。
+4. **分析流程**：目前先以 AST syntax check、關鍵字規則與範圍限制為主；若後續需要更深的結構驗證，再在此層擴充。
+5. **評測流程**：`JudgeFactory` 依環境變數選擇 `WasmJudge` 或 `StubJudge`；`WasmJudge` 再透過 `WasmtimeRunner` 執行 `python.wasm` 並完成測資比對。
+6. **結果回饋**：Analysis 與 Judge 結果回到主 UI，呈現在 feedback 區，並影響關卡解鎖與進度保存。
+7. **AI 預留接點**：未來若引入 tutor，將以學生程式、block JSON、關卡資料與 Analysis/Judge 結果組裝 tutor context，產生提示與錯誤說明。

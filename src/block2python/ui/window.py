@@ -3,15 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 
 from block2python.app.core import AppCore, LevelState
-from block2python.app.demo_levels import demo_levels
-from block2python.app.progress import JsonFileProgress
+from block2python.app.runtime import build_configured_app, default_progress_path
 from block2python.contracts import LevelSpec, Submission
 
 try:
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import (
         QAbstractItemView,
-        QApplication,
         QHBoxLayout,
         QLabel,
         QListWidget,
@@ -35,11 +33,12 @@ from .blockly_embed import BlocklyEmbed, BlocklyOutput
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Block2Python (Demo)")
+        self.setWindowTitle("Block2Python")
         self.resize(1100, 700)
 
         self._levels: dict[str, LevelSpec] = {}
-        self._app = AppCore({}, progress=JsonFileProgress(self._progress_path()))
+        self._judge_info: str = ""
+        self._app = AppCore({})
         self._block_json_by_level: dict[str, dict] = {}
         self._draft_code_by_level: dict[str, str] = {}
 
@@ -117,7 +116,7 @@ class MainWindow(QMainWindow):
         actions_layout.setContentsMargins(0, 0, 0, 0)
         actions_layout.setSpacing(8)
 
-        self._pass_block_button = QPushButton("Pass Block Step (stub)")
+        self._pass_block_button = QPushButton("Complete Block Step")
         self._pass_block_button.clicked.connect(self._pass_block_step)
         actions_layout.addWidget(self._pass_block_button)
 
@@ -148,16 +147,15 @@ class MainWindow(QMainWindow):
         self._reload_levels()
 
     def _progress_path(self) -> Path:
-        return Path(".block2python") / "progress.json"
+        return default_progress_path()
 
     def _reload_levels(self) -> None:
         try:
-            self._levels = demo_levels()
+            self._app, self._levels, self._judge_info = build_configured_app()
         except Exception as e:  # noqa: BLE001
             QMessageBox.critical(self, "Failed to Load Levels", str(e))
             return
 
-        self._app = AppCore(self._levels, progress=JsonFileProgress(self._progress_path()))
         self._blockly.load_placeholder(Path("assets") / "blockly" / "index.html")
         self._levels_list.clear()
 
@@ -263,6 +261,13 @@ class MainWindow(QMainWindow):
                 lines.append(f"- [{v.severity}] {v.rule_id}: {v.message}")
 
         lines.append(f"judge: {outcome.judge.status} — {outcome.judge.summary}")
+        if self._judge_info:
+            lines.append(self._judge_info)
+        if outcome.judge.elapsed_ms is not None:
+            lines.append(f"judge_elapsed_ms: {outcome.judge.elapsed_ms}")
+        if outcome.judge.stderr:
+            lines.append("judge_stderr:")
+            lines.append(outcome.judge.stderr[:800])
         lines.append(f"cleared: {outcome.cleared}")
         lines.append(f"block_passed: {outcome.block_passed}")
         if block_schema_version:
@@ -275,6 +280,12 @@ class MainWindow(QMainWindow):
                 lines.append(f"- case[{idx}] {cr.status}")
                 lines.append(f"  expected: {cr.expected_stdout!r}")
                 lines.append(f"  actual:   {cr.actual_stdout!r}")
+                if cr.elapsed_ms is not None:
+                    lines.append(f"  elapsed_ms: {cr.elapsed_ms}")
+                if cr.exit_code is not None:
+                    lines.append(f"  exit_code: {cr.exit_code}")
+                if cr.stderr:
+                    lines.append(f"  stderr: {cr.stderr[:300]!r}")
         self._feedback.setPlainText("\n".join(lines))
 
         self._reload_levels()

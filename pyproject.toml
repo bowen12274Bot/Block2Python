@@ -1,0 +1,59 @@
+[project]
+name = "block2python"
+version = "0.1.0"
+description = "Block2Python - 積木式程式學習闖關 Demo"
+requires-python = ">=3.10"
+dependencies = [
+    "psutil>=5.9.0",
+    "PyYAML>=6.0",
+    "PySide6>=6.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=src/block2python",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "requires_wasm: Tests that require python.wasm to be present",
+]
+
+[tool.coverage.run]
+source = ["src/block2python"]
+omit = [
+    "*/tests/*",
+    "*/__main__.py",
+    "*/ui/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

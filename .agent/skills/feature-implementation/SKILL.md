@@ -1,6 +1,6 @@
 ---
 name: feature-implementation
-description: 用於 Block2Python 的功能實作、重構與維護工作。當需求涉及新功能開發、bug 修正、程式碼變更、與架構一致的重構，或任何本 repository 內的實作任務時使用。
+description: 用於 Block2Python 的功能實作、重構與維護工作。當需求涉及新功能開發、bug 修正、程式碼變更，或任何本 repository 內的實作任務時使用。
 ---
 
 # Feature Implementation
@@ -12,7 +12,7 @@ description: 用於 Block2Python 的功能實作、重構與維護工作。當�
 - 在 `src/block2python/` 中實作新功能
 - 修正應用程式、UI、Blockly 整合或工具腳本中的問題
 - 在維持專案架構一致的前提下進行重構
-- 當行為變更影響既有流程時，補上或更新測試與 smoke test 驗證
+- 當行為變更影響既有流程時，補上或更新測試
 
 ## 開發前必讀
 
@@ -53,9 +53,34 @@ description: 用於 Block2Python 的功能實作、重構與維護工作。當�
 
 ## 驗證
 
-若變更影響 CLI 或 UI 流程，使用既有 smoke scripts：
+目前驗證原則：
+
+- `pytest` 是主要測試入口
+- smoke script 是輔助驗證，不取代 `pytest`
+
+優先使用：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest
+```
+
+若只影響局部，可縮小範圍：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests/test_levels_loader.py
+.\.venv\Scripts\python.exe -m pytest tests/test_wasm_judge.py::TestWasmJudge::test_ac_status
+```
+
+若改動涉及 Wasm：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -m requires_wasm -v
+```
+
+若改動影響 CLI / UI / demo 展示，可額外使用：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools/run_demo.ps1
 powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
+powershell -ExecutionPolicy Bypass -File tools/run_wasm_smoke.ps1
 ```
