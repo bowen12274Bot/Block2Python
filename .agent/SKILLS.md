@@ -11,7 +11,7 @@
 ## 目前 Skills
 
 - `contributing`
-  用於開發環境設定、Git workflow、Blockly vendor、smoke test 與協作規範導讀。
+  用於快速上手、開發環境設定、Git workflow、Blockly vendor、驗證流程與協作規範導讀。
 
 - `development-planning`
   用於判斷一項開發任務應直接進行、先在 AI 對話中規劃，或先撰寫完整開發計畫文件。

@@ -12,6 +12,7 @@ AI 在開始分析或修改前，應先建立最小必要上下文：
 1. `docs/project_architecture.md`
 2. `docs/contributing.md`
 3. 與任務直接相關的子文件：
+   - 快速上手：`docs/QUICKSTART.md`
    - 環境與本機資料：`docs/contributing/environment_setup.md`
    - Git / PR / 驗證：`docs/contributing/developer_workflow.md`
    - 代碼一致性：`docs/contributing/code_guidelines.md`
@@ -38,7 +39,8 @@ AI 在開始分析或修改前，應先建立最小必要上下文：
 
 ## 3. AI 與人類文件的責任分界
 
-- `docs/contributing.md`：人類快速開始入口
+- `docs/QUICKSTART.md`：最短啟動路徑
+- `docs/contributing.md`：人類協作入口與文件導覽
 - `docs/contributing/environment_setup.md`：本機環境與 Blockly vendor 細節
 - `docs/contributing/developer_workflow.md`：Git、PR、驗證與 DoD
 - `docs/contributing/code_guidelines.md`：代碼一致性
