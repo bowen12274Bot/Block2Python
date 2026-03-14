@@ -1,0 +1,34 @@
+from __future__ import annotations
+
+from block2python.game import GameSession, GameSessionError
+from block2python.integration.contracts import ActionType, GameState, PlayerAction
+
+
+class IntegrationDispatchError(Exception):
+    """Raised when a PlayerAction cannot be dispatched."""
+
+
+def dispatch(session: GameSession, action: PlayerAction) -> GameState:
+    try:
+        if action.action_type is ActionType.ADVANCE:
+            session.advance()
+            return session.current_game_state()
+
+        if action.action_type is ActionType.SUBMIT_LEVEL:
+            python_code = action.payload.get("python_code")
+            if not isinstance(python_code, str) or not python_code:
+                raise IntegrationDispatchError("submit_level requires payload.python_code")
+
+            block_json = action.payload.get("block_json")
+            if block_json is not None and not isinstance(block_json, dict):
+                raise IntegrationDispatchError("submit_level payload.block_json must be a dict or null")
+
+            session.submit_current_level(python_code=python_code, block_json=block_json)
+            return session.current_game_state()
+
+        if action.action_type is ActionType.RESTART_QUEST:
+            raise IntegrationDispatchError("restart_quest is not implemented")
+    except GameSessionError as exc:
+        raise IntegrationDispatchError(str(exc)) from exc
+
+    raise IntegrationDispatchError(f"Unsupported PlayerAction: {action.action_type.value}")

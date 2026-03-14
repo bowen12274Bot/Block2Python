@@ -65,13 +65,13 @@
 | `dialogue_blocks` | `list[DialogueBlock]` | 是 | 對話內容 |
 | `next_action` | `str` | 是 | 場景結束後的動作 |
 
-## 5.2 DialogueBlock
+### 5.2 DialogueBlock
 
 用途：
 
 - 定義對話框中單一段可播放內容
 
-### 5.2.1 欄位
+#### 5.2.1 欄位
 
 | 欄位 | 型別 | 必填 | 說明 |
 |------|------|------|------|
@@ -81,7 +81,7 @@
 | `expression` | `str | null` | 否 | 表情識別 |
 | `emphasis` | `str | null` | 否 | 額外語氣標記，如 `normal` / `alert` / `success` |
 
-### 5.2.2 第一版刻意不先定死的欄位
+#### 5.2.2 第一版刻意不先定死的欄位
 
 以下欄位未來很可能需要，但第一版先不納入正式 schema：
 

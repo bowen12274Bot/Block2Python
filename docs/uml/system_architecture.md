@@ -72,6 +72,41 @@ graph TB
     CHALLENGE --> Judge
 ```
 
+## Action Flow
+```mermaid
+sequenceDiagram
+    participant Client as Client / Future Godot
+    participant Bridge as bridge_stdio
+    participant Contracts as GameState / PlayerAction
+    participant Dispatcher as dispatch()
+    participant Session as GameSession
+    participant Core as AppCore / Judge
+
+    Client->>Bridge: JSON request
+    Bridge->>Contracts: deserialize PlayerAction
+    Contracts-->>Bridge: PlayerAction
+    Bridge->>Dispatcher: dispatch(session, action)
+
+    alt advance
+        Dispatcher->>Session: advance()
+    else submit_level
+        Dispatcher->>Session: submit_current_level(...)
+        Session->>Core: submit(...)
+        Core-->>Session: SubmitOutcome
+    end
+
+    Session->>Contracts: current_game_state()
+    Contracts-->>Bridge: GameState
+    Bridge->>Contracts: serialize GameState
+    Contracts-->>Bridge: JSON-ready state
+    Bridge-->>Client: JSON response
+```
+
+- client 只送 `PlayerAction`
+- dispatcher 只做 action 到 session 的轉接
+- `GameSession` 負責真正的流程推進
+- `bridge_stdio` 只負責 JSON stdin/stdout 運輸
+
 ## Package 對照
 
 | Package | 角色 |

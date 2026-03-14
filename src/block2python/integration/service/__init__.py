@@ -1,3 +1,3 @@
-"""Reserved for integration dispatch services."""
+from .dispatcher import IntegrationDispatchError, dispatch
 
-__all__: list[str] = []
+__all__ = ["IntegrationDispatchError", "dispatch"]

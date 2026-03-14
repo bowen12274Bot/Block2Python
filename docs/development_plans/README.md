@@ -19,6 +19,7 @@
 - `mvp_development_plan_v2.md`
 - `wasm_judge_plan.md`
 - `ai_tutor_skills_plan.md`
+- `godot_bridge_client_guide.md`
 
 ## 命名規則與延伸
 

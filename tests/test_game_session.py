@@ -1,9 +1,10 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from block2python.app.core import AppCore
 from block2python.app.game_session import GameSession, GameSessionError, SessionMode
 from block2python.app.levels_loader import load_levels
 from block2python.game_content import assemble_game_slice, load_game_content
+from block2python.integration.contracts import GameMode
 from block2python.judge import StubJudge
 
 
@@ -20,26 +21,67 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert state.node_id == "map-entry"
     assert state.scene_id is None
 
+    contract_state = session.current_game_state()
+    assert contract_state.mode is GameMode.SCENE
+    assert contract_state.node_id == "map-entry"
+    assert contract_state.scene is None
+    assert contract_state.challenge is None
+    assert contract_state.available_actions.advance is True
+    assert contract_state.progress.completed_node_ids == ()
+    assert contract_state.last_submission is None
+
     state = session.advance()
     assert state.mode is SessionMode.SCENE
     assert state.node_id == "story-intro"
     assert state.scene_id == "scene-city-alarm"
+
+    contract_state = session.current_game_state()
+    assert contract_state.scene is not None
+    assert contract_state.scene.scene_id == "scene-city-alarm"
+    assert contract_state.scene.dialogue_blocks
+    assert contract_state.challenge is None
 
     state = session.advance()
     assert state.mode is SessionMode.SCENE
     assert state.node_id == "demo-basic-io"
     assert state.scene_id == "scene-practice-unlock"
 
+    contract_state = session.current_game_state()
+    assert contract_state.mode is GameMode.SCENE
+    assert contract_state.scene is not None
+    assert contract_state.scene.scene_id == "scene-practice-unlock"
+    assert contract_state.challenge is not None
+    assert contract_state.challenge.challenge_id == "challenge-demo-basic-io"
+
     state = session.advance()
     assert state.mode is SessionMode.CHALLENGE
     assert state.challenge_id == "challenge-demo-basic-io"
     assert state.current_level_id == "demo-1"
+
+    contract_state = session.current_game_state()
+    assert contract_state.mode is GameMode.CHALLENGE
+    assert contract_state.scene is None
+    assert contract_state.challenge is not None
+    assert contract_state.challenge.challenge_id == "challenge-demo-basic-io"
+    assert contract_state.challenge.current_level_id == "demo-1"
+    assert contract_state.available_actions.submit is True
 
     state, outcome = session.submit_current_level(python_code="print(3)")
     assert outcome.cleared is True
     assert state.mode is SessionMode.CHALLENGE
     assert state.current_level_id == "add-two-numbers"
     assert state.challenge_id == "challenge-practice-basic-io"
+
+    contract_state = session.current_game_state()
+    assert contract_state.progress.completed_node_ids == ("map-entry", "story-intro", "demo-basic-io")
+    assert contract_state.progress.cleared_level_ids == ("demo-1",)
+    assert contract_state.challenge is not None
+    assert contract_state.challenge.challenge_id == "challenge-practice-basic-io"
+    assert contract_state.challenge.current_level_id == "add-two-numbers"
+    assert contract_state.last_submission is not None
+    assert contract_state.last_submission.level_id == "demo-1"
+    assert contract_state.last_submission.analysis_status == "PASS"
+    assert contract_state.last_submission.judge_status == "AC"
 
 
 def test_game_session_rejects_advance_during_challenge() -> None:

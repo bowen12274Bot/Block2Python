@@ -29,6 +29,8 @@ addopts = [
     "-v",
     "--strict-markers",
     "--tb=short",
+    "-p",
+    "no:cacheprovider",
     "--cov=src/block2python",
     "--cov-report=term-missing",
     "--cov-report=html:.tmp/pytest/htmlcov",

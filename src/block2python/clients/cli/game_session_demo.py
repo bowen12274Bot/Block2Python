@@ -6,7 +6,8 @@ from typing import Callable
 
 from block2python.challenge import AppCore, InMemoryProgress
 from block2python.content import assemble_game_slice, load_game_content, load_levels
-from block2python.game import GameSession, SessionMode
+from block2python.game import GameSession
+from block2python.integration.contracts import GameMode, GameState
 from block2python.judge import StubJudge
 
 
@@ -17,12 +18,13 @@ def build_demo_session(
     *,
     levels_dir: Path | None = None,
     game_content_dir: Path | None = None,
+    quest_id: str = DEFAULT_QUEST_ID,
 ) -> GameSession:
     levels = load_levels(levels_dir or Path("assets/levels"))
     game_content = load_game_content(game_content_dir or Path("assets/game_content"))
     game_slice = assemble_game_slice(game_content=game_content, levels=levels)
     app = AppCore(levels, judge=StubJudge(), progress=InMemoryProgress.empty())
-    return GameSession.start(app=app, game_slice=game_slice, quest_id=DEFAULT_QUEST_ID)
+    return GameSession.start(app=app, game_slice=game_slice, quest_id=quest_id)
 
 
 def run_auto_demo(
@@ -34,20 +36,21 @@ def run_auto_demo(
     code_factory = code_factory or _default_code_factory
 
     while True:
-        state = session.current_state()
+        state = session.current_game_state()
         logs.extend(_render_state(state))
-        if state.mode is SessionMode.COMPLETE:
+        if state.mode is GameMode.COMPLETE:
             break
-        if state.mode is SessionMode.SCENE:
+        if state.mode is GameMode.SCENE:
             session.advance()
             continue
-        if state.current_level_id is None:
+        if state.challenge is None or state.challenge.current_level_id is None:
             raise RuntimeError("Challenge mode without current_level_id")
-        next_state, outcome = session.submit_current_level(python_code=code_factory(state.current_level_id))
-        logs.append(f"submit {state.current_level_id}: {outcome.judge.status}")
+        level_id = state.challenge.current_level_id
+        next_state, outcome = session.submit_current_level(python_code=code_factory(level_id))
+        logs.append(f"submit {level_id}: {outcome.judge.status}")
         logs.append(f"cleared={outcome.cleared}")
-        if next_state.mode is SessionMode.CHALLENGE and next_state.current_level_id == state.current_level_id:
-            raise RuntimeError(f"Challenge submission did not advance level {state.current_level_id}")
+        if next_state.mode.value == "CHALLENGE" and next_state.current_level_id == level_id:
+            raise RuntimeError(f"Challenge submission did not advance level {level_id}")
 
     return logs
 
@@ -56,10 +59,10 @@ def interactive_demo(session: GameSession) -> int:
     print("Block2Python GameSession Demo")
     print("Commands: next, submit, status, quit")
     while True:
-        state = session.current_state()
+        state = session.current_game_state()
         for line in _render_state(state):
             print(line)
-        if state.mode is SessionMode.COMPLETE:
+        if state.mode is GameMode.COMPLETE:
             return 0
 
         command = input("> ").strip().lower()
@@ -71,13 +74,14 @@ def interactive_demo(session: GameSession) -> int:
             session.advance()
             continue
         if command == "submit":
-            if state.mode is not SessionMode.CHALLENGE or state.current_level_id is None:
+            if state.mode is not GameMode.CHALLENGE or state.challenge is None or state.challenge.current_level_id is None:
                 print("Current state is not a challenge")
                 continue
-            code = _default_code_factory(state.current_level_id)
+            level_id = state.challenge.current_level_id
+            code = _default_code_factory(level_id)
             next_state, outcome = session.submit_current_level(python_code=code)
-            print(f"submit {state.current_level_id}: {outcome.judge.status} cleared={outcome.cleared}")
-            if next_state.mode is SessionMode.CHALLENGE and next_state.current_level_id == state.current_level_id:
+            print(f"submit {level_id}: {outcome.judge.status} cleared={outcome.cleared}")
+            if next_state.mode.value == "CHALLENGE" and next_state.current_level_id == level_id:
                 print("Challenge did not advance; submit again or inspect state")
             continue
         print("Unknown command")
@@ -98,16 +102,24 @@ def main(argv: list[str] | None = None) -> int:
     return interactive_demo(session)
 
 
-def _render_state(state) -> list[str]:
-    lines = [f"mode={state.mode} quest={state.quest_id}"]
+def _render_state(state: GameState) -> list[str]:
+    lines = [f"mode={state.mode.value} quest={state.quest_id}"]
     if state.node_id is not None:
         lines.append(f"node={state.node_id} title={state.node_title}")
-    if state.scene_id is not None:
-        lines.append(f"scene={state.scene_id}")
-    if state.challenge_id is not None:
-        lines.append(f"challenge={state.challenge_id}")
-    if state.current_level_id is not None:
-        lines.append(f"level={state.current_level_id} title={state.current_level_title}")
+    if state.scene is not None:
+        lines.append(f"scene={state.scene.scene_id} title={state.scene.title}")
+    if state.challenge is not None:
+        lines.append(f"challenge={state.challenge.challenge_id} type={state.challenge.challenge_type}")
+    if state.challenge is not None and state.challenge.current_level_id is not None:
+        lines.append(
+            f"level={state.challenge.current_level_id} title={state.challenge.current_level_title}"
+        )
+    lines.append(
+        "actions="
+        f"advance:{state.available_actions.advance} "
+        f"submit:{state.available_actions.submit} "
+        f"restart_quest:{state.available_actions.restart_quest}"
+    )
     return lines
 
 
