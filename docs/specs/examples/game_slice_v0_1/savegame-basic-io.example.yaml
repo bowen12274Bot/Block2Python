@@ -1,0 +1,40 @@
+save_version: "0.1"
+current_node_id: practice-basic-io
+unlocked_node_ids:
+  - map-entry
+  - story-intro
+  - demo-basic-io
+  - practice-basic-io
+completed_node_ids:
+  - story-intro
+  - demo-basic-io
+completed_challenge_ids:
+  - challenge-demo-basic-io
+toolbox_state:
+  toolbox-basic-io:
+    unlocked_block_ids:
+      - input
+      - print
+practice_run_states:
+  - practice_run_id: practice-run-basic-io
+    challenge_id: challenge-practice-basic-io
+    question_index: 2
+    question_results:
+      - level_id: practice-basic-io-01
+        passed: true
+        toolbox_used: false
+        reward_percent: 20
+      - level_id: practice-basic-io-02
+        passed: true
+        toolbox_used: false
+        reward_percent: 20
+    toolbox_used_flags:
+      - false
+      - false
+    battery_percent: 40
+    cooldown_until: null
+    completed: false
+    passed: false
+story_flags:
+  city_alarm_seen: true
+  practice_unlocked: true
