@@ -4,6 +4,13 @@
 
 ## 目前文件
 
+- `game_architecture_transition_plan.md`
+- `game_data_model_plan.md`
+- `game_loader_plan.md`
+- `game_product_direction_plan.md`
+- `game_technology_recommendation.md`
+- `game_system_boundary_plan.md`
+- `game_vertical_slice_plan.md`
 - `technical_introduction_plan.md`
 - `technical_introduction_plan_verification.md`
 - `mvp_development_plan.md`

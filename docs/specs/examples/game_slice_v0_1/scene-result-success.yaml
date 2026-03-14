@@ -1,0 +1,19 @@
+scene_id: scene-result-success
+title: 修復成功
+dialogue_blocks:
+  - speaker: Byte
+    text: 能量恢復成功，這座城市的基礎模組重新啟動了。
+    portrait_id: byte-default
+    expression: happy
+    emphasis: success
+  - speaker: Player
+    text: 太好了，下一步呢？
+    portrait_id: player-default
+    expression: happy
+    emphasis: normal
+  - speaker: Byte
+    text: 下一個節點已經解鎖，我們可以繼續前進。
+    portrait_id: byte-default
+    expression: explain
+    emphasis: normal
+next_action: unlock_next_main_node

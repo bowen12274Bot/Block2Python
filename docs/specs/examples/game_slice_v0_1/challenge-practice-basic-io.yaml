@@ -1,0 +1,11 @@
+challenge_id: challenge-practice-basic-io
+challenge_type: practice
+title: 基礎輸入輸出練習組
+level_ids:
+  - practice-basic-io-01
+  - practice-basic-io-02
+  - practice-basic-io-03
+  - practice-basic-io-04
+  - practice-basic-io-05
+toolbox_policy_id: toolbox-basic-io
+battery_policy_id: battery-basic-io

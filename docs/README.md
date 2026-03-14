@@ -16,13 +16,24 @@
 
 ## 專案設計
 
-- 專案計畫：`docs/project_plan.md`
+- 產品內容文件：`docs/product/README.md`
 - 需求文件：`docs/requirements.md`
 - 技術策略說明：`docs/technical_rationale.md`
 - 專案架構：`docs/project_architecture.md`
-- 開發進度安排：`docs/development_timeline.md`
 - 開發計畫資料夾：`docs/development_plans/`
 - UML：`docs/uml/`
+
+## 遊戲轉型規劃
+
+- 世界觀設定：`docs/product/worldbuilding.md`
+- 章節設計：`docs/product/chapter_design.md`
+- 架構轉型稿：`docs/development_plans/game_architecture_transition_plan.md`
+- 資料模型計畫：`docs/development_plans/game_data_model_plan.md`
+- Loader 計畫：`docs/development_plans/game_loader_plan.md`
+- 技術建議書：`docs/development_plans/game_technology_recommendation.md`
+- 產品方向計畫：`docs/development_plans/game_product_direction_plan.md`
+- 系統邊界計畫：`docs/development_plans/game_system_boundary_plan.md`
+- Vertical Slice 計畫：`docs/development_plans/game_vertical_slice_plan.md`
 
 ## 規格與結構
 

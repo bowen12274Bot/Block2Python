@@ -22,5 +22,11 @@
 - `project-architecture`
   用於建立專案全局架構理解、分析分層、責任邊界與功能落點。
 
+- `game-product-direction`
+  用於理解目前已確立的遊戲產品定位、主流程、關卡分工與核心玩法規則。
+
+- `game-story-background`
+  用於理解目前已確立的世界觀、故事前提、角色關係與敘事調性。
+
 - `skill-creator`
   用於建立、調整、驗證與封裝 canonical skills。
