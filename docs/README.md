@@ -29,6 +29,7 @@
 - 章節設計：`docs/product/chapter_design.md`
 - 架構轉型稿：`docs/development_plans/game_architecture_transition_plan.md`
 - 資料模型計畫：`docs/development_plans/game_data_model_plan.md`
+- Loader 計畫：`docs/development_plans/game_loader_plan.md`
 - 技術建議書：`docs/development_plans/game_technology_recommendation.md`
 - 產品方向計畫：`docs/development_plans/game_product_direction_plan.md`
 - 系統邊界計畫：`docs/development_plans/game_system_boundary_plan.md`

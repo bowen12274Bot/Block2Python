@@ -6,6 +6,7 @@
 
 - `game_architecture_transition_plan.md`
 - `game_data_model_plan.md`
+- `game_loader_plan.md`
 - `game_product_direction_plan.md`
 - `game_technology_recommendation.md`
 - `game_system_boundary_plan.md`
