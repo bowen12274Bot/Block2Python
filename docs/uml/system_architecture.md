@@ -1,115 +1,144 @@
-# 系統架構圖（System Architecture Diagram）
+# 系統架構圖
 
-> 依據 [技術策略說明文件](../technical_rationale.md) 與目前整併後的 MVP 架構整理
-> 更新日期：2026-03-12
+> 更新日期：2026-03-14
+> 相關文件：[technical_rationale.md](../technical_rationale.md)
 
-## 系統架構圖（圖片版）
+## 架構總覽
 
-![Block2Python 系統架構圖](system_architecture.png)
+![Block2Python system architecture](system_architecture.png)
 
-## 分層元件圖（Layered Component Diagram，互動版）
+## 分層元件圖
 
 ```mermaid
 graph TB
-    subgraph APP["應用整合層（Application Integration Layer）\nPySide6 / Qt6"]
+    subgraph CLIENTS["Clients Layer"]
         direction TB
-        Runtime["Runtime / App 組裝\n（載入題庫、建立 AppCore、選擇 Judge）"]
-        MainUI["Main UI\n（關卡列表、內容頁籤、Blockly、Python、Feedback）"]
-        Progress["Progress Store\n（本機進度與解鎖狀態）"]
-        Runtime --> MainUI
-        Progress --> Runtime
+        PySide6["PySide6 Client"]
+        CLI["CLI Demo Client"]
+        Godot["Future Godot Client"]
     end
 
-    subgraph LEVELS["題庫管理層（Level Management Layer）\nYAML / JSON"]
+    subgraph INTEGRATION["Integration Layer"]
         direction TB
-        LevelsLoader["Levels Loader\n（index.yaml 讀取 / 關卡檔解析）"]
-        LevelSpec["LevelSpec\n（關卡資料契約）"]
-        Policies["Policies\n（JudgePolicy / AnalysisPolicy / ConceptPolicy）"]
-        Testcases["Testcases\n（inline 或 cases 目錄）"]
-        LevelsLoader --> LevelSpec
-        LevelSpec --> Policies
-        LevelSpec --> Testcases
+        Contracts["Game Contracts\nGameState / PlayerAction"]
+        Dispatcher["Dispatch Service"]
+        Bridge["Bridge Adapter\nstdio / future transport"]
+        GodotAdapter["Godot Adapter"]
+        Contracts --> Dispatcher
+        Dispatcher --> Bridge
+        Dispatcher --> GodotAdapter
     end
 
-    subgraph VIS["視覺化編程層（Visual Programming Layer）\nBlockly + QWebEngineView"]
+    subgraph GAME["Game Layer"]
         direction TB
-        BlocklyEmbed["BlocklyEmbed\n（QWebEngineView / WebChannel）"]
-        BlocklyPage["Blockly Page\n（workspace / block JSON / generated Python）"]
-        FutureBlocks["Future Block Scope\n（自訂 blocks / toolbox 限制 / generator 策略）"]
-        BlocklyEmbed --> BlocklyPage
-        FutureBlocks -.保留規劃.-> BlocklyPage
+        Session["GameSession"]
+        SaveGame["SaveGame"]
+        Runtime["Game Runtime"]
+        Session --> SaveGame
+        Session --> Runtime
     end
 
-    subgraph PY["Python 編程層（Python Programming Layer）\nPySide6 Editor UI"]
+    subgraph CONTENT["Content Layer"]
         direction TB
-        Editor["Python Editor\n（手寫程式 / 編輯）"]
-        SubmitFlow["Submit Flow\n（送出、分析、評測、結果整理）"]
-        Feedback["Feedback Panel\n（Analysis / Judge / 後續 tutor）"]
-        Editor --> SubmitFlow
-        SubmitFlow --> Feedback
+        Levels["Levels Loader"]
+        GameContent["Game Content Loader"]
+        Models["Content Models / Assembly"]
+        Levels --> Models
+        GameContent --> Models
     end
 
-    subgraph ANALYSIS["程式分析層（Program Analysis Layer）\nPython ast"]
+    subgraph CHALLENGE["Challenge Layer"]
         direction TB
-        Analyzer["AstAnalyzer\n（syntax check / 關鍵字規則 / 範圍限制）"]
-        FutureAnalysis["Future Analysis\n（結構比對 / block mapping / diff 產出）"]
-        Analyzer -.預留擴充.-> FutureAnalysis
+        AppCore["AppCore"]
+        Progress["Progress Store"]
+        JudgeFactory["Judge Factory"]
+        AppCore --> Progress
+        AppCore --> JudgeFactory
     end
 
-    subgraph EXEC["程式執行與安全層（Execution & Security Layer）\npython.wasm + Wasmtime CLI (WASI)"]
+    subgraph EXEC["Execution Layer"]
         direction TB
-        JudgeFactory["JudgeFactory\n（依環境變數選擇後端）"]
-        WasmRunner["WasmtimeRunner\n（WASI 沙盒 / 超時 / 記憶體限制）"]
-        WasmJudge["WasmJudge\n（測資比對 / 輸出正規化）"]
-        StubJudge["StubJudge\n（fallback）"]
-        JudgeResult["JudgeResult\n（AC / WA / TLE / MLE / RE）"]
-        JudgeFactory --> WasmJudge
-        JudgeFactory --> StubJudge
-        WasmRunner --> WasmJudge
-        WasmJudge --> JudgeResult
-        StubJudge --> JudgeResult
+        Analyzer["Analysis"]
+        Judge["Judge"]
+        Wasm["Wasm Runner"]
+        Judge --> Wasm
     end
 
-    subgraph AI["AI 語意輔助層（Semantic Assistant Layer）\n預留擴充"]
-        direction TB
-        TutorContext["Tutor Context\n（學生程式、block JSON、關卡資料、Analysis/Judge 結果）"]
-        TutorPolicy["Tutor Policy / Teaching Skills\n（提示邊界、拒答策略、教學綱要）"]
-        TutorService["Tutor Service\n（提示生成 / 錯誤說明）"]
-        TutorContext --> TutorService
-        TutorPolicy --> TutorService
-    end
-
-    LEVELS -->|"LevelSpec / policies / testcases"| APP
-    APP -->|"載入 Blockly 頁面"| VIS
-    APP -->|"顯示 Python 與 Feedback 流程"| PY
-    VIS -->|"block JSON / generated Python"| PY
-    PY -->|"Submission"| ANALYSIS
-    PY -->|"Submission"| EXEC
-    ANALYSIS -->|"AnalysisResult"| PY
-    EXEC -->|"JudgeResult"| PY
-    ANALYSIS -.未來可提供結構資訊.-> AI
-    EXEC -.未來可提供執行結果.-> AI
-    AI -.預留 tutor 回饋.-> PY
+    CLIENTS --> INTEGRATION
+    INTEGRATION --> GAME
+    GAME --> CONTENT
+    GAME --> CHALLENGE
+    CHALLENGE --> Analyzer
+    CHALLENGE --> Judge
 ```
 
-## 各層職責摘要
+## Action Flow
+```mermaid
+sequenceDiagram
+    participant Client as Client / Future Godot
+    participant Bridge as bridge_stdio
+    participant Contracts as GameState / PlayerAction
+    participant Dispatcher as dispatch()
+    participant Session as GameSession
+    participant Core as AppCore / Judge
 
-| 層別 | 核心技術 | 主要職責 |
-|------|----------|----------|
-| 應用整合層 | PySide6 / Qt6 | 啟動 runtime、組裝 `AppCore`、載入題庫、串接 UI 與本機進度 |
-| 題庫管理層 | YAML / JSON / PyYAML | 載入 `index.yaml`、解析關卡、組裝 `LevelSpec`、政策與測資 |
-| 視覺化編程層 | Blockly + QWebEngineView | 提供 Blockly workspace，輸出 block JSON 與 generated Python；自訂 blocks 與限制策略屬後續規劃 |
-| Python 編程層 | PySide6 Editor UI | 提供 Python 編輯、送出、結果呈現與主互動流程 |
-| 程式分析層 | Python `ast` | 目前以 syntax check、關鍵字規則、範圍限制為主；更深的結構分析屬後續擴充 |
-| 程式執行與安全層 | python.wasm + Wasmtime CLI (WASI) | 以 WASI 沙盒執行 Python、做測資比對、正規化、超時與記憶體限制；wasm 不可用時 fallback 至 `StubJudge` |
-| AI 語意輔助層 | 待定 provider + teaching skills | 保留給 tutor、提示策略與教學綱要整合；目前屬預留擴充層 |
+    Client->>Bridge: JSON request
+    Bridge->>Contracts: deserialize PlayerAction
+    Contracts-->>Bridge: PlayerAction
+    Bridge->>Dispatcher: dispatch(session, action)
 
-## 資料流說明
+    alt advance
+        Dispatcher->>Session: advance()
+    else submit_level
+        Dispatcher->>Session: submit_current_level(...)
+        Session->>Core: submit(...)
+        Core-->>Session: SubmitOutcome
+    end
 
-1. **題庫載入**：啟動時由題庫 loader 讀取 `assets/levels/index.yaml` 與各關卡檔，組成 `LevelSpec`、政策與測資資料，交由 runtime 與 `AppCore` 使用。
-2. **Blockly 互動**：Blockly 透過 `QWebEngineView` 與 WebChannel 嵌入桌面 UI，輸出 block JSON 與 generated Python，供主介面接收。
-3. **Python 提交**：學生在編輯區撰寫或調整 Python 程式後送出，形成 `Submission` 進入分析與評測流程。
-4. **分析流程**：目前先以 AST syntax check、關鍵字規則與範圍限制為主；若後續需要更深的結構驗證，再在此層擴充。
-5. **評測流程**：`JudgeFactory` 依環境變數選擇 `WasmJudge` 或 `StubJudge`；`WasmJudge` 再透過 `WasmtimeRunner` 執行 `python.wasm` 並完成測資比對。
-6. **結果回饋**：Analysis 與 Judge 結果回到主 UI，呈現在 feedback 區，並影響關卡解鎖與進度保存。
-7. **AI 預留接點**：未來若引入 tutor，將以學生程式、block JSON、關卡資料與 Analysis/Judge 結果組裝 tutor context，產生提示與錯誤說明。
+    Session->>Contracts: current_game_state()
+    Contracts-->>Bridge: GameState
+    Bridge->>Contracts: serialize GameState
+    Contracts-->>Bridge: JSON-ready state
+    Bridge-->>Client: JSON response
+```
+
+- client 只送 `PlayerAction`
+- dispatcher 只做 action 到 session 的轉接
+- `GameSession` 負責真正的流程推進
+- `bridge_stdio` 只負責 JSON stdin/stdout 運輸
+
+## Package 對照
+
+| Package | 角色 |
+|---------|------|
+| `block2python.clients` | PySide6 與 CLI consumer |
+| `block2python.integration` | 對外 contract 與 bridge 邊界 |
+| `block2python.game` | 遊戲主流程控制 |
+| `block2python.content` | levels 與 game content 載入 |
+| `block2python.challenge` | challenge submit 與 progress 子系統 |
+| `block2python.analysis` | 靜態分析服務 |
+| `block2python.judge` | judge 實作與 Wasm 執行 |
+
+## 目前狀態
+
+目前已完成：
+- `challenge/`、`content/`、`game/`、`integration/`、`clients/` 骨架
+- `game/` 內的 `GameSession`
+- `challenge/` 內的 `AppCore`
+- `content/` 內的 loaders
+- `clients/` 內的 PySide6 與 CLI wrapper
+- `app/` 與 `game_content/` 的相容 shim
+
+目前僅預留、尚未完整實作：
+- 正式 `integration/contracts` models
+- dispatcher logic
+- stdio bridge server
+- Godot adapter 行為
+
+## 架構解讀
+
+- `GameSession` 是預定的遊戲主入口。
+- `AppCore` 是 challenge 子系統，不是整個遊戲總控。
+- `integration/` 是外部前端應依賴的正式邊界。
+- `clients/` 是 consumer，不應定義遊戲模型本身。
+- `app/`、`game_content/`、`ui/` 是過渡期保留的相容路徑。

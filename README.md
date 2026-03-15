@@ -74,3 +74,9 @@ python -m block2python
 ```
 
 完整配置指南請見 [docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)。
+
+## GameSession Demo
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_game_session_demo.ps1
+```

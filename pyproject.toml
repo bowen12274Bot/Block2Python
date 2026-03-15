@@ -24,13 +24,16 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+cache_dir = ".tmp/pytest/cache"
 addopts = [
     "-v",
     "--strict-markers",
     "--tb=short",
+    "-p",
+    "no:cacheprovider",
     "--cov=src/block2python",
     "--cov-report=term-missing",
-    "--cov-report=html",
+    "--cov-report=html:.tmp/pytest/htmlcov",
 ]
 markers = [
     "unit: Unit tests",
@@ -40,6 +43,7 @@ markers = [
 
 [tool.coverage.run]
 source = ["src/block2python"]
+data_file = ".tmp/pytest/.coverage"
 omit = [
     "*/tests/*",
     "*/__main__.py",

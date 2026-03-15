@@ -105,40 +105,30 @@ class TestWasmJudgeSmoke:
 @pytest.mark.requires_wasm
 @pytest.mark.integration
 class TestWasmJudgeYAMLLevels:
-    def test_load_and_judge_add_two_numbers(self, wasm_judge: WasmJudge):
+    def test_load_and_judge_demo_basic_io_hello(self, wasm_judge: WasmJudge):
         levels = load_levels(Path("assets/levels"))
-        level = levels.get("add-two-numbers")
+        level = levels.get("demo-basic-io-hello")
         if level is None:
-            pytest.skip("add-two-numbers level id not found")
+            pytest.skip("demo-basic-io-hello level id not found")
 
         submission = Submission(
             level_id=level.level_id,
-            python_code="a, b = map(int, input().split())\nprint(a + b)",
+            python_code="name = input()\nprint('Hello, ' + name)",
         )
         result = wasm_judge.judge(submission, level)
 
         assert result.status == JudgeStatus.AC
         assert all(case.status == "PASS" for case in result.case_results)
 
-    def test_load_and_judge_fizzbuzz_simple(self, wasm_judge: WasmJudge):
+    def test_load_and_judge_practice_basic_io_sum(self, wasm_judge: WasmJudge):
         levels = load_levels(Path("assets/levels"))
-        level = levels.get("fizzbuzz-simple")
+        level = levels.get("practice-basic-io-sum")
         if level is None:
-            pytest.skip("fizzbuzz-simple level id not found")
+            pytest.skip("practice-basic-io-sum level id not found")
 
         submission = Submission(
             level_id=level.level_id,
-            python_code=(
-                "n = int(input())\n"
-                "if n % 15 == 0:\n"
-                "    print('FizzBuzz')\n"
-                "elif n % 3 == 0:\n"
-                "    print('Fizz')\n"
-                "elif n % 5 == 0:\n"
-                "    print('Buzz')\n"
-                "else:\n"
-                "    print(n)\n"
-            ),
+            python_code="a = int(input())\nb = int(input())\nprint(a + b)",
         )
         result = wasm_judge.judge(submission, level)
 

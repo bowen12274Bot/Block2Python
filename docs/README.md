@@ -1,43 +1,40 @@
-# Docs
+﻿# Docs
 
-本資料夾存放本專案的主要文件。
+本目錄收納專案需求、架構、計畫、規格與協作文件。
 
-## 快速上手
+## 快速開始
 
 - 快速啟動：`docs/QUICKSTART.md`
-- 環境與 Wasm 設定：`docs/contributing/environment_setup.md`
-- 貢獻指南：`docs/contributing.md`
+- Wasm 環境設定：`docs/contributing/environment_setup.md`
+- 貢獻總覽：`docs/contributing.md`
 
-## 協作與開發流程
+## 開發協作
 
-- 開發者流程：`docs/contributing/developer_workflow.md`
-- 程式風格與原則：`docs/contributing/code_guidelines.md`
-- AI 協作規則：`docs/contributing/ai_collaboration.md`
+- 開發流程：`docs/contributing/developer_workflow.md`
+- 程式碼規範：`docs/contributing/code_guidelines.md`
+- AI 協作：`docs/contributing/ai_collaboration.md`
 
-## 專案設計
+## 專案核心文件
 
-- 產品內容文件：`docs/product/README.md`
-- 需求文件：`docs/requirements.md`
-- 技術策略說明：`docs/technical_rationale.md`
+- 需求：`docs/requirements.md`
+- 技術說明：`docs/technical_rationale.md`
 - 專案架構：`docs/project_architecture.md`
-- 開發計畫資料夾：`docs/development_plans/`
+- 開發計畫：`docs/development_plans/`
 - UML：`docs/uml/`
 
-## 遊戲轉型規劃
+## 遊戲化相關文件
 
-- 世界觀設定：`docs/product/worldbuilding.md`
-- 章節設計：`docs/product/chapter_design.md`
-- 架構轉型稿：`docs/development_plans/game_architecture_transition_plan.md`
-- 資料模型計畫：`docs/development_plans/game_data_model_plan.md`
-- Loader 計畫：`docs/development_plans/game_loader_plan.md`
-- 技術建議書：`docs/development_plans/game_technology_recommendation.md`
-- 產品方向計畫：`docs/development_plans/game_product_direction_plan.md`
-- 系統邊界計畫：`docs/development_plans/game_system_boundary_plan.md`
-- Vertical Slice 計畫：`docs/development_plans/game_vertical_slice_plan.md`
+- 產品方向：`docs/development_plans/game_product_direction_plan.md`
+- 技術建議：`docs/development_plans/game_technology_recommendation.md`
+- 系統邊界：`docs/development_plans/game_system_boundary_plan.md`
+- 架構轉型：`docs/development_plans/game_architecture_transition_plan.md`
+- 系統架構與落地計畫：`docs/development_plans/game_system_architecture_plan.md`
+- 資料模型：`docs/development_plans/game_data_model_plan.md`
+- Loader：`docs/development_plans/game_loader_plan.md`
+- Vertical Slice：`docs/development_plans/game_vertical_slice_plan.md`
 
-## 規格與結構
+## 規格與 schema
 
-- 規格首頁：`docs/specs/README.md`
-- 關卡 schema：`docs/specs/levels_schema_v0_1.md`
+- 規格總覽：`docs/specs/README.md`
+- Levels schema：`docs/specs/levels_schema_v0_1.md`
 - Blockly JSON schema：`docs/specs/block_json_schema_v0_1.md`
-- 貢獻細則目錄：`docs/contributing/`
