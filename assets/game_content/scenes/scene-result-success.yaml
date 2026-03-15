@@ -1,0 +1,19 @@
+scene_id: scene-result-success
+title: Repair Success
+dialogue_blocks:
+  - speaker: Byte
+    text: Repair complete. The signal path is stable again.
+    portrait_id: byte-default
+    expression: happy
+    emphasis: success
+  - speaker: Player
+    text: Good. What opens next?
+    portrait_id: player-default
+    expression: happy
+    emphasis: normal
+  - speaker: Byte
+    text: The next story node is unlocked. We can move deeper into the map.
+    portrait_id: byte-default
+    expression: explain
+    emphasis: normal
+next_action: unlock_next_main_node

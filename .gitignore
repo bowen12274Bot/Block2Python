@@ -1,5 +1,13 @@
 .block2python/
 .venv/
+.tmp/
 __pycache__/
 *.pyc
 assets/blockly/vendor/
+.pytest_cache/
+.pytest_tmp/
+.pytest_tmp_run_*/
+pytest_tmp_run_*/
+pytest-cache-files-*/
+htmlcov/
+.coverage

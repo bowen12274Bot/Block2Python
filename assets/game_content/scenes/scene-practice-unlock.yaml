@@ -1,0 +1,19 @@
+scene_id: scene-practice-unlock
+title: Practice Unlocked
+dialogue_blocks:
+  - speaker: Byte
+    text: The demo worked. Practice mode is now unlocked.
+    portrait_id: byte-default
+    expression: happy
+    emphasis: success
+  - speaker: Byte
+    text: Use the Python blocks to solve a few short exercises.
+    portrait_id: byte-default
+    expression: explain
+    emphasis: normal
+  - speaker: Byte
+    text: Toolbox help is available, but using it costs battery.
+    portrait_id: byte-default
+    expression: alert
+    emphasis: alert
+next_action: goto_practice_basic_io
