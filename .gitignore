@@ -14,3 +14,4 @@ htmlcov/
 godot_poc/.godot/
 .vs/
 *.uid
+.vscode
