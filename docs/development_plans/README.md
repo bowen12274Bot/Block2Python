@@ -22,6 +22,8 @@
 - `godot_bridge_client_guide.md`
 - `godot_poc_plan.md`
 - `godot_client_structure_plan.md`
+- `godot_quest_map_vertical_slice_plan.md`
+- `godot_screen_separation_plan.md`
 
 ## 命名規則與延伸
 

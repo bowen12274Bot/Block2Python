@@ -128,7 +128,7 @@ text = "No scene loaded yet."
 
 [node name="CodePanel" type="PanelContainer" parent="Margin/Scroll/Root/ClientColumn"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 220)
+custom_minimum_size = Vector2(0, 320)
 script = ExtResource("3_challenge")
 
 [node name="CodeMargin" type="MarginContainer" parent="Margin/Scroll/Root/ClientColumn/CodePanel"]
@@ -154,6 +154,13 @@ text = "Challenge"
 [node name="LevelLabel" type="Label" parent="Margin/Scroll/Root/ClientColumn/CodePanel/CodeMargin/ChallengeRoot/ChallengeHeader"]
 layout_mode = 2
 text = "Waiting for challenge mode."
+
+[node name="PromptText" type="RichTextLabel" parent="Margin/Scroll/Root/ClientColumn/CodePanel/CodeMargin/ChallengeRoot"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 120)
+bbcode_enabled = false
+fit_content = false
+text = "No challenge prompt loaded yet."
 
 [node name="CodeInput" type="TextEdit" parent="Margin/Scroll/Root/ClientColumn/CodePanel/CodeMargin/ChallengeRoot"]
 layout_mode = 2

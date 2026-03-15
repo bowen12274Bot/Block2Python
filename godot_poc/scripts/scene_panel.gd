@@ -1,4 +1,5 @@
 extends PanelContainer
+class_name ScenePanel
 
 @onready var mode_label: Label = $SceneMargin/SceneRoot/SceneMeta/ModeLabel
 @onready var node_label: Label = $SceneMargin/SceneRoot/SceneMeta/NodeLabel

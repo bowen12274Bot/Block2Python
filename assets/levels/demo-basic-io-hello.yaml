@@ -1,0 +1,56 @@
+level_id: demo-basic-io-hello
+title: 示範關：輸入名字並打招呼
+chapter_id: basic-io
+order_index: 100
+
+prompt: |
+  讀取一行名字，輸出：
+  Hello, <名字>
+
+  例如輸入：
+  Byte
+
+  應輸出：
+  Hello, Byte
+
+learning_markdown: |
+  目標：讓玩家先熟悉 `input()` 與 `print()` 的最小提交流程。
+
+  範例：
+  ```python
+  name = input()
+  print("Hello, " + name)
+  ```
+
+story_intro_markdown: |
+  主地圖上的第一個示範節點會要求你先確認通訊模組還能讀取名字並回應問候語。
+
+story_outro_markdown: |
+  很好，輸入與輸出的基本流程已經恢復。接下來進入兩題練習關。
+
+testcases:
+  - name: hello-byte
+    stdin_file: cases/basic-io-hello/01.in
+    expected_stdout_file: cases/basic-io-hello/01.out
+  - name: hello-ava
+    stdin_file: cases/basic-io-hello/02.in
+    expected_stdout_file: cases/basic-io-hello/02.out
+
+next_level_ids:
+  - practice-basic-io-sum
+
+judge_policy:
+  time_limit_ms: 10000
+  memory_limit_mb: 384
+  output_normalization:
+    strip_trailing_whitespace: true
+    normalize_newlines_to_lf: true
+    strip_trailing_newline: true
+
+metadata:
+  stage: godot-vertical-slice
+  track: quest-map
+  difficulty: intro
+  topics:
+    - input
+    - print

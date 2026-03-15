@@ -32,8 +32,9 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
         challenge=ChallengeState(
             challenge_id="challenge-demo-basic-io",
             challenge_type="demo",
-            current_level_id="demo-1",
-            current_level_title="Demo 1",
+            current_level_id="demo-basic-io-hello",
+            current_level_title="Demo Basic IO Hello",
+            current_level_prompt="Print a greeting.",
         ),
         progress=ProgressState(
             completed_node_ids=("map-entry", "story-intro"),
@@ -41,7 +42,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
         ),
         available_actions=AvailableActions(submit=True, restart_quest=True),
         last_submission=SubmissionFeedback(
-            level_id="demo-1",
+            level_id="demo-basic-io-hello",
             cleared=True,
             block_passed=True,
             analysis_status="PASS",
@@ -56,7 +57,8 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
 
     assert payload["mode"] == "challenge"
     assert payload["scene"]["scene_id"] == "scene-practice-unlock"
-    assert payload["challenge"]["current_level_id"] == "demo-1"
+    assert payload["challenge"]["current_level_id"] == "demo-basic-io-hello"
+    assert payload["challenge"]["current_level_prompt"] == "Print a greeting."
     assert payload["progress"]["completed_node_ids"] == ["map-entry", "story-intro"]
     assert payload["available_actions"] == {
         "advance": False,

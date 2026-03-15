@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Block2Python Godot POC"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/game_flow_root.tscn"
 config/features=PackedStringArray("4.6")
 
 [display]

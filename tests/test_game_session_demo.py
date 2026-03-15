@@ -12,5 +12,5 @@ def test_run_auto_demo_completes_runtime_quest() -> None:
     assert any("challenge=challenge-demo-basic-io" in line for line in logs)
     assert any("challenge=challenge-practice-basic-io" in line for line in logs)
     assert any("actions=advance:False submit:True restart_quest:False" in line for line in logs)
-    assert any("submit demo-1: JudgeStatus.AC" in line for line in logs)
-    assert any("submit fizzbuzz-simple: JudgeStatus.AC" in line for line in logs)
+    assert any("submit demo-basic-io-hello: JudgeStatus.AC" in line for line in logs)
+    assert any("submit practice-basic-io-double: JudgeStatus.AC" in line for line in logs)

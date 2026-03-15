@@ -10,7 +10,7 @@ from block2python.judge import StubJudge
 
 def test_game_session_walks_scene_and_challenge_flow() -> None:
     levels = load_levels(load_levels_dir())
-    levels["demo-1"].metadata["stub_judge"] = {"status": "AC"}
+    levels["demo-basic-io-hello"].metadata["stub_judge"] = {"status": "AC"}
     app = AppCore(levels, judge=StubJudge())
     assembled = assemble_game_slice(game_content=load_game_content(game_content_dir()), levels=levels)
 
@@ -56,30 +56,30 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     state = session.advance()
     assert state.mode is SessionMode.CHALLENGE
     assert state.challenge_id == "challenge-demo-basic-io"
-    assert state.current_level_id == "demo-1"
+    assert state.current_level_id == "demo-basic-io-hello"
 
     contract_state = session.current_game_state()
     assert contract_state.mode is GameMode.CHALLENGE
     assert contract_state.scene is None
     assert contract_state.challenge is not None
     assert contract_state.challenge.challenge_id == "challenge-demo-basic-io"
-    assert contract_state.challenge.current_level_id == "demo-1"
+    assert contract_state.challenge.current_level_id == "demo-basic-io-hello"
     assert contract_state.available_actions.submit is True
 
-    state, outcome = session.submit_current_level(python_code="print(3)")
+    state, outcome = session.submit_current_level(python_code="name = input()\nprint(\"Hello, \" + name)")
     assert outcome.cleared is True
     assert state.mode is SessionMode.CHALLENGE
-    assert state.current_level_id == "add-two-numbers"
+    assert state.current_level_id == "practice-basic-io-sum"
     assert state.challenge_id == "challenge-practice-basic-io"
 
     contract_state = session.current_game_state()
     assert contract_state.progress.completed_node_ids == ("map-entry", "story-intro", "demo-basic-io")
-    assert contract_state.progress.cleared_level_ids == ("demo-1",)
+    assert contract_state.progress.cleared_level_ids == ("demo-basic-io-hello",)
     assert contract_state.challenge is not None
     assert contract_state.challenge.challenge_id == "challenge-practice-basic-io"
-    assert contract_state.challenge.current_level_id == "add-two-numbers"
+    assert contract_state.challenge.current_level_id == "practice-basic-io-sum"
     assert contract_state.last_submission is not None
-    assert contract_state.last_submission.level_id == "demo-1"
+    assert contract_state.last_submission.level_id == "demo-basic-io-hello"
     assert contract_state.last_submission.analysis_status == "PASS"
     assert contract_state.last_submission.judge_status == "AC"
 

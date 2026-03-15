@@ -45,8 +45,8 @@ def test_bridge_server_persists_session_across_requests() -> None:
     assert last_response["ok"] is True
     assert last_response["state"]["mode"] == "challenge"
     assert last_response["state"]["challenge"]["challenge_id"] == "challenge-practice-basic-io"
-    assert last_response["state"]["progress"]["cleared_level_ids"] == ["demo-1"]
-    assert last_response["state"]["last_submission"]["level_id"] == "demo-1"
+    assert last_response["state"]["progress"]["cleared_level_ids"] == ["demo-basic-io-hello"]
+    assert last_response["state"]["last_submission"]["level_id"] == "demo-basic-io-hello"
     assert last_response["state"]["last_submission"]["judge_status"] == "AC"
 
 

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -34,7 +34,7 @@ def test_assemble_runtime_game_slice_against_levels_assets() -> None:
     assembled = assemble_game_slice(game_content=bundle, levels=levels)
     practice = assembled.challenges["challenge-practice-basic-io"]
 
-    assert [level.level_id for level in practice.levels] == ["add-two-numbers", "demo-2", "fizzbuzz-simple"]
+    assert [level.level_id for level in practice.levels] == ["practice-basic-io-sum", "practice-basic-io-double"]
     assert practice.toolbox_policy is not None
     assert practice.battery_policy is not None
 

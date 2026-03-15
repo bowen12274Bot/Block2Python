@@ -37,10 +37,10 @@ def test_dispatch_submit_level_returns_updated_challenge_state() -> None:
     assert state.mode is GameMode.CHALLENGE
     assert state.challenge is not None
     assert state.challenge.challenge_id == "challenge-practice-basic-io"
-    assert state.challenge.current_level_id == "add-two-numbers"
-    assert state.progress.cleared_level_ids == ("demo-1",)
+    assert state.challenge.current_level_id == "practice-basic-io-sum"
+    assert state.progress.cleared_level_ids == ("demo-basic-io-hello",)
     assert state.last_submission is not None
-    assert state.last_submission.level_id == "demo-1"
+    assert state.last_submission.level_id == "demo-basic-io-hello"
     assert state.last_submission.judge_status == "AC"
 
 

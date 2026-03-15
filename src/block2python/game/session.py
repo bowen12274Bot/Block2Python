@@ -38,6 +38,7 @@ class GameSessionState:
     challenge_id: str | None = None
     current_level_id: str | None = None
     current_level_title: str | None = None
+    current_level_prompt: str | None = None
 
 
 @dataclass(slots=True)
@@ -82,6 +83,7 @@ class GameSession:
                 challenge_id=runtime_state.challenge.challenge_id,
                 current_level_id=current_level.level_id,
                 current_level_title=current_level.title,
+                current_level_prompt=current_level.prompt,
             )
 
         return GameSessionState(
@@ -113,6 +115,7 @@ class GameSession:
                 challenge_type=runtime_state.challenge.challenge_type,
                 current_level_id=state.current_level_id,
                 current_level_title=state.current_level_title,
+                current_level_prompt=state.current_level_prompt,
             )
 
         if state.mode is SessionMode.SCENE:

@@ -28,7 +28,7 @@ def test_game_state_contract_supports_scene_payload() -> None:
         progress=ProgressState(completed_node_ids=("map-entry",), cleared_level_ids=()),
         available_actions=AvailableActions(advance=True),
         last_submission=SubmissionFeedback(
-            level_id="demo-1",
+            level_id="demo-basic-io-hello",
             cleared=True,
             block_passed=True,
             analysis_status="PASS",

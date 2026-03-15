@@ -1,4 +1,5 @@
 extends PanelContainer
+class_name FeedbackPanel
 
 @onready var feedback_title: Label = $FeedbackMargin/FeedbackRoot/FeedbackTitle
 @onready var feedback_text: RichTextLabel = $FeedbackMargin/FeedbackRoot/FeedbackText

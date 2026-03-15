@@ -1,7 +1,7 @@
 ﻿# Bridge Stdio 協定 v0.1
 
-- 版本：`0.1`
-- 日期：`2026-03-14`
+- 版本：0.2
+- 日期：2026-03-15
 - 狀態：已在 Python bridge MVP 中實作
 
 ## 1. 目的
@@ -198,7 +198,7 @@ payload 欄位：
 
 ```json
 {
-  "level_id": "demo-1",
+  "level_id": "demo-basic-io-hello",
   "cleared": true,
   "block_passed": true,
   "analysis_status": "PASS",

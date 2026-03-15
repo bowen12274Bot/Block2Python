@@ -1,0 +1,297 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/quest_map_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://scripts/bridge_client.gd" id="2_bridge"]
+[ext_resource type="Script" path="res://scripts/quest_map_panel.gd" id="3_map"]
+[ext_resource type="Script" path="res://scripts/challenge_panel.gd" id="4_challenge"]
+[ext_resource type="Script" path="res://scripts/feedback_panel.gd" id="5_feedback"]
+[ext_resource type="Script" path="res://scripts/scene_panel.gd" id="6_scene"]
+
+[node name="QuestMap" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_controller")
+
+[node name="BridgeClient" type="Node" parent="."]
+script = ExtResource("2_bridge")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Scroll" type="ScrollContainer" parent="Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="Root" type="VBoxContainer" parent="Margin/Scroll"]
+custom_minimum_size = Vector2(0, 1320)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Margin/Scroll/Root"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Block2Python Quest Map Prototype"
+
+[node name="Subtitle" type="Label" parent="Margin/Scroll/Root"]
+layout_mode = 2
+text = "GQM-1 / GQM-3 bridge-backed quest map with active node flow"
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/Scroll/Root"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StartBridgeButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+layout_mode = 2
+text = "Start Bridge"
+
+[node name="ResetButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+layout_mode = 2
+text = "Reset"
+
+[node name="AdvanceButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+layout_mode = 2
+text = "Advance"
+
+[node name="SubmitButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+layout_mode = 2
+text = "Submit"
+
+[node name="DebugToggleButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+layout_mode = 2
+toggle_mode = true
+text = "Show Debug"
+
+[node name="StatusLabel" type="Label" parent="Margin/Scroll/Root"]
+layout_mode = 2
+text = "Status: idle"
+
+[node name="QuestMapPanel" type="PanelContainer" parent="Margin/Scroll/Root"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 260)
+script = ExtResource("3_map")
+
+[node name="MapMargin" type="MarginContainer" parent="Margin/Scroll/Root/QuestMapPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="MapRoot" type="VBoxContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MapHeader" type="VBoxContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="QuestTitle" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Quest Map"
+
+[node name="MetaRow" type="HBoxContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ModeLabel" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader/MetaRow"]
+layout_mode = 2
+text = "Mode: -"
+
+[node name="CurrentNodeLabel" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader/MetaRow"]
+layout_mode = 2
+text = "Current Node: -"
+
+[node name="SummaryLabel" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot"]
+layout_mode = 2
+text = "No state loaded yet."
+
+[node name="NodesContainer" type="HFlowContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+
+[node name="SelectionPanel" type="PanelContainer" parent="Margin/Scroll/Root"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 140)
+
+[node name="SelectionMargin" type="MarginContainer" parent="Margin/Scroll/Root/SelectionPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="SelectionRoot" type="VBoxContainer" parent="Margin/Scroll/Root/SelectionPanel/SelectionMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SelectionTitle" type="Label" parent="Margin/Scroll/Root/SelectionPanel/SelectionMargin/SelectionRoot"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Quest Map Notes"
+
+[node name="SelectionText" type="Label" parent="Margin/Scroll/Root/SelectionPanel/SelectionMargin/SelectionRoot"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Node selection will be connected in GQM-3."
+
+[node name="FlowColumn" type="VBoxContainer" parent="Margin/Scroll/Root"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="ScenePanel" type="PanelContainer" parent="Margin/Scroll/Root/FlowColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 180)
+script = ExtResource("6_scene")
+
+[node name="SceneMargin" type="MarginContainer" parent="Margin/Scroll/Root/FlowColumn/ScenePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="SceneRoot" type="VBoxContainer" parent="Margin/Scroll/Root/FlowColumn/ScenePanel/SceneMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SceneMeta" type="HBoxContainer" parent="Margin/Scroll/Root/FlowColumn/ScenePanel/SceneMargin/SceneRoot"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ModeLabel" type="Label" parent="Margin/Scroll/Root/FlowColumn/ScenePanel/SceneMargin/SceneRoot/SceneMeta"]
+layout_mode = 2
+text = "Mode: -"
+
+[node name="NodeLabel" type="Label" parent="Margin/Scroll/Root/FlowColumn/ScenePanel/SceneMargin/SceneRoot/SceneMeta"]
+layout_mode = 2
+text = "Node: -"
+
+[node name="SceneTitle" type="Label" parent="Margin/Scroll/Root/FlowColumn/ScenePanel/SceneMargin/SceneRoot"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Scene"
+
+[node name="SceneBody" type="RichTextLabel" parent="Margin/Scroll/Root/FlowColumn/ScenePanel/SceneMargin/SceneRoot"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 108)
+bbcode_enabled = false
+fit_content = false
+text = "No scene loaded yet."
+
+[node name="CodePanel" type="PanelContainer" parent="Margin/Scroll/Root/FlowColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 320)
+script = ExtResource("4_challenge")
+
+[node name="CodeMargin" type="MarginContainer" parent="Margin/Scroll/Root/FlowColumn/CodePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="ChallengeRoot" type="VBoxContainer" parent="Margin/Scroll/Root/FlowColumn/CodePanel/CodeMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ChallengeHeader" type="VBoxContainer" parent="Margin/Scroll/Root/FlowColumn/CodePanel/CodeMargin/ChallengeRoot"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ChallengeTitle" type="Label" parent="Margin/Scroll/Root/FlowColumn/CodePanel/CodeMargin/ChallengeRoot/ChallengeHeader"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Challenge"
+
+[node name="LevelLabel" type="Label" parent="Margin/Scroll/Root/FlowColumn/CodePanel/CodeMargin/ChallengeRoot/ChallengeHeader"]
+layout_mode = 2
+text = "Waiting for challenge mode."
+
+[node name="PromptText" type="RichTextLabel" parent="Margin/Scroll/Root/FlowColumn/CodePanel/CodeMargin/ChallengeRoot"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 120)
+bbcode_enabled = false
+fit_content = false
+text = "No challenge prompt loaded yet."
+
+[node name="CodeInput" type="TextEdit" parent="Margin/Scroll/Root/FlowColumn/CodePanel/CodeMargin/ChallengeRoot"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 160)
+wrap_mode = 0
+placeholder_text = "Write Python code here before submit_level."
+
+[node name="FeedbackPanel" type="PanelContainer" parent="Margin/Scroll/Root/FlowColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 124)
+script = ExtResource("5_feedback")
+
+[node name="FeedbackMargin" type="MarginContainer" parent="Margin/Scroll/Root/FlowColumn/FeedbackPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="FeedbackRoot" type="VBoxContainer" parent="Margin/Scroll/Root/FlowColumn/FeedbackPanel/FeedbackMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="FeedbackTitle" type="Label" parent="Margin/Scroll/Root/FlowColumn/FeedbackPanel/FeedbackMargin/FeedbackRoot"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Feedback"
+
+[node name="FeedbackText" type="RichTextLabel" parent="Margin/Scroll/Root/FlowColumn/FeedbackPanel/FeedbackMargin/FeedbackRoot"]
+layout_mode = 2
+bbcode_enabled = false
+fit_content = false
+custom_minimum_size = Vector2(0, 96)
+text = "Feedback will appear here."
+
+[node name="DebugPanel" type="PanelContainer" parent="Margin/Scroll/Root"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(0, 180)
+
+[node name="DebugMargin" type="MarginContainer" parent="Margin/Scroll/Root/DebugPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="DebugRoot" type="VBoxContainer" parent="Margin/Scroll/Root/DebugPanel/DebugMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DebugTitle" type="Label" parent="Margin/Scroll/Root/DebugPanel/DebugMargin/DebugRoot"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Debug Response"
+
+[node name="ResponseText" type="RichTextLabel" parent="Margin/Scroll/Root/DebugPanel/DebugMargin/DebugRoot"]
+layout_mode = 2
+bbcode_enabled = false
+fit_content = false
+custom_minimum_size = Vector2(0, 132)
+text = "No response yet."

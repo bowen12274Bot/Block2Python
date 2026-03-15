@@ -71,12 +71,16 @@ static func _build_scene_view(state: Dictionary, meta: Dictionary) -> Dictionary
 static func _build_challenge_view(state: Dictionary) -> Dictionary:
     var challenge_title: String = "Challenge"
     var level_label: String = "Waiting for challenge mode."
+    var prompt_body: String = "No challenge prompt loaded yet."
     var challenge: Variant = state.get("challenge", null)
     if challenge is Dictionary:
         challenge_title = str(challenge.get("current_level_title", "Challenge"))
         var current_level_id: String = str(challenge.get("current_level_id", ""))
         if current_level_id != "":
             level_label = "level_id: %s" % current_level_id
+        var current_level_prompt: String = str(challenge.get("current_level_prompt", ""))
+        if current_level_prompt != "":
+            prompt_body = current_level_prompt
 
     var raw_actions: Variant = state.get("available_actions", null)
     var can_submit: bool = false
@@ -86,6 +90,7 @@ static func _build_challenge_view(state: Dictionary) -> Dictionary:
     return {
         "title": challenge_title,
         "level_label": level_label,
+        "prompt_body": prompt_body,
         "code_editable": can_submit,
     }
 

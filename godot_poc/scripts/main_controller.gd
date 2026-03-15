@@ -129,6 +129,7 @@ func _render_error_response(response: Dictionary) -> void:
     })
 
 
-func _set_debug_visible(is_visible: bool) -> void:
-    debug_panel.visible = is_visible
-    debug_toggle_button.text = "Hide Debug" if is_visible else "Show Debug"
+func _set_debug_visible(debug_visible: bool) -> void:
+    debug_panel.visible = debug_visible
+    debug_toggle_button.text = "Hide Debug" if debug_visible else "Show Debug"
+

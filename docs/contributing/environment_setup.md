@@ -105,6 +105,21 @@ $env:BLOCK2PYTHON_JUDGE_FAIL_FAST = "true"
 - `tempfile`：將 submission 寫成暫存檔，適合 Windows fallback
 - `stdin`：以 `python -` 與 wrapper 執行
 
+### 2.5 Windows / Godot 實務建議
+
+目前在本 repo 的 Godot quest-map / bridge 整合路徑上，較穩定的設定是：
+
+```powershell
+$env:BLOCK2PYTHON_WASM_CODE_MODE = "stdin"
+```
+
+原因是某些 Windows 環境下：
+
+- `auto` 可能因 `tempfile` 路徑權限或策略切換造成不穩定
+- Godot 啟動 subprocess 時，用 `stdin` 模式較容易得到一致結果
+
+如果你是在 Godot 端驗證 `submit_level`，建議優先使用 `stdin`。
+
 ## 3. Wasm Judge 驗證與測試
 
 ### 3.1 一鍵驗證

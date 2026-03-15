@@ -39,6 +39,7 @@ class ChallengeState:
     challenge_type: str
     current_level_id: str | None = None
     current_level_title: str | None = None
+    current_level_prompt: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

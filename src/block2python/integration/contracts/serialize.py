@@ -29,6 +29,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "challenge_type": state.challenge.challenge_type,
             "current_level_id": state.challenge.current_level_id,
             "current_level_title": state.challenge.current_level_title,
+            "current_level_prompt": state.challenge.current_level_prompt,
         }
 
     last_submission = None

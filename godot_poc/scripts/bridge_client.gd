@@ -9,6 +9,12 @@ const LEVELS_DIR := "../assets/levels"
 const GAME_CONTENT_DIR := "../assets/game_content"
 const PYTHONPATH_DIR := "../src"
 const WASM_PATH := "../assets/wasm/python.wasm"
+const WASMTIME_CANDIDATES := [
+	"../assets/wasm/wasmtime.exe",
+	"../wasmtime.exe",
+	"../wasmtime/wasmtime.exe",
+	"../tools/wasmtime.exe",
+]
 
 var _pipe: Dictionary = {}
 var _stdio: FileAccess
@@ -33,6 +39,11 @@ func start_bridge() -> bool:
 	var wasm_abs: String = ProjectSettings.globalize_path("res://%s" % WASM_PATH)
 	OS.set_environment("PYTHONPATH", pythonpath_abs)
 	OS.set_environment("BLOCK2PYTHON_WASM_PATH", wasm_abs)
+	OS.set_environment("BLOCK2PYTHON_WASM_CODE_MODE", "stdin")
+
+	var wasmtime_abs: String = _find_wasmtime_bin()
+	if wasmtime_abs != "":
+		OS.set_environment("BLOCK2PYTHON_WASMTIME_BIN", wasmtime_abs)
 
 	var args: PackedStringArray = PackedStringArray([
 		"-m",
@@ -115,6 +126,14 @@ func stop_bridge() -> void:
 	_stdio = null
 	_stderr = null
 	_pid = -1
+
+
+func _find_wasmtime_bin() -> String:
+	for candidate in WASMTIME_CANDIDATES:
+		var absolute_candidate: String = ProjectSettings.globalize_path("res://%s" % candidate)
+		if FileAccess.file_exists(absolute_candidate):
+			return absolute_candidate
+	return ""
 
 
 func _notification(what: int) -> void:

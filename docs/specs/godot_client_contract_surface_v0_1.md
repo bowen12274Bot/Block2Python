@@ -1,7 +1,7 @@
 # Godot Client Contract Surface
 
-- 版本：`0.1`
-- 日期：`2026-03-15`
+- 版本：0.1
+- 日期：2026-03-15
 - 狀態：草案
 - 文件定位：明文化目前 Godot client 對 integration contract 的最小依賴面
 
@@ -16,7 +16,7 @@
 
 - 避免 Godot 端直接散落依賴 raw dictionary 欄位
 - 讓 Python 端之後調整 contract 時，知道哪些欄位已成為 Godot 正式依賴
-- 作為 `MainController -> Panels` 的共同邊界說明
+- 作為 `QuestMapController / MainController -> Panels` 的共同邊界說明
 
 ## 2. 分層原則
 
@@ -26,8 +26,8 @@
 2. `GameState` raw dictionary
 3. `StateMapper`
 4. Godot view model
-5. `MainController`
-6. `ScenePanel` / `ChallengePanel` / `FeedbackPanel`
+5. `QuestMapController` / `MainController`
+6. `QuestMapPanel` / `ScenePanel` / `ChallengePanel` / `FeedbackPanel`
 
 Godot panel 不應直接解析 raw `GameState`。
 
@@ -84,6 +84,7 @@ Godot 端目前正式依賴以下 top-level response 欄位：
 
 - `challenge.current_level_title`
 - `challenge.current_level_id`
+- `challenge.current_level_prompt`
 
 目前未使用但仍存在於 contract 的欄位：
 
@@ -155,6 +156,7 @@ view_model
 
 - `title`
 - `level_label`
+- `prompt_body`
 - `code_editable`
 
 ### 5.4 feedback_view
@@ -176,6 +178,17 @@ view_model
 - `can_submit`
 
 ## 6. 目前面板依賴關係
+
+### 6.0 QuestMapPanel
+
+只吃：
+
+- quest map 專用 view model
+
+不應直接讀：
+
+- raw `state.progress`
+- raw `state.node_id`
 
 ### 6.1 ScenePanel
 
@@ -214,6 +227,17 @@ view_model
 - 根據 `action_view` 控制按鈕
 
 不應再回退成直接組字串或散落讀 raw `state.get(...)`。
+
+### 6.5 QuestMapController
+
+負責：
+
+- 接收 bridge response
+- 驅動 quest map refresh
+- 透過 `StateMapper` 分發 flow panels
+- 控制 `Start Bridge / Reset / Advance / Submit`
+
+不應直接讓 `QuestMapPanel` 或 `ChallengePanel` 自行解析 raw `GameState`。
 
 ## 7. 後續變更原則
 
