@@ -78,5 +78,5 @@ python -m block2python
 ## GameSession Demo
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/run_game_session_demo.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_game_session_demo.ps1
 ```

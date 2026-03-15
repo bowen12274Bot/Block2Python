@@ -10,10 +10,11 @@ const GAME_CONTENT_DIR := "../assets/game_content"
 const PYTHONPATH_DIR := "../src"
 const WASM_PATH := "../assets/wasm/python.wasm"
 const WASMTIME_CANDIDATES := [
-	"../assets/wasm/wasmtime.exe",
+	"../.block2python/tools/wasmtime/wasmtime.exe",
 	"../wasmtime.exe",
 	"../wasmtime/wasmtime.exe",
 	"../tools/wasmtime.exe",
+	"../assets/wasm/wasmtime.exe",
 ]
 
 var _pipe: Dictionary = {}

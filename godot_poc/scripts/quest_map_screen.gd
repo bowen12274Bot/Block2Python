@@ -61,6 +61,6 @@ func set_can_advance(can_advance: bool) -> void:
 	advance_button.disabled = not can_advance
 
 
-func set_debug_visible(is_visible: bool) -> void:
-	debug_toggle_button.button_pressed = is_visible
-	debug_toggle_button.text = "Hide Debug" if is_visible else "Show Debug"
+func set_debug_visible(debug_visible: bool) -> void:
+	debug_toggle_button.button_pressed = debug_visible
+	debug_toggle_button.text = "Hide Debug" if debug_visible else "Show Debug"

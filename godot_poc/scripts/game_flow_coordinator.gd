@@ -101,8 +101,8 @@ func _on_submit_requested(python_code: String) -> void:
 
 
 @warning_ignore("shadowed_variable_base_class")
-func _on_debug_toggled(is_visible: bool) -> void:
-	_set_debug_visible(is_visible)
+func _on_debug_toggled(debug_visible: bool) -> void:
+	_set_debug_visible(debug_visible)
 
 
 func _on_bridge_started() -> void:
@@ -214,10 +214,10 @@ func _show_page(page: String) -> void:
 	challenge_screen.visible = page == "challenge"
 
 
-func _set_debug_visible(is_visible: bool) -> void:
-	debug_margin.visible = is_visible
-	debug_panel.visible = is_visible
-	map_screen.set_debug_visible(is_visible)
+func _set_debug_visible(debug_visible: bool) -> void:
+	debug_margin.visible = debug_visible
+	debug_panel.visible = debug_visible
+	map_screen.set_debug_visible(debug_visible)
 
 
 func _has_scene_payload(state: Dictionary) -> bool:
