@@ -39,6 +39,19 @@
 <type>(<scope>): <summary>
 ```
 
+但目前 repo 的實務寫法更常見的是較簡化的：
+
+```text
+<type>: <繁體中文描述>
+```
+
+原則如下：
+
+- `scope` 視需要才使用，不強制
+- 若最近歷史沒有一致使用 `scope`，優先沿用簡化格式
+- commit subject 優先用簡短的繁體中文描述
+- 若同一批變更同時包含功能與文件，通常仍以主要變更類型為準
+
 常用 `type`：
 
 - `feat`
@@ -51,6 +64,9 @@
 例子：
 
 ```text
+feat: 新增 GameSession 終端 demo 入口
+feat: 新增遊戲內容 loader 與 runtime 骨架
+docs: 新增遊戲內容 loader 計畫
 feat(levels): add yaml-backed prototype levels
 fix(judge): handle wasm runner timeout correctly
 refactor(app): unify runtime composition

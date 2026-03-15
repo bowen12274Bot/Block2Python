@@ -1,32 +1,28 @@
 # Skills Index
 
-本文件是 `.agent/skills/` 的人工維護索引，用於快速查看目前有哪些 canonical skills 以及它們的用途。
+以下列出目前放在 `.agent/skills/` 的 repo 內技能。這些技能是本專案的 canonical skills。
 
-注意：
+## 原則
 
-- 這份文件是導覽索引，不是 source of truth。
-- 真正的技能定義仍以各 skill 目錄中的 `SKILL.md` 為準。
-- 新增、刪除或重新命名 skill 後，應同步更新這份文件。
+- `.agent/skills/` 是 repo 內 skill 的 source of truth。
+- 每個 skill 的入口都是該目錄下的 `SKILL.md`。
+- 若問題明顯屬於 repo-specific 工作方式，優先使用這裡的 skill。
 
-## 目前 Skills
+## Available Skills
 
 - `contributing`
-  用於快速上手、開發環境設定、Git workflow、Blockly vendor、驗證流程與協作規範導讀。
-
+  - 說明提交流程、git workflow、Blockly vendor 更新與基本開發慣例。
 - `development-planning`
-  用於判斷一項開發任務應直接進行、先在 AI 對話中規劃，或先撰寫完整開發計畫文件。
-
+  - 用於整理功能計畫、拆解工作項目與規劃 AI 協作開發順序。
 - `feature-implementation`
-  用於 Block2Python 的功能實作、重構、維護與程式碼變更。
-
+  - 用於 Block2Python 的功能實作、修 bug、重構與一般程式碼修改。
 - `project-architecture`
-  用於建立專案全局架構理解、分析分層、責任邊界與功能落點。
-
+  - 用於整理 repo 架構、模組職責與跨模組設計方向。
 - `game-product-direction`
-  用於理解目前已確立的遊戲產品定位、主流程、關卡分工與核心玩法規則。
-
+  - 用於整理遊戲產品方向、遊戲化設計與整體體驗目標。
 - `game-story-background`
-  用於理解目前已確立的世界觀、故事前提、角色關係與敘事調性。
-
+  - 用於整理世界觀、劇情背景與角色設定。
+- `block2python-common-troubleshooting`
+  - 用於排查 Block2Python repo 常見開發問題，例如測試、temp、cache、git 權限與 PowerShell 指令相容性。
 - `skill-creator`
-  用於建立、調整、驗證與封裝 canonical skills。
+  - 用於建立或更新 repo 內的 canonical skills。
