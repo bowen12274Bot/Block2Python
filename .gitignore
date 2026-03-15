@@ -11,3 +11,6 @@ pytest_tmp_run_*/
 pytest-cache-files-*/
 htmlcov/
 .coverage
+godot_poc/.godot/
+.vs/
+*.uid

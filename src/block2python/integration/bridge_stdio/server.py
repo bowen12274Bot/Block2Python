@@ -6,7 +6,9 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-from block2python.app.game_session_demo import DEFAULT_QUEST_ID, build_demo_session
+from block2python.app.game_session_demo import DEFAULT_QUEST_ID
+from block2python.challenge import AppCore, InMemoryProgress, build_judge_from_env
+from block2python.content import assemble_game_slice, load_game_content, load_levels
 from block2python.game import GameSession
 from block2python.integration.contracts import (
     IntegrationContractValidationError,
@@ -14,6 +16,7 @@ from block2python.integration.contracts import (
     serialize_game_state,
 )
 from block2python.integration.service import IntegrationDispatchError, dispatch
+from block2python.judge import StubJudge
 
 
 class BridgeServer:
@@ -23,11 +26,14 @@ class BridgeServer:
         levels_dir: Path | None = None,
         game_content_dir: Path | None = None,
         quest_id: str = DEFAULT_QUEST_ID,
+        use_stub_judge: bool = False,
     ) -> None:
         self._levels_dir = levels_dir
         self._game_content_dir = game_content_dir
         self._quest_id = quest_id
+        self._use_stub_judge = use_stub_judge
         self._session: GameSession | None = None
+        self._judge_info: str | None = None
 
     def handle_request(self, request: object) -> dict[str, object]:
         if not isinstance(request, dict):
@@ -51,6 +57,7 @@ class BridgeServer:
             "ok": True,
             "state": serialize_game_state(state),
             "error": None,
+            "debug": self._debug_payload(),
         }
 
     def serve(self, instream: TextIO, outstream: TextIO) -> int:
@@ -77,9 +84,22 @@ class BridgeServer:
         return self._session
 
     def _build_session(self) -> GameSession:
-        return build_demo_session(
-            levels_dir=self._levels_dir,
-            game_content_dir=self._game_content_dir,
+        levels_dir = self._levels_dir or Path("assets/levels")
+        game_content_dir = self._game_content_dir or Path("assets/game_content")
+
+        levels = load_levels(levels_dir)
+        game_content = load_game_content(game_content_dir)
+        game_slice = assemble_game_slice(game_content=game_content, levels=levels)
+
+        if self._use_stub_judge:
+            judge = StubJudge()
+            self._judge_info = "judge=StubJudge (forced by BridgeServer.use_stub_judge)"
+        else:
+            judge, self._judge_info = build_judge_from_env()
+        app = AppCore(levels, judge=judge, progress=InMemoryProgress.empty())
+        return GameSession.start(
+            app=app,
+            game_slice=game_slice,
             quest_id=self._quest_id,
         )
 
@@ -88,6 +108,7 @@ class BridgeServer:
             "ok": True,
             "state": serialize_game_state(self._ensure_session().current_game_state()),
             "error": None,
+            "debug": self._debug_payload(),
         }
 
     @staticmethod
@@ -96,6 +117,13 @@ class BridgeServer:
             "ok": False,
             "state": None,
             "error": message,
+            "debug": None,
+        }
+
+    def _debug_payload(self) -> dict[str, object]:
+        return {
+            "judge_info": self._judge_info,
+            "use_stub_judge": self._use_stub_judge,
         }
 
 

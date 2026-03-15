@@ -1,4 +1,4 @@
-﻿# 開發計畫（Development Plans）
+# 開發計畫（Development Plans）
 
 > 本資料夾用來存放各主題的設計、轉型、驗證與分階段落地計畫。
 
@@ -20,6 +20,8 @@
 - `wasm_judge_plan.md`
 - `ai_tutor_skills_plan.md`
 - `godot_bridge_client_guide.md`
+- `godot_poc_plan.md`
+- `godot_client_structure_plan.md`
 
 ## 命名規則與延伸
 

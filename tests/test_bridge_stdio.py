@@ -8,7 +8,7 @@ from block2python.integration.bridge_stdio import BridgeServer
 
 
 def test_bridge_server_handles_advance_over_stdio_streams() -> None:
-    server = BridgeServer()
+    server = BridgeServer(use_stub_judge=True)
     instream = io.StringIO('{"action":{"action_type":"advance","payload":{}}}\n')
     outstream = io.StringIO()
 
@@ -24,7 +24,7 @@ def test_bridge_server_handles_advance_over_stdio_streams() -> None:
 
 
 def test_bridge_server_persists_session_across_requests() -> None:
-    server = BridgeServer()
+    server = BridgeServer(use_stub_judge=True)
     instream = io.StringIO(
         "\n".join(
             [
@@ -52,7 +52,7 @@ def test_bridge_server_persists_session_across_requests() -> None:
 
 
 def test_bridge_server_returns_error_for_invalid_json() -> None:
-    server = BridgeServer()
+    server = BridgeServer(use_stub_judge=True)
     instream = io.StringIO("{not-json}\n")
     outstream = io.StringIO()
 
@@ -66,7 +66,7 @@ def test_bridge_server_returns_error_for_invalid_json() -> None:
 
 
 def test_bridge_server_returns_error_for_invalid_action_shape() -> None:
-    server = BridgeServer()
+    server = BridgeServer(use_stub_judge=True)
     instream = io.StringIO('{"action":{"action_type":123,"payload":{}}}\n')
     outstream = io.StringIO()
 
@@ -80,7 +80,7 @@ def test_bridge_server_returns_error_for_invalid_action_shape() -> None:
 
 
 def test_bridge_server_supports_reset_command() -> None:
-    server = BridgeServer()
+    server = BridgeServer(use_stub_judge=True)
     instream = io.StringIO(
         "\n".join(
             [

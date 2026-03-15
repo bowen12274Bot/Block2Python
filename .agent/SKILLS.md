@@ -26,3 +26,5 @@
   - 用於排查 Block2Python repo 常見開發問題，例如測試、temp、cache、git 權限與 PowerShell 指令相容性。
 - `skill-creator`
   - 用於建立或更新 repo 內的 canonical skills。
+- `encoding-safe-writes`
+  - 用於修正亂碼、避免 PowerShell 寫檔改壞編碼，並驗證 UTF-8 位元組是否正確。
