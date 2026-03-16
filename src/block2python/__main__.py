@@ -1,4 +1,5 @@
-from .clients.cli.main import main
+from .app.main import main
 
 
 raise SystemExit(main())
+

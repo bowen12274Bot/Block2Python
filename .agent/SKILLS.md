@@ -11,12 +11,7 @@
 ## Available Skills
 
 - `contributing`
-<<<<<<< HEAD
-  - 說明提交流程、git workflow、Blockly vendor 更新與基本開發慣例。
-=======
   用於快速上手、開發環境設定、Git workflow、Blockly vendor、驗證流程與協作規範導讀。
-
->>>>>>> merge/judge_introduction_branch
 - `development-planning`
   - 用於整理功能計畫、拆解工作項目與規劃 AI 協作開發順序。
 - `feature-implementation`

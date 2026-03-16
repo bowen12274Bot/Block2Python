@@ -24,40 +24,19 @@ python -m block2python
 
 ### 使用與開發
 - **快速啟動指南**：[docs/QUICKSTART.md](docs/QUICKSTART.md)
-<<<<<<< HEAD
-<<<<<<< HEAD
-- **Wasm Judge 配置**：[docs/WASM_SETUP.md](docs/WASM_SETUP.md)
-=======
 - **環境與 Wasm 設定**：[docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)
->>>>>>> merge/judge_introduction_branch
+- **Judge 介紹**：[docs/JUDGE_INTRO.md](docs/JUDGE_INTRO.md)
 - **貢獻指南**：[docs/contributing.md](docs/contributing.md)
 
 ### 規劃與設計
 - 專案計畫：`docs/project_plan.md`
-=======
-- **環境與 Wasm 設定**：[docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)
-- **貢獻指南**：[docs/contributing.md](docs/contributing.md)
-
-### 規劃與設計
-- 產品內容：`docs/product/`
->>>>>>> main
 - 需求文件：`docs/requirements.md`
 - 技術策略說明：`docs/technical_rationale.md`
 - 專案架構：`docs/project_architecture.md`
 - 開發計畫資料夾：`docs/development_plans/`
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> merge/judge_introduction_branch
 - 開發進度安排（待補）：`docs/development_timeline.md`
-- 專案計畫：`docs/project_plan.md`
 - 貢獻指南入口：`docs/contributing.md`
 - 貢獻細則：`docs/contributing/`
-<<<<<<< HEAD
->>>>>>> main
-=======
->>>>>>> merge/judge_introduction_branch
 - 規格（Specs）：`docs/specs/`
 - UML：`docs/uml/`
 
@@ -94,18 +73,4 @@ $env:BLOCK2PYTHON_JUDGE_MODE = "stub"
 python -m block2python
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-完整配置指南請見 [docs/WASM_SETUP.md](docs/WASM_SETUP.md)。
-=======
 完整配置指南請見 [docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)。
-
-## GameSession Demo
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tools/legacy/run_game_session_demo.ps1
-```
->>>>>>> main
-=======
-完整配置指南請見 [docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)。
->>>>>>> merge/judge_introduction_branch

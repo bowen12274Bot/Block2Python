@@ -1,6 +1,5 @@
-from block2python.content.levels_loader import LevelsLoadError, load_levels
+from __future__ import annotations
 
-<<<<<<< HEAD
 import json
 from pathlib import Path
 from typing import Any
@@ -275,6 +274,3 @@ def _opt_positive_int(v: object) -> int | None:
     if parsed is None:
         return None
     return parsed if parsed > 0 else None
-=======
-__all__ = ["LevelsLoadError", "load_levels"]
->>>>>>> main

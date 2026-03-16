@@ -315,27 +315,6 @@ def _monitor_process(
 
 def _kill_process(process: subprocess.Popen[str]) -> None:
     try:
-<<<<<<< HEAD
-=======
-        import psutil
-
-        proc = psutil.Process(process.pid)
-        children = proc.children(recursive=True)
-        for child in reversed(children):
-            try:
-                child.kill()
-            except psutil.Error:
-                continue
-        try:
-            proc.kill()
-            return
-        except psutil.Error:
-            pass
-    except Exception:  # noqa: BLE001
-        pass
-
-    try:
->>>>>>> main
         process.kill()
     except OSError:
         return

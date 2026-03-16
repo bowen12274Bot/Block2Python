@@ -1,158 +1,83 @@
-# 專案架構
+# 專案架構（Project Architecture）
 
-<<<<<<< HEAD
-- 更新日期：2026-03-14
-- 範圍：遊戲系統骨架重構後的目前專案結構
-=======
 - 最後更新：2026-03-11
 - 本文件說明 Block2Python 專案目前的目錄結構、主要模組分工、靜態資源配置、工具腳本，以及 agent skills 的使用方式。
->>>>>>> merge/judge_introduction_branch
 
-## 1. 儲存庫結構
+## 1. 專案根目錄
 
 ```text
 Block2Python/
-  assets/                     # runtime 資源：levels、game_content、blockly、wasm
-  docs/                       # 架構、計畫、規格、協作文件
-  src/block2python/           # Python 原始碼
-  tests/                      # 單元測試、整合測試、smoke tests
-  tools/                      # PowerShell 輔助腳本
-  .agent/ .agents/ .claude/ .codex/  # agent skills 與客戶端設定
+  .agent/         # 唯一的 canonical agent skills source
+  .agents/        # 其餘模型入口
+  .block2python/  # 專案本機執行期狀態，不進版控
+  .claude/        # Claude Code 模型入口
+  .codex/         # Codex 模型入口
+  .venv/          # 開發用 Python 虛擬環境，不進版控
+  assets/         # 靜態資源，例如關卡資料與 Blockly vendor 檔案
+  docs/           # 架構、規格、開發計畫與協作文件
+  src/            # 核心 Python 程式碼
+  tests/          # 測試與 smoke test
+  tools/          # 開發與維運腳本
+  .gitignore      # Git 忽略規則
+  README.md       # 專案入口說明
+  skills-lock.json  # skills 鎖定資訊
 ```
 
-## 2. 原始碼結構
+### 1.1 不進版控資料夾
 
-目前的 source of truth 位於 `src/block2python/`。
+- `.venv/`：本機 Python 開發環境，建立與使用方式見 `docs/contributing/environment_setup.md`。
+- `.block2python/`：本機執行期狀態、快取與暫存資料，細節見 `docs/contributing/environment_setup.md`。
+
+### 1.2 Agent Skills 入口
+
+- `.agent/`：skills 的唯一來源，真正的 `SKILL.md` 與 bundled resources 都放在這裡。
+- `.agents/`、`.claude/`、`.codex/`：不同 AI 模型的入口層，用來讓各模型接上 `.agent` 這份 canonical skills；它們不是獨立的 skill source。
+- `skills-lock.json`：記錄已安裝或已鎖定的 skill 來源與 hash。
+
+## 2. 文件資料夾（docs/）
 
 ```text
-src/block2python/
-  analysis/       # AST 分析與分析 API
-  challenge/      # challenge 子系統：AppCore、judge factory、progress
-  clients/        # client 入口：PySide6 與 CLI
-  content/        # levels loader、game content loader、內容與 runtime 模型
-  contracts/      # 現有 level/judge 領域契約
-  game/           # GameSession、savegame、遊戲主流程控制
-  integration/    # 對外邊界：contracts、dispatcher、bridge、adapters
-  judge/          # judge 實作與 Wasm runner
-
-  ai/             # 預留 AI 相關 package
-  app/            # 舊路徑相容 shim
-  blockly/        # Blockly 相關 package hooks
-  game_content/   # content 層舊路徑相容 shim
-  ui/             # 現有 PySide6 實作
+docs/
+  README.md
+  requirements.md
+  technical_rationale.md
+  project_plan.md
+  development_timeline.md
+  contributing.md
+  contributing/
+  project_architecture.md
+  development_plans/
+  specs/
+  uml/
 ```
 
-## 3. 目前架構模型
+### 2.1 文件分工
 
-目前專案遵守的邊界模型如下：
+- `requirements.md`：定義需求、目標與 MVP 範圍。
+- `technical_rationale.md`：說明技術選型與架構考量。
+- `project_plan.md`、`development_timeline.md`：記錄整體開發規劃與時程。
+- `contributing.md`：人類開發者入口，提供快速開始與文件導覽。
+- `contributing/`：拆分後的協作細則，分別處理環境、開發流程、AI 協作與代碼規範。
+- `development_plans/`：各主題的實作計畫、驗證與 review 文件。
+- `specs/`：資料格式與 JSON schema。
+- `uml/`：系統架構圖與相關視覺化文件。
 
-```text
-clients -> integration -> game
-                      -> challenge
-                      -> content
+## 3. 程式碼（src/）
 
-game -> challenge
-game -> content
+核心 package 位於 `src/block2python/`，目前主要分成下列模組：
 
-challenge -> judge / analysis / contracts
-content -> contracts
-```
+- `app/`：應用程式啟動與組裝流程。
+- `ui/`：PySide6 視窗、Widget 與 UI 整合。
+- `blockly/`：Blockly 與 WebEngine 之間的橋接層。
+- `analysis/`：分析或 AST 相關能力。
+- `judge/`：評測或執行結果檢查相關能力。
+- `contracts/`：模組間共用的介面與資料契約。
+- `ai/`：與 AI 能力相關的擴充模組。
 
-### 3.1 `challenge/`
-
-用途：
-- 負責單題提交流程與 challenge 級進度。
-- 包含 `AppCore`、`JudgeFactory` 與 progress store 實作。
-
-主要檔案：
-- `src/block2python/challenge/app_core.py`
-- `src/block2python/challenge/judge_factory.py`
-- `src/block2python/challenge/progress.py`
-
-### 3.2 `content/`
-
-用途：
-- 負責從 `assets/levels/` 與 `assets/game_content/` 載入並組裝遊戲內容。
-- 持有 `GameSession` 會依賴的內容模型與 runtime helper。
-
-主要檔案：
-- `src/block2python/content/levels_loader.py`
-- `src/block2python/content/loader.py`
-- `src/block2python/content/models.py`
-- `src/block2python/content/runtime.py`
-
-### 3.3 `game/`
-
-用途：
-- 負責遊戲層級的流程控制與 session state。
-- `GameSession` 是預定的遊戲應用層主入口。
-- `SaveGame` 應屬於這一層，不屬於 challenge 子系統。
-
-主要檔案：
-- `src/block2python/game/session.py`
-- `src/block2python/game/savegame.py`
-
-### 3.4 `integration/`
-
-用途：
-- 作為 Godot 等外部 consumer 的正式邊界。
-- 未來承接 `GameState`、`PlayerAction`、序列化、dispatch 與 bridge adapters。
-
-目前結構：
-
-```text
-src/block2python/integration/
-  contracts/
-  service/
-  bridge_stdio/
-  godot_adapter/
-```
-
-目前狀態：
-- 已建立骨架。
-- 在 contract 與 bridge 開工前，會刻意保持輕量。
-
-### 3.5 `clients/`
-
-用途：
-- 放 consumer 端入口與 adapter。
-- PySide6 與 CLI 在架構上屬於 client，不是遊戲規則來源。
-
-目前結構：
-
-```text
-src/block2python/clients/
-  cli/
-  pyside6/
-```
-
-## 4. 舊路徑相容 package
-
-以下 package 仍然存在，但現在應視為相容層或舊實作：
-
-- `app/`
-  - 轉發或 re-export 到新骨架。
-  - 讓既有 import 在遷移期間仍可運作。
-- `game_content/`
-  - 轉發到 `content/` 的相容層。
-- `ui/`
-  - 現有 PySide6 實作仍保留在這裡。
-  - `clients/pyside6/` 目前是 wrapper，而不是整批取代它。
-
-遷移原則：
-- 新功能應優先落在 `challenge/`、`content/`、`game/`、`integration/`、`clients/`。
-- 舊 package 只應在維持相容或完成遷移時修改。
-
-## 5. 資源結構
+## 4. 資料與靜態資源（assets/）
 
 ```text
 assets/
-<<<<<<< HEAD
-  blockly/          # 內嵌 Blockly 頁面與 vendor 資源
-  game_content/     # quest / node / scene / challenge 內容
-  levels/           # level index 與各 level 規格
-  wasm/             # python.wasm 與相關執行資源
-=======
   README.md
   blockly/
     README.md
@@ -165,38 +90,51 @@ assets/
     demo-2.yaml
     fizzbuzz-simple.yaml
     cases/
->>>>>>> merge/judge_introduction_branch
 ```
 
-補充：
-- `assets/levels/` 仍是 challenge 執行所使用的 level 規格來源。
-- `assets/game_content/` 是 quest/node 流程所用的遊戲內容來源。
-- `assets/wasm/` 供 Wasm judge 路徑使用。
+### 4.1 `assets/levels/`
 
-<<<<<<< HEAD
-## 6. 工具與測試
-=======
 - 儲存關卡索引與範例關卡資料。
 - `index.yaml` 作為目前題庫入口。
 - 關卡檔已統一為 `.yaml`。
 - `demo-1.yaml`、`add-two-numbers.yaml`、`demo-2.yaml`、`fizzbuzz-simple.yaml` 共同組成目前的 prototype flow。
->>>>>>> merge/judge_introduction_branch
 
-`tools/` 內包含環境初始化、smoke run、UI 啟動與 Wasm 驗證腳本。
+### 4.2 `assets/blockly/`
 
-`tests/` 目前主要覆蓋：
-- challenge 流程
-- levels 載入
-- game content 載入
-- `GameSession` 流程
-- 骨架與舊 import 相容性
+- `index.html` 提供 Blockly Web 端載入入口。
+- `vendor/` 放置 vendored Blockly dist，供 UI 端直接載入。
 
-## 7. 架構約束
+### 4.3 執行期資料與狀態
 
-以下規則代表目前預期的架構方向：
+- `.block2python/` 用來保存本機執行期資料，不納入版控。
+- 這類資料應與 `assets/` 的靜態內容分離，避免將本機狀態混入正式資源。
 
-- Godot 不應直接 import `game/`、`challenge/` 或 `content/`。
-- 外部前端應依賴 `integration/`。
-- `GameSession` 是遊戲流程主入口。
-- `AppCore` 維持 challenge 子系統定位，不應膨脹成整個遊戲總控。
-- PySide6 是開發 client 與過渡前端，不是長期產品邊界。
+## 5. 工具腳本（tools/）
+
+- `setup_dev_env.ps1`：建立 `.venv` 與安裝開發依賴。
+- `run_demo.ps1`：執行 CLI demo 或 smoke flow。
+- `run_ui.ps1`：啟動 UI smoke flow。
+- `reset_progress.ps1`：重置本機進度與狀態資料。
+- `vendor_blockly.ps1`：從下載來源匯入 Blockly dist。
+- `vendor_blockly_from_dir.ps1`：從本機目錄匯入 Blockly dist。
+
+## 6. Agent Skills
+
+本專案採用單一來源的 skills 架構，讓多個 AI 模型都共用同一份 canonical skill 定義。
+
+```text
+Block2Python/
+  .agent/
+    skills/                 # 唯一 canonical skills source
+    README.md               # 維護原則與各個skills的說明
+  .agents/                  # 其餘模型入口
+  .claude/                  # Claude Code 模型入口
+  .codex/                   # Codex 模型入口
+  skills-lock.json          # skills 鎖定資訊
+```
+
+### 6.1 分層原則
+
+- `.agent/skills/` 存放真正的 skill 定義與 bundled resources。
+- `.agents/`、`.claude/`、`.codex/` 只負責讓不同 AI 模型接上同一套 canonical skills，不應作為獨立 skill source。
+- `skills-lock.json` 是 skill 的 lock layer，用來記錄已安裝或已鎖定 skill 的來源與 hash 中繼資料。

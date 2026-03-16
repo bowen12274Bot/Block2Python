@@ -21,13 +21,6 @@ try {
         exit 1
     }
 
-<<<<<<< HEAD
-=======
-    $localWasmtime = ".block2python\\tools\\wasmtime\\wasmtime.exe"
-    if (Test-Path $localWasmtime) {
-        $env:BLOCK2PYTHON_WASMTIME_BIN = $localWasmtime
-    }
->>>>>>> main
     $env:BLOCK2PYTHON_WASM_CODE_MODE = $CodeMode
 
     # 1) TLE
