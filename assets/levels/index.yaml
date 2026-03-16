@@ -1,4 +1,10 @@
 levels:
+  - id: demo-basic-io-hello
+    file: demo-basic-io-hello.yaml
+  - id: practice-basic-io-sum
+    file: practice-basic-io-sum.yaml
+  - id: practice-basic-io-double
+    file: practice-basic-io-double.yaml
   - id: demo-1
     file: demo-1.yaml
   - id: add-two-numbers

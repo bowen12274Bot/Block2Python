@@ -1,0 +1,8 @@
+# Runtime + development dependencies for local setup
+# Keep this in sync with pyproject.toml
+psutil>=5.9.0
+PyYAML>=6.0
+PySide6>=6.5.0
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.14.0

@@ -5,16 +5,19 @@
 ## 快速開始
 
 ```powershell
-# 1. 安裝依賴
-pip install -e ".[dev]"
+# 1. 一鍵設定（建立 .venv、安裝依賴、執行 gate）
+powershell -ExecutionPolicy Bypass -File .\tools\setup_project.ps1
 
-# 2. 執行測試
+# 2. 啟用虛擬環境
+.\.venv\Scripts\Activate.ps1
+
+# 3. 執行測試
 pytest
 
-# 3. 啟動 GUI
+# 4. 啟動 GUI
 python -m block2python.ui
 
-# 4. 或啟動 CLI
+# 5. 或啟動 CLI
 python -m block2python
 ```
 

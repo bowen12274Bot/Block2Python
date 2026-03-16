@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import shutil
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -111,6 +112,9 @@ class TestWasmJudgeYAMLLevels:
         if level is None:
             pytest.skip("add-two-numbers level id not found")
 
+        # On some Windows hosts the wasm Python runtime needs a higher memory cap.
+        level = replace(level, judge_policy=replace(level.judge_policy, memory_limit_kb=max(level.judge_policy.memory_limit_kb or 0, 256 * 1024)))
+
         submission = Submission(
             level_id=level.level_id,
             python_code="a, b = map(int, input().split())\nprint(a + b)",
@@ -125,6 +129,9 @@ class TestWasmJudgeYAMLLevels:
         level = levels.get("fizzbuzz-simple")
         if level is None:
             pytest.skip("fizzbuzz-simple level id not found")
+
+        # Keep test focused on correctness, not host-dependent memory ceilings.
+        level = replace(level, judge_policy=replace(level.judge_policy, memory_limit_kb=max(level.judge_policy.memory_limit_kb or 0, 256 * 1024)))
 
         submission = Submission(
             level_id=level.level_id,
