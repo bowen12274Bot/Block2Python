@@ -1,9 +1,16 @@
 # 關卡檔 Schema 規格（v0.1）
 
+<<<<<<< HEAD
 - 文件版本：0.2
 - 更新日期：2026-03-15
 - 適用範圍：目前 `assets/levels/` 的 Godot vertical slice 題庫
 - Source of truth：`src/block2python/content/levels_loader.py`
+=======
+- 文件版本：0.1
+- 更新日期：2026-03-11
+- 適用範圍：目前 `assets/levels/` 的 prototype 題庫
+- Source of truth：`src/block2python/app/levels_loader.py`
+>>>>>>> merge/judge_introduction_branch
 
 ## 1. 目前採用的檔案格式
 
@@ -30,12 +37,23 @@
 
 ```yaml
 levels:
+<<<<<<< HEAD
   - id: demo-basic-io-hello
     file: demo-basic-io-hello.yaml
   - id: practice-basic-io-sum
     file: practice-basic-io-sum.yaml
   - id: practice-basic-io-double
     file: practice-basic-io-double.yaml
+=======
+  - id: demo-1
+    file: demo-1.yaml
+  - id: add-two-numbers
+    file: add-two-numbers.yaml
+  - id: demo-2
+    file: demo-2.yaml
+  - id: fizzbuzz-simple
+    file: fizzbuzz-simple.yaml
+>>>>>>> merge/judge_introduction_branch
 ```
 
 ### 2.3 Loader 行為
@@ -96,14 +114,23 @@ testcases:
 ```yaml
 testcases:
   - name: case-01
+<<<<<<< HEAD
     stdin_file: cases/basic-io-hello/01.in
     expected_stdout_file: cases/basic-io-hello/01.out
+=======
+    stdin_file: cases/fizzbuzz/01.in
+    expected_stdout_file: cases/fizzbuzz/01.out
+>>>>>>> merge/judge_introduction_branch
 ```
 
 #### 形式 C：資料夾自動掃描
 
 ```yaml
+<<<<<<< HEAD
 testcase_dir: cases/basic-io-hello
+=======
+testcase_dir: cases/add-two-numbers
+>>>>>>> merge/judge_introduction_branch
 testcase_glob: "*.in"
 ```
 
@@ -152,7 +179,11 @@ metadata:
 
 ## 6. Prototype / dev-only metadata
 
+<<<<<<< HEAD
 目前題庫仍保留 prototype / vertical-slice 標記，因此 `metadata` 中可出現下列 dev-only 欄位：
+=======
+目前 prototype flow 仍保留 stub 路徑，因此 `metadata` 中可出現下列 dev-only 欄位：
+>>>>>>> merge/judge_introduction_branch
 
 - `metadata.stage`
 - `metadata.track`
@@ -167,6 +198,7 @@ metadata:
 - `metadata.stub_analysis.status`：`PASS` / `FAIL` / `SYNTAX_ERROR`
 - `metadata.stub_analysis.summary`
 
+<<<<<<< HEAD
 這些欄位屬於過渡用途，不應視為未來正式課程資料格式的穩定契約。
 
 ## 7. 範例
@@ -216,6 +248,50 @@ judge_policy:
 metadata:
   stage: godot-vertical-slice
   track: quest-map
+=======
+這些欄位屬於 demo / prototype 過渡用途，不應視為未來正式課程資料格式的穩定契約。
+
+## 7. 範例
+
+### 7.1 `demo-1.yaml`
+
+```yaml
+level_id: demo-1
+title: 兩數相加（Stub）
+prompt: 讀入兩個整數並輸出相加結果。
+next_level_ids:
+  - add-two-numbers
+testcases:
+  - name: basic
+    stdin: |
+      1 2
+    expected_stdout: |
+      3
+metadata:
+  stage: prototype
+  track: demo-flow
+  stub_judge:
+    status: AC
+    summary: "StubJudge: forced AC for demo-1."
+```
+
+### 7.2 `add-two-numbers.yaml`
+
+```yaml
+level_id: add-two-numbers
+title: 兩數相加（YAML 題庫）
+prerequisite_level_ids:
+  - demo-1
+next_level_ids:
+  - demo-2
+testcase_dir: cases/add-two-numbers
+judge_policy:
+  time_limit_ms: 1000
+  memory_limit_mb: 64
+metadata:
+  stage: prototype
+  track: yaml-judge
+>>>>>>> merge/judge_introduction_branch
 ```
 
 ## 8. 相關文件

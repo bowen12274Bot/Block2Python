@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from block2python.clients.cli.main import main
 
 <<<<<<< HEAD
@@ -8,23 +9,21 @@ from block2python.clients.cli.main import main
 
     judge, judge_info = build_judge_from_env()
     print("Block2Python (Demo)")
+=======
+def main() -> int:
+    from .runtime import build_configured_app, configured_levels_dir
+
+    app, _levels, judge_info = build_configured_app()
+    print("Block2Python")
+>>>>>>> merge/judge_introduction_branch
     print(judge_info)
-    progress = JsonFileProgress(path=__progress_path())
-    app = AppCore(demo_levels(), judge=judge, progress=progress)
+    print(f"levels_dir={configured_levels_dir()}")
 
     for view in app.list_levels():
         print(f"- {view.level_id}: {view.title} [{view.state}]")
 
-    app.mark_block_passed("demo-1")
-    outcome = app.submit(Submission(level_id="demo-1", python_code="print(3)"))
-    print(
-        f"Submit demo-1 -> analysis={outcome.analysis.status}, judge={outcome.judge.status}, "
-        f"block_passed={outcome.block_passed}, cleared={outcome.cleared}"
-    )
-
-    for view in app.list_levels():
-        print(f"- {view.level_id}: {view.title} [{view.state}]")
     return 0
+<<<<<<< HEAD
 
 
 def __progress_path():
@@ -34,3 +33,5 @@ def __progress_path():
 =======
 __all__ = ["main"]
 >>>>>>> main
+=======
+>>>>>>> merge/judge_introduction_branch

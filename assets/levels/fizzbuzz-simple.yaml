@@ -3,7 +3,7 @@ title: FizzBuzz 簡化版
 chapter_id: conditional
 order_index: 2
 prerequisite_level_ids:
-  - add-two-numbers
+  - demo-2
 
 prompt: |
   讀取一個整數 n，根據以下規則輸出：
@@ -47,6 +47,8 @@ judge_policy:
   memory_limit_mb: 32
 
 metadata:
+  stage: prototype
+  track: yaml-judge
   difficulty: easy
   topics:
     - 條件判斷

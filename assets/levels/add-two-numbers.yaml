@@ -2,6 +2,10 @@ level_id: add-two-numbers
 title: 兩數相加（YAML 版本）
 chapter_id: basic-io
 order_index: 1
+prerequisite_level_ids:
+  - demo-1
+next_level_ids:
+  - demo-2
 
 prompt: |
   讀取兩個整數 a 和 b，輸出它們的和。
@@ -44,6 +48,8 @@ judge_policy:
     strip_trailing_newline: true
 
 metadata:
+  stage: prototype
+  track: yaml-judge
   difficulty: easy
   topics:
     - 基礎輸入輸出

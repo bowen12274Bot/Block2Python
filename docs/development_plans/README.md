@@ -17,6 +17,7 @@
 - `technical_introduction_plan_verification.md`
 - `mvp_development_plan.md`
 <<<<<<< HEAD
+<<<<<<< HEAD
 - `wasm_judge_plan.md`
 =======
 - `mvp_development_plan_v2.md`
@@ -28,6 +29,11 @@
 - `godot_quest_map_vertical_slice_plan.md`
 - `godot_screen_separation_plan.md`
 >>>>>>> main
+=======
+- `mvp_development_plan_v2.md`
+- `wasm_judge_plan.md`
+- `ai_tutor_skills_plan.md`
+>>>>>>> merge/judge_introduction_branch
 
 ## 命名規則與延伸
 

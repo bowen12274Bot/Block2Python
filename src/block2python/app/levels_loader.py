@@ -22,7 +22,7 @@ def load_levels(levels_dir: Path) -> dict[str, LevelSpec]:
 
     items = index.get("levels")
     if not isinstance(items, list):
-        raise LevelsLoadError("index.json must contain a list field: levels")
+        raise LevelsLoadError(f"{index_path.name} must contain a list field: levels")
 
     levels: dict[str, LevelSpec] = {}
     for item in items:
@@ -37,7 +37,7 @@ def load_levels(levels_dir: Path) -> dict[str, LevelSpec]:
         levels[level_id] = _load_level_file(level_path)
 
     if not levels:
-        raise LevelsLoadError("No levels loaded from index.json")
+        raise LevelsLoadError(f"No levels loaded from {index_path.name}")
     return levels
 
 

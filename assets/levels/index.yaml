@@ -1,9 +1,17 @@
 levels:
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  - id: demo-1
+    file: demo-1.yaml
+>>>>>>> merge/judge_introduction_branch
   - id: add-two-numbers
     file: add-two-numbers.yaml
+  - id: demo-2
+    file: demo-2.yaml
   - id: fizzbuzz-simple
     file: fizzbuzz-simple.yaml
+<<<<<<< HEAD
   - id: demo-1
     file: demo-1.json
   - id: demo-2
@@ -16,3 +24,5 @@ levels:
   - id: practice-basic-io-double
     file: practice-basic-io-double.yaml
 >>>>>>> main
+=======
+>>>>>>> merge/judge_introduction_branch

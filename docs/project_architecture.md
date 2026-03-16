@@ -1,7 +1,12 @@
 # 專案架構
 
+<<<<<<< HEAD
 - 更新日期：2026-03-14
 - 範圍：遊戲系統骨架重構後的目前專案結構
+=======
+- 最後更新：2026-03-11
+- 本文件說明 Block2Python 專案目前的目錄結構、主要模組分工、靜態資源配置、工具腳本，以及 agent skills 的使用方式。
+>>>>>>> merge/judge_introduction_branch
 
 ## 1. 儲存庫結構
 
@@ -142,10 +147,25 @@ src/block2python/clients/
 
 ```text
 assets/
+<<<<<<< HEAD
   blockly/          # 內嵌 Blockly 頁面與 vendor 資源
   game_content/     # quest / node / scene / challenge 內容
   levels/           # level index 與各 level 規格
   wasm/             # python.wasm 與相關執行資源
+=======
+  README.md
+  blockly/
+    README.md
+    index.html
+    vendor/
+  levels/
+    index.yaml
+    demo-1.yaml
+    add-two-numbers.yaml
+    demo-2.yaml
+    fizzbuzz-simple.yaml
+    cases/
+>>>>>>> merge/judge_introduction_branch
 ```
 
 補充：
@@ -153,7 +173,14 @@ assets/
 - `assets/game_content/` 是 quest/node 流程所用的遊戲內容來源。
 - `assets/wasm/` 供 Wasm judge 路徑使用。
 
+<<<<<<< HEAD
 ## 6. 工具與測試
+=======
+- 儲存關卡索引與範例關卡資料。
+- `index.yaml` 作為目前題庫入口。
+- 關卡檔已統一為 `.yaml`。
+- `demo-1.yaml`、`add-two-numbers.yaml`、`demo-2.yaml`、`fizzbuzz-simple.yaml` 共同組成目前的 prototype flow。
+>>>>>>> merge/judge_introduction_branch
 
 `tools/` 內包含環境初始化、smoke run、UI 啟動與 Wasm 驗證腳本。
 

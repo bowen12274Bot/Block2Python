@@ -1,6 +1,10 @@
 # 開發工作流程
 
+<<<<<<< HEAD
 - 文件版本：0.2.1
+=======
+- 文件版本：0.2.0
+>>>>>>> merge/judge_introduction_branch
 - 更新日期：2026-03-11
 
 本文件整理 Git 工作流程、commit / PR 準則、驗證方式，以及 Definition of Done。
@@ -39,6 +43,7 @@
 <type>(<scope>): <summary>
 ```
 
+<<<<<<< HEAD
 但目前 repo 的實務寫法更常見的是較簡化的：
 
 ```text
@@ -135,6 +140,82 @@ powershell -ExecutionPolicy Bypass -File tools/legacy/run_ui.ps1
 
 ## 6. Definition of Done
 
+=======
+常用 `type`：
+
+- `feat`
+- `fix`
+- `refactor`
+- `docs`
+- `test`
+- `chore`
+
+例子：
+
+```text
+feat(levels): add yaml-backed prototype levels
+fix(judge): handle wasm runner timeout correctly
+refactor(app): unify runtime composition
+docs(contributing): align pytest workflow
+```
+
+## 4. PR 原則
+
+PR 描述至少應包含：
+
+- 做了什麼
+- 為什麼這樣做
+- 影響範圍
+- 如何驗證
+
+若有尚未處理的限制，也應明寫。
+
+## 5. 驗證原則
+
+目前專案以 `pytest` 為主要驗證入口，smoke scripts 為輔助驗證。
+
+### 5.1 驗證層級
+
+- 小範圍修改：跑最相關的 `pytest` 測試檔或單一測試
+- 一般修改：至少跑一次 `.\.venv\Scripts\python.exe -m pytest`
+- 影響 Wasm 路徑：補跑 `requires_wasm` 測試或 Wasm smoke script
+- 影響 UI / demo 展示：可額外跑 `tools/run_demo.ps1` 或 `tools/run_ui.ps1`
+
+### 5.2 基本指令
+
+```powershell
+# 全部測試
+.\.venv\Scripts\python.exe -m pytest
+
+# 單一檔案
+.\.venv\Scripts\python.exe -m pytest tests/test_levels_loader.py
+
+# 單一測試
+.\.venv\Scripts\python.exe -m pytest tests/test_wasm_judge.py::TestWasmJudge::test_ac_status
+
+# Wasm 相關測試
+.\.venv\Scripts\python.exe -m pytest -m requires_wasm -v
+```
+
+### 5.3 Smoke scripts 的定位
+
+以下腳本仍可用，但不再作為主要自動化測試入口：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/run_demo.ps1
+powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
+powershell -ExecutionPolicy Bypass -File tools/run_wasm_smoke.ps1
+```
+
+用途：
+
+- demo 展示前人工確認
+- UI 常駐流程或 Blockly 整合檢查
+- Wasm 環境額外 sanity check
+
+## 6. Definition of Done
+
+>>>>>>> merge/judge_introduction_branch
 以下條件至少應大致成立：
 
 - 變更已整理成可理解的 commit / PR

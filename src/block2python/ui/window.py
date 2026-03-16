@@ -4,12 +4,16 @@ from pathlib import Path
 
 from block2python.app.core import AppCore, LevelState
 <<<<<<< HEAD
+<<<<<<< HEAD
 from block2python.app.demo_levels import demo_levels
 from block2python.app.judge_factory import build_judge_from_env
 from block2python.app.progress import JsonFileProgress
 =======
 from block2python.app.runtime import build_configured_app, default_progress_path
 >>>>>>> main
+=======
+from block2python.app.runtime import build_configured_app, default_progress_path
+>>>>>>> merge/judge_introduction_branch
 from block2python.contracts import LevelSpec, Submission
 
 try:
@@ -45,10 +49,14 @@ class MainWindow(QMainWindow):
         self._levels: dict[str, LevelSpec] = {}
         self._judge_info: str = ""
 <<<<<<< HEAD
+<<<<<<< HEAD
         self._app = AppCore({}, progress=JsonFileProgress(self._progress_path()))
 =======
         self._app = AppCore({})
 >>>>>>> main
+=======
+        self._app = AppCore({})
+>>>>>>> merge/judge_introduction_branch
         self._block_json_by_level: dict[str, dict] = {}
         self._draft_code_by_level: dict[str, str] = {}
 
@@ -167,6 +175,7 @@ class MainWindow(QMainWindow):
             return
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         try:
             judge, self._judge_info = build_judge_from_env()
         except Exception as e:  # noqa: BLE001
@@ -178,6 +187,8 @@ class MainWindow(QMainWindow):
 
 =======
 >>>>>>> main
+=======
+>>>>>>> merge/judge_introduction_branch
         self._blockly.load_placeholder(Path("assets") / "blockly" / "index.html")
         self._levels_list.clear()
 

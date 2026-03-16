@@ -50,7 +50,10 @@ powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
 - 問題如果屬於「怎麼加入專案、怎麼操作流程、怎麼遵守規範」，使用此 skill。
 - 問題如果屬於「先把專案跑起來」，優先讀 `docs/QUICKSTART.md`。
 - 問題如果屬於「環境、依賴、Wasm、Blockly vendor」，讀 `docs/contributing/environment_setup.md`。
+<<<<<<< HEAD
 - 問題如果屬於「正式 commit / PR / 驗證規則」，讀 `docs/contributing/developer_workflow.md`。
+=======
+>>>>>>> merge/judge_introduction_branch
 - 問題如果屬於「系統怎麼分層、功能該放哪裡」，改用 `project-architecture`。
 - 問題如果屬於「實際要怎麼改程式」，改用 `feature-implementation`。
 - 如果是開始實作前要判斷是否需要計畫文件，改用 `development-planning`。
