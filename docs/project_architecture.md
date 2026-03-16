@@ -1,107 +1,175 @@
-# 專案架構（Project Structure）
+# 專案架構
 
-- 更新日期：2026-03-06
-- 文件定位：本文件用於說明 Block2Python（Demo）專案的資料夾結構，以及各文件之間的依賴/引用關係，方便團隊協作與交接。
+- 更新日期：2026-03-14
+- 範圍：遊戲系統骨架重構後的目前專案結構
 
-## 1. 專案根目錄（Top-level）
+## 1. 儲存庫結構
 
-```
+```text
 Block2Python/
-  src/            # 主要 Python 程式碼（package）
-  assets/         # 靜態資源（關卡資料、Blockly web 檔等）
-  tools/          # 開發輔助腳本（setup、run、vendor）
-  tests/          # 測試（目前以 smoke/預留為主）
-  docs/           # 文件（需求、技術策略、計畫、規格、UML）
-  .block2python/  # 本機狀態/暫存（不進版控）
-  .venv/          # 開發用虛擬環境（不進版控）
+  assets/                     # runtime 資源：levels、game_content、blockly、wasm
+  docs/                       # 架構、計畫、規格、協作文件
+  src/block2python/           # Python 原始碼
+  tests/                      # 單元測試、整合測試、smoke tests
+  tools/                      # PowerShell 輔助腳本
+  .agent/ .agents/ .claude/ .codex/  # agent skills 與客戶端設定
 ```
 
-### 1.1 不進版控資料夾
+## 2. 原始碼結構
 
-- `.venv/`：每位開發者本機的 Python 虛擬環境（見 `docs/contributing.md`）
-- `.block2python/`：本機進度檔、下載/解壓暫存等（見 `docs/contributing.md`）
+目前的 source of truth 位於 `src/block2python/`。
 
-## 2. 文件資料夾（docs/）
+```text
+src/block2python/
+  analysis/       # AST 分析與分析 API
+  challenge/      # challenge 子系統：AppCore、judge factory、progress
+  clients/        # client 入口：PySide6 與 CLI
+  content/        # levels loader、game content loader、內容與 runtime 模型
+  contracts/      # 現有 level/judge 領域契約
+  game/           # GameSession、savegame、遊戲主流程控制
+  integration/    # 對外邊界：contracts、dispatcher、bridge、adapters
+  judge/          # judge 實作與 Wasm runner
 
+  ai/             # 預留 AI 相關 package
+  app/            # 舊路徑相容 shim
+  blockly/        # Blockly 相關 package hooks
+  game_content/   # content 層舊路徑相容 shim
+  ui/             # 現有 PySide6 實作
 ```
-docs/
-  README.md
-  requirements.md
-  technical_rationale.md
-  project_plan.md
-  development_timeline.md
-  contributing.md
-  development_plans/
-  specs/
-  uml/
+
+## 3. 目前架構模型
+
+目前專案遵守的邊界模型如下：
+
+```text
+clients -> integration -> game
+                      -> challenge
+                      -> content
+
+game -> challenge
+game -> content
+
+challenge -> judge / analysis / contracts
+content -> contracts
 ```
 
-### 2.1 文件角色與關係（建議閱讀順序）
+### 3.1 `challenge/`
 
-1) **需求（What）**：`docs/requirements.md`  
-定義 MVP scope、學習流程、功能需求與非功能需求。
+用途：
+- 負責單題提交流程與 challenge 級進度。
+- 包含 `AppCore`、`JudgeFactory` 與 progress store 實作。
 
-2) **技術策略（Why）**：`docs/technical_rationale.md`  
-說明分層架構與技術選型理由（不等同實作規格）。
+主要檔案：
+- `src/block2python/challenge/app_core.py`
+- `src/block2python/challenge/judge_factory.py`
+- `src/block2python/challenge/progress.py`
 
-3) **規格（Exact）**：`docs/specs/`  
-把跨層資料格式、schema、API 等細節獨立收斂（避免混進技術策略文件）。
+### 3.2 `content/`
 
-4) **UML（視覺化對齊）**：`docs/uml/system_architecture.md`  
-用元件圖對齊分層與資料流（對應技術策略文件的分層章節）。
+用途：
+- 負責從 `assets/levels/` 與 `assets/game_content/` 載入並組裝遊戲內容。
+- 持有 `GameSession` 會依賴的內容模型與 runtime helper。
 
-### 2.2 docs/ 子資料夾
+主要檔案：
+- `src/block2python/content/levels_loader.py`
+- `src/block2python/content/loader.py`
+- `src/block2python/content/models.py`
+- `src/block2python/content/runtime.py`
 
-- `docs/development_plans/`：更細的開發/引入計畫與驗證  
-  - `technical_introduction_plan.md`：建立期技術引入計畫  
-  - `technical_introduction_plan_verification.md`：建立期完成驗證與狀態說明
+### 3.3 `game/`
 
-- `docs/specs/`：可被實作依賴的「格式/規格」文件  
-  - `levels_schema_v0_1.md`：關卡檔 schema（v0.1，建立期寬鬆版）  
-  - `block_json_schema_v0_1.md`：Block JSON schema（v0.1，建立期）
+用途：
+- 負責遊戲層級的流程控制與 session state。
+- `GameSession` 是預定的遊戲應用層主入口。
+- `SaveGame` 應屬於這一層，不屬於 challenge 子系統。
 
-- `docs/uml/`：架構圖與圖檔  
-  - `system_architecture.md`：Mermaid 元件圖  
-  - `system_architecture.png`：輸出圖片版
+主要檔案：
+- `src/block2python/game/session.py`
+- `src/block2python/game/savegame.py`
 
-## 3. 程式碼（src/）
+### 3.4 `integration/`
 
-主要 package：`src/block2python/`
+用途：
+- 作為 Godot 等外部 consumer 的正式邊界。
+- 未來承接 `GameState`、`PlayerAction`、序列化、dispatch 與 bridge adapters。
 
-對應分層（與 `docs/technical_rationale.md`、`docs/uml/system_architecture.md` 一致）：
+目前結構：
 
-- `src/block2python/app/`：應用整合層（關卡流程、解鎖、提交管線）
-- `src/block2python/ui/`：桌面 UI（PySide6 Widgets + WebEngine）
-- `src/block2python/contracts/`：資料契約（跨層資料結構）
-- `src/block2python/analysis/`：AST 分析（建立期最小規則 + 可擴充）
-- `src/block2python/judge/`：判題介面與 stub（真實 sandbox/judge 後續替換）
-- `src/block2python/blockly/`：預留（未來可放 Blockly adapter/抽象）
-- `src/block2python/ai/`：預留（Phase 5）
+```text
+src/block2python/integration/
+  contracts/
+  service/
+  bridge_stdio/
+  godot_adapter/
+```
 
-## 4. 資料與靜態資源（assets/）
+目前狀態：
+- 已建立骨架。
+- 在 contract 與 bridge 開工前，會刻意保持輕量。
 
-- `assets/levels/`：關卡資料（由程式載入）
-  - `index.json`：關卡索引
-  - `*.json`：單關卡內容（對應 `docs/specs/levels_schema_v0_1.md`）
-- `assets/blockly/`：WebEngine 載入的 web 資源
-  - `index.html`：建立期 placeholder + workspace（vendor 後可用）
-  - `vendor/`：Blockly dist 檔（目前不進版控；由工具腳本擺放）
+### 3.5 `clients/`
 
-## 4.1 執行期資料與狀態（Runtime State）
+用途：
+- 放 consumer 端入口與 adapter。
+- PySide6 與 CLI 在架構上屬於 client，不是遊戲規則來源。
 
-以下資料屬於系統執行期狀態，不建議放在 `requirements.md`，而應在架構/資料設計文件中管理：
+目前結構：
 
-- 關卡解鎖狀態
-- 章節／任務進度
-- 已讀對話或劇情節點狀態
-- 關卡路線的選擇結果或節點進度
+```text
+src/block2python/clients/
+  cli/
+  pyside6/
+```
 
-目前本機狀態主要存放在 `.block2python/`（見 `docs/contributing.md`），後續若資料結構擴充，應再獨立補充 schema 或狀態格式文件。
+## 4. 舊路徑相容 package
 
-## 5. 工具腳本（tools/）
+以下 package 仍然存在，但現在應視為相容層或舊實作：
 
-- `tools/setup_dev_env.ps1`：建立 `.venv` 並安裝依賴
-- `tools/run_demo.ps1`：跑 CLI smoke
-- `tools/run_ui.ps1`：啟動 UI smoke
-- `tools/reset_progress.ps1`：清除本機進度
-- `tools/vendor_blockly.ps1` / `tools/vendor_blockly_from_dir.ps1`：擺放 Blockly dist 到 `assets/blockly/vendor/`
+- `app/`
+  - 轉發或 re-export 到新骨架。
+  - 讓既有 import 在遷移期間仍可運作。
+- `game_content/`
+  - 轉發到 `content/` 的相容層。
+- `ui/`
+  - 現有 PySide6 實作仍保留在這裡。
+  - `clients/pyside6/` 目前是 wrapper，而不是整批取代它。
+
+遷移原則：
+- 新功能應優先落在 `challenge/`、`content/`、`game/`、`integration/`、`clients/`。
+- 舊 package 只應在維持相容或完成遷移時修改。
+
+## 5. 資源結構
+
+```text
+assets/
+  blockly/          # 內嵌 Blockly 頁面與 vendor 資源
+  game_content/     # quest / node / scene / challenge 內容
+  levels/           # level index 與各 level 規格
+  wasm/             # python.wasm 與相關執行資源
+```
+
+補充：
+- `assets/levels/` 仍是 challenge 執行所使用的 level 規格來源。
+- `assets/game_content/` 是 quest/node 流程所用的遊戲內容來源。
+- `assets/wasm/` 供 Wasm judge 路徑使用。
+
+## 6. 工具與測試
+
+`tools/` 內包含環境初始化、smoke run、UI 啟動與 Wasm 驗證腳本。
+
+`tests/` 目前主要覆蓋：
+- challenge 流程
+- levels 載入
+- game content 載入
+- `GameSession` 流程
+- 骨架與舊 import 相容性
+
+## 7. 架構約束
+
+以下規則代表目前預期的架構方向：
+
+- Godot 不應直接 import `game/`、`challenge/` 或 `content/`。
+- 外部前端應依賴 `integration/`。
+- `GameSession` 是遊戲流程主入口。
+- `AppCore` 維持 challenge 子系統定位，不應膨脹成整個遊戲總控。
+- PySide6 是開發 client 與過渡前端，不是長期產品邊界。

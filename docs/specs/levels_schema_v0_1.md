@@ -1,130 +1,225 @@
-# 關卡檔 Schema 規範（v0.1 / 寬鬆版）
+# 關卡檔 Schema 規格（v0.1）
 
-- 文件版本：0.1
-- 建立日期：2026-03-04
-- 適用範圍：Demo / 初期建立階段
-- 規範策略：**先與程式行為一致（寬鬆載入）**，等初期階段完成後再改成嚴格驗證（例如多餘欄位/型別錯誤即報錯）。
-- 來源對齊（source of truth）：`src/block2python/app/levels_loader.py`
+- 文件版本：0.2
+- 更新日期：2026-03-15
+- 適用範圍：目前 `assets/levels/` 的 Godot vertical slice 題庫
+- Source of truth：`src/block2python/content/levels_loader.py`
 
-## 1. 目錄結構
+## 1. 目前採用的檔案格式
 
-預設資料夾：`assets/levels/`
+目前專案將 `assets/levels/` 統一為 YAML 題庫：
 
-必要檔案：
+- `assets/levels/index.yaml`：關卡索引
+- `assets/levels/<level>.yaml`：單一關卡定義
+- `assets/levels/cases/**`：`.in/.out` 測資檔
 
-- `assets/levels/index.json`：關卡索引（列出所有關卡檔）
-- `assets/levels/<level>.json`：單一關卡內容
+`levels_loader` 仍保留對 `.json` 的相容讀取能力，主要用於測試或過渡資料；但目前 repo 內的正式題庫來源以 YAML 為主。
 
-可選：
+## 2. 索引檔規格
 
-- 也可透過環境變數 `BLOCK2PYTHON_LEVELS_DIR` 指定關卡目錄（由程式讀取）
+檔案：`assets/levels/index.yaml`
 
-## 2. index.json 規格
+### 2.1 必填欄位
 
-檔案：`assets/levels/index.json`
-
-### 2.1 JSON 結構
-
-必要欄位：
-
-- `levels`：array
-  - 每個元素為 object，必要欄位：
-    - `id`：string（對應關卡 id）
-    - `file`：string（相對於 `assets/levels/` 的檔名）
-
-可選欄位：
-
-- `schema_version`：string（目前僅作為文件/資料版本註記，程式不依此做邏輯分支）
+- `levels`：陣列
+  - 每個元素為 object
+  - `id`：關卡 id
+  - `file`：相對於 `assets/levels/` 的檔名
 
 ### 2.2 範例
 
-參考：`assets/levels/index.json`
-
-```json
-{
-  "schema_version": "0.1",
-  "levels": [
-    { "id": "demo-1", "file": "demo-1.json" },
-    { "id": "demo-2", "file": "demo-2.json" }
-  ]
-}
+```yaml
+levels:
+  - id: demo-basic-io-hello
+    file: demo-basic-io-hello.yaml
+  - id: practice-basic-io-sum
+    file: practice-basic-io-sum.yaml
+  - id: practice-basic-io-double
+    file: practice-basic-io-double.yaml
 ```
 
-## 3. 單關卡 level.json 規格
+### 2.3 Loader 行為
 
-檔案：`assets/levels/<level>.json`
+- 先從 `BLOCK2PYTHON_LEVELS_DIR` 指向的目錄讀取
+- 若未設定，預設讀取 `assets/levels/`
+- 索引檔搜尋順序為 `index.json` → `index.yaml` → `index.yml`
+- 目前 repo 已只保留 `index.yaml`
 
-### 3.1 必要欄位（缺少會載入失敗）
+## 3. 關卡檔規格
+
+檔案：`assets/levels/<level>.yaml`
+
+### 3.1 必填欄位
 
 - `level_id`：string
 - `title`：string
 
-### 3.2 可選欄位（缺少會使用預設值）
+### 3.2 常用欄位
 
-基本資訊：
+- `chapter_id`：string
+- `quest_id`：string
+- `order_index`：int
+- `prompt`：string
+- `learning_markdown`：string
+- `story_intro_markdown`：string
+- `story_outro_markdown`：string
+- `prerequisite_level_ids`：array[string]
+- `next_level_ids`：array[string]
+- `block_schema_version`：string
+- `metadata`：object
 
-- `prompt`：string（預設 `""`）
-- `chapter_id`：string|null（預設 `null`）
-- `quest_id`：string|null（預設 `null`）
-- `order_index`：int|string|null（可轉 int；預設 `null`）
+### 3.3 Judge 與 testcase 欄位
 
-教學/劇情內容（先直接內嵌文字）：
+- `testcases`：明確列出測資
+- `testcase_dir`：用資料夾自動掃描 `.in/.out`
+- `testcase_glob`：自動掃描時的 pattern，預設 `*.in`
+- `judge_policy.time_limit_ms`
+- `judge_policy.memory_limit_kb`
+- `judge_policy.memory_limit_mb`
+- `judge_policy.output_normalization.*`
 
-- `learning_markdown`：string（預設 `""`）
-- `story_intro_markdown`：string（預設 `""`）
-- `story_outro_markdown`：string（預設 `""`）
+### 3.4 testcase 支援的三種形式
 
-解鎖流程：
+#### 形式 A：inline testcase
 
-- `prerequisite_level_ids`：array[string|int]（預設 `[]`；載入後轉為 tuple[str,...]）
-- `next_level_ids`：array[string|int]（預設 `[]`；載入後轉為 tuple[str,...]）
+```yaml
+testcases:
+  - name: basic
+    stdin: |
+      1 2
+    expected_stdout: |
+      3
+```
 
-測資：
+#### 形式 B：檔案引用
 
-- `testcases`：array（預設 `[]`）
-  - 每個 testcase 為 object，可選欄位：
-    - `name`：string（預設 `null`）
-    - `stdin`：string（預設 `""`）
-    - `expected_stdout`：string（預設 `""`）
+```yaml
+testcases:
+  - name: case-01
+    stdin_file: cases/basic-io-hello/01.in
+    expected_stdout_file: cases/basic-io-hello/01.out
+```
 
-Blockly schema（預留）：
+#### 形式 C：資料夾自動掃描
 
-- `block_schema_version`：string|null（預設 `null`）
-  - 若尚未定版，也允許先寫在 `metadata`（例如 `metadata["block_schema_version"]`）避免過早綁死。
+```yaml
+testcase_dir: cases/basic-io-hello
+testcase_glob: "*.in"
+```
 
-擴充欄位：
+Loader 會將 `01.in` 對應到 `01.out`。
 
-- `metadata`：object（預設 `{}`）
-  - 允許放任何自訂 key，程式會原樣帶入 `LevelSpec.metadata`
+## 4. Judge policy 規格
 
-#### 3.2.1 建立期：analysis 規則（metadata hook）
+### 4.1 範例
 
-建立期可以先用 `metadata.analysis` 提供最小 AST 規則（不算正式 schema 欄位；未來可升級為一級欄位或獨立規格）。
+```yaml
+judge_policy:
+  time_limit_ms: 1000
+  memory_limit_mb: 64
+  output_normalization:
+    strip_trailing_whitespace: true
+    normalize_newlines_to_lf: true
+    strip_trailing_newline: true
+```
 
-- `metadata.analysis.required_keywords`：array[string]
-- `metadata.analysis.forbidden_keywords`：array[string]
+### 4.2 欄位說明
 
-若未提供或格式不正確，程式會忽略並使用預設（不額外檢查）。
+- `time_limit_ms`：整數，至少為 1
+- `memory_limit_kb`：整數，可選
+- `memory_limit_mb`：整數，可選；loader 會轉為 `memory_limit_kb`
+- `output_normalization.strip_trailing_whitespace`
+- `output_normalization.normalize_newlines_to_lf`
+- `output_normalization.strip_trailing_newline`
 
-### 3.3 目前「寬鬆載入」的注意事項
+## 5. Analysis metadata hook
 
-- 只有上述欄位會被載入；不在清單中的欄位目前會被忽略（不會自動併入 `metadata`）。
-- `testcases` 內的 `stdin/expected_stdout` 若缺少，會被當成空字串。
+`metadata.analysis` 目前可驅動 AST 分析規則：
 
-### 3.4 dev-only（Demo 期繞過驗證用）
+```yaml
+metadata:
+  analysis:
+    required_keywords:
+      - input
+    forbidden_keywords:
+      - import
+```
 
-以下欄位屬於 Demo 期 stub 設定，**不是最終產品規格的一部分**，目前建議放在 `metadata`：
+支援欄位：
 
-- `metadata.stub_judge`：供 `StubJudge` 使用
-  - `status`：`"AC"|"WA"|"TLE"|"RE"`
-  - `summary`：string
-  - `fail_case_index`：number|string（可選；指定哪一筆測資視為失敗，用於展示 case diff）
-  - `actual_stdout_by_case`：array[string]（可選；指定每筆測資的實際輸出，用於展示 diff）
-- `metadata.stub_analysis`：供 `StubAnalyzer` 使用
-  - `status`：`"PASS"|"FAIL"|"SYNTAX_ERROR"`
-  - `summary`：string
-  - `violations`：array（可選；每項建議至少含 `rule_id`、`message`、`severity`）
+- `metadata.analysis.required_keywords`
+- `metadata.analysis.forbidden_keywords`
 
-### 3.5 範例
+## 6. Prototype / dev-only metadata
 
-參考：`assets/levels/demo-1.json`、`assets/levels/demo-2.json`
+目前題庫仍保留 prototype / vertical-slice 標記，因此 `metadata` 中可出現下列 dev-only 欄位：
+
+- `metadata.stage`
+- `metadata.track`
+- `metadata.stub_judge`
+- `metadata.stub_analysis`
+- `metadata.block_schema_version_note`
+
+其中：
+
+- `metadata.stub_judge.status`：`AC` / `WA` / `TLE` / `RE`
+- `metadata.stub_judge.summary`：顯示於 StubJudge 回饋
+- `metadata.stub_analysis.status`：`PASS` / `FAIL` / `SYNTAX_ERROR`
+- `metadata.stub_analysis.summary`
+
+這些欄位屬於過渡用途，不應視為未來正式課程資料格式的穩定契約。
+
+## 7. 範例
+
+### 7.1 `demo-basic-io-hello.yaml`
+
+```yaml
+level_id: demo-basic-io-hello
+title: 示範關：輸入名字並打招呼
+chapter_id: basic-io
+order_index: 100
+prompt: |
+  讀取一行名字，輸出：
+  Hello, <名字>
+next_level_ids:
+  - practice-basic-io-sum
+testcases:
+  - name: hello-byte
+    stdin_file: cases/basic-io-hello/01.in
+    expected_stdout_file: cases/basic-io-hello/01.out
+judge_policy:
+  time_limit_ms: 10000
+  memory_limit_mb: 384
+metadata:
+  stage: godot-vertical-slice
+  track: quest-map
+```
+
+### 7.2 `practice-basic-io-sum.yaml`
+
+```yaml
+level_id: practice-basic-io-sum
+title: 練習關：兩數相加
+chapter_id: basic-io
+order_index: 101
+prerequisite_level_ids:
+  - demo-basic-io-hello
+next_level_ids:
+  - practice-basic-io-double
+testcases:
+  - name: basic
+    stdin_file: cases/basic-io-sum/01.in
+    expected_stdout_file: cases/basic-io-sum/01.out
+judge_policy:
+  time_limit_ms: 10000
+  memory_limit_mb: 384
+metadata:
+  stage: godot-vertical-slice
+  track: quest-map
+```
+
+## 8. 相關文件
+
+- `docs/QUICKSTART.md`
+- `docs/contributing/environment_setup.md`
+- `tests/test_levels_loader.py`

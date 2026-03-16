@@ -1,6 +1,6 @@
-def main() -> int:
-    from block2python.contracts import Submission
+from block2python.clients.cli.main import main
 
+<<<<<<< HEAD
     from .core import AppCore
     from .demo_levels import demo_levels
     from .judge_factory import build_judge_from_env
@@ -31,3 +31,6 @@ def __progress_path():
     from pathlib import Path
 
     return Path(".block2python") / "progress.json"
+=======
+__all__ = ["main"]
+>>>>>>> main

@@ -1,0 +1,14 @@
+scene_id: scene-result-fail
+title: Repair Failed
+dialogue_blocks:
+  - speaker: Byte
+    text: The repair did not hold. We need another attempt.
+    portrait_id: byte-default
+    expression: sad
+    emphasis: alert
+  - speaker: Byte
+    text: Review the failing cases, then retry after the cooldown.
+    portrait_id: byte-default
+    expression: explain
+    emphasis: normal
+next_action: start_practice_cooldown

@@ -1,102 +1,144 @@
-# 系統架構圖（System Architecture Diagram）
+# 系統架構圖
 
-> 依據 [技術策略說明文件](../technical_rationale.md) v0.1 繪製  
-> 更新日期：2026-03-03
+> 更新日期：2026-03-14
+> 相關文件：[technical_rationale.md](../technical_rationale.md)
 
-## 系統架構圖（圖片版）
+## 架構總覽
 
-![Block2Python 系統架構圖](system_architecture.png)
+![Block2Python system architecture](system_architecture.png)
 
-## 分層元件圖（Layered Component Diagram，互動版）
+## 分層元件圖
 
 ```mermaid
 graph TB
-    subgraph APP["應用整合層（Application Integration Layer）\nPySide6 / Qt6"]
+    subgraph CLIENTS["Clients Layer"]
         direction TB
-        AppCtrl["AppController\n（關卡流程 / 頁面狀態管理）"]
-        UI_Panel["UI Panels\n（關卡選單 / 回饋面板 / 解鎖流程）"]
-        AppCtrl <--> UI_Panel
+        PySide6["PySide6 Client"]
+        CLI["CLI Demo Client"]
+        Godot["Future Godot Client"]
     end
 
-    subgraph VIS["視覺化編程層（Visual Programming Layer）\nBlockly + QWebEngineView"]
+    subgraph INTEGRATION["Integration Layer"]
         direction TB
-        BlocklyEmbed["BlocklyEmbed\n（QWebEngineView 嵌入）"]
-        BlockDef["CustomBlockDefs\n（關卡積木定義）"]
-        BlockGen["Block → Python Generator\n（積木程式碼生成）"]
-        BlocklyEmbed --> BlockDef
-        BlocklyEmbed --> BlockGen
+        Contracts["Game Contracts\nGameState / PlayerAction"]
+        Dispatcher["Dispatch Service"]
+        Bridge["Bridge Adapter\nstdio / future transport"]
+        GodotAdapter["Godot Adapter"]
+        Contracts --> Dispatcher
+        Dispatcher --> Bridge
+        Dispatcher --> GodotAdapter
     end
 
-    subgraph PY["Python 編程層（Python Programming Layer）\nPySide6 Editor Widget"]
+    subgraph GAME["Game Layer"]
         direction TB
-        Editor["CodeEditor\n（程式碼輸入 / 編輯）"]
-        Submitter["SubmitHandler\n（送出 / 執行觸發）"]
-        FeedbackView["FeedbackView\n（結果 / 錯誤 / 提示呈現）"]
-        Editor --> Submitter
-        Submitter --> FeedbackView
+        Session["GameSession"]
+        SaveGame["SaveGame"]
+        Runtime["Game Runtime"]
+        Session --> SaveGame
+        Session --> Runtime
     end
 
-    subgraph ANALYSIS["程式分析層（Program Analysis Layer）\nPython ast"]
+    subgraph CONTENT["Content Layer"]
         direction TB
-        ASTParser["ASTParser\n（Python → AST）"]
-        StructChecker["StructureChecker\n（結構規則檢查）"]
-        BlockMapper["Block ↔ AST Mapper\n（積木結構映射）"]
-        DiffProducer["DiffProducer\n（差異資訊產出）"]
-        ASTParser --> StructChecker
-        ASTParser --> BlockMapper
-        StructChecker --> DiffProducer
-        BlockMapper --> DiffProducer
+        Levels["Levels Loader"]
+        GameContent["Game Content Loader"]
+        Models["Content Models / Assembly"]
+        Levels --> Models
+        GameContent --> Models
     end
 
-    subgraph EXEC["程式執行與安全層（Execution & Security Layer）\nPython Sandbox"]
+    subgraph CHALLENGE["Challenge Layer"]
         direction TB
-        Sandbox["SandboxRunner\n（隔離執行 / 資源限制 / 超時）"]
-        TestJudge["TestcaseJudge\n（測資比對 / 正規化）"]
-        JudgeResult["JudgeResult\n（AC / WA / 差異回傳）"]
-        Sandbox --> TestJudge
-        TestJudge --> JudgeResult
+        AppCore["AppCore"]
+        Progress["Progress Store"]
+        JudgeFactory["Judge Factory"]
+        AppCore --> Progress
+        AppCore --> JudgeFactory
     end
 
-    subgraph AI["AI 語意輔助層（Semantic Assistant Layer）\nGemini API + Agent Skill"]
+    subgraph EXEC["Execution Layer"]
         direction TB
-        SkillExtractor["AgentSkill\n（教案綱要提取）"]
-        HintGen["HintGenerator\n（提示語意生成）"]
-        ErrExplainer["ErrorExplainer\n（錯誤說明 / 引導）"]
-        SkillExtractor --> HintGen
-        DiffInput(["DiffInput\n（差異資訊輸入）"])
-        DiffInput --> HintGen
-        DiffInput --> ErrExplainer
+        Analyzer["Analysis"]
+        Judge["Judge"]
+        Wasm["Wasm Runner"]
+        Judge --> Wasm
     end
 
-    %% 跨層資料流
-    APP -->|"載入關卡\n啟動積木環境"| VIS
-    APP -->|"啟動 Python 編輯"| PY
-    VIS -->|"Block JSON / 生成程式碼"| ANALYSIS
-    PY -->|"Python 原始碼"| ANALYSIS
-    PY -->|"Python 原始碼"| EXEC
-    ANALYSIS -->|"結構差異 / AST 結果"| AI
-    EXEC -->|"AC / WA / 執行差異"| AI
-    EXEC -->|"判定結果"| PY
-    AI -->|"語意提示 / 引導訊息"| PY
-    ANALYSIS -->|"結構驗證結果"| APP
-    EXEC -->|"最終判定"| APP
+    CLIENTS --> INTEGRATION
+    INTEGRATION --> GAME
+    GAME --> CONTENT
+    GAME --> CHALLENGE
+    CHALLENGE --> Analyzer
+    CHALLENGE --> Judge
 ```
 
-## 各層職責摘要
+## Action Flow
+```mermaid
+sequenceDiagram
+    participant Client as Client / Future Godot
+    participant Bridge as bridge_stdio
+    participant Contracts as GameState / PlayerAction
+    participant Dispatcher as dispatch()
+    participant Session as GameSession
+    participant Core as AppCore / Judge
 
-| 層別 | 核心技術 | 主要職責 |
-|------|----------|----------|
-| 應用整合層 | PySide6 / Qt6 | 關卡流程控制、頁面狀態管理、模組整合 |
-| 視覺化編程層 | Blockly + QWebEngineView | 積木操作、自訂積木定義、積木→程式碼生成 |
-| Python 編程層 | PySide6 Editor Widget | 程式碼編輯送出、結果與回饋呈現 |
-| 程式分析層 | Python `ast` | AST 解析、結構規則檢查、積木↔AST 映射、差異產出 |
-| 程式執行與安全層 | Python Sandbox | 隔離執行、測資比對、AC/WA 判定、超時控制 |
-| AI 語意輔助層 | Gemini API + Agent Skill | 差異語意轉換、學習提示生成、錯誤說明引導 |
+    Client->>Bridge: JSON request
+    Bridge->>Contracts: deserialize PlayerAction
+    Contracts-->>Bridge: PlayerAction
+    Bridge->>Dispatcher: dispatch(session, action)
 
-## 資料流說明
+    alt advance
+        Dispatcher->>Session: advance()
+    else submit_level
+        Dispatcher->>Session: submit_current_level(...)
+        Session->>Core: submit(...)
+        Core-->>Session: SubmitOutcome
+    end
 
-1. **積木 → 分析**：Blockly 輸出 Block JSON 或產生 Python 程式碼，送至程式分析層進行結構映射與驗證。
-2. **Python → 執行**：學生送出程式碼後，沙盒執行並以測資比對取得 AC/WA 判定。
-3. **差異 → AI 引導**：程式分析與執行層產出的結構差異與執行錯誤，輸入 AI 層轉為可理解之學習提示。
-4. **提示 → 回饋呈現**：AI 語意提示回傳至 Python 編程層的回饋面板，呈現給學生。
-5. **流程控制**：應用整合層統籌關卡解鎖與流程推進，接收驗證結果後決定是否進入下一關。
+    Session->>Contracts: current_game_state()
+    Contracts-->>Bridge: GameState
+    Bridge->>Contracts: serialize GameState
+    Contracts-->>Bridge: JSON-ready state
+    Bridge-->>Client: JSON response
+```
+
+- client 只送 `PlayerAction`
+- dispatcher 只做 action 到 session 的轉接
+- `GameSession` 負責真正的流程推進
+- `bridge_stdio` 只負責 JSON stdin/stdout 運輸
+
+## Package 對照
+
+| Package | 角色 |
+|---------|------|
+| `block2python.clients` | PySide6 與 CLI consumer |
+| `block2python.integration` | 對外 contract 與 bridge 邊界 |
+| `block2python.game` | 遊戲主流程控制 |
+| `block2python.content` | levels 與 game content 載入 |
+| `block2python.challenge` | challenge submit 與 progress 子系統 |
+| `block2python.analysis` | 靜態分析服務 |
+| `block2python.judge` | judge 實作與 Wasm 執行 |
+
+## 目前狀態
+
+目前已完成：
+- `challenge/`、`content/`、`game/`、`integration/`、`clients/` 骨架
+- `game/` 內的 `GameSession`
+- `challenge/` 內的 `AppCore`
+- `content/` 內的 loaders
+- `clients/` 內的 PySide6 與 CLI wrapper
+- `app/` 與 `game_content/` 的相容 shim
+
+目前僅預留、尚未完整實作：
+- 正式 `integration/contracts` models
+- dispatcher logic
+- stdio bridge server
+- Godot adapter 行為
+
+## 架構解讀
+
+- `GameSession` 是預定的遊戲主入口。
+- `AppCore` 是 challenge 子系統，不是整個遊戲總控。
+- `integration/` 是外部前端應依賴的正式邊界。
+- `clients/` 是 consumer，不應定義遊戲模型本身。
+- `app/`、`game_content/`、`ui/` 是過渡期保留的相容路徑。

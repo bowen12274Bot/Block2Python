@@ -105,6 +105,7 @@ class TestWasmJudgeSmoke:
 @pytest.mark.requires_wasm
 @pytest.mark.integration
 class TestWasmJudgeYAMLLevels:
+<<<<<<< HEAD
     def test_load_and_judge_add_two_numbers(self, wasm_judge: WasmJudge):
         levels = load_levels(Path("assets/levels"))
         level = levels.get("add-two-numbers")
@@ -114,12 +115,24 @@ class TestWasmJudgeYAMLLevels:
         submission = Submission(
             level_id=level.level_id,
             python_code="a, b = map(int, input().split())\nprint(a + b)",
+=======
+    def test_load_and_judge_demo_basic_io_hello(self, wasm_judge: WasmJudge):
+        levels = load_levels(Path("assets/levels"))
+        level = levels.get("demo-basic-io-hello")
+        if level is None:
+            pytest.skip("demo-basic-io-hello level id not found")
+
+        submission = Submission(
+            level_id=level.level_id,
+            python_code="name = input()\nprint('Hello, ' + name)",
+>>>>>>> main
         )
         result = wasm_judge.judge(submission, level)
 
         assert result.status == JudgeStatus.AC
         assert all(case.status == "PASS" for case in result.case_results)
 
+<<<<<<< HEAD
     def test_load_and_judge_fizzbuzz_simple(self, wasm_judge: WasmJudge):
         levels = load_levels(Path("assets/levels"))
         level = levels.get("fizzbuzz-simple")
@@ -139,6 +152,17 @@ class TestWasmJudgeYAMLLevels:
                 "else:\n"
                 "    print(n)\n"
             ),
+=======
+    def test_load_and_judge_practice_basic_io_sum(self, wasm_judge: WasmJudge):
+        levels = load_levels(Path("assets/levels"))
+        level = levels.get("practice-basic-io-sum")
+        if level is None:
+            pytest.skip("practice-basic-io-sum level id not found")
+
+        submission = Submission(
+            level_id=level.level_id,
+            python_code="a = int(input())\nb = int(input())\nprint(a + b)",
+>>>>>>> main
         )
         result = wasm_judge.judge(submission, level)
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from __future__ import annotations
 
 import os
@@ -58,3 +59,8 @@ def _parse_bool(raw: str, *, default: bool) -> bool:
     if text in {"0", "false", "no", "off"}:
         return False
     return default
+=======
+from block2python.challenge.judge_factory import JudgeBuildError, build_judge_from_env
+
+__all__ = ["JudgeBuildError", "build_judge_from_env"]
+>>>>>>> main
