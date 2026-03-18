@@ -43,7 +43,7 @@ func _ready() -> void:
 	challenge_screen.initialize(DEFAULT_CHALLENGE_CODE)
 	map_screen.show_map(QuestMapViewModelMapperScript.empty_map_view("Click Start Bridge, then Reset to load the current quest map."))
 	map_screen.set_status("Status: idle")
-	map_screen.set_note("Use Reset to load the latest quest state. The old basic-io quest slice is paused while the new map-level nodes are being integrated.")
+	map_screen.set_note("Use Reset to load the latest quest state. Route steps now come from bridge map_route data.")
 	map_screen.set_bridge_running(false)
 	map_screen.set_can_advance(false)
 	map_screen.set_current_node_enterable(false)
@@ -97,11 +97,13 @@ func _on_group_route_requested(group_view: Dictionary) -> void:
 	if status_key == "locked":
 		map_screen.set_note("This group is still locked.")
 		return
-	if status_key == "current":
+
+	var preferred_step: Dictionary = _preferred_route_step(group_view)
+	if status_key == "current" and not preferred_step.is_empty() and _step_matches_live_page(preferred_step):
 		_on_open_current_node_requested()
 		return
 
-	var scene_view: Dictionary = _build_group_route_scene(group_view)
+	var scene_view: Dictionary = _build_group_route_scene(group_view, preferred_step)
 	scene_screen.show_scene(scene_view)
 	scene_screen.set_status("Status: group route preview")
 	scene_screen.set_can_advance(false)
@@ -128,7 +130,7 @@ func _on_debug_toggled(debug_visible: bool) -> void:
 func _on_bridge_started() -> void:
 	map_screen.set_status("Status: bridge running")
 	map_screen.set_bridge_running(true)
-	map_screen.set_note("Bridge started. Press Reset to fetch the current quest state.")
+	map_screen.set_note("Bridge started. Press Reset to fetch current state.")
 	response_text.text = "Bridge started. Click Reset to fetch current state."
 
 
@@ -173,11 +175,11 @@ func _render_map_view(map_view: Dictionary, state: Dictionary, view_model: Dicti
 	map_screen.set_can_advance(can_advance)
 	map_screen.set_current_node_enterable(can_open)
 	if can_open:
-		map_screen.set_note("Open Current Node to enter the active story or challenge page. The map reflects the live quest state.")
+		map_screen.set_note("Open Current Node to enter the active story or challenge page. The map now reflects live route step state.")
 	elif can_advance:
-		map_screen.set_note("This node has no standalone page yet. Use Advance to move to the next story node.")
+		map_screen.set_note("Current route step has no standalone page yet. Use Advance to move forward.")
 	else:
-		map_screen.set_note("Current node cannot be opened as a separate page.")
+		map_screen.set_note("Current route step cannot be opened as a separate page.")
 
 
 func _render_flow_views(view_model: Dictionary) -> void:
@@ -256,7 +258,35 @@ func _has_challenge_payload(state: Dictionary) -> bool:
 	return false
 
 
-func _build_group_route_scene(group_view: Dictionary) -> Dictionary:
+func _preferred_route_step(group_view: Dictionary) -> Dictionary:
+	var demo_slot_variant: Variant = group_view.get("demo_slot", {})
+	if demo_slot_variant is Dictionary:
+		var demo_slot: Dictionary = demo_slot_variant
+		var primary_step_variant: Variant = demo_slot.get("primary_step", {})
+		if primary_step_variant is Dictionary and not primary_step_variant.is_empty():
+			return primary_step_variant
+	var practice_slot_variant: Variant = group_view.get("practice_slot", {})
+	if practice_slot_variant is Dictionary:
+		var practice_slot: Dictionary = practice_slot_variant
+		var primary_step_variant: Variant = practice_slot.get("primary_step", {})
+		if primary_step_variant is Dictionary and not primary_step_variant.is_empty():
+			return primary_step_variant
+	return {}
+
+
+func _step_matches_live_page(step: Dictionary) -> bool:
+	if _state_store == null or not _state_store.has_state():
+		return false
+	var state: Dictionary = _state_store.get_state()
+	var target_page: String = str(step.get("target_page", "map"))
+	if target_page == "scene":
+		return _has_scene_payload(state)
+	if target_page == "challenge":
+		return _has_challenge_payload(state)
+	return false
+
+
+func _build_group_route_scene(group_view: Dictionary, preferred_step: Dictionary) -> Dictionary:
 	var body_lines: Array[String] = []
 	body_lines.append("Status: %s" % str(group_view.get("status_label", "Unknown")))
 	body_lines.append(str(group_view.get("progress_label", "")))
@@ -264,13 +294,14 @@ func _build_group_route_scene(group_view: Dictionary) -> Dictionary:
 	if current_label != "":
 		body_lines.append(current_label)
 
-	var node_titles: Variant = group_view.get("node_titles", [])
-	if node_titles is Array and not node_titles.is_empty():
-		body_lines.append("Flow nodes:")
-		for node_title in node_titles:
-			body_lines.append("- %s" % str(node_title))
-	else:
-		body_lines.append("This group is currently a map placeholder with no concrete nodes attached.")
+	_append_slot_section(body_lines, group_view.get("demo_slot", {}))
+	body_lines.append("")
+	_append_slot_section(body_lines, group_view.get("practice_slot", {}))
+
+	if not preferred_step.is_empty():
+		body_lines.append("")
+		body_lines.append("Selected step: %s [%s]" % [str(preferred_step.get("title", "Step")), str(preferred_step.get("status_label", "Unknown"))])
+		body_lines.append("Target page: %s" % str(preferred_step.get("target_page", "map")))
 
 	body_lines.append("")
 	body_lines.append("This preview route is local to the Godot client. It does not change the bridge GameState.")
@@ -281,3 +312,23 @@ func _build_group_route_scene(group_view: Dictionary) -> Dictionary:
 		"title": str(group_view.get("title", "Group Route")),
 		"body": "\n".join(body_lines),
 	}
+
+
+func _append_slot_section(body_lines: Array[String], slot_variant: Variant) -> void:
+	if not (slot_variant is Dictionary):
+		return
+	var slot: Dictionary = slot_variant
+	if slot.is_empty():
+		return
+	body_lines.append("%s [%s | %s]:" % [str(slot.get("title", "Slot")), str(slot.get("status_label", "Unknown")), str(slot.get("progress_label", "0 / 0"))])
+	var route_steps_variant: Variant = slot.get("route_steps", [])
+	if route_steps_variant is Array:
+		for step in route_steps_variant:
+			if step is Dictionary:
+				body_lines.append("- %s [%s]" % [str(step.get("title", "Step")), str(step.get("status_label", "Unknown"))])
+	var practice_levels_variant: Variant = slot.get("practice_levels", [])
+	if practice_levels_variant is Array and not practice_levels_variant.is_empty():
+		body_lines.append("Practice Levels:")
+		for level_variant in practice_levels_variant:
+			if level_variant is Dictionary:
+				body_lines.append("- %s [%s]" % [str(level_variant.get("title", "Level")), str(level_variant.get("status_label", "Unknown"))])

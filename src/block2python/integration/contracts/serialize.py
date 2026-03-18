@@ -44,6 +44,23 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "judge_summary": state.last_submission.judge_summary,
         }
 
+    map_route = None
+    if state.map_route is not None:
+        map_route = {
+            "route_id": state.map_route.route_id,
+            "quest_id": state.map_route.quest_id,
+            "title": state.map_route.title,
+            "groups": [
+                {
+                    "group_id": group.group_id,
+                    "title": group.title,
+                    "demo_route": [_serialize_map_route_step(step) for step in group.demo_route],
+                    "practice_route": [_serialize_map_route_step(step) for step in group.practice_route],
+                }
+                for group in state.map_route.groups
+            ],
+        }
+
     return {
         "mode": state.mode.value,
         "quest_id": state.quest_id,
@@ -61,7 +78,26 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "restart_quest": state.available_actions.restart_quest,
         },
         "last_submission": last_submission,
+        "map_route": map_route,
         "errors": list(state.errors),
+    }
+
+
+def _serialize_map_route_step(step) -> dict[str, object]:
+    return {
+        "step_id": step.step_id,
+        "step_type": step.step_type,
+        "title": step.title,
+        "target_page": step.target_page,
+        "status_key": step.status_key,
+        "status_label": step.status_label,
+        "tracked_node_ids": list(step.tracked_node_ids),
+        "level_ids": list(step.level_ids),
+        "node_id": step.node_id,
+        "scene_id": step.scene_id,
+        "challenge_id": step.challenge_id,
+        "is_planned": step.is_planned,
+        "is_repeatable": step.is_repeatable,
     }
 
 

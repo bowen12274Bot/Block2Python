@@ -67,6 +67,39 @@ class SubmissionFeedback:
 
 
 @dataclass(frozen=True, slots=True)
+class MapRouteStepState:
+    step_id: str
+    step_type: str
+    title: str
+    target_page: str
+    status_key: str
+    status_label: str
+    tracked_node_ids: tuple[str, ...] = ()
+    level_ids: tuple[str, ...] = ()
+    node_id: str | None = None
+    scene_id: str | None = None
+    challenge_id: str | None = None
+    is_planned: bool = False
+    is_repeatable: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class GroupMapRouteState:
+    group_id: str
+    title: str
+    demo_route: tuple[MapRouteStepState, ...] = ()
+    practice_route: tuple[MapRouteStepState, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class MapRouteState:
+    route_id: str
+    quest_id: str
+    title: str
+    groups: tuple[GroupMapRouteState, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class GameState:
     mode: GameMode
     quest_id: str
@@ -77,6 +110,7 @@ class GameState:
     progress: ProgressState = field(default_factory=ProgressState)
     available_actions: AvailableActions = field(default_factory=AvailableActions)
     last_submission: SubmissionFeedback | None = None
+    map_route: MapRouteState | None = None
     errors: tuple[str, ...] = ()
 
 

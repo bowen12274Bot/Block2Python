@@ -1,7 +1,0 @@
-challenge_id: challenge-demo-basic-io
-challenge_type: demo
-title: Demo Basic IO
-level_ids:
-  - demo-basic-io-hello
-toolbox_policy_id: null
-battery_policy_id: null

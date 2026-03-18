@@ -1,10 +1,4 @@
 levels:
-  - id: demo-basic-io-hello
-    file: demo-basic-io-hello.yaml
-  - id: practice-basic-io-sum
-    file: practice-basic-io-sum.yaml
-  - id: practice-basic-io-double
-    file: practice-basic-io-double.yaml
   - id: group-01-demo
     file: group-01-demo.yaml
   - id: group-01-practice-01

@@ -171,4 +171,4 @@ text = "Map Notes"
 [node name="NoteText" type="Label" parent="Margin/Scroll/Root/NotePanel/NoteMargin/NoteRoot"]
 layout_mode = 2
 autowrap_mode = 3
-text = "Use Reset to load the latest quest state. The old basic-io quest slice is paused on this map screen while level-group integration is in progress."
+text = "Use Reset to load the latest quest state. Main map routing now comes from bridge map_route data."

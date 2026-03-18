@@ -1,85 +1,39 @@
 extends RefCounted
 class_name QuestMapViewModelMapper
 
-const QUEST_TITLE := "Basic IO Repair"
-const GROUP_SPECS := [
-	{
-		"group_id": "group-01",
-		"title": "Group 01",
-		"subtitle": "Onboarding Route",
-		"node_ids": [
-			"map-entry",
-			"story-intro",
-			"demo-basic-io",
-			"practice-basic-io",
-			"result-basic-io",
-		],
-		"fallback_count": 5,
-	},
-	{
-		"group_id": "group-02",
-		"title": "Group 02",
-		"subtitle": "Main Route Extension",
-		"node_ids": [
-			"next-main-node",
-		],
-		"fallback_count": 1,
-	},
-	{
-		"group_id": "group-03",
-		"title": "Group 03",
-		"subtitle": "Reserved Next Arc",
-		"node_ids": [],
-		"fallback_count": 1,
-	},
-]
-const NODE_SPECS := [
-	{
-		"node_id": "map-entry",
-		"title": "Map Entry",
-		"node_type": "entry",
-		"prerequisite_node_ids": [],
-	},
-	{
-		"node_id": "story-intro",
-		"title": "City Alarm",
-		"node_type": "story",
-		"prerequisite_node_ids": ["map-entry"],
-	},
-	{
-		"node_id": "demo-basic-io",
-		"title": "Demo Route",
-		"node_type": "demo",
-		"prerequisite_node_ids": ["story-intro"],
-	},
-	{
-		"node_id": "practice-basic-io",
-		"title": "Practice Route",
-		"node_type": "practice",
-		"prerequisite_node_ids": ["demo-basic-io"],
-	},
-	{
-		"node_id": "result-basic-io",
-		"title": "Result Route",
-		"node_type": "result",
-		"prerequisite_node_ids": ["practice-basic-io"],
-	},
-	{
-		"node_id": "next-main-node",
-		"title": "Next Main Node",
-		"node_type": "story",
-		"prerequisite_node_ids": ["result-basic-io"],
-	},
-]
-
 
 static func empty_map_view(message: String) -> Dictionary:
-	var group_views: Array[Dictionary] = _build_group_views({}, {}, [])
 	return {
-		"quest_title": QUEST_TITLE,
+		"quest_title": "Quest Map",
 		"mode_label": "Mode: -",
 		"current_node_label": "Current Node: -",
 		"summary": message,
+		"group_summary": "0 groups visible | 0 active | 0 completed | 0 enterable",
+		"groups": [],
+		"show_legacy_nodes": false,
+		"nodes": [],
+	}
+
+
+static func map_game_state(state: Dictionary) -> Dictionary:
+	var current_node_id: String = str(state.get("node_id", ""))
+	var current_node_title: String = str(state.get("node_title", current_node_id))
+	var mode_value: String = str(state.get("mode", ""))
+	var map_route_variant: Variant = state.get("map_route", {})
+	var map_route: Dictionary = {}
+	if map_route_variant is Dictionary:
+		map_route = map_route_variant
+
+	var group_views: Array[Dictionary] = _build_group_views(map_route)
+	var summary: String = "Main map synced from live route state."
+	if group_views.is_empty():
+		summary = "Main map is waiting for route data from bridge state."
+
+	return {
+		"quest_title": _quest_title_from_route(map_route),
+		"mode_label": "Mode: %s" % mode_value,
+		"current_node_label": "Current Node: %s" % current_node_title,
+		"summary": summary,
 		"group_summary": _build_group_summary(group_views),
 		"groups": group_views,
 		"show_legacy_nodes": false,
@@ -87,123 +41,284 @@ static func empty_map_view(message: String) -> Dictionary:
 	}
 
 
-static func map_game_state(state: Dictionary) -> Dictionary:
-	var completed_node_ids: Dictionary = _completed_node_lookup(state)
-	var current_node_id: String = str(state.get("node_id", ""))
-	var current_node_title: String = str(state.get("node_title", current_node_id))
-	var mode_value: String = str(state.get("mode", ""))
-	var node_views: Array[Dictionary] = []
-
-	for node_spec_variant in NODE_SPECS:
-		if not (node_spec_variant is Dictionary):
-			continue
-
-		var node_spec: Dictionary = node_spec_variant
-		var node_id: String = str(node_spec.get("node_id", ""))
-		var is_completed: bool = completed_node_ids.has(node_id)
-		var is_current: bool = current_node_id != "" and current_node_id == node_id
-		var is_available: bool = _is_available(node_spec, completed_node_ids, current_node_id)
-		var status_key: String = _status_key(is_current, is_completed, is_available)
-
-		node_views.append({
-			"node_id": node_id,
-			"title": str(node_spec.get("title", node_id)),
-			"node_type": str(node_spec.get("node_type", "")),
-			"status_key": status_key,
-			"status_label": _status_label(status_key),
-			"is_enterable": status_key != "locked",
-		})
-
-	var group_views: Array[Dictionary] = _build_group_views(state, completed_node_ids, node_views)
-	var completed_count := completed_node_ids.size()
-	return {
-		"quest_title": QUEST_TITLE,
-		"mode_label": "Mode: %s" % mode_value,
-		"current_node_label": "Current Node: %s" % current_node_title,
-		"summary": "Main map synced from live quest state. Completed %d nodes so far." % completed_count,
-		"group_summary": _build_group_summary(group_views),
-		"groups": group_views,
-		"show_legacy_nodes": false,
-		"nodes": node_views,
-	}
+static func _quest_title_from_route(map_route: Dictionary) -> String:
+	var title: String = str(map_route.get("title", ""))
+	if title != "":
+		return title
+	return "Quest Map"
 
 
-static func _completed_node_lookup(state: Dictionary) -> Dictionary:
-	var completed_node_ids: Dictionary = {}
-	var progress_state: Variant = state.get("progress", {})
-	if progress_state is Dictionary:
-		var raw_completed_ids: Variant = progress_state.get("completed_node_ids", [])
-		if raw_completed_ids is Array:
-			for node_id_variant in raw_completed_ids:
-				completed_node_ids[str(node_id_variant)] = true
-	return completed_node_ids
+static func _build_group_views(map_route: Dictionary) -> Array[Dictionary]:
+	var groups_variant: Variant = map_route.get("groups", [])
+	if not (groups_variant is Array):
+		return []
 
+	var raw_groups: Array[Dictionary] = []
+	for group_variant in groups_variant:
+		if group_variant is Dictionary:
+			raw_groups.append(group_variant)
 
-static func _build_group_views(state: Dictionary, completed_node_ids: Dictionary, node_views: Array) -> Array[Dictionary]:
-	var current_node_id: String = str(state.get("node_id", ""))
-	var current_group_index := _find_current_group_index(current_node_id)
-	var current_node_title: String = str(state.get("node_title", current_node_id))
 	var group_views: Array[Dictionary] = []
-
-	for index in GROUP_SPECS.size():
-		var group_spec_variant: Variant = GROUP_SPECS[index]
-		if not (group_spec_variant is Dictionary):
-			continue
-
-		var group_spec: Dictionary = group_spec_variant
-		var group_node_ids: Array[String] = _string_array(group_spec.get("node_ids", []))
-		var group_nodes: Array[Dictionary] = _find_node_views(group_node_ids, node_views)
-		var completed_count := 0
-		for node_view in group_nodes:
-			if str(node_view.get("status_key", "")) == "completed":
-				completed_count += 1
-
-		var total_count := group_nodes.size()
-		if total_count == 0:
-			total_count = int(group_spec.get("fallback_count", 0))
-
-		var is_current: bool = current_group_index == index
-		var is_completed: bool = total_count > 0 and completed_count >= total_count
-		var is_available: bool = _is_group_available(index, is_current, group_views)
-		if is_completed:
-			is_available = true
-
-		var status_key := _status_key(is_current, is_completed, is_available)
-		var current_label := ""
-		if is_current and current_node_title != "":
-			current_label = "Current flow: %s" % current_node_title
-		elif group_nodes.is_empty() and index > current_group_index and current_group_index != -1:
-			current_label = "Waiting for previous group to finish"
-
-		var node_titles: Array[String] = []
-		for node_view in group_nodes:
-			node_titles.append(str(node_view.get("title", "")))
-
-		group_views.append({
-			"group_id": str(group_spec.get("group_id", "")),
-			"title": str(group_spec.get("title", "Group")),
-			"subtitle": str(group_spec.get("subtitle", "")),
-			"status_key": status_key,
-			"status_label": _group_status_label(status_key, group_nodes.is_empty()),
-			"is_enterable": status_key != "locked",
-			"progress_label": "Progress: %d / %d nodes" % [completed_count, total_count],
-			"current_label": current_label,
-			"node_titles": node_titles,
-			"node_views": group_nodes,
-		})
-
+	for index in raw_groups.size():
+		var group: Dictionary = raw_groups[index]
+		group_views.append(_build_group_view(group, index, group_views))
 	return group_views
 
 
-static func _is_group_available(group_index: int, is_current: bool, prior_group_views: Array[Dictionary]) -> bool:
-	if is_current:
-		return true
+static func _build_group_view(group: Dictionary, group_index: int, prior_group_views: Array[Dictionary]) -> Dictionary:
+	var demo_route_steps: Array[Dictionary] = _step_dict_array(group.get("demo_route", []))
+	var practice_route_steps: Array[Dictionary] = _step_dict_array(group.get("practice_route", []))
+	var all_steps: Array[Dictionary] = []
+	all_steps.append_array(demo_route_steps)
+	all_steps.append_array(practice_route_steps)
+
+	var intrinsic_status_key: String = _intrinsic_group_status_key(all_steps)
+	var status_key: String = _group_status_key(group_index, intrinsic_status_key, prior_group_views)
+	var current_label: String = _group_current_label(all_steps)
+	var progress := _group_progress(all_steps)
+	var demo_slot: Dictionary = _build_slot_view("demo", "Demo", demo_route_steps)
+	var practice_slot: Dictionary = _build_slot_view("practice", "Practice", practice_route_steps)
+
+	return {
+		"group_id": str(group.get("group_id", "")),
+		"title": str(group.get("title", "Group")),
+		"subtitle": "Demo + Practice",
+		"status_key": status_key,
+		"status_label": _group_status_label(status_key, _is_planned_only_group(all_steps)),
+		"is_enterable": status_key != "locked",
+		"progress_label": "Progress: %d / %d tracked steps" % [progress["completed"], progress["total"]],
+		"current_label": current_label,
+		"node_titles": _tracked_titles(demo_route_steps, practice_route_steps),
+		"node_views": [],
+		"demo_route_summary": _build_route_summary(demo_route_steps),
+		"demo_route_step_titles": _route_step_titles(demo_route_steps),
+		"demo_route_steps": demo_route_steps,
+		"practice_route_summary": _build_route_summary(practice_route_steps),
+		"practice_route_step_titles": _route_step_titles(practice_route_steps),
+		"practice_route_steps": practice_route_steps,
+		"demo_slot": demo_slot,
+		"practice_slot": practice_slot,
+	}
+
+
+static func _build_slot_view(slot_key: String, title: String, route_steps: Array[Dictionary]) -> Dictionary:
+	var slot_status_key: String = _slot_status_key(route_steps)
+	var primary_step: Dictionary = _primary_slot_step(route_steps)
+	var progress: Dictionary = _slot_progress(route_steps)
+	var practice_levels: Array[Dictionary] = []
+	if slot_key == "practice":
+		practice_levels = _practice_levels(route_steps)
+
+	return {
+		"slot_key": slot_key,
+		"title": title,
+		"status_key": slot_status_key,
+		"status_label": _status_label(slot_status_key),
+		"summary": _build_route_summary(route_steps),
+		"progress_label": "%d / %d" % [progress["completed"], progress["total"]],
+		"primary_step": primary_step,
+		"route_steps": route_steps,
+		"practice_levels": practice_levels,
+	}
+
+
+static func _slot_status_key(route_steps: Array[Dictionary]) -> String:
+	if _has_step_status(route_steps, "current"):
+		return "current"
+	if _all_trackable_steps_completed(route_steps):
+		return "completed"
+	if _has_step_status(route_steps, "available") or _has_step_status(route_steps, "completed"):
+		return "available"
+	return "locked"
+
+
+static func _primary_slot_step(route_steps: Array[Dictionary]) -> Dictionary:
+	for step in route_steps:
+		if str(step.get("status_key", "")) == "current":
+			return step
+	for step in route_steps:
+		var status_key: String = str(step.get("status_key", ""))
+		if status_key == "available" or status_key == "completed":
+			return step
+	return {}
+
+
+static func _slot_progress(route_steps: Array[Dictionary]) -> Dictionary:
+	var tracked_steps: Array[Dictionary] = []
+	for step in route_steps:
+		if _is_trackable_step(step):
+			tracked_steps.append(step)
+	if tracked_steps.is_empty():
+		return {"completed": 0, "total": 1}
+	var primary_step: Dictionary = _primary_slot_step(route_steps)
+	var level_ids: Array[String] = _string_array(primary_step.get("level_ids", []))
+	if level_ids.size() > 1:
+		var completed_levels := 0
+		var level_views: Array[Dictionary] = _practice_levels(route_steps)
+		for level_view in level_views:
+			if str(level_view.get("status_key", "")) == "completed":
+				completed_levels += 1
+		return {"completed": completed_levels, "total": level_ids.size()}
+	var completed := 0
+	for step in tracked_steps:
+		if str(step.get("status_key", "")) == "completed":
+			completed += 1
+	return {"completed": completed, "total": tracked_steps.size()}
+
+
+static func _practice_levels(route_steps: Array[Dictionary]) -> Array[Dictionary]:
+	var primary_step: Dictionary = _primary_slot_step(route_steps)
+	var level_ids: Array[String] = _string_array(primary_step.get("level_ids", []))
+	var step_status_key: String = str(primary_step.get("status_key", "locked"))
+	var results: Array[Dictionary] = []
+	for index in level_ids.size():
+		var level_id: String = level_ids[index]
+		var level_status_key: String = "locked"
+		if step_status_key == "completed":
+			level_status_key = "completed"
+		elif step_status_key == "current" or step_status_key == "available":
+			if index == 0:
+				level_status_key = step_status_key
+		results.append({
+			"level_id": level_id,
+			"title": "Practice %02d" % [index + 1],
+			"status_key": level_status_key,
+			"status_label": _status_label(level_status_key),
+		})
+	return results
+
+
+static func _step_dict_array(value: Variant) -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	if value is Array:
+		for item in value:
+			if item is Dictionary:
+				results.append(item)
+	return results
+
+
+static func _intrinsic_group_status_key(all_steps: Array[Dictionary]) -> String:
+	if _has_step_status(all_steps, "current"):
+		return "current"
+	if _all_trackable_steps_completed(all_steps):
+		return "completed"
+	if _has_step_status(all_steps, "available") or _has_step_status(all_steps, "completed"):
+		return "available"
+	if _is_planned_only_group(all_steps):
+		return "locked"
+	return "locked"
+
+
+static func _group_status_key(group_index: int, intrinsic_status_key: String, prior_group_views: Array[Dictionary]) -> String:
+	if intrinsic_status_key == "current":
+		return "current"
+	if intrinsic_status_key == "completed":
+		return "completed"
 	if group_index == 0:
-		return true
+		return "available"
 	if group_index - 1 >= prior_group_views.size():
-		return false
+		return "locked"
 	var previous_group_view: Dictionary = prior_group_views[group_index - 1]
-	return str(previous_group_view.get("status_key", "locked")) == "completed"
+	if str(previous_group_view.get("status_key", "locked")) == "completed" and intrinsic_status_key == "available":
+		return "available"
+	return "locked"
+
+
+static func _has_step_status(steps: Array[Dictionary], status_key: String) -> bool:
+	for step in steps:
+		if str(step.get("status_key", "")) == status_key:
+			return true
+	return false
+
+
+static func _all_trackable_steps_completed(steps: Array[Dictionary]) -> bool:
+	var total := 0
+	var completed := 0
+	for step in steps:
+		if _is_trackable_step(step):
+			total += 1
+			if str(step.get("status_key", "")) == "completed":
+				completed += 1
+	return total > 0 and completed >= total
+
+
+static func _is_trackable_step(step: Dictionary) -> bool:
+	var tracked_node_ids: Array[String] = _string_array(step.get("tracked_node_ids", []))
+	var level_ids: Array[String] = _string_array(step.get("level_ids", []))
+	if not tracked_node_ids.is_empty():
+		return true
+	if not level_ids.is_empty():
+		return true
+	if str(step.get("node_id", "")) != "":
+		return true
+	if str(step.get("challenge_id", "")) != "":
+		return true
+	if str(step.get("scene_id", "")) != "":
+		return true
+	return false
+
+
+static func _is_planned_only_group(steps: Array[Dictionary]) -> bool:
+	for step in steps:
+		if _is_trackable_step(step):
+			return false
+	return true
+
+
+static func _group_current_label(steps: Array[Dictionary]) -> String:
+	for step in steps:
+		if str(step.get("status_key", "")) == "current":
+			return "Current flow: %s" % str(step.get("title", "Step"))
+	return ""
+
+
+static func _group_progress(steps: Array[Dictionary]) -> Dictionary:
+	var total := 0
+	var completed := 0
+	for step in steps:
+		if not _is_trackable_step(step):
+			continue
+		total += 1
+		if str(step.get("status_key", "")) == "completed":
+			completed += 1
+	return {
+		"completed": completed,
+		"total": max(total, 1),
+	}
+
+
+static func _tracked_titles(demo_route_steps: Array[Dictionary], practice_route_steps: Array[Dictionary]) -> Array[String]:
+	var results: Array[String] = []
+	var seen: Dictionary = {}
+	for step in demo_route_steps:
+		_append_unique_title(results, seen, step)
+	for step in practice_route_steps:
+		_append_unique_title(results, seen, step)
+	return results
+
+
+static func _append_unique_title(results: Array[String], seen: Dictionary, step: Dictionary) -> void:
+	if not _is_trackable_step(step):
+		return
+	var title: String = str(step.get("title", ""))
+	if title == "" or seen.has(title):
+		return
+	seen[title] = true
+	results.append(title)
+
+
+static func _build_route_summary(route_steps: Array[Dictionary]) -> String:
+	var step_titles: PackedStringArray = []
+	for route_step in route_steps:
+		step_titles.append(str(route_step.get("title", "Step")))
+	return " -> ".join(step_titles)
+
+
+static func _route_step_titles(route_steps: Array[Dictionary]) -> Array[String]:
+	var titles: Array[String] = []
+	for route_step in route_steps:
+		titles.append(str(route_step.get("title", "")))
+	return titles
 
 
 static func _build_group_summary(group_views: Array[Dictionary]) -> String:
@@ -221,63 +336,12 @@ static func _build_group_summary(group_views: Array[Dictionary]) -> String:
 	return "%d groups visible | %d active | %d completed | %d enterable" % [group_views.size(), current_groups, completed_groups, available_groups]
 
 
-static func _find_current_group_index(current_node_id: String) -> int:
-	if current_node_id == "":
-		return -1
-	for index in GROUP_SPECS.size():
-		var group_spec_variant: Variant = GROUP_SPECS[index]
-		if not (group_spec_variant is Dictionary):
-			continue
-		var group_spec: Dictionary = group_spec_variant
-		var node_ids: Array[String] = _string_array(group_spec.get("node_ids", []))
-		if node_ids.has(current_node_id):
-			return index
-	return -1
-
-
-static func _find_node_views(group_node_ids: Array[String], node_views: Array) -> Array[Dictionary]:
-	var results: Array[Dictionary] = []
-	for group_node_id in group_node_ids:
-		for node_view_variant in node_views:
-			if not (node_view_variant is Dictionary):
-				continue
-			var node_view: Dictionary = node_view_variant
-			if str(node_view.get("node_id", "")) == group_node_id:
-				results.append(node_view)
-				break
-	return results
-
-
 static func _string_array(value: Variant) -> Array[String]:
 	var result: Array[String] = []
 	if value is Array:
 		for item in value:
 			result.append(str(item))
 	return result
-
-
-static func _is_available(node_spec: Dictionary, completed_node_ids: Dictionary, current_node_id: String) -> bool:
-	var node_id: String = str(node_spec.get("node_id", ""))
-	if node_id != "" and node_id == current_node_id:
-		return true
-
-	var prerequisites: Variant = node_spec.get("prerequisite_node_ids", [])
-	if prerequisites is Array:
-		for prerequisite_variant in prerequisites:
-			if not completed_node_ids.has(str(prerequisite_variant)):
-				return false
-
-	return true
-
-
-static func _status_key(is_current: bool, is_completed: bool, is_available: bool) -> String:
-	if is_current:
-		return "current"
-	if is_completed:
-		return "completed"
-	if is_available:
-		return "available"
-	return "locked"
 
 
 static func _status_label(status_key: String) -> String:

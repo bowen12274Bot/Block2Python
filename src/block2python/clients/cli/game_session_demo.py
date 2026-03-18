@@ -11,7 +11,7 @@ from block2python.integration.contracts import GameMode, GameState
 from block2python.judge import StubJudge
 
 
-DEFAULT_QUEST_ID = "quest-basic-io-repair"
+DEFAULT_QUEST_ID = "quest-main-map"
 
 
 def build_demo_session(

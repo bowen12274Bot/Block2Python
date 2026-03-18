@@ -106,11 +106,9 @@ func _on_group_pressed(group_id: String) -> void:
 	var current_label: String = str(group_view.get("current_label", ""))
 	if current_label != "":
 		lines.append(current_label)
-	var node_titles: Variant = group_view.get("node_titles", [])
-	if node_titles is Array and not node_titles.is_empty():
-		lines.append("Flow nodes: %s" % ", ".join(PackedStringArray(node_titles)))
-	else:
-		lines.append("Flow nodes: placeholder only. No concrete challenge content attached yet.")
+
+	_append_slot_note(lines, group_view.get("demo_slot", {}))
+	_append_slot_note(lines, group_view.get("practice_slot", {}))
 
 	var status_key: String = str(group_view.get("status_key", "locked"))
 	if status_key == "locked":
@@ -118,18 +116,40 @@ func _on_group_pressed(group_id: String) -> void:
 		note_label.text = "\n\n".join(lines)
 		return
 
-	if status_key == "current":
-		lines.append("Opening current flow page for this group.")
+	var next_step: Dictionary = _preferred_route_step(group_view)
+	if status_key == "current" and not next_step.is_empty():
+		lines.append("Opening current route step: %s" % str(next_step.get("title", "Step")))
 	else:
-		lines.append("Opening group route preview. This does not change bridge state yet.")
-		
+		lines.append("Opening route preview from the selected group. This does not change bridge state yet.")
+
 	note_label.text = "\n\n".join(lines)
 	_route_group_from_map(group_view)
 
 
+func _append_slot_note(lines: Array[String], slot_variant: Variant) -> void:
+	if not (slot_variant is Dictionary):
+		return
+	var slot: Dictionary = slot_variant
+	if slot.is_empty():
+		return
+	lines.append("%s: %s [%s]" % [str(slot.get("title", "Slot")), str(slot.get("progress_label", "0 / 0")), str(slot.get("status_label", "Unknown"))])
+	var primary_step_variant: Variant = slot.get("primary_step", {})
+	if primary_step_variant is Dictionary:
+		var primary_step: Dictionary = primary_step_variant
+		if not primary_step.is_empty():
+			lines.append("%s entry: %s" % [str(slot.get("title", "Slot")), str(primary_step.get("title", "Step"))])
+	var practice_levels_variant: Variant = slot.get("practice_levels", [])
+	if practice_levels_variant is Array and not practice_levels_variant.is_empty():
+		var practice_labels: PackedStringArray = []
+		for level_variant in practice_levels_variant:
+			if level_variant is Dictionary:
+				practice_labels.append("%s[%s]" % [str(level_variant.get("title", "Level")), str(level_variant.get("status_label", "Unknown"))])
+		lines.append("Practice Levels: %s" % ", ".join(practice_labels))
+
+
 func _on_node_pressed(node_id: String) -> void:
 	if note_label != null:
-		note_label.text = "Selected quest node: %s\n\nThis node is only being used to drive map flow right now. Concrete challenge content is intentionally not attached yet." % node_id
+		note_label.text = "Selected quest node: %s\n\nLegacy node cards are being phased out. Route steps on the map are now driven by bridge map_route data." % node_id
 
 
 func _find_group_view(group_id: String) -> Dictionary:
@@ -141,6 +161,22 @@ func _find_group_view(group_id: String) -> Dictionary:
 			var group_view: Dictionary = group_view_variant
 			if str(group_view.get("group_id", "")) == group_id:
 				return group_view
+	return {}
+
+
+func _preferred_route_step(group_view: Dictionary) -> Dictionary:
+	var demo_slot_variant: Variant = group_view.get("demo_slot", {})
+	if demo_slot_variant is Dictionary:
+		var demo_slot: Dictionary = demo_slot_variant
+		var primary_step_variant: Variant = demo_slot.get("primary_step", {})
+		if primary_step_variant is Dictionary and not primary_step_variant.is_empty():
+			return primary_step_variant
+	var practice_slot_variant: Variant = group_view.get("practice_slot", {})
+	if practice_slot_variant is Dictionary:
+		var practice_slot: Dictionary = practice_slot_variant
+		var practice_step_variant: Variant = practice_slot.get("primary_step", {})
+		if practice_step_variant is Dictionary and not practice_step_variant.is_empty():
+			return practice_step_variant
 	return {}
 
 

@@ -1,0 +1,11 @@
+quest_id: quest-main-map
+title: Block2Python Main Map
+node_ids:
+  - main-map-entry
+  - group-01-story
+  - group-01-demo
+  - group-01-practice
+  - group-01-result
+  - group-02-story
+entry_node_id: main-map-entry
+completion_node_id: group-02-story

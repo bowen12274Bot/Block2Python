@@ -4,7 +4,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from block2python.challenge import AppCore, SubmitOutcome
-from block2python.content import AssembledGameSlice, GameRuntime, ResolvedChallengeSpec, SceneSpec
+from block2python.content import (
+    AssembledGameSlice,
+    GameRuntime,
+    GroupMapRoutesSpec,
+    MapRouteSpec,
+    MapRouteStepSpec,
+    ResolvedChallengeSpec,
+    SceneSpec,
+)
 from block2python.contracts import LevelSpec, Submission
 from block2python.integration.contracts import (
     AvailableActions,
@@ -12,6 +20,9 @@ from block2python.integration.contracts import (
     DialogueBlockState,
     GameMode,
     GameState,
+    GroupMapRouteState,
+    MapRouteState,
+    MapRouteStepState,
     ProgressState,
     SceneState,
     SubmissionFeedback,
@@ -97,14 +108,17 @@ class GameSession:
     def current_game_state(self) -> GameState:
         state = self.current_state()
         runtime_state = self.runtime.current_state()
+        progress = self._progress_state()
+        map_route = self._map_route_state(state, progress)
 
         if state.mode is SessionMode.COMPLETE or runtime_state is None:
             return GameState(
                 mode=GameMode.COMPLETE,
                 quest_id=self.runtime.quest.quest_id,
-                progress=self._progress_state(),
+                progress=progress,
                 available_actions=AvailableActions(),
                 last_submission=self.last_submission,
+                map_route=map_route,
             )
 
         scene = self._scene_state(runtime_state.scene) if state.mode is SessionMode.SCENE else None
@@ -132,9 +146,10 @@ class GameSession:
             node_title=state.node_title,
             scene=scene,
             challenge=challenge,
-            progress=self._progress_state(),
+            progress=progress,
             available_actions=actions,
             last_submission=self.last_submission,
+            map_route=map_route,
         )
 
     def advance(self) -> GameSessionState:
@@ -216,3 +231,139 @@ class GameSession:
             completed_node_ids=completed_node_ids,
             cleared_level_ids=cleared_level_ids,
         )
+
+    def _map_route_state(self, state: GameSessionState, progress: ProgressState) -> MapRouteState | None:
+        route_spec = self._route_spec_for_current_quest()
+        if route_spec is None:
+            return None
+
+        groups = tuple(
+            self._group_map_route_state(group, state, progress)
+            for group in route_spec.groups
+        )
+        return MapRouteState(
+            route_id=route_spec.route_id,
+            quest_id=route_spec.quest_id,
+            title=route_spec.title,
+            groups=groups,
+        )
+
+    def _route_spec_for_current_quest(self) -> MapRouteSpec | None:
+        quest_id = self.runtime.quest.quest_id
+        for route in self.runtime.game_slice.map_routes.values():
+            if route.quest_id == quest_id:
+                return route
+        return None
+
+    def _group_map_route_state(
+        self,
+        group: GroupMapRoutesSpec,
+        state: GameSessionState,
+        progress: ProgressState,
+    ) -> GroupMapRouteState:
+        return GroupMapRouteState(
+            group_id=group.group_id,
+            title=group.title,
+            demo_route=tuple(self._map_route_step_state(step, state, progress, group.demo_route) for step in group.demo_route),
+            practice_route=tuple(self._map_route_step_state(step, state, progress, group.practice_route) for step in group.practice_route),
+        )
+
+    def _map_route_step_state(
+        self,
+        step: MapRouteStepSpec,
+        state: GameSessionState,
+        progress: ProgressState,
+        route_steps: tuple[MapRouteStepSpec, ...],
+    ) -> MapRouteStepState:
+        status_key = self._route_step_status_key(step, state, progress, route_steps)
+        return MapRouteStepState(
+            step_id=step.step_id,
+            step_type=step.step_type,
+            title=step.title,
+            target_page=step.target_page,
+            status_key=status_key,
+            status_label=self._route_step_status_label(status_key),
+            tracked_node_ids=step.tracked_node_ids,
+            level_ids=step.level_ids,
+            node_id=step.node_id,
+            scene_id=step.scene_id,
+            challenge_id=step.challenge_id,
+            is_planned=step.is_planned,
+            is_repeatable=step.is_repeatable,
+        )
+
+    def _route_step_status_key(
+        self,
+        step: MapRouteStepSpec,
+        state: GameSessionState,
+        progress: ProgressState,
+        route_steps: tuple[MapRouteStepSpec, ...],
+    ) -> str:
+        completed_node_ids = set(progress.completed_node_ids)
+        cleared_level_ids = set(progress.cleared_level_ids)
+
+        if self._is_route_step_current(step, state):
+            return "current"
+        if self._is_route_step_completed(step, completed_node_ids, cleared_level_ids):
+            return "completed"
+        if step.is_planned and not step.tracked_node_ids and not step.level_ids and step.node_id is None and step.challenge_id is None:
+            return "planned"
+        if self._is_route_step_available(step, route_steps, completed_node_ids, cleared_level_ids):
+            return "available"
+        return "locked"
+
+    def _is_route_step_current(self, step: MapRouteStepSpec, state: GameSessionState) -> bool:
+        if step.node_id is not None and step.node_id == state.node_id:
+            return True
+        if step.challenge_id is not None and step.challenge_id == state.challenge_id:
+            return True
+        if step.scene_id is not None and step.scene_id == state.scene_id:
+            return True
+        if state.node_id is not None and state.node_id in step.tracked_node_ids:
+            return True
+        if state.current_level_id is not None and state.current_level_id in step.level_ids:
+            return True
+        return False
+
+    def _is_route_step_completed(
+        self,
+        step: MapRouteStepSpec,
+        completed_node_ids: set[str],
+        cleared_level_ids: set[str],
+    ) -> bool:
+        if step.level_ids:
+            return all(level_id in cleared_level_ids for level_id in step.level_ids)
+        if step.node_id is not None:
+            return step.node_id in completed_node_ids
+        if step.tracked_node_ids:
+            return all(node_id in completed_node_ids for node_id in step.tracked_node_ids)
+        return False
+
+    def _is_route_step_available(
+        self,
+        step: MapRouteStepSpec,
+        route_steps: tuple[MapRouteStepSpec, ...],
+        completed_node_ids: set[str],
+        cleared_level_ids: set[str],
+    ) -> bool:
+        step_index = route_steps.index(step)
+        if step_index == 0:
+            return True
+        for previous_step in route_steps[:step_index]:
+            if previous_step.is_planned and not previous_step.level_ids and not previous_step.tracked_node_ids and previous_step.node_id is None:
+                continue
+            if not self._is_route_step_completed(previous_step, completed_node_ids, cleared_level_ids):
+                return False
+        return True
+
+    @staticmethod
+    def _route_step_status_label(status_key: str) -> str:
+        if status_key == "current":
+            return "Current"
+        if status_key == "completed":
+            return "Completed"
+        if status_key == "available":
+            return "Available"
+        if status_key == "planned":
+            return "Planned"
+        return "Locked"

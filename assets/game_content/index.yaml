@@ -1,21 +1,21 @@
 quests:
-  - file: quests/quest-basic-io-repair.yaml
+  - file: quests/quest-main-map.yaml
 nodes:
-  - file: nodes/nodes-basic-io.yaml
+  - file: nodes/main-map-nodes.yaml
 scenes:
   - file: scenes/scene-city-alarm.yaml
   - file: scenes/scene-practice-unlock.yaml
   - file: scenes/scene-result-success.yaml
   - file: scenes/scene-result-fail.yaml
 challenges:
-  - file: challenges/challenge-demo-basic-io.yaml
-  - file: challenges/challenge-practice-basic-io.yaml
   - file: challenges/challenge-group-01-demo.yaml
   - file: challenges/challenge-group-01-practice.yaml
   - file: challenges/challenge-group-02-demo.yaml
   - file: challenges/challenge-group-02-practice.yaml
   - file: challenges/challenge-group-03-demo.yaml
   - file: challenges/challenge-group-03-practice.yaml
+map_routes:
+  - file: map_routes/main-map-routes.yaml
 toolbox:
   - file: toolbox/toolbox-basic-io.yaml
 battery:

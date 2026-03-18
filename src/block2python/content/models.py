@@ -58,6 +58,40 @@ class ChallengeSpec:
 
 
 @dataclass(frozen=True, slots=True)
+class MapRouteStepSpec:
+    step_id: str
+    step_type: str
+    title: str
+    target_page: str
+    tracked_node_ids: tuple[str, ...] = ()
+    node_id: str | None = None
+    scene_id: str | None = None
+    challenge_id: str | None = None
+    level_ids: tuple[str, ...] = ()
+    is_planned: bool = False
+    is_repeatable: bool = False
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class GroupMapRoutesSpec:
+    group_id: str
+    title: str
+    demo_route: tuple[MapRouteStepSpec, ...] = ()
+    practice_route: tuple[MapRouteStepSpec, ...] = ()
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class MapRouteSpec:
+    route_id: str
+    quest_id: str
+    title: str
+    groups: tuple[GroupMapRoutesSpec, ...] = ()
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
 class ToolboxPolicySpec:
     toolbox_id: str
     unlocked_block_ids: tuple[str, ...] = ()
@@ -82,6 +116,7 @@ class GameContentBundle:
     nodes: dict[str, NodeSpec] = field(default_factory=dict)
     scenes: dict[str, SceneSpec] = field(default_factory=dict)
     challenges: dict[str, ChallengeSpec] = field(default_factory=dict)
+    map_routes: dict[str, MapRouteSpec] = field(default_factory=dict)
     toolbox: dict[str, ToolboxPolicySpec] = field(default_factory=dict)
     battery_policies: dict[str, BatteryPolicySpec] = field(default_factory=dict)
 
@@ -103,4 +138,5 @@ class AssembledGameSlice:
     nodes: dict[str, NodeSpec]
     scenes: dict[str, SceneSpec]
     challenges: dict[str, ResolvedChallengeSpec]
+    map_routes: dict[str, MapRouteSpec]
     levels: dict[str, LevelSpec]

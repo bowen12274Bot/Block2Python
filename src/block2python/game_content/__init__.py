@@ -1,4 +1,4 @@
-﻿from block2python.content import (
+from block2python.content import (
     AssembledGameSlice,
     BatteryPolicySpec,
     ChallengeSpec,
@@ -10,6 +10,9 @@
     GameNodeState,
     GameRuntime,
     GameRuntimeError,
+    GroupMapRoutesSpec,
+    MapRouteSpec,
+    MapRouteStepSpec,
     NodeSpec,
     QuestSpec,
     ResolvedChallengeSpec,
@@ -31,6 +34,9 @@ __all__ = [
     "GameNodeState",
     "GameRuntime",
     "GameRuntimeError",
+    "GroupMapRoutesSpec",
+    "MapRouteSpec",
+    "MapRouteStepSpec",
     "NodeSpec",
     "QuestSpec",
     "ResolvedChallengeSpec",

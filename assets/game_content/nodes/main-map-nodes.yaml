@@ -1,58 +1,58 @@
 nodes:
-  - node_id: map-entry
+  - node_id: main-map-entry
     node_type: entry
-    title: Map Entry
+    title: Main Map Entry
     prerequisite_node_ids: []
     next_node_ids:
-      - story-intro
+      - group-01-story
     scene_id: null
     challenge_group_id: null
 
-  - node_id: story-intro
+  - node_id: group-01-story
     node_type: story
-    title: City Alarm
+    title: Group 01 Story
     prerequisite_node_ids:
-      - map-entry
+      - main-map-entry
     next_node_ids:
-      - demo-basic-io
+      - group-01-demo
     scene_id: scene-city-alarm
     challenge_group_id: null
 
-  - node_id: demo-basic-io
+  - node_id: group-01-demo
     node_type: demo
-    title: Demo Challenge
+    title: Group 01 Demo
     prerequisite_node_ids:
-      - story-intro
+      - group-01-story
     next_node_ids:
-      - practice-basic-io
+      - group-01-practice
     scene_id: scene-practice-unlock
-    challenge_group_id: challenge-demo-basic-io
+    challenge_group_id: challenge-group-01-demo
 
-  - node_id: practice-basic-io
+  - node_id: group-01-practice
     node_type: practice
-    title: Practice Challenge
+    title: Group 01 Practice
     prerequisite_node_ids:
-      - demo-basic-io
+      - group-01-demo
     next_node_ids:
-      - result-basic-io
+      - group-01-result
     scene_id: null
-    challenge_group_id: challenge-practice-basic-io
+    challenge_group_id: challenge-group-01-practice
 
-  - node_id: result-basic-io
+  - node_id: group-01-result
     node_type: result
-    title: Result Node
+    title: Group 01 Result
     prerequisite_node_ids:
-      - practice-basic-io
+      - group-01-practice
     next_node_ids:
-      - next-main-node
+      - group-02-story
     scene_id: scene-result-success
     challenge_group_id: null
 
-  - node_id: next-main-node
+  - node_id: group-02-story
     node_type: story
-    title: Next Main Node
+    title: Group 02 Story
     prerequisite_node_ids:
-      - result-basic-io
+      - group-01-result
     next_node_ids: []
     scene_id: null
     challenge_group_id: null
