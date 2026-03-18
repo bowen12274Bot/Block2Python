@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from block2python.app.levels_loader import load_levels
+from block2python.content import load_levels
 from block2python.contracts import JudgePolicy
 
 

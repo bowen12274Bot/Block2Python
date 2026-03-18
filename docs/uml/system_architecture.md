@@ -1,6 +1,6 @@
 # 系統架構圖
 
-> 更新日期：2026-03-14
+> 更新日期：2026-03-18
 > 相關文件：[technical_rationale.md](../technical_rationale.md)
 
 ## 架構總覽
@@ -115,16 +115,16 @@ sequenceDiagram
 | `block2python.integration` | 對外 contract 與 bridge 邊界 |
 | `block2python.game` | 遊戲主流程控制 |
 | `block2python.content` | levels 與 game content 載入 |
-| `block2python.challenge` | challenge submit 與 progress 子系統 |
+| `block2python.level_play` | level submit 與 progress 子系統 |
 | `block2python.analysis` | 靜態分析服務 |
 | `block2python.judge` | judge 實作與 Wasm 執行 |
 
 ## 目前狀態
 
 目前已完成：
-- `challenge/`、`content/`、`game/`、`integration/`、`clients/` 骨架
+- `level_play/`、`content/`、`game/`、`integration/`、`clients/` 骨架
 - `game/` 內的 `GameSession`
-- `challenge/` 內的 `AppCore`
+- `level_play/` 內的 `AppCore`
 - `content/` 內的 loaders
 - `clients/` 內的 PySide6 與 CLI wrapper
 - `app/` 與 `game_content/` 的相容 shim

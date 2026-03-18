@@ -1,14 +1,11 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os
 from pathlib import Path
 
+from block2python.level_play import AppCore, JsonFileProgress, build_judge_from_env
+from block2python.content import LevelsLoadError, load_levels
 from block2python.contracts import LevelSpec
-
-from .core import AppCore
-from .judge_factory import build_judge_from_env
-from .levels_loader import LevelsLoadError, load_levels
-from .progress import JsonFileProgress
 
 
 def default_progress_path() -> Path:
@@ -26,8 +23,8 @@ def load_configured_levels() -> dict[str, LevelSpec]:
     levels_dir = configured_levels_dir()
     try:
         return load_levels(levels_dir)
-    except LevelsLoadError as e:
-        raise RuntimeError(f"Failed to load levels from {levels_dir}: {e}") from e
+    except LevelsLoadError as exc:
+        raise RuntimeError(f"Failed to load levels from {levels_dir}: {exc}") from exc
 
 
 def build_configured_app() -> tuple[AppCore, dict[str, LevelSpec], str]:
@@ -35,3 +32,4 @@ def build_configured_app() -> tuple[AppCore, dict[str, LevelSpec], str]:
     judge, judge_info = build_judge_from_env()
     app = AppCore(levels, judge=judge, progress=JsonFileProgress(default_progress_path()))
     return app, levels, judge_info
+

@@ -1,3 +1,7 @@
-﻿"""PySide6 client adapters."""
+"""Legacy/development PySide6 client."""
 
-__all__ = []
+from .blockly_embed import BlocklyBridge, BlocklyEmbed, BlocklyOutput
+from .main import main
+from .window import MainWindow
+
+__all__ = ["BlocklyBridge", "BlocklyEmbed", "BlocklyOutput", "MainWindow", "main"]

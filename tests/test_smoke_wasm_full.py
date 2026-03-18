@@ -1,4 +1,4 @@
-﻿"""Smoke tests for real WasmJudge execution with wasmtime + python.wasm."""
+"""Smoke tests for real WasmJudge execution with wasmtime + python.wasm."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from block2python.app.levels_loader import load_levels
+from block2python.content import load_levels
 from block2python.contracts import (
     JudgePolicy,
     JudgeStatus,

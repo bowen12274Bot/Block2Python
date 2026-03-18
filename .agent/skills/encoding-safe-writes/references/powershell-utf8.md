@@ -1,31 +1,69 @@
-# PowerShell UTF-8 寫檔模式
+# PowerShell UTF-8 Safe Patterns
 
-當你需要在這個 repo 裡用 PowerShell 重寫文字檔時，使用這個模式。
+Use these patterns when editing files that may contain Chinese or other non-ASCII text.
+
+## 1. Preferred: Python UTF-8 write
+
+```powershell
+python -c "from pathlib import Path; Path('README.md').write_text(content, encoding='utf-8')"
+```
+
+If shell encoding is unreliable, build `content` with Unicode escape sequences.
+
+## 2. PowerShell .NET UTF-8 no-BOM write
 
 ```powershell
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-$content = @'
-...final text...
-'@
 [System.IO.File]::WriteAllText((Resolve-Path $path), $content, $utf8NoBom)
 ```
 
-## 驗證方式
+## 3. Verify actual content, not terminal appearance
 
-以 UTF-8 讀回：
-
-```powershell
-Get-Content <file> -Encoding utf8
-```
-
-檢查位元組：
+### Show escaped code points
 
 ```powershell
-Format-Hex <file> | Select-Object -First 12
+python -c "from pathlib import Path; text = Path('README.md').read_text(encoding='utf-8'); print(text[:500].encode('unicode_escape').decode())"
 ```
 
-## 注意事項
+### Check for literal replacement damage
 
-- `Set-Content` 可能跟隨 host 預設值，或產生你沒有預期的編碼。
-- CJK 文字的 UTF-8 位元組通常會出現像 `E4`、`E5`、`E6`、`E7`、`E8`、`E9` 這類開頭，而不是舊式 Big5 位元組樣式。
-- 如果存檔後仍然是亂碼，先檢查位元組，不要直接把終端畫面當成唯一真相。
+```powershell
+python -c "from pathlib import Path; text = Path('README.md').read_text(encoding='utf-8'); print('????' in text)"
+```
+
+### Check BOM or first bytes
+
+```powershell
+python -c "from pathlib import Path; print(Path('README.md').read_bytes()[:3].hex())"
+```
+
+## 4. Known pitfalls
+
+- `Set-Content` may follow host or session encoding behavior you did not intend.
+- Raw Chinese text inside PowerShell here-strings can still be damaged before it reaches the file.
+- Terminal mojibake does not prove the file is broken.
+- Literal `?` characters usually mean lossy rewriting already happened.
+
+## 5. Patch vs Rewrite
+
+Choose full rewrite over patch when:
+- the file contains Chinese text and large sections are changing
+- the file is already garbled or contains literal `?`
+- file moves or renames just happened and stale copies may exist
+- repeated patch attempts are making the file less trustworthy
+
+Safe fallback:
+
+```powershell
+python -c "from pathlib import Path; Path('README.md').write_text(final_text, encoding='utf-8')"
+```
+
+Then verify with:
+
+```powershell
+python -c "from pathlib import Path; text = Path('README.md').read_text(encoding='utf-8'); print(text[:500].encode('unicode_escape').decode())"
+```
+
+## 6. Recovery
+
+If a file is already full of `?`, do not keep patching it from terminal output. Rebuild from a trusted source and rewrite via Python UTF-8.

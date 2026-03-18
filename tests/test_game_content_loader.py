@@ -1,28 +1,31 @@
 from __future__ import annotations
 
 import json
+import shutil
+import uuid
 from pathlib import Path
 
 import pytest
 
-from block2python.app.levels_loader import load_levels
-from block2python.game_content import (
+
+from block2python.content import (
     GameContentAssemblyError,
     GameContentLoadError,
     GameRuntime,
     GameRuntimeError,
     assemble_game_slice,
     load_game_content,
+    load_levels,
 )
 
 
 def test_load_runtime_game_content_assets() -> None:
     bundle = load_game_content(Path("assets/game_content"))
 
-    assert "quest-basic-io-repair" in bundle.quests
-    assert "story-intro" in bundle.nodes
+    assert "quest-main-map" in bundle.quests
+    assert "main-map-entry" in bundle.nodes
     assert "scene-city-alarm" in bundle.scenes
-    assert "challenge-practice-basic-io" in bundle.challenges
+    assert "challenge-group-01-practice" in bundle.challenges
     assert "toolbox-basic-io" in bundle.toolbox
     assert "battery-basic-io" in bundle.battery_policies
 
@@ -32,11 +35,17 @@ def test_assemble_runtime_game_slice_against_levels_assets() -> None:
     bundle = load_game_content(Path("assets/game_content"))
 
     assembled = assemble_game_slice(game_content=bundle, levels=levels)
-    practice = assembled.challenges["challenge-practice-basic-io"]
+    practice = assembled.challenges["challenge-group-01-practice"]
 
-    assert [level.level_id for level in practice.levels] == ["practice-basic-io-sum", "practice-basic-io-double"]
-    assert practice.toolbox_policy is not None
-    assert practice.battery_policy is not None
+    assert [level.level_id for level in practice.levels] == [
+        "group-01-practice-01",
+        "group-01-practice-02",
+        "group-01-practice-03",
+        "group-01-practice-04",
+        "group-01-practice-05",
+    ]
+    assert practice.toolbox_policy is None
+    assert practice.battery_policy is None
 
     group_02_practice = assembled.challenges["challenge-group-02-practice"]
     assert [level.level_id for level in group_02_practice.levels] == [
@@ -50,38 +59,53 @@ def test_assemble_runtime_game_slice_against_levels_assets() -> None:
     assert group_02_practice.battery_policy is None
 
 
-def test_missing_level_reference_raises(tmp_path: Path) -> None:
-    levels_dir = tmp_path / "levels"
-    levels_dir.mkdir()
-    (levels_dir / "index.json").write_text(json.dumps({"levels": [{"id": "l1", "file": "l1.json"}]}), encoding="utf-8")
-    (levels_dir / "l1.json").write_text(json.dumps({"level_id": "l1", "title": "L1"}), encoding="utf-8")
+def test_missing_level_reference_raises() -> None:
+    tmp_path = _make_temp_test_dir()
+    try:
+        levels_dir = tmp_path / "levels"
+        levels_dir.mkdir()
+        (levels_dir / "index.json").write_text(
+            json.dumps({"levels": [{"id": "l1", "file": "l1.json"}]}),
+            encoding="utf-8",
+        )
+        (levels_dir / "l1.json").write_text(json.dumps({"level_id": "l1", "title": "L1"}), encoding="utf-8")
 
-    content_dir = tmp_path / "game_content"
-    _write_game_content_fixture(content_dir, challenge_level_ids=["missing-level"])
+        content_dir = tmp_path / "game_content"
+        _write_game_content_fixture(content_dir, challenge_level_ids=["missing-level"])
 
-    bundle = load_game_content(content_dir)
-    levels = load_levels(levels_dir)
+        bundle = load_game_content(content_dir)
+        levels = load_levels(levels_dir)
 
-    with pytest.raises(GameContentAssemblyError, match="missing level_id"):
-        assemble_game_slice(game_content=bundle, levels=levels)
-
-
-def test_missing_scene_reference_raises(tmp_path: Path) -> None:
-    content_dir = tmp_path / "game_content"
-    _write_game_content_fixture(content_dir, scene_id="missing-scene")
-    bundle = load_game_content(content_dir)
-
-    with pytest.raises(GameContentAssemblyError, match="missing scene_id"):
-        assemble_game_slice(game_content=bundle, levels={})
+        with pytest.raises(GameContentAssemblyError, match="missing level_id"):
+            assemble_game_slice(game_content=bundle, levels=levels)
+    finally:
+        shutil.rmtree(tmp_path, ignore_errors=True)
 
 
-def test_invalid_index_shape_raises(tmp_path: Path) -> None:
-    content_dir = tmp_path / "game_content"
-    content_dir.mkdir()
-    (content_dir / "index.yaml").write_text("quests: nope\n", encoding="utf-8")
+def test_missing_scene_reference_raises() -> None:
+    tmp_path = _make_temp_test_dir()
+    try:
+        content_dir = tmp_path / "game_content"
+        _write_game_content_fixture(content_dir, scene_id="missing-scene")
+        bundle = load_game_content(content_dir)
 
-    with pytest.raises(GameContentLoadError, match="quests"):
-        load_game_content(content_dir)
+        with pytest.raises(GameContentAssemblyError, match="missing scene_id"):
+            assemble_game_slice(game_content=bundle, levels={})
+    finally:
+        shutil.rmtree(tmp_path, ignore_errors=True)
+
+
+def test_invalid_index_shape_raises() -> None:
+    tmp_path = _make_temp_test_dir()
+    try:
+        content_dir = tmp_path / "game_content"
+        content_dir.mkdir()
+        (content_dir / "index.yaml").write_text("quests: nope\n", encoding="utf-8")
+
+        with pytest.raises(GameContentLoadError, match="quests"):
+            load_game_content(content_dir)
+    finally:
+        shutil.rmtree(tmp_path, ignore_errors=True)
 
 
 def test_game_runtime_walks_runtime_quest() -> None:
@@ -89,30 +113,30 @@ def test_game_runtime_walks_runtime_quest() -> None:
     bundle = load_game_content(Path("assets/game_content"))
     assembled = assemble_game_slice(game_content=bundle, levels=levels)
 
-    runtime = GameRuntime.start(assembled, quest_id="quest-basic-io-repair")
+    runtime = GameRuntime.start(assembled, quest_id="quest-main-map")
 
     state = runtime.current_state()
     assert state is not None
-    assert state.node.node_id == "map-entry"
+    assert state.node.node_id == "main-map-entry"
     assert state.scene is None
     assert state.challenge is None
-    assert state.available_next_node_ids == ("story-intro",)
+    assert state.available_next_node_ids == ("group-01-story",)
 
     runtime.complete_current_node()
     state = runtime.current_state()
     assert state is not None
-    assert state.node.node_id == "story-intro"
+    assert state.node.node_id == "group-01-story"
     assert state.scene is not None
     assert state.scene.scene_id == "scene-city-alarm"
 
     runtime.complete_current_node()
     state = runtime.current_state()
     assert state is not None
-    assert state.node.node_id == "demo-basic-io"
+    assert state.node.node_id == "group-01-demo"
     assert state.scene is not None
     assert state.scene.scene_id == "scene-practice-unlock"
     assert state.challenge is not None
-    assert state.challenge.challenge_id == "challenge-demo-basic-io"
+    assert state.challenge.challenge_id == "challenge-group-01-demo"
 
 
 def test_game_runtime_rejects_unknown_quest() -> None:
@@ -214,3 +238,9 @@ def _write_game_content_fixture(
         ]
     )
     (base_dir / "challenges" / "c.yaml").write_text("\n".join(challenge_lines) + "\n", encoding="utf-8")
+
+
+def _make_temp_test_dir() -> Path:
+    path = Path(".tmp") / f"test-game-content-{uuid.uuid4().hex}"
+    path.mkdir(parents=True, exist_ok=False)
+    return path

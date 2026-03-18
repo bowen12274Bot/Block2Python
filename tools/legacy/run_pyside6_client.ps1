@@ -8,7 +8,7 @@ $env:PYTHONPATH = Join-Path $repoRoot "src"
 $venvPy = Join-Path $repoRoot ".venv\\Scripts\\python.exe"
 if (Test-Path $venvPy) {
   & $venvPy -c "import PySide6; print('PySide6', PySide6.__version__)" | Out-Host
-  & $venvPy -m block2python.ui
+  & $venvPy -m block2python.clients.pyside6
 } else {
   Write-Host "Missing .venv. Run: tools/setup_dev_env.ps1"
   exit 1

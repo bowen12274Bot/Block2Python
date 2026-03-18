@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-from block2python.app.game_session_demo import DEFAULT_QUEST_ID
-from block2python.challenge import AppCore, InMemoryProgress, build_judge_from_env
+from block2python.clients.cli.game_session_demo import DEFAULT_QUEST_ID
+from block2python.level_play import AppCore, InMemoryProgress, build_judge_from_env
 from block2python.content import assemble_game_slice, load_game_content, load_levels
 from block2python.game import GameSession
 from block2python.integration.contracts import (

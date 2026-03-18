@@ -1,9 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
 
-from block2python.challenge import AppCore, SubmitOutcome
+from block2python.level_play import AppCore, SubmitOutcome
 from block2python.content import (
     AssembledGameSlice,
     GameRuntime,
@@ -367,3 +367,4 @@ class GameSession:
         if status_key == "planned":
             return "Planned"
         return "Locked"
+

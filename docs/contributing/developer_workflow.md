@@ -93,8 +93,8 @@ PR 描述至少應包含：
 - 小範圍修改：跑最相關的 `pytest` 測試檔或單一測試
 - 一般修改：至少跑一次 `.\.venv\Scripts\python.exe -m pytest`
 - 影響 Wasm 路徑：補跑 `requires_wasm` 測試或 Wasm smoke script
-- 影響 Godot 前端：可額外跑 `tools/run_godot_poc.ps1`
-- 影響舊 CLI / PySide6 流程：再視需要跑 `tools/legacy/run_demo.ps1` 或 `tools/legacy/run_ui.ps1`
+- 影響 Godot 前端：可額外跑 `tools/run_godot_client.ps1`
+- 影響舊 CLI / PySide6 流程：再視需要跑 `tools/legacy/run_cli_demo.ps1` 或 `tools/legacy/run_pyside6_client.ps1`
 
 ### 5.2 基本指令
 
@@ -117,8 +117,8 @@ PR 描述至少應包含：
 以下腳本仍可用，但不再作為主要自動化測試入口：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/run_godot_poc.ps1
-powershell -ExecutionPolicy Bypass -File tools/run_wasm_smoke.ps1
+powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1
+powershell -ExecutionPolicy Bypass -File tools/smoke_wasm.ps1
 ```
 
 用途：
@@ -129,8 +129,8 @@ powershell -ExecutionPolicy Bypass -File tools/run_wasm_smoke.ps1
 若要驗證舊 CLI / PySide6 流程，請改用：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/legacy/run_demo.ps1
-powershell -ExecutionPolicy Bypass -File tools/legacy/run_ui.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_cli_demo.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_pyside6_client.ps1
 ```
 
 ## 6. Definition of Done

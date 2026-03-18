@@ -1,4 +1,4 @@
-"""Tests for judge factory and environment-based configuration."""
+﻿"""Tests for judge factory and environment-based configuration."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from block2python.app.judge_factory import build_judge_from_env
+from block2python.level_play import build_judge_from_env
 from block2python.judge import StubJudge, WasmJudge
 
 
@@ -60,3 +60,4 @@ class TestJudgeFactory:
         monkeypatch.setenv("BLOCK2PYTHON_JUDGE_MODE", "invalid_mode")
         with pytest.raises(Exception):  # JudgeBuildError
             build_judge_from_env()
+

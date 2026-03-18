@@ -34,14 +34,8 @@ func set_can_advance(can_advance: bool) -> void:
 func _on_advance_button_pressed() -> void:
 	status_label.text = "Status: requesting advance..."
 	advance_requested.emit()
-	var coordinator: Node = get_parent()
-	if coordinator != null and coordinator.has_method("_on_advance_requested"):
-		coordinator.call("_on_advance_requested")
 
 
 func _on_back_button_pressed() -> void:
 	status_label.text = "Status: returning to map..."
 	back_requested.emit()
-	var coordinator: Node = get_parent()
-	if coordinator != null and coordinator.has_method("_show_map_page"):
-		coordinator.call("_show_map_page")

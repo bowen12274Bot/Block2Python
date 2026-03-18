@@ -33,4 +33,4 @@
 
 使用工具腳本下載/擺放（需要網路）：
 
-- `tools/vendor_blockly.ps1`
+- `tools/sync_blockly_vendor.ps1`

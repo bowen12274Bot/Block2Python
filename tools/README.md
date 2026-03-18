@@ -1,26 +1,36 @@
-# Tools
+﻿# Tools
 
-本資料夾放開發用工具腳本。現在已依用途收斂成 3 類：主線入口、診斷/驗證、legacy 相容入口。
+這個目錄放的是專案用的 PowerShell 腳本。
 
-## 主線入口
+## 主線腳本
 
-- `tools/setup_dev_env.ps1`：建立 `.venv`、快速安裝開發依賴，並下載 Godot / Wasmtime；可選配 Blockly
-- `tools/run_godot_poc.ps1`：從 repo 根目錄啟動 `godot_poc/project.godot`，預設優先使用 `.block2python/godot/4.6.1/` 內的 Godot
-- `tools/reset_progress.ps1`：清除本機進度檔（`.block2python/progress.json`）
-- `tools/run_tests.ps1`：pytest 入口，支援 pattern / marker / coverage
-- `tools/vendor_blockly.ps1`：Blockly vendor 單一入口，可接受 URL、壓縮檔或已解壓目錄，並擺放靜態檔到 `assets/blockly/vendor/`
+- `tools/setup_dev_env.ps1`
+  建立 `.venv`，安裝開發依賴，並可選擇下載 Godot、Wasmtime、Blockly vendor 資源。
+- `tools/run_godot_client.ps1`
+  啟動 `godot_poc/`，這是目前主要的 client 入口。
+- `tools/run_tests.ps1`
+  執行 pytest，可附帶 pattern、marker、coverage。
+- `tools/reset_progress.ps1`
+  清除本機 progress 檔案 `.block2python/progress.json`。
+- `tools/sync_blockly_vendor.ps1`
+  將 Blockly dist 同步到 `assets/blockly/vendor/`。
 
-## 診斷與驗證
+## 驗證與 Smoke Test
 
-- `tools/run_bridge_smoke.ps1`：最小 stdio bridge smoke
-- `tools/run_wasm_smoke.ps1`：以 wasm judge 跑最小 smoke
-- `tools/verify_wasm_setup.ps1`：檢查 wasmtime / python.wasm / WasmJudge 基本 AC/WA
-- `tools/test_wasm_edge_cases.ps1`：額外驗證 TLE / MLE
+- `tools/smoke_bridge.ps1`
+  用最小請求驗證 stdio bridge server 是否能正常回應。
+- `tools/smoke_wasm.ps1`
+  用 wasm judge 跑最小 CLI smoke flow。
+- `tools/verify_wasm_env.ps1`
+  驗證 wasmtime、`assets/wasm/python.wasm`、Wasm judge 的基本 AC/WA 流程。
+- `tools/verify_wasm_limits.ps1`
+  驗證 Wasm judge 的 TLE / MLE 類邊界情況。
 
 ## Legacy
 
-以下腳本保留給舊流程與歷史文件，不再是目前主線入口：
+舊的 CLI / PySide6 腳本已移到 `tools/legacy/`。
+它們仍可作為開發或回歸檢查用途，但不是主線入口。
 
-- `tools/legacy/run_demo.ps1`
-- `tools/legacy/run_ui.ps1`
+- `tools/legacy/run_cli_demo.ps1`
+- `tools/legacy/run_pyside6_client.ps1`
 - `tools/legacy/run_game_session_demo.ps1`

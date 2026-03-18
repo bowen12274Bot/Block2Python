@@ -47,7 +47,7 @@ data_file = ".tmp/pytest/.coverage"
 omit = [
     "*/tests/*",
     "*/__main__.py",
-    "*/ui/*",
+    "*/clients/pyside6/*",
 ]
 
 [tool.coverage.report]

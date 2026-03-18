@@ -53,20 +53,20 @@ powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1 -IncludeBlockly
 目前主線前端入口是 Godot。
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/run_godot_poc.ps1
+powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1
 ```
 
 若要用 console 版 Godot：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/run_godot_poc.ps1 -Console
+powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1 -Console
 ```
 
 舊 CLI / PySide6 啟動腳本仍保留在 `tools/legacy/`：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/legacy/run_demo.ps1
-powershell -ExecutionPolicy Bypass -File tools/legacy/run_ui.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_cli_demo.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_pyside6_client.ps1
 ```
 
 ### 1.3 Godot 本機位置
@@ -208,7 +208,7 @@ $env:BLOCK2PYTHON_WASM_CODE_MODE = "stdin"
 ### 3.1 一鍵驗證
 
 ```powershell
-.\tools\verify_wasm_setup.ps1
+.\tools\verify_wasm_env.ps1
 ```
 
 驗證項目包括：
@@ -221,13 +221,13 @@ $env:BLOCK2PYTHON_WASM_CODE_MODE = "stdin"
 ### 3.2 Edge cases
 
 ```powershell
-.\tools\test_wasm_edge_cases.ps1
+.\tools\verify_wasm_limits.ps1
 ```
 
 若只想先跳過 MLE：
 
 ```powershell
-.\tools\test_wasm_edge_cases.ps1 -SkipMLE
+.\tools\verify_wasm_limits.ps1 -SkipMLE
 ```
 
 ### 3.3 Pytest
@@ -245,7 +245,7 @@ UI 使用 `QWebEngineView` 載入 Blockly，因此 `assets/blockly/vendor/` 是�
 
 ```powershell
 $env:BLOCKLY_DIST_URL = "https://github.com/RaspberryPiFoundation/blockly/releases/download/blockly-v12.4.1/blockly-12.4.1.tgz"
-powershell -ExecutionPolicy Bypass -File tools/vendor_blockly.ps1
+powershell -ExecutionPolicy Bypass -File tools/sync_blockly_vendor.ps1
 ```
 
 如果同版本 archive 已經存在於：
@@ -260,14 +260,14 @@ powershell -ExecutionPolicy Bypass -File tools/vendor_blockly.ps1
 
 ```powershell
 $env:BLOCKLY_DIST_ZIP = "C:\\path\\to\\blockly_dist.zip"
-powershell -ExecutionPolicy Bypass -File tools/vendor_blockly.ps1
+powershell -ExecutionPolicy Bypass -File tools/sync_blockly_vendor.ps1
 ```
 
 ### 4.3 從資料夾匯入
 
 ```powershell
 $env:BLOCKLY_DIST_DIR = ".block2python\\blockly-12.4.1\\package"
-powershell -ExecutionPolicy Bypass -File tools/vendor_blockly.ps1
+powershell -ExecutionPolicy Bypass -File tools/sync_blockly_vendor.ps1
 ```
 
 ## 5. 本機資料與重置

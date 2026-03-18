@@ -1,6 +1,6 @@
 # 專案架構
 
-- 更新日期：2026-03-14
+- 更新日期：2026-03-18
 - 範圍：遊戲系統骨架重構後的目前專案結構
 
 ## 1. 儲存庫結構
@@ -22,7 +22,7 @@ Block2Python/
 ```text
 src/block2python/
   analysis/       # AST 分析與分析 API
-  challenge/      # challenge 子系統：AppCore、judge factory、progress
+  level_play/      # challenge 子系統：AppCore、judge factory、progress
   clients/        # client 入口：PySide6 與 CLI
   content/        # levels loader、game content loader、內容與 runtime 模型
   contracts/      # 現有 level/judge 領域契約
@@ -43,26 +43,26 @@ src/block2python/
 
 ```text
 clients -> integration -> game
-                      -> challenge
+                      -> level_play
                       -> content
 
-game -> challenge
+game -> level_play
 game -> content
 
-challenge -> judge / analysis / contracts
+level_play -> judge / analysis / contracts
 content -> contracts
 ```
 
-### 3.1 `challenge/`
+### 3.1 `level_play/`
 
 用途：
 - 負責單題提交流程與 challenge 級進度。
 - 包含 `AppCore`、`JudgeFactory` 與 progress store 實作。
 
 主要檔案：
-- `src/block2python/challenge/app_core.py`
-- `src/block2python/challenge/judge_factory.py`
-- `src/block2python/challenge/progress.py`
+- `src/block2python/level_play/app_core.py`
+- `src/block2python/level_play/judge_factory.py`
+- `src/block2python/level_play/progress.py`
 
 ### 3.2 `content/`
 
@@ -135,7 +135,7 @@ src/block2python/clients/
   - `clients/pyside6/` 目前是 wrapper，而不是整批取代它。
 
 遷移原則：
-- 新功能應優先落在 `challenge/`、`content/`、`game/`、`integration/`、`clients/`。
+- 新功能應優先落在 `level_play/`、`content/`、`game/`、`integration/`、`clients/`。
 - 舊 package 只應在維持相容或完成遷移時修改。
 
 ## 5. 資源結構
@@ -168,7 +168,7 @@ assets/
 
 以下規則代表目前預期的架構方向：
 
-- Godot 不應直接 import `game/`、`challenge/` 或 `content/`。
+- Godot 不應直接 import `game/`、`level_play/` 或 `content/`。
 - 外部前端應依賴 `integration/`。
 - `GameSession` 是遊戲流程主入口。
 - `AppCore` 維持 challenge 子系統定位，不應膨脹成整個遊戲總控。

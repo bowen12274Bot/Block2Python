@@ -1,5 +1,5 @@
 extends RefCounted
-class_name StateMapper
+class_name GameFlowMapper
 
 
 static func map_game_state(state: Dictionary) -> Dictionary:
@@ -12,28 +12,13 @@ static func map_game_state(state: Dictionary) -> Dictionary:
 
     var scene_view: Dictionary = _build_scene_view(state, meta)
     var challenge_view: Dictionary = _build_challenge_view(state)
-    var action_view: Dictionary = _build_action_view(state)
-    var feedback_view: Dictionary = _build_feedback_view(meta, state)
+    var action_view: Dictionary = build_action_view(state)
 
     return {
         "meta": meta,
         "scene_view": scene_view,
         "challenge_view": challenge_view,
-        "feedback_view": feedback_view,
         "action_view": action_view,
-    }
-
-
-static func override_feedback(view_model: Dictionary, response: Dictionary) -> Dictionary:
-    var next_view_model: Dictionary = view_model.duplicate(true)
-    next_view_model["feedback_view"] = _build_feedback_from_response(next_view_model, response)
-    return next_view_model
-
-
-static func empty_feedback_view(message: String) -> Dictionary:
-    return {
-        "title": "Feedback",
-        "body": message,
     }
 
 
@@ -95,7 +80,7 @@ static func _build_challenge_view(state: Dictionary) -> Dictionary:
     }
 
 
-static func _build_action_view(state: Dictionary) -> Dictionary:
+static func build_action_view(state: Dictionary) -> Dictionary:
     var raw_actions: Variant = state.get("available_actions", null)
     if raw_actions is Dictionary:
         return {
@@ -106,60 +91,4 @@ static func _build_action_view(state: Dictionary) -> Dictionary:
     return {
         "can_advance": false,
         "can_submit": false,
-    }
-
-
-static func _build_feedback_view(meta: Dictionary, state: Dictionary) -> Dictionary:
-    return _build_feedback_from_response({
-        "meta": meta,
-        "action_view": _build_action_view(state),
-    }, {"ok": true, "state": state})
-
-
-static func _build_feedback_from_response(view_model: Dictionary, response: Dictionary) -> Dictionary:
-    var ok_value: bool = bool(response.get("ok", false))
-    if not ok_value:
-        return {
-            "title": "Request Failed",
-            "body": str(response.get("error", "Unknown error")),
-        }
-
-    var state: Variant = response.get("state", null)
-    if state is Dictionary:
-        var last_submission: Variant = state.get("last_submission", null)
-        if last_submission is Dictionary:
-            var lines: Array[String] = []
-            lines.append("level_id: %s" % str(last_submission.get("level_id", "")))
-            lines.append("cleared: %s" % str(bool(last_submission.get("cleared", false))))
-            lines.append("analysis: %s" % str(last_submission.get("analysis_status", "")))
-            var analysis_summary: String = str(last_submission.get("analysis_summary", ""))
-            if analysis_summary != "":
-                lines.append("analysis_summary: %s" % analysis_summary)
-            lines.append("judge: %s" % str(last_submission.get("judge_status", "")))
-            var judge_summary: String = str(last_submission.get("judge_summary", ""))
-            if judge_summary != "":
-                lines.append("judge_summary: %s" % judge_summary)
-            return {
-                "title": "Submission Result",
-                "body": "\n".join(lines),
-            }
-
-    var meta: Variant = view_model.get("meta", {})
-    var mode_value: String = ""
-    if meta is Dictionary:
-        mode_value = str(meta.get("mode", ""))
-    if mode_value == "scene":
-        return {
-            "title": "Scene Guidance",
-            "body": "Scene mode\n\nUse Advance to continue the story flow.",
-        }
-    if mode_value == "challenge":
-        return {
-            "title": "Challenge Guidance",
-            "body": "Challenge mode\n\nEdit the code and press Submit.",
-        }
-
-    return {
-        "title": "Feedback",
-        "body": "Request succeeded.",
     }

@@ -1,4 +1,4 @@
-# Wasm Judge Verification Script
+﻿# Wasm Judge Verification Script
 # Purpose: Verify wasmtime + python.wasm complete workflow, including AC/WA/TLE/MLE scenarios
 
 param(
@@ -153,10 +153,11 @@ print(f'OK WA Test Passed: {result.summary}')
     Write-Host ""
     Write-Host "Next steps:" -ForegroundColor Yellow
     Write-Host "  1. Run full tests: pytest -v" -ForegroundColor White
-    Write-Host "  2. Test TLE/MLE: .\tools\test_wasm_edge_cases.ps1" -ForegroundColor White
-    Write-Host "  3. Start app: python -m block2python" -ForegroundColor White
+    Write-Host "  2. Test TLE/MLE: .\tools\verify_wasm_limits.ps1" -ForegroundColor White
+    Write-Host "  3. Start CLI check: python -m block2python.clients.cli.main" -ForegroundColor White
     Write-Host ""
 
 } finally {
     Pop-Location
 }
+

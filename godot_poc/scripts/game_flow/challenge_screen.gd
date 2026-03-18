@@ -40,14 +40,8 @@ func _on_submit_button_pressed() -> void:
 	status_label.text = "Status: submitting code..."
 	var python_code: String = challenge_panel.get_python_code()
 	submit_requested.emit(python_code)
-	var coordinator: Node = get_parent()
-	if coordinator != null and coordinator.has_method("_on_submit_requested"):
-		coordinator.call("_on_submit_requested", python_code)
 
 
 func _on_back_button_pressed() -> void:
 	status_label.text = "Status: returning to map..."
 	back_requested.emit()
-	var coordinator: Node = get_parent()
-	if coordinator != null and coordinator.has_method("_show_map_page"):
-		coordinator.call("_show_map_page")
