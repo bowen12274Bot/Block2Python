@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 class_name QuestMapMapper
 
 const QuestMapRulesScript = preload("res://scripts/map/quest_map_rules.gd")
@@ -21,12 +21,16 @@ static func map_game_state(state: Dictionary) -> Dictionary:
 	var current_node_id: String = str(state.get("node_id", ""))
 	var current_node_title: String = str(state.get("node_title", current_node_id))
 	var mode_value: String = str(state.get("mode", ""))
+	var progress_state: Dictionary = {}
+	var progress_variant: Variant = state.get("progress", {})
+	if progress_variant is Dictionary:
+		progress_state = progress_variant
 	var map_route_variant: Variant = state.get("map_route", {})
 	var map_route: Dictionary = {}
 	if map_route_variant is Dictionary:
 		map_route = map_route_variant
 
-	var group_views: Array[Dictionary] = _build_group_views(map_route)
+	var group_views: Array[Dictionary] = _build_group_views(map_route, progress_state)
 	var summary: String = "Main map synced from live route state."
 	if group_views.is_empty():
 		summary = "Main map is waiting for route data from bridge state."
@@ -50,7 +54,7 @@ static func _quest_title_from_route(map_route: Dictionary) -> String:
 	return "Quest Map"
 
 
-static func _build_group_views(map_route: Dictionary) -> Array[Dictionary]:
+static func _build_group_views(map_route: Dictionary, progress_state: Dictionary) -> Array[Dictionary]:
 	var groups_variant: Variant = map_route.get("groups", [])
 	if not (groups_variant is Array):
 		return []
@@ -63,11 +67,11 @@ static func _build_group_views(map_route: Dictionary) -> Array[Dictionary]:
 	var group_views: Array[Dictionary] = []
 	for index in raw_groups.size():
 		var group: Dictionary = raw_groups[index]
-		group_views.append(_build_group_view(group, index, group_views))
+		group_views.append(_build_group_view(group, index, group_views, progress_state))
 	return group_views
 
 
-static func _build_group_view(group: Dictionary, group_index: int, prior_group_views: Array[Dictionary]) -> Dictionary:
+static func _build_group_view(group: Dictionary, group_index: int, prior_group_views: Array[Dictionary], progress_state: Dictionary) -> Dictionary:
 	var demo_route_steps: Array[Dictionary] = _step_dict_array(group.get("demo_route", []))
 	var practice_route_steps: Array[Dictionary] = _step_dict_array(group.get("practice_route", []))
 	var all_steps: Array[Dictionary] = []
@@ -78,13 +82,18 @@ static func _build_group_view(group: Dictionary, group_index: int, prior_group_v
 	var status_key: String = QuestMapRulesScript.group_status_key(group_index, intrinsic_status_key, prior_group_views)
 	var current_label: String = QuestMapRulesScript.group_current_label(all_steps)
 	var progress := QuestMapRulesScript.group_progress(all_steps)
-	var demo_slot: Dictionary = _build_slot_view("demo", "Demo", demo_route_steps)
-	var practice_slot: Dictionary = _build_slot_view("practice", "Practice", practice_route_steps)
+	var group_id: String = str(group.get("group_id", ""))
+	var title: String = str(group.get("title", "Group"))
+	var demo_slot: Dictionary = _build_slot_view("demo", "Demo", demo_route_steps, progress_state, group_id)
+	var practice_slot: Dictionary = _build_slot_view("practice", "Practice", practice_route_steps, progress_state, group_id)
 
 	return {
-		"group_id": str(group.get("group_id", "")),
-		"title": str(group.get("title", "Group")),
+		"group_id": group_id,
+		"title": title,
 		"subtitle": "Demo + Practice",
+		"theme_title": _theme_title_for_group(group_id, title),
+		"theme_description": _theme_description_for_group(group_id),
+		"unlock_blocks": _unlock_blocks_for_group(group_id),
 		"status_key": status_key,
 		"status_label": QuestMapRulesScript.group_status_label(status_key, QuestMapRulesScript.is_planned_only_group(all_steps)),
 		"is_enterable": status_key != "locked",
@@ -103,13 +112,28 @@ static func _build_group_view(group: Dictionary, group_index: int, prior_group_v
 	}
 
 
-static func _build_slot_view(slot_key: String, title: String, route_steps: Array[Dictionary]) -> Dictionary:
+static func _build_slot_view(slot_key: String, title: String, route_steps: Array[Dictionary], progress_state: Dictionary, group_id: String) -> Dictionary:
 	var slot_status_key: String = QuestMapRulesScript.slot_status_key(route_steps)
 	var primary_step: Dictionary = QuestMapRulesScript.primary_slot_step(route_steps)
-	var progress: Dictionary = QuestMapRulesScript.slot_progress(route_steps)
+	var cleared_level_ids: Array[String] = _string_array(progress_state.get("cleared_level_ids", []))
+	var slot_progress: Dictionary = QuestMapRulesScript.slot_progress(route_steps, cleared_level_ids)
 	var practice_levels: Array[Dictionary] = []
+	var demo_seen_group_ids: Array[String] = _string_array(progress_state.get("demo_seen_group_ids", []))
+	var demo_viewed: bool = group_id in demo_seen_group_ids
+	var is_unlocked: bool = slot_status_key != "locked"
+	var completed_count: int = int(slot_progress.get("completed", 0))
+	var total_count: int = int(slot_progress.get("total", 0))
+	var next_level_id: String = ""
+	var entry_level_id: String = ""
 	if slot_key == "practice":
-		practice_levels = QuestMapRulesScript.practice_levels(route_steps)
+		practice_levels = QuestMapRulesScript.practice_levels(route_steps, cleared_level_ids)
+		is_unlocked = demo_viewed and not primary_step.is_empty()
+		next_level_id = _first_uncleared_level_id(primary_step, cleared_level_ids)
+		entry_level_id = next_level_id if next_level_id != "" else _first_level_id(primary_step)
+		completed_count = _completed_level_count(primary_step, cleared_level_ids)
+		total_count = _level_count(primary_step)
+	else:
+		is_unlocked = true
 
 	return {
 		"slot_key": slot_key,
@@ -117,11 +141,72 @@ static func _build_slot_view(slot_key: String, title: String, route_steps: Array
 		"status_key": slot_status_key,
 		"status_label": QuestMapRulesScript.status_label(slot_status_key),
 		"summary": _build_route_summary(route_steps),
-		"progress_label": "%d / %d" % [progress["completed"], progress["total"]],
+		"progress_label": "%d / %d" % [slot_progress["completed"], slot_progress["total"]],
+		"is_unlocked": is_unlocked,
+		"viewed": demo_viewed if slot_key == "demo" else false,
+		"completed_count": completed_count,
+		"total_count": total_count,
+		"next_level_id": next_level_id,
+		"entry_level_id": entry_level_id,
 		"primary_step": primary_step,
 		"route_steps": route_steps,
 		"practice_levels": practice_levels,
 	}
+
+
+static func _theme_title_for_group(group_id: String, fallback_title: String) -> String:
+	match group_id:
+		"group-01":
+			return "Stage 01: Basic IO"
+		_:
+			return fallback_title
+
+
+static func _theme_description_for_group(group_id: String) -> String:
+	match group_id:
+		"group-01":
+			return "Learn the new IO blocks in Demo, then unlock a 5-stage Practice bundle."
+		_:
+			return "This stage will unlock new blocks and guided practice in a later update."
+
+
+static func _unlock_blocks_for_group(group_id: String) -> Array[Dictionary]:
+	match group_id:
+		"group-01":
+			return [
+				{"title": "print", "description": "Output text to the screen."},
+				{"title": "input", "description": "Read user input into your program."},
+			]
+		_:
+			return [
+				{"title": "Coming Soon", "description": "Future stages will add more blocks here."},
+			]
+
+
+static func _first_uncleared_level_id(primary_step: Dictionary, cleared_level_ids: Array[String]) -> String:
+	for level_id in _string_array(primary_step.get("level_ids", [])):
+		if level_id not in cleared_level_ids:
+			return level_id
+	return ""
+
+
+static func _first_level_id(primary_step: Dictionary) -> String:
+	var level_ids: Array[String] = _string_array(primary_step.get("level_ids", []))
+	if level_ids.is_empty():
+		return ""
+	return level_ids[0]
+
+
+static func _completed_level_count(primary_step: Dictionary, cleared_level_ids: Array[String]) -> int:
+	var completed := 0
+	for level_id in _string_array(primary_step.get("level_ids", [])):
+		if level_id in cleared_level_ids:
+			completed += 1
+	return completed
+
+
+static func _level_count(primary_step: Dictionary) -> int:
+	return _string_array(primary_step.get("level_ids", [])).size()
 
 
 static func _step_dict_array(value: Variant) -> Array[Dictionary]:
@@ -168,5 +253,3 @@ static func _string_array(value: Variant) -> Array[String]:
 		for item in value:
 			result.append(str(item))
 	return result
-
-

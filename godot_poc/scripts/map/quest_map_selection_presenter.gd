@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 class_name QuestMapSelectionPresenter
 
 
@@ -106,6 +106,13 @@ static func _append_slot_note(lines: Array[String], slot_variant: Variant) -> vo
 	if slot.is_empty():
 		return
 	lines.append("%s: %s [%s]" % [str(slot.get("title", "Slot")), str(slot.get("progress_label", "0 / 0")), str(slot.get("status_label", "Unknown"))])
+	if str(slot.get("slot_key", "")) == "demo":
+		lines.append("Demo: %s" % ("Seen" if bool(slot.get("viewed", false)) else "Unseen"))
+	if str(slot.get("slot_key", "")) == "practice":
+		lines.append("Practice: %s" % ("Available" if bool(slot.get("is_unlocked", false)) else "Locked"))
+		var entry_level_id: String = str(slot.get("entry_level_id", ""))
+		if entry_level_id != "":
+			lines.append("Practice entry level: %s" % entry_level_id)
 	var primary_step_variant: Variant = slot.get("primary_step", {})
 	if primary_step_variant is Dictionary:
 		var primary_step: Dictionary = primary_step_variant

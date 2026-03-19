@@ -1,4 +1,4 @@
-map_routes:
+﻿map_routes:
   - route_id: main-map-routes
     quest_id: quest-main-map
     title: Block2Python Main Map Routes
@@ -58,6 +58,8 @@ map_routes:
             tracked_node_ids:
               - group-01-practice
             is_repeatable: true
+            metadata:
+              requires_demo_seen_group_id: group-01
           - step_id: group-01-practice-map-return
             step_type: map_return
             title: Return To Map

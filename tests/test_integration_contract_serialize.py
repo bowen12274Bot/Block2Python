@@ -1,4 +1,4 @@
-import pytest
+﻿import pytest
 
 from block2python.integration.contracts import (
     ActionType,
@@ -39,6 +39,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
         progress=ProgressState(
             completed_node_ids=("map-entry", "story-intro"),
             cleared_level_ids=("demo-0",),
+            demo_seen_group_ids=("group-01",),
         ),
         available_actions=AvailableActions(submit=True, restart_quest=True),
         last_submission=SubmissionFeedback(
@@ -60,6 +61,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     assert payload["challenge"]["current_level_id"] == "demo-basic-io-hello"
     assert payload["challenge"]["current_level_prompt"] == "Print a greeting."
     assert payload["progress"]["completed_node_ids"] == ["map-entry", "story-intro"]
+    assert payload["progress"]["demo_seen_group_ids"] == ["group-01"]
     assert payload["available_actions"] == {
         "advance": False,
         "submit": True,

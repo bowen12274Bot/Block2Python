@@ -20,3 +20,4 @@ metadata:
   stage: map-format-skeleton
   group_id: group-01
   slot: demo
+  auto_clear_on_enter: true

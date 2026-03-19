@@ -172,3 +172,103 @@ text = "Map Notes"
 layout_mode = 2
 autowrap_mode = 3
 text = "Use Reset to load the latest quest state. Main map routing now comes from bridge map_route data."
+
+[node name="StageOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="Backdrop" type="ColorRect" parent="StageOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.45)
+mouse_filter = 1
+
+[node name="Center" type="CenterContainer" parent="StageOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="StageOverlay/Center"]
+custom_minimum_size = Vector2(620, 0)
+layout_mode = 2
+
+[node name="OverlayMargin" type="MarginContainer" parent="StageOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="OverlayRoot" type="VBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleColumn" type="VBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="StageTitle" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Stage"
+
+[node name="StageSubtitle" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn"]
+layout_mode = 2
+text = "Demo + Practice"
+
+[node name="CloseButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header"]
+layout_mode = 2
+text = "Close"
+
+[node name="StageDescription" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Stage description"
+
+[node name="UnlockTitle" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "New Blocks"
+
+[node name="UnlockBlocks" type="HFlowContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+
+[node name="ActionNote" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Choose Demo or Practice."
+
+[node name="Buttons" type="HBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StartDemoButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Start Demo"
+
+[node name="StartPracticeButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Practice"

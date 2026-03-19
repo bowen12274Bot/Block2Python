@@ -57,7 +57,7 @@ func show_map(map_view: Dictionary) -> void:
 
 func _add_group_card(group_view: Dictionary) -> void:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(220, 120)
+	button.custom_minimum_size = Vector2(220, 140)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
@@ -66,9 +66,19 @@ func _add_group_card(group_view: Dictionary) -> void:
 		str(group_view.get("subtitle", "")),
 		"[%s]" % str(group_view.get("status_label", "Unknown")),
 	]
-	var progress_label: String = str(group_view.get("progress_label", ""))
-	if progress_label != "":
-		detail_lines.append(progress_label)
+	var demo_slot_variant: Variant = group_view.get("demo_slot", {})
+	if demo_slot_variant is Dictionary:
+		var demo_slot: Dictionary = demo_slot_variant
+		detail_lines.append("Demo: %s" % ("Seen" if bool(demo_slot.get("viewed", false)) else "Unseen"))
+	var practice_slot_variant: Variant = group_view.get("practice_slot", {})
+	if practice_slot_variant is Dictionary:
+		var practice_slot: Dictionary = practice_slot_variant
+		var completed_count: int = int(practice_slot.get("completed_count", 0))
+		var total_count: int = int(practice_slot.get("total_count", 0))
+		var practice_state: String = "%d / %d" % [completed_count, total_count]
+		if not bool(practice_slot.get("is_unlocked", false)):
+			practice_state = "Locked"
+		detail_lines.append("Practice: %s" % practice_state)
 	var current_label: String = str(group_view.get("current_label", ""))
 	if current_label != "":
 		detail_lines.append(current_label)

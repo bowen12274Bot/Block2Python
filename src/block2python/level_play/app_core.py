@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
@@ -110,3 +110,11 @@ class AppCore:
 
     def is_cleared(self, level_id: str) -> bool:
         return self._progress.is_cleared(level_id)
+
+    def mark_cleared(self, level_id: str) -> bool:
+        level = self._levels.get(level_id)
+        if level is None:
+            return False
+        self._progress.mark_block_passed(level_id)
+        self._progress.mark_cleared(level_id)
+        return True

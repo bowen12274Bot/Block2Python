@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from block2python.game import GameSession, GameSessionError
 from block2python.integration.contracts import ActionType, GameState, PlayerAction
@@ -24,6 +24,22 @@ def dispatch(session: GameSession, action: PlayerAction) -> GameState:
                 raise IntegrationDispatchError("submit_level payload.block_json must be a dict or null")
 
             session.submit_current_level(python_code=python_code, block_json=block_json)
+            return session.current_game_state()
+
+        if action.action_type is ActionType.START_GROUP_DEMO:
+            group_id = action.payload.get("group_id")
+            if not isinstance(group_id, str) or not group_id:
+                raise IntegrationDispatchError("start_group_demo requires payload.group_id")
+
+            session.start_group_demo(group_id)
+            return session.current_game_state()
+
+        if action.action_type is ActionType.START_GROUP_PRACTICE:
+            group_id = action.payload.get("group_id")
+            if not isinstance(group_id, str) or not group_id:
+                raise IntegrationDispatchError("start_group_practice requires payload.group_id")
+
+            session.start_group_practice(group_id)
             return session.current_game_state()
 
         if action.action_type is ActionType.RESTART_QUEST:

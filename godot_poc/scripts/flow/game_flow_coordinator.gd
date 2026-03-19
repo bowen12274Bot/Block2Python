@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 class_name GameFlowCoordinator
 
 const DEFAULT_CHALLENGE_CODE := "print(3)\n"
@@ -27,7 +27,8 @@ func _ready() -> void:
 	map_screen.advance_requested.connect(_on_advance_requested)
 	map_screen.node_open_requested.connect(_on_open_current_node_requested)
 	map_screen.debug_toggled.connect(_on_debug_toggled)
-	map_screen.group_route_requested.connect(_on_group_route_requested)
+	map_screen.stage_demo_requested.connect(_on_stage_demo_requested)
+	map_screen.stage_practice_requested.connect(_on_stage_practice_requested)
 	scene_screen.advance_requested.connect(_on_advance_requested)
 	scene_screen.back_requested.connect(_show_map_page)
 	challenge_screen.submit_requested.connect(_on_submit_requested)
@@ -80,6 +81,22 @@ func _on_open_current_node_requested() -> void:
 		return
 
 	map_screen.set_note("Current node cannot be opened as a separate page.")
+
+
+func _on_stage_demo_requested(group_id: String) -> void:
+	if not _state_store.has_state():
+		map_screen.set_note("No GameState loaded yet. Start the bridge and press Reset first.")
+		return
+	map_screen.set_status("Status: opening demo...")
+	python_bridge_client.send_start_group_demo(group_id)
+
+
+func _on_stage_practice_requested(group_id: String) -> void:
+	if not _state_store.has_state():
+		map_screen.set_note("No GameState loaded yet. Start the bridge and press Reset first.")
+		return
+	map_screen.set_status("Status: opening practice...")
+	python_bridge_client.send_start_group_practice(group_id)
 
 
 func _on_group_route_requested(group_view: Dictionary) -> void:
@@ -204,13 +221,11 @@ func _render_flow_views(view_model: Dictionary, feedback_view: Dictionary) -> vo
 	scene_screen.set_can_advance(can_advance)
 	challenge_screen.show_challenge(view_model.get("challenge_view", {}))
 	challenge_screen.show_feedback(feedback_view)
-	challenge_screen.set_status("Status: challenge flow ready")
+	challenge_screen.set_status("Challenge flow ready")
 	challenge_screen.set_can_submit(can_submit)
 
 
 func _route_after_response(state: Dictionary) -> void:
-	if _current_page == "map":
-		return
 	_show_page(_resolved_page_for_state(state))
 
 

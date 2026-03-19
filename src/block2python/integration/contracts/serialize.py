@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from .errors import IntegrationContractValidationError
 from .models import ActionType, GameState, PlayerAction
@@ -71,6 +71,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
         "progress": {
             "completed_node_ids": list(state.progress.completed_node_ids),
             "cleared_level_ids": list(state.progress.cleared_level_ids),
+            "demo_seen_group_ids": list(state.progress.demo_seen_group_ids),
         },
         "available_actions": {
             "advance": state.available_actions.advance,
@@ -135,5 +136,9 @@ def deserialize_player_action(payload: object) -> PlayerAction:
     python_code = normalized_payload.get("python_code")
     if python_code is not None and not isinstance(python_code, str):
         raise IntegrationContractValidationError("PlayerAction.payload.python_code must be a string")
+
+    group_id = normalized_payload.get("group_id")
+    if group_id is not None and not isinstance(group_id, str):
+        raise IntegrationContractValidationError("PlayerAction.payload.group_id must be a string")
 
     return PlayerAction(action_type=parsed_action_type, payload=normalized_payload)

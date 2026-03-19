@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 class_name QuestMapRules
 
 
@@ -23,7 +23,7 @@ static func primary_slot_step(route_steps: Array[Dictionary]) -> Dictionary:
 	return {}
 
 
-static func slot_progress(route_steps: Array[Dictionary]) -> Dictionary:
+static func slot_progress(route_steps: Array[Dictionary], cleared_level_ids: Array[String] = []) -> Dictionary:
 	var tracked_steps: Array[Dictionary] = []
 	for step in route_steps:
 		if is_trackable_step(step):
@@ -34,7 +34,7 @@ static func slot_progress(route_steps: Array[Dictionary]) -> Dictionary:
 	var level_ids: Array[String] = _string_array(primary_step.get("level_ids", []))
 	if level_ids.size() > 1:
 		var completed_levels := 0
-		var level_views: Array[Dictionary] = practice_levels(route_steps)
+		var level_views: Array[Dictionary] = practice_levels(route_steps, cleared_level_ids)
 		for level_view in level_views:
 			if str(level_view.get("status_key", "")) == "completed":
 				completed_levels += 1
@@ -46,19 +46,20 @@ static func slot_progress(route_steps: Array[Dictionary]) -> Dictionary:
 	return {"completed": completed, "total": tracked_steps.size()}
 
 
-static func practice_levels(route_steps: Array[Dictionary]) -> Array[Dictionary]:
+static func practice_levels(route_steps: Array[Dictionary], cleared_level_ids: Array[String] = []) -> Array[Dictionary]:
 	var primary_step: Dictionary = primary_slot_step(route_steps)
 	var level_ids: Array[String] = _string_array(primary_step.get("level_ids", []))
-	var step_status_key: String = str(primary_step.get("status_key", "locked"))
 	var results: Array[Dictionary] = []
+	var unlocked := false
 	for index in level_ids.size():
 		var level_id: String = level_ids[index]
 		var level_status_key: String = "locked"
-		if step_status_key == "completed":
+		if level_id in cleared_level_ids:
 			level_status_key = "completed"
-		elif step_status_key == "current" or step_status_key == "available":
-			if index == 0:
-				level_status_key = step_status_key
+			unlocked = true
+		elif not unlocked:
+			level_status_key = "available"
+			unlocked = true
 		results.append({
 			"level_id": level_id,
 			"title": "Practice %02d" % [index + 1],

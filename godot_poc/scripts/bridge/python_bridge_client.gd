@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 class_name PythonBridgeClient
 
 signal bridge_started()
@@ -83,6 +83,28 @@ func send_submit_level(python_code: String) -> void:
 			"payload": {
 				"python_code": python_code,
 				"block_json": null,
+			},
+		},
+	})
+
+
+func send_start_group_demo(group_id: String) -> void:
+	send_request({
+		"action": {
+			"action_type": "start_group_demo",
+			"payload": {
+				"group_id": group_id,
+			},
+		},
+	})
+
+
+func send_start_group_practice(group_id: String) -> void:
+	send_request({
+		"action": {
+			"action_type": "start_group_practice",
+			"payload": {
+				"group_id": group_id,
 			},
 		},
 	})

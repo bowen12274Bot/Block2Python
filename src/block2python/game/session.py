@@ -13,7 +13,7 @@ from block2python.content import (
     ResolvedChallengeSpec,
     SceneSpec,
 )
-from block2python.contracts import LevelSpec, Submission
+from block2python.contracts import AnalysisResult, AnalysisStatus, JudgeResult, JudgeStatus, LevelSpec, Submission
 from block2python.integration.contracts import (
     AvailableActions,
     ChallengeState,
@@ -57,6 +57,7 @@ class GameSession:
     app: AppCore
     runtime: GameRuntime
     scene_seen_node_ids: set[str] = field(default_factory=set)
+    demo_seen_group_ids: set[str] = field(default_factory=set)
     last_submission: SubmissionFeedback | None = None
 
     @classmethod
@@ -64,6 +65,7 @@ class GameSession:
         return cls(app=app, runtime=GameRuntime.start(game_slice, quest_id=quest_id))
 
     def current_state(self) -> GameSessionState:
+        self._sync_demo_seen_from_runtime()
         runtime_state = self.runtime.current_state()
         if runtime_state is None:
             return GameSessionState(mode=SessionMode.COMPLETE, quest_id=self.runtime.quest.quest_id)
@@ -174,6 +176,37 @@ class GameSession:
         self.runtime.complete_current_node()
         return self.current_state()
 
+    def start_group_demo(self, group_id: str) -> GameSessionState:
+        if not group_id:
+            raise GameSessionError("group_id is required")
+        group = self._route_group(group_id)
+        if group is None:
+            raise GameSessionError(f"Unknown group_id: {group_id}")
+        target_node_id = self._entry_node_id_for_steps(group.demo_route)
+        if target_node_id is None:
+            raise GameSessionError(f"Group {group_id} has no demo entry node")
+
+        self.demo_seen_group_ids.add(group_id)
+        self._jump_to_node(target_node_id)
+        return self.current_state()
+
+    def start_group_practice(self, group_id: str) -> GameSessionState:
+        if not group_id:
+            raise GameSessionError("group_id is required")
+        self._sync_demo_seen_from_runtime()
+        if group_id not in self.demo_seen_group_ids:
+            raise GameSessionError(f"Practice for {group_id} is still locked")
+
+        group = self._route_group(group_id)
+        if group is None:
+            raise GameSessionError(f"Unknown group_id: {group_id}")
+        target_node_id = self._entry_node_id_for_steps(group.practice_route)
+        if target_node_id is None:
+            raise GameSessionError(f"Group {group_id} has no practice entry node")
+
+        self._jump_to_node(target_node_id)
+        return self.current_state()
+
     def submit_current_level(self, *, python_code: str, block_json: dict | None = None) -> tuple[GameSessionState, SubmitOutcome]:
         state = self.current_state()
         if state.mode is not SessionMode.CHALLENGE:
@@ -182,9 +215,18 @@ class GameSession:
             raise GameSessionError("Challenge node has no current level")
 
         self.app.mark_block_passed(state.current_level_id)
-        outcome = self.app.submit(
-            Submission(level_id=state.current_level_id, python_code=python_code, block_json=block_json)
-        )
+        if self._is_placeholder_auto_ac_level(state.current_level_id):
+            self.app.mark_cleared(state.current_level_id)
+            outcome = SubmitOutcome(
+                analysis=AnalysisResult(status=AnalysisStatus.PASS, summary="Placeholder level auto-cleared"),
+                judge=JudgeResult(status=JudgeStatus.AC, summary="Placeholder level auto-cleared"),
+                cleared=True,
+                block_passed=True,
+            )
+        else:
+            outcome = self.app.submit(
+                Submission(level_id=state.current_level_id, python_code=python_code, block_json=block_json)
+            )
         self.last_submission = SubmissionFeedback(
             level_id=state.current_level_id,
             cleared=outcome.cleared,
@@ -198,8 +240,12 @@ class GameSession:
 
     def _current_level_for_challenge(self, challenge: ResolvedChallengeSpec) -> LevelSpec | None:
         for level in challenge.levels:
-            if not self.app.is_cleared(level.level_id):
-                return level
+            if self.app.is_cleared(level.level_id):
+                continue
+            if self._should_auto_clear_on_enter(level):
+                self.app.mark_cleared(level.level_id)
+                continue
+            return level
         return None
 
     def _scene_state(self, scene: SceneSpec | None) -> SceneState | None:
@@ -230,6 +276,7 @@ class GameSession:
         return ProgressState(
             completed_node_ids=completed_node_ids,
             cleared_level_ids=cleared_level_ids,
+            demo_seen_group_ids=tuple(sorted(self.demo_seen_group_ids)),
         )
 
     def _map_route_state(self, state: GameSessionState, progress: ProgressState) -> MapRouteState | None:
@@ -301,6 +348,7 @@ class GameSession:
     ) -> str:
         completed_node_ids = set(progress.completed_node_ids)
         cleared_level_ids = set(progress.cleared_level_ids)
+        demo_seen_group_ids = set(progress.demo_seen_group_ids)
 
         if self._is_route_step_current(step, state):
             return "current"
@@ -308,7 +356,7 @@ class GameSession:
             return "completed"
         if step.is_planned and not step.tracked_node_ids and not step.level_ids and step.node_id is None and step.challenge_id is None:
             return "planned"
-        if self._is_route_step_available(step, route_steps, completed_node_ids, cleared_level_ids):
+        if self._is_route_step_available(step, route_steps, completed_node_ids, cleared_level_ids, demo_seen_group_ids):
             return "available"
         return "locked"
 
@@ -345,7 +393,12 @@ class GameSession:
         route_steps: tuple[MapRouteStepSpec, ...],
         completed_node_ids: set[str],
         cleared_level_ids: set[str],
+        demo_seen_group_ids: set[str],
     ) -> bool:
+        required_group_id = step.metadata.get("requires_demo_seen_group_id")
+        if isinstance(required_group_id, str) and required_group_id not in demo_seen_group_ids:
+            return False
+
         step_index = route_steps.index(step)
         if step_index == 0:
             return True
@@ -368,3 +421,63 @@ class GameSession:
             return "Planned"
         return "Locked"
 
+    def _route_group(self, group_id: str) -> GroupMapRoutesSpec | None:
+        route_spec = self._route_spec_for_current_quest()
+        if route_spec is None:
+            return None
+        for group in route_spec.groups:
+            if group.group_id == group_id:
+                return group
+        return None
+
+    def _sync_demo_seen_from_runtime(self) -> None:
+        route_spec = self._route_spec_for_current_quest()
+        runtime_state = self.runtime.current_state()
+        if route_spec is None or runtime_state is None:
+            return
+
+        current_node_id = runtime_state.node.node_id
+        completed_node_ids = set(self.runtime.completed_node_ids)
+        for group in route_spec.groups:
+            for step in group.demo_route:
+                if step.step_type == "map":
+                    continue
+                if step.node_id == current_node_id:
+                    self.demo_seen_group_ids.add(group.group_id)
+                    break
+                tracked_ids = set(step.tracked_node_ids)
+                if tracked_ids and tracked_ids & completed_node_ids:
+                    self.demo_seen_group_ids.add(group.group_id)
+                    break
+
+    def _jump_to_node(self, node_id: str) -> None:
+        if node_id not in self.runtime.quest.node_ids:
+            raise GameSessionError(f"Node {node_id} is not part of quest {self.runtime.quest.quest_id}")
+        self.runtime.current_node_id = node_id
+        self.last_submission = None
+        self.scene_seen_node_ids.discard(node_id)
+
+    @staticmethod
+    def _entry_node_id_for_steps(route_steps: tuple[MapRouteStepSpec, ...]) -> str | None:
+        for step in route_steps:
+            if step.target_page == "map":
+                continue
+            if step.node_id is not None:
+                return step.node_id
+        return None
+
+    def _first_uncleared_level_id(self, challenge: ResolvedChallengeSpec) -> str | None:
+        for level in challenge.levels:
+            if not self.app.is_cleared(level.level_id):
+                return level.level_id
+        return challenge.levels[0].level_id if challenge.levels else None
+
+    def _is_placeholder_auto_ac_level(self, level_id: str) -> bool:
+        level = self.runtime.game_slice.levels.get(level_id)
+        if level is None:
+            return False
+        return bool(level.metadata.get("placeholder_auto_ac", False))
+
+    @staticmethod
+    def _should_auto_clear_on_enter(level: LevelSpec) -> bool:
+        return bool(level.metadata.get("auto_clear_on_enter", False))

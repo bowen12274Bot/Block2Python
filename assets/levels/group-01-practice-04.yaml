@@ -1,4 +1,4 @@
-level_id: group-01-practice-04
+﻿level_id: group-01-practice-04
 title: Group 01 Practice 04 Placeholder
 chapter_id: map-groups
 order_index: 1004
@@ -18,3 +18,4 @@ metadata:
   stage: map-format-skeleton
   group_id: group-01
   slot: practice-04
+  placeholder_auto_ac: true
