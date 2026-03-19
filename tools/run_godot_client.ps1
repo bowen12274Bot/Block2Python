@@ -45,7 +45,7 @@ function Resolve-GodotExecutable {
 try {
   $godotExe = Resolve-GodotExecutable -Version $GodotVersion -UseConsole:$Console
   if (-not $godotExe) {
-    throw "Godot executable not found. Run tools/setup_dev_env.ps1 first, or place Godot in .block2python\\godot\\$GodotVersion\\"
+    throw "Godot executable not found. Run tools/setup_project.ps1 first, or place Godot in .block2python\\godot\\$GodotVersion\\"
   }
 
   $projectPath = Join-Path $repoRoot "godot_poc"

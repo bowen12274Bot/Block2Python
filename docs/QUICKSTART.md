@@ -11,7 +11,7 @@
 建議直接使用工具腳本：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1
+powershell -ExecutionPolicy Bypass -File tools/setup_project.ps1
 ```
 
 如果要手動建立：

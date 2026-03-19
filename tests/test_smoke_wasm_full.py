@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import shutil
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -105,30 +106,28 @@ class TestWasmJudgeSmoke:
 @pytest.mark.requires_wasm
 @pytest.mark.integration
 class TestWasmJudgeYAMLLevels:
-    def test_load_and_judge_demo_basic_io_hello(self, wasm_judge: WasmJudge):
+    def test_load_and_judge_benchmark_level(self, wasm_judge: WasmJudge):
         levels = load_levels(Path("assets/levels"))
-        level = levels.get("demo-basic-io-hello")
+        level = levels.get("judge-precision-sum-series")
         if level is None:
-            pytest.skip("demo-basic-io-hello level id not found")
+            pytest.skip("judge-precision-sum-series level id not found")
 
-        submission = Submission(
-            level_id=level.level_id,
-            python_code="name = input()\nprint('Hello, ' + name)",
+        # On some Windows hosts the wasm Python runtime needs a higher memory cap.
+        level = replace(
+            level,
+            judge_policy=replace(level.judge_policy, memory_limit_kb=max(level.judge_policy.memory_limit_kb or 0, 256 * 1024)),
         )
-        result = wasm_judge.judge(submission, level)
-
-        assert result.status == JudgeStatus.AC
-        assert all(case.status == "PASS" for case in result.case_results)
-
-    def test_load_and_judge_practice_basic_io_sum(self, wasm_judge: WasmJudge):
-        levels = load_levels(Path("assets/levels"))
-        level = levels.get("practice-basic-io-sum")
-        if level is None:
-            pytest.skip("practice-basic-io-sum level id not found")
 
         submission = Submission(
             level_id=level.level_id,
-            python_code="a = int(input())\nb = int(input())\nprint(a + b)",
+            python_code=(
+                "import sys\n"
+                "n = int(sys.stdin.readline().strip())\n"
+                "total = 0\n"
+                "for i in range(1, n + 1):\n"
+                "    total += i * i\n"
+                "print(total)\n"
+            ),
         )
         result = wasm_judge.judge(submission, level)
 

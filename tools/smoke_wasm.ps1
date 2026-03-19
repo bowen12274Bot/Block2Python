@@ -14,12 +14,7 @@ if (-not $WasmPath) {
     $WasmPath = "assets/wasm/python.wasm"
 }
 if (-not $WasmtimeBin) {
-    $localWasmtime = Join-Path $repoRoot ".block2python\tools\wasmtime\wasmtime.exe"
-    if (Test-Path $localWasmtime) {
-        $WasmtimeBin = $localWasmtime
-    } else {
-        $WasmtimeBin = "wasmtime"
-    }
+    $WasmtimeBin = "wasmtime"
 }
 
 $env:BLOCK2PYTHON_JUDGE_MODE = "wasm"
@@ -34,7 +29,7 @@ $venvPy = Join-Path $repoRoot ".venv\Scripts\python.exe"
 if (Test-Path $venvPy) {
     & $venvPy -m block2python.clients.cli.main
 } else {
-    Write-Host "Missing .venv. Run: tools/setup_dev_env.ps1"
+    Write-Host "Missing .venv. Run: tools/setup_project.ps1"
     exit 1
 }
 

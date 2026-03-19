@@ -4,7 +4,7 @@
 
 ## 主線腳本
 
-- `tools/setup_dev_env.ps1`
+- `tools/setup_project.ps1`
   建立 `.venv`，安裝開發依賴，並可選擇下載 Godot、Wasmtime、Blockly vendor 資源。
 - `tools/run_godot_client.ps1`
   啟動 `godot_poc/`，這是目前主要的 client 入口。

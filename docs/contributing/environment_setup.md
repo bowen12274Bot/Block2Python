@@ -20,7 +20,7 @@ pip install -e ".[dev]"
 或直接使用腳本：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1
+powershell -ExecutionPolicy Bypass -File tools/setup_project.ps1
 ```
 
 這個腳本目前可做四件事：
@@ -33,19 +33,19 @@ powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1
 若你只想配置 Python 環境、不下載 Godot / Wasmtime：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1 -SkipGodot -SkipWasmtime
+powershell -ExecutionPolicy Bypass -File tools/setup_project.ps1 -SkipGodot -SkipWasmtime
 ```
 
 若你想一起下載 Blockly：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1 -IncludeBlockly
+powershell -ExecutionPolicy Bypass -File tools/setup_project.ps1 -IncludeBlockly
 ```
 
 若你手上已經有解壓好的 Blockly dist 目錄：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1 -IncludeBlockly -BlocklyDistDir ".block2python\\vendor\\blockly-12.4.1\\package"
+powershell -ExecutionPolicy Bypass -File tools/setup_project.ps1 -IncludeBlockly -BlocklyDistDir ".block2python\\vendor\\blockly-12.4.1\\package"
 ```
 
 ### 1.2 啟動
@@ -77,7 +77,7 @@ powershell -ExecutionPolicy Bypass -File tools/legacy/run_pyside6_client.ps1
 .block2python\godot\4.6.1\
 ```
 
-`tools/setup_dev_env.ps1` 會自動下載：
+`tools/setup_project.ps1` 會自動下載：
 
 - `Godot_v4.6.1-stable_win64.exe`
 - `Godot_v4.6.1-stable_win64_console.exe`
@@ -107,7 +107,7 @@ powershell -ExecutionPolicy Bypass -File tools/legacy/run_pyside6_client.ps1
 .block2python\tools\wasmtime\
 ```
 
-`tools/setup_dev_env.ps1` 會自動下載：
+`tools/setup_project.ps1` 會自動下載：
 
 - `wasmtime.exe`
 
