@@ -10,6 +10,12 @@ scenes:
 challenges:
   - file: challenges/challenge-demo-basic-io.yaml
   - file: challenges/challenge-practice-basic-io.yaml
+  - file: challenges/challenge-group-01-demo.yaml
+  - file: challenges/challenge-group-01-practice.yaml
+  - file: challenges/challenge-group-02-demo.yaml
+  - file: challenges/challenge-group-02-practice.yaml
+  - file: challenges/challenge-group-03-demo.yaml
+  - file: challenges/challenge-group-03-practice.yaml
 toolbox:
   - file: toolbox/toolbox-basic-io.yaml
 battery:

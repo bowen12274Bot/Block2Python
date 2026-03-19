@@ -14,11 +14,11 @@ const StateMapperScript = preload("res://scripts/state_mapper.gd")
 @onready var debug_panel: PanelContainer = $Margin/DebugPanel
 @onready var response_text: RichTextLabel = $Margin/DebugPanel/DebugMargin/DebugRoot/ResponseText
 
-@onready var start_bridge_button: Button = $MapScreen/Margin/Root/Buttons/StartBridgeButton
-@onready var reset_button: Button = $MapScreen/Margin/Root/Buttons/ResetButton
-@onready var map_advance_button: Button = $MapScreen/Margin/Root/Buttons/AdvanceButton
-@onready var open_node_button: Button = $MapScreen/Margin/Root/Buttons/OpenNodeButton
-@onready var debug_toggle_button: Button = $MapScreen/Margin/Root/Buttons/DebugToggleButton
+@onready var start_bridge_button: Button = get_node_or_null("MapScreen/Margin/Scroll/Root/Buttons/StartBridgeButton")
+@onready var reset_button: Button = get_node_or_null("MapScreen/Margin/Scroll/Root/Buttons/ResetButton")
+@onready var map_advance_button: Button = get_node_or_null("MapScreen/Margin/Scroll/Root/Buttons/AdvanceButton")
+@onready var open_node_button: Button = get_node_or_null("MapScreen/Margin/Scroll/Root/Buttons/OpenNodeButton")
+@onready var debug_toggle_button: Button = get_node_or_null("MapScreen/Margin/Scroll/Root/Buttons/DebugToggleButton")
 
 var _state_store: RefCounted
 var _current_page: String = "map"
@@ -26,11 +26,16 @@ var _current_page: String = "map"
 
 func _ready() -> void:
 	_state_store = BridgeStateStoreScript.new()
-	start_bridge_button.pressed.connect(_on_start_bridge_requested)
-	reset_button.pressed.connect(_on_reset_requested)
-	map_advance_button.pressed.connect(_on_advance_requested)
-	open_node_button.pressed.connect(_on_open_current_node_requested)
-	debug_toggle_button.toggled.connect(_on_debug_toggled)
+	if start_bridge_button != null:
+		start_bridge_button.pressed.connect(_on_start_bridge_requested)
+	if reset_button != null:
+		reset_button.pressed.connect(_on_reset_requested)
+	if map_advance_button != null:
+		map_advance_button.pressed.connect(_on_advance_requested)
+	if open_node_button != null:
+		open_node_button.pressed.connect(_on_open_current_node_requested)
+	if debug_toggle_button != null:
+		debug_toggle_button.toggled.connect(_on_debug_toggled)
 	bridge_client.bridge_started.connect(_on_bridge_started)
 	bridge_client.bridge_failed.connect(_on_bridge_failed)
 	bridge_client.response_received.connect(_on_response_received)
@@ -38,7 +43,7 @@ func _ready() -> void:
 	challenge_screen.initialize(DEFAULT_CHALLENGE_CODE)
 	map_screen.show_map(QuestMapViewModelMapperScript.empty_map_view("Click Start Bridge, then Reset to load the current quest map."))
 	map_screen.set_status("Status: idle")
-	map_screen.set_note("Use Reset to load the latest quest state. Then open the current node to enter story or challenge flow.")
+	map_screen.set_note("Use Reset to load the latest quest state. The old basic-io quest slice is paused while the new map-level nodes are being integrated.")
 	map_screen.set_bridge_running(false)
 	map_screen.set_can_advance(false)
 	map_screen.set_current_node_enterable(false)
@@ -87,6 +92,22 @@ func _on_open_current_node_requested() -> void:
 	map_screen.set_note("Current node cannot be opened as a separate page.")
 
 
+func _on_group_route_requested(group_view: Dictionary) -> void:
+	var status_key: String = str(group_view.get("status_key", "locked"))
+	if status_key == "locked":
+		map_screen.set_note("This group is still locked.")
+		return
+	if status_key == "current":
+		_on_open_current_node_requested()
+		return
+
+	var scene_view: Dictionary = _build_group_route_scene(group_view)
+	scene_screen.show_scene(scene_view)
+	scene_screen.set_status("Status: group route preview")
+	scene_screen.set_can_advance(false)
+	_show_page("scene")
+
+
 func _on_advance_requested() -> void:
 	if _current_page == "scene":
 		scene_screen.set_status("Status: requesting advance...")
@@ -100,7 +121,6 @@ func _on_submit_requested(python_code: String) -> void:
 	bridge_client.send_submit_level(python_code)
 
 
-@warning_ignore("shadowed_variable_base_class")
 func _on_debug_toggled(debug_visible: bool) -> void:
 	_set_debug_visible(debug_visible)
 
@@ -155,7 +175,7 @@ func _render_map_view(map_view: Dictionary, state: Dictionary, view_model: Dicti
 	if can_open:
 		map_screen.set_note("Open Current Node to enter the active story or challenge page. The map reflects the live quest state.")
 	elif can_advance:
-		map_screen.set_note("This node has no standalone page. Use Advance to move to the next story node.")
+		map_screen.set_note("This node has no standalone page yet. Use Advance to move to the next story node.")
 	else:
 		map_screen.set_note("Current node cannot be opened as a separate page.")
 
@@ -234,3 +254,30 @@ func _has_challenge_payload(state: Dictionary) -> bool:
 		var challenge_dict: Dictionary = challenge_value
 		return not challenge_dict.is_empty()
 	return false
+
+
+func _build_group_route_scene(group_view: Dictionary) -> Dictionary:
+	var body_lines: Array[String] = []
+	body_lines.append("Status: %s" % str(group_view.get("status_label", "Unknown")))
+	body_lines.append(str(group_view.get("progress_label", "")))
+	var current_label: String = str(group_view.get("current_label", ""))
+	if current_label != "":
+		body_lines.append(current_label)
+
+	var node_titles: Variant = group_view.get("node_titles", [])
+	if node_titles is Array and not node_titles.is_empty():
+		body_lines.append("Flow nodes:")
+		for node_title in node_titles:
+			body_lines.append("- %s" % str(node_title))
+	else:
+		body_lines.append("This group is currently a map placeholder with no concrete nodes attached.")
+
+	body_lines.append("")
+	body_lines.append("This preview route is local to the Godot client. It does not change the bridge GameState.")
+
+	return {
+		"mode_label": "Mode: group-route",
+		"node_label": "Group: %s" % str(group_view.get("group_id", "-")),
+		"title": str(group_view.get("title", "Group Route")),
+		"body": "\n".join(body_lines),
+	}

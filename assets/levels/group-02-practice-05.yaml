@@ -1,0 +1,18 @@
+level_id: group-02-practice-05
+title: Group 02 Practice 05 Placeholder
+chapter_id: map-groups
+order_index: 2005
+prerequisite_level_ids:
+  - group-02-practice-04
+prompt: |
+  Placeholder practice level 05 for group-02.
+learning_markdown: |
+  Placeholder practice scaffold.
+testcase_dir: cases/group-02-practice-05
+judge_policy:
+  time_limit_ms: 1000
+  memory_limit_mb: 64
+metadata:
+  stage: map-format-skeleton
+  group_id: group-02
+  slot: practice-05

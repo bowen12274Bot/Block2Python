@@ -1,0 +1,20 @@
+level_id: group-01-practice-03
+title: Group 01 Practice 03 Placeholder
+chapter_id: map-groups
+order_index: 1003
+prerequisite_level_ids:
+  - group-01-practice-02
+next_level_ids:
+  - group-01-practice-04
+prompt: |
+  Placeholder practice level 03 for group-01.
+learning_markdown: |
+  Placeholder practice scaffold.
+testcase_dir: cases/group-01-practice-03
+judge_policy:
+  time_limit_ms: 1000
+  memory_limit_mb: 64
+metadata:
+  stage: map-format-skeleton
+  group_id: group-01
+  slot: practice-03

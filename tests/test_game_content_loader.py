@@ -38,6 +38,17 @@ def test_assemble_runtime_game_slice_against_levels_assets() -> None:
     assert practice.toolbox_policy is not None
     assert practice.battery_policy is not None
 
+    group_02_practice = assembled.challenges["challenge-group-02-practice"]
+    assert [level.level_id for level in group_02_practice.levels] == [
+        "group-02-practice-01",
+        "group-02-practice-02",
+        "group-02-practice-03",
+        "group-02-practice-04",
+        "group-02-practice-05",
+    ]
+    assert group_02_practice.toolbox_policy is None
+    assert group_02_practice.battery_policy is None
+
 
 def test_missing_level_reference_raises(tmp_path: Path) -> None:
     levels_dir = tmp_path / "levels"

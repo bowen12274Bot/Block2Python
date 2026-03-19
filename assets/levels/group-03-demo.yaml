@@ -1,0 +1,22 @@
+level_id: group-03-demo
+title: Group 03 Demo Placeholder
+chapter_id: map-groups
+order_index: 3000
+prompt: |
+  Placeholder demo level for group-03.
+learning_markdown: |
+  Placeholder content scaffold for future demo content.
+story_intro_markdown: |
+  Placeholder intro for group-03 demo.
+story_outro_markdown: |
+  Placeholder outro for group-03 demo.
+next_level_ids:
+  - group-03-practice-01
+testcase_dir: cases/group-03-demo
+judge_policy:
+  time_limit_ms: 1000
+  memory_limit_mb: 64
+metadata:
+  stage: map-format-skeleton
+  group_id: group-03
+  slot: demo

@@ -24,6 +24,8 @@
 - `godot_client_structure_plan.md`
 - `godot_quest_map_vertical_slice_plan.md`
 - `godot_screen_separation_plan.md`
+- `godot_map_completion_plan.md`
+- `godot_map_integration_plan.md`
 
 ## 命名規則與延伸
 
