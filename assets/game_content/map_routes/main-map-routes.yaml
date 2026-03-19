@@ -1,0 +1,197 @@
+map_routes:
+  - route_id: main-map-routes
+    quest_id: quest-main-map
+    title: Block2Python Main Map Routes
+    groups:
+      - group_id: group-01
+        title: Group 01
+        demo_route:
+          - step_id: group-01-demo-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-01-demo-story
+            step_type: story
+            title: Story Scene
+            target_page: scene
+            node_id: group-01-story
+            scene_id: scene-city-alarm
+            tracked_node_ids:
+              - group-01-story
+          - step_id: group-01-demo-level
+            step_type: challenge
+            title: Main Level
+            target_page: challenge
+            node_id: group-01-demo
+            challenge_id: challenge-group-01-demo
+            level_ids:
+              - group-01-demo
+            tracked_node_ids:
+              - group-01-demo
+          - step_id: group-01-demo-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+        practice_route:
+          - step_id: group-01-practice-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-01-practice-level
+            step_type: practice
+            title: Practice Level
+            target_page: challenge
+            node_id: group-01-practice
+            challenge_id: challenge-group-01-practice
+            level_ids:
+              - group-01-practice-01
+              - group-01-practice-02
+              - group-01-practice-03
+              - group-01-practice-04
+              - group-01-practice-05
+            tracked_node_ids:
+              - group-01-practice
+            is_repeatable: true
+            metadata:
+              requires_demo_seen_group_id: group-01
+          - step_id: group-01-practice-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            node_id: group-01-result
+            tracked_node_ids:
+              - group-01-result
+      - group_id: group-02
+        title: Group 02
+        demo_route:
+          - step_id: group-02-demo-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-02-demo-story
+            step_type: story
+            title: Story Scene
+            target_page: scene
+            node_id: group-02-story
+            scene_id: scene-city-alarm
+            tracked_node_ids:
+              - group-02-story
+          - step_id: group-02-demo-level
+            step_type: challenge
+            title: Main Level
+            target_page: challenge
+            node_id: group-02-demo
+            challenge_id: challenge-group-02-demo
+            level_ids:
+              - group-02-demo
+            tracked_node_ids:
+              - group-02-demo
+          - step_id: group-02-demo-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+        practice_route:
+          - step_id: group-02-practice-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-02-practice-level
+            step_type: practice
+            title: Practice Level
+            target_page: challenge
+            node_id: group-02-practice
+            challenge_id: challenge-group-02-practice
+            level_ids:
+              - group-02-practice-01
+              - group-02-practice-02
+              - group-02-practice-03
+              - group-02-practice-04
+              - group-02-practice-05
+            tracked_node_ids:
+              - group-02-practice
+            is_repeatable: true
+            metadata:
+              requires_demo_seen_group_id: group-02
+          - step_id: group-02-practice-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            node_id: group-02-result
+            tracked_node_ids:
+              - group-02-result
+      - group_id: group-03
+        title: Group 03
+        demo_route:
+          - step_id: group-03-demo-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-03-demo-story
+            step_type: story
+            title: Story Scene
+            target_page: scene
+            node_id: group-03-story
+            scene_id: scene-city-alarm
+            tracked_node_ids:
+              - group-03-story
+          - step_id: group-03-demo-level
+            step_type: challenge
+            title: Main Level
+            target_page: challenge
+            node_id: group-03-demo
+            challenge_id: challenge-group-03-demo
+            level_ids:
+              - group-03-demo
+            tracked_node_ids:
+              - group-03-demo
+          - step_id: group-03-demo-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+        practice_route:
+          - step_id: group-03-practice-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-03-practice-level
+            step_type: practice
+            title: Practice Level
+            target_page: challenge
+            node_id: group-03-practice
+            challenge_id: challenge-group-03-practice
+            level_ids:
+              - group-03-practice-01
+              - group-03-practice-02
+              - group-03-practice-03
+              - group-03-practice-04
+              - group-03-practice-05
+            tracked_node_ids:
+              - group-03-practice
+            is_repeatable: true
+            metadata:
+              requires_demo_seen_group_id: group-03
+          - step_id: group-03-practice-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            node_id: group-03-result
+            tracked_node_ids:
+              - group-03-result

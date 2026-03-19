@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/quest_map_screen.gd" id="1_screen"]
-[ext_resource type="Script" path="res://scripts/quest_map_panel.gd" id="2_map"]
+[ext_resource type="Script" path="res://scripts/map/quest_map_screen.gd" id="1_screen"]
+[ext_resource type="Script" path="res://scripts/map/quest_map_panel.gd" id="2_map"]
 
 [node name="QuestMapScreen" type="Control"]
 layout_mode = 3
@@ -24,118 +24,251 @@ offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Root" type="VBoxContainer" parent="Margin"]
+[node name="Scroll" type="ScrollContainer" parent="Margin"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="Root" type="VBoxContainer" parent="Margin/Scroll"]
+custom_minimum_size = Vector2(0, 860)
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="Margin/Root"]
+[node name="Title" type="Label" parent="Margin/Scroll/Root"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
-text = "Block2Python Quest Map"
+text = "Block2Python Main Map"
 
-[node name="Subtitle" type="Label" parent="Margin/Root"]
+[node name="Subtitle" type="Label" parent="Margin/Scroll/Root"]
 layout_mode = 2
-text = "Main map page for the active quest"
+text = "Minimal main map with 3 level-group nodes"
 
-[node name="Buttons" type="HBoxContainer" parent="Margin/Root"]
+[node name="Buttons" type="HBoxContainer" parent="Margin/Scroll/Root"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="StartBridgeButton" type="Button" parent="Margin/Root/Buttons"]
+[node name="StartBridgeButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
 layout_mode = 2
 text = "Start Bridge"
 
-[node name="ResetButton" type="Button" parent="Margin/Root/Buttons"]
+[node name="ResetButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
 layout_mode = 2
 text = "Reset"
 
-[node name="AdvanceButton" type="Button" parent="Margin/Root/Buttons"]
+[node name="AdvanceButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+visible = false
 layout_mode = 2
 text = "Advance"
 
-[node name="OpenNodeButton" type="Button" parent="Margin/Root/Buttons"]
+[node name="OpenNodeButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+visible = false
 layout_mode = 2
 text = "Open Current Node"
 
-[node name="DebugToggleButton" type="Button" parent="Margin/Root/Buttons"]
+[node name="DebugToggleButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
 layout_mode = 2
 toggle_mode = true
 text = "Show Debug"
 
-[node name="StatusLabel" type="Label" parent="Margin/Root"]
+[node name="StatusLabel" type="Label" parent="Margin/Scroll/Root"]
 layout_mode = 2
 text = "Status: idle"
 
-[node name="QuestMapPanel" type="PanelContainer" parent="Margin/Root"]
+[node name="QuestMapPanel" type="PanelContainer" parent="Margin/Scroll/Root"]
 layout_mode = 2
-size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 360)
+custom_minimum_size = Vector2(0, 420)
 script = ExtResource("2_map")
 
-[node name="MapMargin" type="MarginContainer" parent="Margin/Root/QuestMapPanel"]
+[node name="MapMargin" type="MarginContainer" parent="Margin/Scroll/Root/QuestMapPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="MapRoot" type="VBoxContainer" parent="Margin/Root/QuestMapPanel/MapMargin"]
+[node name="MapRoot" type="VBoxContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="MapHeader" type="VBoxContainer" parent="Margin/Root/QuestMapPanel/MapMargin/MapRoot"]
+[node name="MapHeader" type="VBoxContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="QuestTitle" type="Label" parent="Margin/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader"]
+[node name="QuestTitle" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Quest Map"
 
-[node name="MetaRow" type="HBoxContainer" parent="Margin/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader"]
+[node name="MetaRow" type="HBoxContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ModeLabel" type="Label" parent="Margin/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader/MetaRow"]
+[node name="ModeLabel" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader/MetaRow"]
 layout_mode = 2
 text = "Mode: -"
 
-[node name="CurrentNodeLabel" type="Label" parent="Margin/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader/MetaRow"]
+[node name="CurrentNodeLabel" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/MapHeader/MetaRow"]
 layout_mode = 2
 text = "Current Node: -"
 
-[node name="SummaryLabel" type="Label" parent="Margin/Root/QuestMapPanel/MapMargin/MapRoot"]
+[node name="SummaryLabel" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot"]
 layout_mode = 2
 text = "No state loaded yet."
 
-[node name="NodesContainer" type="HFlowContainer" parent="Margin/Root/QuestMapPanel/MapMargin/MapRoot"]
+[node name="GroupsSection" type="VBoxContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GroupsTitle" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/GroupsSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Level Groups"
+
+[node name="GroupsSummaryLabel" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/GroupsSection"]
+layout_mode = 2
+text = "No level groups available yet."
+
+[node name="GroupsContainer" type="HFlowContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot/GroupsSection"]
 layout_mode = 2
 theme_override_constants/h_separation = 12
 theme_override_constants/v_separation = 12
 
-[node name="NotePanel" type="PanelContainer" parent="Margin/Root"]
+[node name="NodesTitle" type="Label" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot"]
+visible = false
 layout_mode = 2
-custom_minimum_size = Vector2(0, 120)
+theme_override_font_sizes/font_size = 18
+text = "Current Quest Slice"
 
-[node name="NoteMargin" type="MarginContainer" parent="Margin/Root/NotePanel"]
+[node name="NodesContainer" type="HFlowContainer" parent="Margin/Scroll/Root/QuestMapPanel/MapMargin/MapRoot"]
+visible = false
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+
+[node name="NotePanel" type="PanelContainer" parent="Margin/Scroll/Root"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 140)
+
+[node name="NoteMargin" type="MarginContainer" parent="Margin/Scroll/Root/NotePanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="NoteRoot" type="VBoxContainer" parent="Margin/Root/NotePanel/NoteMargin"]
+[node name="NoteRoot" type="VBoxContainer" parent="Margin/Scroll/Root/NotePanel/NoteMargin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="NoteTitle" type="Label" parent="Margin/Root/NotePanel/NoteMargin/NoteRoot"]
+[node name="NoteTitle" type="Label" parent="Margin/Scroll/Root/NotePanel/NoteMargin/NoteRoot"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Map Notes"
 
-[node name="NoteText" type="Label" parent="Margin/Root/NotePanel/NoteMargin/NoteRoot"]
+[node name="NoteText" type="Label" parent="Margin/Scroll/Root/NotePanel/NoteMargin/NoteRoot"]
 layout_mode = 2
 autowrap_mode = 3
-text = "Use Reset to load the latest quest state."
+text = "Use Reset to load the latest quest state. Main map routing now comes from bridge map_route data."
+
+[node name="StageOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="Backdrop" type="ColorRect" parent="StageOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.45)
+mouse_filter = 1
+
+[node name="Center" type="CenterContainer" parent="StageOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="StageOverlay/Center"]
+custom_minimum_size = Vector2(620, 0)
+layout_mode = 2
+
+[node name="OverlayMargin" type="MarginContainer" parent="StageOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="OverlayRoot" type="VBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleColumn" type="VBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="StageTitle" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Stage"
+
+[node name="StageSubtitle" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn"]
+layout_mode = 2
+text = "Demo + Practice"
+
+[node name="CloseButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header"]
+layout_mode = 2
+text = "Close"
+
+[node name="StageDescription" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Stage description"
+
+[node name="UnlockTitle" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "New Blocks"
+
+[node name="UnlockBlocks" type="HFlowContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+
+[node name="ActionNote" type="Label" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Choose Demo or Practice."
+
+[node name="Buttons" type="HBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StartDemoButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Start Demo"
+
+[node name="StartPracticeButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Practice"

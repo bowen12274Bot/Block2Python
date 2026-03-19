@@ -1,0 +1,8 @@
+toolbox_id: toolbox-group-01
+unlocked_block_ids:
+  - input
+  - print
+  - variable_set
+  - number_literal
+allow_toolbox_in_practice: true
+toolbox_reward_percent: 10

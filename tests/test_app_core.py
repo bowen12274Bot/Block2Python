@@ -1,10 +1,10 @@
-"""Tests for AppCore submit workflow and judge integration."""
+﻿"""Tests for AppCore submit workflow and judge integration."""
 
 from __future__ import annotations
 
 import pytest
 
-from block2python.app.core import AppCore, LevelState
+from block2python.level_play import AppCore, LevelState
 from block2python.contracts import JudgeStatus, LevelSpec, Submission, Testcase as JudgeTestcase
 from block2python.judge import StubJudge
 
@@ -76,3 +76,4 @@ class TestAppCore:
         sub = Submission(level_id="nonexistent", python_code="")
         outcome = app.submit(sub)
         assert outcome.judge.status == JudgeStatus.INTERNAL_ERROR
+

@@ -1,17 +1,17 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 from pathlib import Path
 from typing import Callable
 
-from block2python.challenge import AppCore, InMemoryProgress
+from block2python.level_play import AppCore, InMemoryProgress
 from block2python.content import assemble_game_slice, load_game_content, load_levels
 from block2python.game import GameSession
 from block2python.integration.contracts import GameMode, GameState
 from block2python.judge import StubJudge
 
 
-DEFAULT_QUEST_ID = "quest-basic-io-repair"
+DEFAULT_QUEST_ID = "quest-main-map"
 
 
 def build_demo_session(
@@ -129,3 +129,4 @@ def _default_code_factory(_level_id: str) -> str:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

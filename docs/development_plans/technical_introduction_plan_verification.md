@@ -14,8 +14,8 @@
 
 ### 0.2 Smoke（最小可重現）
 
-- CLI（核心流程）：`powershell -ExecutionPolicy Bypass -File tools/run_demo.ps1`
-- UI（桌面殼 + WebEngine/橋接）：`powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1`
+- CLI（核心流程）：`powershell -ExecutionPolicy Bypass -File tools/legacy/run_cli_demo.ps1`
+- UI（桌面殼 + WebEngine/橋接）：`powershell -ExecutionPolicy Bypass -File tools/legacy/run_pyside6_client.ps1`
 
 > UI 屬常駐視窗，啟動後請用手動操作驗證：切換關卡、積木頁送回 App、提交 Python、觀察回饋/解鎖/進度保存。
 
@@ -131,7 +131,7 @@
   - 帶入 `Submission.block_json` / `Submission.block_schema_version`
   - 標記積木步驟通過（建立期 gate）
 - Blockly 靜態檔 vendor 流程已文件化，並可用工具腳本從目錄/zip 匯入：
-  - `tools/vendor_blockly.ps1` / `tools/vendor_blockly_from_dir.ps1`
+  - `tools/sync_blockly_vendor.ps1`
   - `docs/contributing/environment_setup.md`
 
 **未做到 / 跳過**

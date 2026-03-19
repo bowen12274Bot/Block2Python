@@ -51,10 +51,7 @@ try {
     Invoke-Step -Name "Key Assets Check" -Action {
         $requiredAssets = @(
             "assets/levels/index.yaml",
-            "assets/levels/demo-basic-io-hello.yaml",
-            "assets/levels/add-two-numbers.yaml",
-            "assets/levels/demo-2.yaml",
-            "assets/levels/fizzbuzz-simple.yaml",
+            "assets/levels/judge-precision-sum-series.yaml",
             "assets/game_content/index.yaml",
             "assets/blockly/index.html",
             "assets/wasm/python.wasm"
@@ -100,7 +97,7 @@ try {
             }
 
             Write-Host "Blockly vendor assets are missing; UI will run in placeholder mode." -ForegroundColor Yellow
-            Write-Host "Use tools/vendor_blockly.ps1 or tools/vendor_blockly_from_dir.ps1 to install them." -ForegroundColor Yellow
+            Write-Host "Use tools/sync_blockly_vendor.ps1 to install them." -ForegroundColor Yellow
         }
     }
 
@@ -112,21 +109,21 @@ try {
     }
 
     Invoke-Step -Name "Judge Verify Script" -Action {
-        & "$PSScriptRoot\verify_wasm_setup.ps1"
+        & "$PSScriptRoot\verify_wasm_env.ps1"
         if ($LASTEXITCODE -ne 0) {
-            throw "verify_wasm_setup.ps1 failed"
+            throw "verify_wasm_env.ps1 failed"
         }
     }
 
     Invoke-Step -Name "Judge Edge Script" -Action {
         if ($SkipMLE) {
-            & "$PSScriptRoot\test_wasm_edge_cases.ps1" -SkipMLE
+            & "$PSScriptRoot\verify_wasm_limits.ps1" -SkipMLE
         } else {
-            & "$PSScriptRoot\test_wasm_edge_cases.ps1"
+            & "$PSScriptRoot\verify_wasm_limits.ps1"
         }
 
         if ($LASTEXITCODE -ne 0) {
-            throw "test_wasm_edge_cases.ps1 failed"
+            throw "verify_wasm_limits.ps1 failed"
         }
     }
 

@@ -29,10 +29,12 @@ addopts = [
     "-v",
     "--strict-markers",
     "--tb=short",
+    "--basetemp=.tmp/pytest",
     "--cov=src/block2python",
     "--cov-report=term-missing",
     "--cov-report=html",
 ]
+cache_dir = ".tmp/pytest_cache"
 markers = [
     "unit: Unit tests",
     "integration: Integration tests",
@@ -44,7 +46,7 @@ source = ["src/block2python"]
 omit = [
     "*/tests/*",
     "*/__main__.py",
-    "*/ui/*",
+    "*/clients/pyside6/*",
 ]
 
 [tool.coverage.report]

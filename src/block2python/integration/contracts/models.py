@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -14,6 +14,8 @@ class GameMode(str, Enum):
 class ActionType(str, Enum):
     ADVANCE = "advance"
     SUBMIT_LEVEL = "submit_level"
+    START_GROUP_DEMO = "start_group_demo"
+    START_GROUP_PRACTICE = "start_group_practice"
     RESTART_QUEST = "restart_quest"
 
 
@@ -46,6 +48,7 @@ class ChallengeState:
 class ProgressState:
     completed_node_ids: tuple[str, ...] = ()
     cleared_level_ids: tuple[str, ...] = ()
+    demo_seen_group_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,6 +70,59 @@ class SubmissionFeedback:
 
 
 @dataclass(frozen=True, slots=True)
+class GroupSlotState:
+    slot_key: str
+    title: str
+    status_key: str
+    status_label: str
+    is_unlocked: bool = False
+    viewed: bool = False
+    completed_count: int = 0
+    total_count: int = 0
+    next_level_id: str | None = None
+    entry_level_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MapRouteStepState:
+    step_id: str
+    step_type: str
+    title: str
+    target_page: str
+    status_key: str
+    status_label: str
+    tracked_node_ids: tuple[str, ...] = ()
+    level_ids: tuple[str, ...] = ()
+    node_id: str | None = None
+    scene_id: str | None = None
+    challenge_id: str | None = None
+    is_planned: bool = False
+    is_repeatable: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class GroupMapRouteState:
+    group_id: str
+    title: str
+    status_key: str = "locked"
+    status_label: str = "Locked"
+    is_enterable: bool = False
+    current_label: str = ""
+    demo_slot: GroupSlotState | None = None
+    practice_slot: GroupSlotState | None = None
+    demo_route: tuple[MapRouteStepState, ...] = ()
+    practice_route: tuple[MapRouteStepState, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class MapRouteState:
+    route_id: str
+    quest_id: str
+    title: str
+    groups: tuple[GroupMapRouteState, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class GameState:
     mode: GameMode
     quest_id: str
@@ -77,6 +133,7 @@ class GameState:
     progress: ProgressState = field(default_factory=ProgressState)
     available_actions: AvailableActions = field(default_factory=AvailableActions)
     last_submission: SubmissionFeedback | None = None
+    map_route: MapRouteState | None = None
     errors: tuple[str, ...] = ()
 
 

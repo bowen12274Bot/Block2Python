@@ -1,0 +1,10 @@
+challenge_id: challenge-group-01-demo
+challenge_type: demo
+title: Group 01 Demo
+level_ids:
+  - group-01-demo
+toolbox_policy_id: null
+battery_policy_id: null
+metadata:
+  stage: map-format-skeleton
+  group_id: group-01

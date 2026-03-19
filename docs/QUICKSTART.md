@@ -1,20 +1,40 @@
-# Block2Python 快速啟動
+# Block2Python 快速開始
 
-- 文件版本：1.0.0
-- 更新日期：2026-03-11
-- 這份文件只保留最短路徑：建立環境、啟動應用、切換 judge 模式、執行基本驗證。較完整的本機環境、Blockly vendor、Wasm judge 安裝與驗證，請看：
+- 版本：0.1.0
+- 更新日期：2026-03-20
 
-- `docs/contributing/environment_setup.md`
+這份文件提供目前專案最短、最直覺的啟動路徑。
+如果你需要更完整的環境設定、Wasm judge 或 Blockly vendor 說明，請看 `docs/contributing/environment_setup.md`。
+
+## 先做這四件事
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1
+powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1
+.\tools\run_tests.ps1
+.\tools\run_project_gate.ps1
+```
+
+意思分別是：
+
+- `setup_dev_env.ps1`
+  把 `.venv`、Godot、Wasmtime、Blockly vendor 都建好。
+- `run_godot_client.ps1`
+  啟動目前主 client。
+- `run_tests.ps1`
+  日常開發時手動跑 pytest。
+- `run_project_gate.ps1`
+  收尾前跑完整檢查。
 
 ## 1. 建立開發環境
 
-建議直接使用專案腳本：
+建議直接使用工具腳本：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1
 ```
 
-若要手動建立：
+如果要手動建立：
 
 ```powershell
 python -m venv .venv
@@ -22,91 +42,86 @@ python -m venv .venv
 pip install -e ".[dev]"
 ```
 
-## 2. 啟動 CLI / GUI
+## 2. 啟動主 client
 
-### CLI
-
-```powershell
-.\.venv\Scripts\python.exe -m block2python
-```
-
-### GUI
+目前主入口是 Godot client：
 
 ```powershell
-.\.venv\Scripts\python.exe -m block2python.ui
+powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1
 ```
 
-## 3. Judge 模式
-
-### 預設自動模式
+如果需要 console 版 Godot：
 
 ```powershell
-.\.venv\Scripts\python.exe -m block2python
+powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1 -Console
 ```
 
-- 若找到 `assets/wasm/python.wasm` 且 `wasmtime` 可執行，會使用 `WasmJudge`
-- 否則回退到 `StubJudge`
+## 3. 其他入口
 
-### 強制 stub 模式
+CLI client：
+
+```powershell
+.\.venv\Scripts\python.exe -m block2python.clients.cli.main
+```
+
+Bridge server：
+
+```powershell
+.\.venv\Scripts\python.exe -m block2python.integration.bridge_stdio.server
+```
+
+Legacy PySide6 client：
+
+```powershell
+.\tools\legacy\run_pyside6_client.ps1
+```
+
+## 4. Judge 模式
+
+使用 CLI client 時，可以用環境變數切換 judge：
 
 ```powershell
 $env:BLOCK2PYTHON_JUDGE_MODE = "stub"
-.\.venv\Scripts\python.exe -m block2python
+.\.venv\Scripts\python.exe -m block2python.clients.cli.main
 ```
-
-### 強制 wasm 模式
 
 ```powershell
 $env:BLOCK2PYTHON_JUDGE_MODE = "wasm"
-.\.venv\Scripts\python.exe -m block2python
+.\.venv\Scripts\python.exe -m block2python.clients.cli.main
 ```
 
-## 4. 題庫位置
+## 5. 測試與 Smoke
 
-預設題庫目錄：
-
-```powershell
-assets\levels
-```
-
-目前主題庫已統一為 YAML：
-
-- `assets/levels/index.yaml`
-- `assets/levels/*.yaml`
-
-若要切換題庫路徑：
-
-```powershell
-$env:BLOCK2PYTHON_LEVELS_DIR = "path\to\levels"
-.\.venv\Scripts\python.exe -m block2python
-```
-
-## 5. 基本驗證
+執行測試：
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-若要跑 Wasm 相關 smoke test：
+常用工具：
 
 ```powershell
-.\tools\run_wasm_smoke.ps1
-```
-
-## 6. 常用腳本
-
-```powershell
-.\tools\run_demo.ps1
-.\tools\run_ui.ps1
 .\tools\run_tests.ps1
-.\tools\verify_wasm_setup.ps1
-.\tools\test_wasm_edge_cases.ps1
+.\tools\smoke_bridge.ps1
+.\tools\smoke_wasm.ps1
+.\tools\verify_wasm_env.ps1
+.\tools\verify_wasm_limits.ps1
 .\tools\reset_progress.ps1
 ```
 
-## 7. 下一步
+## 6. Legacy 工具
 
-- 題庫格式：`docs/specs/levels_schema_v0_1.md`
-- 環境與 Wasm 設定：`docs/contributing/environment_setup.md`
-- 測試說明：`tests/README.md`
-- 協作與提交流程：`docs/contributing.md`
+如果你需要舊流程：
+
+```powershell
+.\tools\legacy\run_cli_demo.ps1
+.\tools\legacy\run_pyside6_client.ps1
+.\tools\legacy\run_game_session_demo.ps1
+```
+
+## 7. 相關文件
+
+- `docs/contributing/environment_setup.md`
+- `docs/contributing/developer_workflow.md`
+- `tests/README.md`
+- `tools/README.md`

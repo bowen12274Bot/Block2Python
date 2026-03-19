@@ -17,9 +17,9 @@ Judge 服務負責在受控環境中執行玩家提交的 Python 程式，依照
 
 主要元件：
 
-- `src/block2python/app/core.py`
+- `src/block2python/level_play/app_core.py`
   - 提交流程入口，串接 Analyzer + Judge
-- `src/block2python/app/judge_factory.py`
+- `src/block2python/level_play/judge_factory.py`
   - 根據環境變數組裝 Judge 實例
 - `src/block2python/judge/wasm_judge.py`
   - case-by-case 評測、彙整 verdict
@@ -85,14 +85,14 @@ Judge 服務負責在受控環境中執行玩家提交的 Python 程式，依照
 
 ```powershell
 $env:PYTHONPATH = "src"
-.\tools\verify_wasm_setup.ps1
+.\tools\verify_wasm_env.ps1
 ```
 
 邊界測試：
 
 ```powershell
 $env:PYTHONPATH = "src"
-.\tools\test_wasm_edge_cases.ps1 -SkipMLE -CodeMode auto
+.\tools\verify_wasm_limits.ps1 -SkipMLE -CodeMode auto
 ```
 
 核心單元測試：
@@ -107,7 +107,7 @@ $env:PYTHONPATH = "src"
 `No module named block2python`：
 
 - 先設 `PYTHONPATH=src`
-- 或透過 `tools/run_demo.ps1` / `tools/run_ui.ps1` 啟動
+- 或透過 `tools/legacy/run_cli_demo.ps1` / `tools/legacy/run_pyside6_client.ps1` 啟動
 
 `wasmtime binary not found`：
 

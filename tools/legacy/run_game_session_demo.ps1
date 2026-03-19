@@ -7,7 +7,7 @@ $env:PYTHONPATH = Join-Path $repoRoot "src"
 
 $venvPy = Join-Path $repoRoot ".venv\Scripts\python.exe"
 if (Test-Path $venvPy) {
-  & $venvPy -m block2python.app.game_session_demo --auto
+  & $venvPy -m block2python.clients.cli.game_session_demo --auto
 } else {
   Write-Host "Missing .venv. Run: tools/setup_dev_env.ps1"
   exit 1

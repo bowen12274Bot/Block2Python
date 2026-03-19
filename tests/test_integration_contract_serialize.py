@@ -1,4 +1,4 @@
-import pytest
+﻿import pytest
 
 from block2python.integration.contracts import (
     ActionType,
@@ -21,28 +21,29 @@ from block2python.integration.contracts import (
 def test_serialize_game_state_emits_json_ready_payload() -> None:
     state = GameState(
         mode=GameMode.CHALLENGE,
-        quest_id="quest-basic-io-repair",
-        node_id="demo-basic-io",
-        node_title="Demo Basic IO",
+        quest_id="quest-main-map",
+        node_id="group-01-practice",
+        node_title="Group 01 Practice",
         scene=SceneState(
             scene_id="scene-practice-unlock",
             title="Practice Unlock",
             dialogue_blocks=(DialogueBlockState(speaker="Byte", text="Try it."),),
         ),
         challenge=ChallengeState(
-            challenge_id="challenge-demo-basic-io",
-            challenge_type="demo",
-            current_level_id="demo-basic-io-hello",
-            current_level_title="Demo Basic IO Hello",
+            challenge_id="challenge-group-01-practice",
+            challenge_type="practice",
+            current_level_id="group-01-practice-01",
+            current_level_title="Group 01 Practice 01 Hello",
             current_level_prompt="Print a greeting.",
         ),
         progress=ProgressState(
-            completed_node_ids=("map-entry", "story-intro"),
+            completed_node_ids=("main-map-entry", "group-01-story"),
             cleared_level_ids=("demo-0",),
+            demo_seen_group_ids=("group-01",),
         ),
         available_actions=AvailableActions(submit=True, restart_quest=True),
         last_submission=SubmissionFeedback(
-            level_id="demo-basic-io-hello",
+            level_id="group-01-practice-01",
             cleared=True,
             block_passed=True,
             analysis_status="PASS",
@@ -57,9 +58,10 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
 
     assert payload["mode"] == "challenge"
     assert payload["scene"]["scene_id"] == "scene-practice-unlock"
-    assert payload["challenge"]["current_level_id"] == "demo-basic-io-hello"
+    assert payload["challenge"]["current_level_id"] == "group-01-practice-01"
     assert payload["challenge"]["current_level_prompt"] == "Print a greeting."
-    assert payload["progress"]["completed_node_ids"] == ["map-entry", "story-intro"]
+    assert payload["progress"]["completed_node_ids"] == ["main-map-entry", "group-01-story"]
+    assert payload["progress"]["demo_seen_group_ids"] == ["group-01"]
     assert payload["available_actions"] == {
         "advance": False,
         "submit": True,

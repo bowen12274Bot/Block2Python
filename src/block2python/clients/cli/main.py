@@ -1,6 +1,6 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
-from block2python.app.runtime import build_configured_app, configured_levels_dir
+from block2python.clients.bootstrap import build_configured_app, configured_levels_dir
 
 
 def main() -> int:
@@ -13,3 +13,4 @@ def main() -> int:
         print(f"- {view.level_id}: {view.title} [{view.state}]")
 
     return 0
+

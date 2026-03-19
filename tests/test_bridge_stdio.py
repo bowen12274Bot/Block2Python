@@ -18,7 +18,7 @@ def test_bridge_server_handles_advance_over_stdio_streams() -> None:
     response = json.loads(outstream.getvalue().strip())
     assert response["ok"] is True
     assert response["state"]["mode"] == "scene"
-    assert response["state"]["node_id"] == "story-intro"
+    assert response["state"]["node_id"] == "group-01-story"
     assert response["state"]["last_submission"] is None
 
 
@@ -44,9 +44,9 @@ def test_bridge_server_persists_session_across_requests() -> None:
     last_response = responses[-1]
     assert last_response["ok"] is True
     assert last_response["state"]["mode"] == "challenge"
-    assert last_response["state"]["challenge"]["challenge_id"] == "challenge-practice-basic-io"
-    assert last_response["state"]["progress"]["cleared_level_ids"] == ["demo-basic-io-hello"]
-    assert last_response["state"]["last_submission"]["level_id"] == "demo-basic-io-hello"
+    assert last_response["state"]["challenge"]["challenge_id"] == "challenge-group-01-practice"
+    assert last_response["state"]["progress"]["cleared_level_ids"] == ["group-01-demo", "group-01-practice-01"]
+    assert last_response["state"]["last_submission"]["level_id"] == "group-01-practice-01"
     assert last_response["state"]["last_submission"]["judge_status"] == "AC"
 
 
@@ -98,5 +98,5 @@ def test_bridge_server_supports_reset_command() -> None:
     reset_response = responses[-1]
     assert reset_response["ok"] is True
     assert reset_response["state"]["mode"] == "scene"
-    assert reset_response["state"]["node_id"] == "map-entry"
+    assert reset_response["state"]["node_id"] == "main-map-entry"
     assert reset_response["state"]["last_submission"] is None

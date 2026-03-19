@@ -1,175 +1,246 @@
-# 技術策略說明文件（Demo）
+# 技術架構說明
 
-- 文件版本：0.2
-- 更新日期：2026-03-06
-- 適用範圍：Demo 版本（僅學生端；不設計教師後台；不以正式部署或軟體釋出為目標）
-- 目的：支援「積木 → Python」之學習闖關流程，提供可操作、可驗證、可引導的整體體驗
-- 文件定位：說明技術選型動機與分層架構之設計理由；不作為實作規格書（不包含完整介面定義、演算法細節與部署細節）
+- 版本：1.0
+- 更新日期：2026-03-14
+- 範圍：目前以 Python 為核心的遊戲系統架構說明
 
-## 1. 動機與設計原則
+## 1. 決策摘要
 
-### 1.1 動機
+Block2Python 現在已不再只是以 PySide6 包住 level submit 的 demo shell，而是逐步轉向「Python 邏輯層 + 未來 Godot 呈現層」的遊戲化架構。
 
-本專案面向具積木式程式設計基礎之國中生，核心挑戰在於協助學生完成「視覺化結構」到「文字語法」的表徵轉換。若系統僅以輸出結果判定正確性，將難以反映關卡的教學目標（例如：要求使用特定控制結構），也難以在學生卡關時提供具體且可理解的回饋。
+目前的技術方向是：
 
-因此，本專案需要同時滿足下列能力：
+- Python 仍是遊戲規則的 source of truth。
+- `GameSession` 是預定的遊戲流程主入口。
+- `AppCore` 維持 challenge 子系統，專注在 level submit 與 judge。
+- 內容載入與流程控制已開始分層。
+- 外部前端應透過 `integration/` 接入，而不是直接 import Python 內部模組。
 
-- 提供積木式操作介面，讓學生以可視化方式建立邏輯結構
-- 提供 Python 編輯與執行環境，使學生完成對應之文字程式
-- 提供可重複且可解釋的驗證機制（包含結果與結構層面）
-- 提供語意化提示機制，將錯誤差異轉為學習導向的引導（且不直接給出完整解答）
+## 2. 為什麼要先重構骨架
 
-### 1.2 設計原則
+舊結構把多種責任混在一起：
 
-- 分層與解耦：將 UI 整合、積木環境、程式分析、程式執行評測、AI 引導等責任分離，以降低耦合並保留替換空間。
-- 可解釋性優先：除 AC/WA 外，系統需能回傳結構差異與可理解的錯誤訊息，以支援教學回饋。
-- Demo 可控性：以穩定展示核心流程為優先，細節（例如教學頁呈現與 AI 策略）保留可調整空間。
+- app 啟動與遊戲流程
+- challenge submit 與 judge 組裝
+- 內容載入
+- PySide6 專屬 UI 行為
 
-## 2. 架構概覽（分層視角）
+這種結構可以支撐 prototype，但不足以穩定承接後續工作，例如：
 
-本架構採分層設計，並將關鍵能力拆分為下列各層（由下而上可獨立演進；由上而下可組合成完整學習流程）：
+- 正式的 `GameState` / `PlayerAction` 契約
+- savegame 擴充
+- bridge adapter
+- Godot 接入
 
-- 程式分析層：解析 Python AST、進行結構檢查與映射
-- 視覺化編程層：提供 Blockly 積木操作，輸出結構與/或生成程式碼
-- Python 編程層：提供學生端 Python 編寫、送出與回饋呈現的介面能力
-- AI 語意輔助層：將差異/錯誤資訊轉為可理解的引導提示（不直接給完整解答）
-- 應用整合層：以 PySide6 整合關卡流程、UI 與各層模組
-- 程式執行與安全層：以測資執行與比對完成 AC/WA 判定，並提供超時/資源限制
+因此，先重構骨架的目的是在功能繼續增加前，把責任邊界明確切開。
 
-> **系統架構圖（UML 元件圖）**：[docs/uml/system_architecture.md](uml/system_architecture.md)  
-> 以 Mermaid 分層元件圖呈現各層模組組成、元件職責與跨層資料流。
+## 3. 目前分層
 
-![Block2Python 系統架構圖](uml/system_architecture.png)
+目前專案的核心骨架集中在五個 package：
 
-## 3. 程式分析層（Compiler / Program Analysis）
+- `challenge`
+- `content`
+- `game`
+- `integration`
+- `clients`
 
-核心目標：結構正確性保證
+### 3.1 `challenge`
 
-本層負責將學生的 Python 程式轉換為可檢查之語法結構，並支援結構層面的驗證與差異產出，以貼合關卡學習目標。
+原因：
+- 單題執行與 judge 是一個子系統，不是整個遊戲本體。
+- `AppCore` 現在的責任天然符合這個定位。
 
-採用技術與功能範圍：
+這層應包含：
+- submit flow
+- judge 選擇與執行
+- challenge 級 progress
+- level clear / block pass 狀態
 
-- Python `ast` 模組：解析 Python 程式為 AST
-- AST 結構解析與比對：針對語法結構進行檢查與比較（例如是否具備指定控制結構）
-- 結構拓樸一致性驗證：視關卡需求逐步引入，用於檢查節點關係的整體一致性（Demo 以 MVP 語法集合為主）
-- Python AST ⇄ Block JSON 結構映射：建立積木結構與 Python 結構之對應，用於「積木 → Python」的教學與驗證
+這層不應包含：
+- quest orchestration
+- scene flow
+- 全遊戲 savegame
+- 前端交換契約
 
-選型理由（概述）：
+### 3.2 `content`
 
-- `ast` 為 Python 標準庫，能以結構化方式解析語法並支援可解釋的規則檢查，符合「可解釋性優先」原則。
-- 以 AST/結構映射作為教學與驗證基礎，可避免僅以輸出判斷造成的「湊答案」問題，並更貼近關卡學習目標。
+原因：
+- level 規格與遊戲內容本質上都屬於內容領域。
+- 它們不應藏在 app bootstrapping 或前端實作裡。
 
-## 4. 視覺化編程層（Visual Programming）
+這層應包含：
+- level loading
+- game content loading
+- content models
+- content/runtime assembly helpers
 
-核心目標：積木操作與可視化邏輯
+### 3.3 `game`
 
-本層提供學生操作積木建立邏輯的能力，並輸出可供系統後續分析與轉換之結構資料或程式碼。
+原因：
+- 專案需要一個明確的遊戲狀態擁有者。
+- `GameSession` 已經是最接近這個角色的模組。
 
-採用技術與功能範圍：
+這層應包含：
+- session state
+- 遊戲主流程控制
+- 未來 savegame state
+- 不屬於單題 challenge 的遊戲規則
 
-- Blockly：積木式編程環境
-- 自訂 Block 定義：依關卡逐步開放積木能力（與教案/關卡目標對應）
-- Block ⇄ Python 代碼生成：由積木生成對應 Python 程式碼（主要作為理解對照或輔助功能，不應取代學生自行撰寫 Python 任務）
-- `QWebEngineView` 嵌入：於桌面應用中嵌入 Blockly 的 Web 介面（若採桌面整合方案）
+### 3.4 `integration`
 
-選型理由（概述）：
+原因：
+- Godot 或其他前端需要穩定邊界。
+- 若沒有獨立 integration layer，前端就會直接依賴 Python 內部實作。
 
-- Blockly 為成熟的視覺化編程框架，具備自訂積木與生成器機制，能以較低成本支援「積木操作」與「積木→文字」的對應展示。
-- 以 Web 方式承載 Blockly，可保留其生態與擴充彈性；若採桌面方案，透過 `QWebEngineView` 可在同一應用內完成整合展示。
+這層應包含：
+- `GameState`
+- `PlayerAction`
+- serialization
+- dispatch
+- process bridge adapters
+- Godot 專用薄 adapter
 
-## 5. Python 編程層（Python Programming）
+這層不應包含：
+- 遊戲規則本身
+- judge 內部細節
+- 內容編輯邏輯
 
-核心目標：提供可控且一致的 Python 編寫體驗
+### 3.5 `clients`
 
-本層負責提供學生編寫 Python 程式碼、執行送出、並接收回饋的使用介面與基礎能力。其設計需同時兼顧「學習操作性」與「可驗證性」，並能與程式分析層（AST）及執行與安全層（Judge/Sandbox）順利銜接。
+原因：
+- PySide6 與 CLI 是系統 consumer，不是系統本身。
+- 把它們明確標為 clients，可以避免工具型 UI 反客為主，變成架構主邊界。
 
-採用技術與功能範圍：
+## 4. 依賴規則
 
-- 桌面 UI 承載：Qt6（PySide6），並可依需求採用 Widgets 與/或 QML
-- 編輯器元件：待定（Demo 階段可先以可用與可整合為優先；後續再依體驗需求選型/替換）
-- 基礎能力（方向性）：程式碼輸入/編輯、送出執行、顯示執行結果與錯誤、與 AI 提示/診斷資訊整合呈現
+目前預期的依賴方向如下：
 
-選型理由（概述）：
+```text
+clients -> integration -> game
+                      -> challenge
+                      -> content
 
-- Python 編寫介面屬於「學習體驗核心」，但其元件選型高度依賴 UI 呈現與互動需求；因此先固定宿主框架（PySide6），並保留編輯器元件可替換空間，以降低早期決策風險並利於迭代。
+game -> challenge
+game -> content
 
-## 6. AI 語意輔助層（Semantic Assistant）
+challenge -> judge / analysis / contracts
+content -> contracts
+```
 
-核心目標：語意轉換與學習引導
+規則如下：
 
-本層負責將「執行/結構驗證」所產生之錯誤與差異資訊，轉換為學生可理解、可行動的提示內容，以支援學習前進。
+- `clients` 長期不應直接 orchestrate `AppCore`。
+- `integration` 是外部前端應依賴的唯一正式邊界。
+- `game` 可以依賴 `challenge` 與 `content`，但應維持整體遊戲流程的控制權。
+- `challenge` 不應擴張成 quest/node/scene 導演層。
 
-採用技術與功能範圍：
+## 5. 為什麼 Python 仍是 source of truth
 
-- Gemini API：作為模型服務來源
-- AST → 易懂邏輯結構轉換：將結構差異翻譯為易懂描述與修正方向
-- 錯誤語意解釋生成：針對常見錯誤提供說明與引導
+Python 目前仍應作為 source of truth，原因是現有邏輯已經在 Python 端具備基礎能力：
 
-使用邊界（原則）：
+- level loading
+- analysis
+- judge execution
+- challenge submit flow
+- quest/node/challenge progression
 
-- 允許讀取學生程式碼以進行診斷與提示
-- 不直接提供完整解答
-- 不引入超出當前關卡範圍的語法/概念
-- 模型使用邊界、拒答策略、與教案橋接規格屬待設計項，Demo 階段以可控為優先
+如果現在把規則搬進 Godot，會立刻帶來重複實作與迭代變慢的問題。維持 Python-first 的邏輯層可以得到：
 
-選型理由（概述）：
+- 更快的規則調整速度
+- 較好的測試性
+- 更清楚的前後端邊界
+- 更薄的 Godot client
 
-- AI 層的主要價值在於將「差異資訊」轉譯為可理解的學習引導，降低學生因錯誤訊息不具可讀性而中斷學習。
-- 模型供應商屬策略選型：Demo 先採用既定 API 以快速驗證流程；後續可透過抽象化介面保留替換空間。
+## 6. 為什麼 Godot 只能依賴 `integration`
 
-### 6.1 Agent Skill（教案綱要提取與開發輔助）
+Godot 的角色應是呈現層，不是規則引擎。
 
-為提升 AI 輔助層在「教學綱要提取」與「開發期間效率」的表現，本專案將導入 Agent Skill 概念，作為 AI 層的支援元件與開發工具。
+如果 Godot 直接 import Python 內部模組，會出現幾個問題：
 
-定位與目的：
+- Python 內部重構會直接變成 Godot breaking change
+- 前端會耦合到 backend implementation details
+- 入口會變多，例如 `AppCore`、loader、runtime object、session object
+- 測試邊界會變模糊
 
-- 教案綱要提取：以可重複的流程從教案/需求/關卡資料中提取可用的「教學綱要」（例如：本關卡可用概念、禁止概念、提示策略重點），供 AI 產生提示時使用。
-- 開發輔助：在開發過程中，協助整理文件、建立一致的內容骨架、檢核範圍一致性，降低文件與實作方向偏移的成本。
+讓 Godot 只依賴 `integration/`，可以把資料交換強制收斂成一種正式模型：
 
-輸出物（示例；格式待定）：
+- Python 回傳 `GameState`
+- frontend 傳入 `PlayerAction`
 
-- 關卡可用概念清單（Allowed Concepts）
-- 關卡禁止概念/黑名單（Forbidden Concepts）
-- 提示策略要點（Hint Policy / Boundaries）
-- 常見錯誤與建議引導方向（Common Mistakes & Guidance）
+## 7. 為什麼 PySide6 不再是長期邊界
 
-設計原則（方向）：
+PySide6 仍然有價值，但定位已經改變。
 
-- 可版本化與可追溯：Skill 的規則/模板/流程需可被版本控制，避免提示行為隨意漂移。
-- 以「提取與整理」為主：Skill 主要負責把教案資訊結構化，降低模型自由發揮造成的偏差。
-- 不破壞教學邊界：Skill 輸出的綱要需能支援「不給完整解答、不超綱」等既定邊界策略。
+它目前的價值是：
+- 開發驗證
+- smoke testing
+- 內部 demo client
+- 內容檢查工具
 
-## 7. 應用整合層（Application Architecture）
+它不應繼續作為長期產品邊界，原因是：
 
-核心目標：系統整合與執行環境
+- 它容易把 UI 流程綁死在 Python 內部細節上
+- 它不是預期中的最終遊戲呈現層
+- 它會讓 app-shell 邏輯不斷吸收本該屬於遊戲層的責任
 
-本層負責整合關卡流程、積木介面、Python 編輯、驗證回饋與 AI 互動，提供一致的操作體驗。
+## 8. 舊 package 與遷移策略
 
-採用技術與功能範圍：
+`app/`、`game_content/`、`ui/` 目前仍然存在，因為專案需要過渡路徑。
 
-- Qt6（PySide6）：桌面應用框架
-- 桌面應用架構：頁面/狀態管理、關卡流程與解鎖、回饋呈現
-- UI 技術選項（待定）：Widgets 與/或 QML（視互動與視覺需求決定）
-- 模組整合：Blockly（Web）嵌入、Python 編輯器（元件待定）、驗證/提示 UI（形式待定）
+現階段應這樣理解：
 
-選型理由（概述）：
+- `app/`：相容 shim layer
+- `game_content/`：新 `content/` 的相容 shim
+- `ui/`：過渡期間保留的 PySide6 實作
 
-- PySide6（Qt6）可用於快速建立跨平台桌面 Demo，並提供穩定的 UI 與嵌入能力，以利整合 Blockly、編輯器與回饋面板。
-- Widgets 與 QML 先作為選項保留，可依互動複雜度與視覺呈現需求決定採用方向，避免過早鎖死 UI 技術路線。
+這是刻意的安排。骨架重構先做邊界切分，不在同一輪同時強迫整個 UI 完整搬遷。
 
-## 8. 程式執行與安全層（Execution / Security）
+## 9. 技術選型
 
-核心目標：安全評測與回饋
+### 9.1 Python
 
-本層負責以可控方式執行學生程式，並以測資驗證結果正確性，回傳判定與差異資訊以供 UI 與 AI 使用。
+保留為核心邏輯語言，因為：
+- 主要規則已存在於此
+- 測試與迭代效率較高
+- 較容易集中管理遊戲規則
 
-採用技術與功能範圍：
+### 9.2 PySide6
 
-- Python 沙盒執行：隔離與資源限制（實作方式待定）
-- 測資比對機制：多組測資、輸出正規化
-- AC / WA 判定邏輯：回傳通過與否、差異資訊與錯誤類型
-- 超時限制：避免無限迴圈或資源耗盡（Demo 必要能力）
+目前仍保留，因為：
+- 適合快速建立內部工具與 demo
+- 對編輯器型 workflow 很實用
+- 現有程式已經建立在其上
 
-選型理由（概述）：
+目前定位：
+- 支援中的 client
+- 不是最終產品架構邊界
 
-- 對教學闖關而言，測資比對與超時控制是最低限度的可控性要求，可避免無限迴圈與不穩定結果影響 Demo 展示與學習體驗。
+### 9.3 Godot
+
+作為正式遊戲前端方向，原因是：
+- 更適合承接 scene flow、呈現與遊戲體驗
+- 比目前桌面工具型 shell 更符合最終產品型態
+
+目前定位：
+- `integration/` 的預期 consumer
+- 尚未持有遊戲規則主控權
+
+### 9.4 Wasm Judge 路徑
+
+Wasm judge 仍然重要，因為它提供：
+
+- 更可控的執行環境
+- 更清楚的 sandbox 邊界
+- 較穩定的遊戲判定基礎
+
+## 10. 對後續開發的直接影響
+
+基於目前架構，後續技術工作應依序進行：
+
+1. 穩定骨架與相容路徑。
+2. 在 `integration/contracts/` 定義正式契約。
+3. 讓 `GameSession` 輸出正式 contract state。
+4. 讓 clients 改成消費 contract 邊界。
+5. 補上 bridge 基礎設施給外部前端使用。
+
+這個順序可以減少重工，也能避免 Godot 直接耦合到尚未穩定的 Python 內部結構。

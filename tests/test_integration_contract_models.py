@@ -14,9 +14,9 @@ from block2python.integration.contracts import (
 def test_game_state_contract_supports_scene_payload() -> None:
     state = GameState(
         mode=GameMode.SCENE,
-        quest_id="quest-basic-io-repair",
-        node_id="story-intro",
-        node_title="Story Intro",
+        quest_id="quest-main-map",
+        node_id="group-01-story",
+        node_title="Group 01 Story",
         scene=SceneState(
             scene_id="scene-city-alarm",
             title="City Alarm",
@@ -25,10 +25,10 @@ def test_game_state_contract_supports_scene_payload() -> None:
                 DialogueBlockState(speaker="Nova", text="System check.", emphasis="alert"),
             ),
         ),
-        progress=ProgressState(completed_node_ids=("map-entry",), cleared_level_ids=()),
+        progress=ProgressState(completed_node_ids=("main-map-entry",), cleared_level_ids=()),
         available_actions=AvailableActions(advance=True),
         last_submission=SubmissionFeedback(
-            level_id="demo-basic-io-hello",
+            level_id="group-01-practice-01",
             cleared=True,
             block_passed=True,
             analysis_status="PASS",

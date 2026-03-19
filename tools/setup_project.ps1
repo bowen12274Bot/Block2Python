@@ -1,9 +1,16 @@
 param(
   [switch]$RecreateVenv = $false,
-  [switch]$SkipGate = $false,
-  [switch]$SkipMLE = $true,
+  [int]$SkipGate = 0,
+  [int]$SkipMLE = 1,
   [int]$CovFailUnder = 70,
-  [switch]$RequireBlocklyVendor = $false
+  [switch]$RequireBlocklyVendor = $false,
+  [switch]$SkipGodot = $false,
+  [string]$GodotVersion = "4.6.1",
+  [switch]$SkipWasmtime = $false,
+  [switch]$IncludeBlockly = $false,
+  [string]$BlocklyVersion = "12.4.1",
+  [string]$BlocklyDistUrl = "https://github.com/RaspberryPiFoundation/blockly/releases/download/blockly-v12.4.1/blockly-12.4.1.tgz",
+  [string]$BlocklyDistDir = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,18 +18,6 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $pwdPath = (Get-Location).Path
 Set-Location $repoRoot
-
-function Get-PythonBootstrapCommand {
-  if (Get-Command py -ErrorAction SilentlyContinue) {
-    return @("py", "-3")
-  }
-
-  if (Get-Command python -ErrorAction SilentlyContinue) {
-    return @("python")
-  }
-
-  throw "Cannot find Python launcher. Install Python 3.10+ and ensure 'py' or 'python' is in PATH."
-}
 
 function Invoke-Cmd {
   param(
@@ -43,35 +38,44 @@ function Invoke-Cmd {
 }
 
 try {
-  $pyBootstrap = Get-PythonBootstrapCommand
-  $venvDir = Join-Path $repoRoot ".venv"
-  $venvPy = Join-Path $repoRoot ".venv\Scripts\python.exe"
+  $setupArgs = @(
+    "-ExecutionPolicy", "Bypass",
+    "-File", (Join-Path $PSScriptRoot "setup_dev_env.ps1"),
+    "-GodotVersion", $GodotVersion,
+    "-BlocklyVersion", $BlocklyVersion,
+    "-BlocklyDistUrl", $BlocklyDistUrl
+  )
 
-  if ($RecreateVenv -and (Test-Path $venvDir)) {
-    Write-Host "Removing existing virtual environment..." -ForegroundColor Yellow
-    Remove-Item -Recurse -Force $venvDir
+  if ($RecreateVenv) {
+    $setupArgs += "-RecreateVenv"
   }
 
-  if (-not (Test-Path $venvPy)) {
-    Write-Host "Creating virtual environment at .venv..." -ForegroundColor Cyan
-    & $pyBootstrap[0] $pyBootstrap[1..($pyBootstrap.Length - 1)] -m venv .venv
-    if ($LASTEXITCODE -ne 0) {
-      throw "Failed to create .venv"
-    }
+  if ($SkipGodot) {
+    $setupArgs += "-SkipGodot"
   }
 
-  Invoke-Cmd -Name "Upgrade pip" -Command @($venvPy, "-m", "pip", "install", "--upgrade", "pip")
-  Invoke-Cmd -Name "Install requirements.txt" -Command @($venvPy, "-m", "pip", "install", "-r", "requirements.txt")
-  Invoke-Cmd -Name "Install package in editable mode" -Command @($venvPy, "-m", "pip", "install", "-e", ".[dev]")
+  if ($SkipWasmtime) {
+    $setupArgs += "-SkipWasmtime"
+  }
 
-  if (-not $SkipGate) {
+  if ($IncludeBlockly) {
+    $setupArgs += "-IncludeBlockly"
+  }
+
+  if ($BlocklyDistDir) {
+    $setupArgs += @("-BlocklyDistDir", $BlocklyDistDir)
+  }
+
+  Invoke-Cmd -Name "Setup development environment" -Command (@("powershell") + $setupArgs)
+
+  if (-not [bool]$SkipGate) {
     $gateArgs = @(
       "-ExecutionPolicy", "Bypass",
       "-File", (Join-Path $PSScriptRoot "run_project_gate.ps1"),
       "-CovFailUnder", "$CovFailUnder"
     )
 
-    if ($SkipMLE) {
+    if ([bool]$SkipMLE) {
       $gateArgs += "-SkipMLE"
     }
 
@@ -79,17 +83,14 @@ try {
       $gateArgs += "-RequireBlocklyVendor"
     }
 
-    $gateCommand = @("powershell") + $gateArgs
-    Invoke-Cmd -Name "Run project gate" -Command $gateCommand
+    Invoke-Cmd -Name "Run project gate" -Command (@("powershell") + $gateArgs)
   } else {
     Write-Host ""
     Write-Host "Skipped project gate check (-SkipGate)." -ForegroundColor Yellow
   }
 
   Write-Host ""
-  Write-Host "Setup completed." -ForegroundColor Green
-  Write-Host "Activate venv:" -ForegroundColor Green
-  Write-Host "  .\\.venv\\Scripts\\Activate.ps1" -ForegroundColor Green
+  Write-Host "Project setup completed." -ForegroundColor Green
 }
 finally {
   Set-Location $pwdPath

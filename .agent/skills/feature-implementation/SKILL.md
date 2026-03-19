@@ -80,7 +80,7 @@ description: 用於 Block2Python 的功能實作、重構與維護工作。當�
 若改動影響 CLI / UI / demo 展示，可額外使用：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/run_demo.ps1
-powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
-powershell -ExecutionPolicy Bypass -File tools/run_wasm_smoke.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_cli_demo.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_pyside6_client.ps1
+powershell -ExecutionPolicy Bypass -File tools/smoke_wasm.ps1
 ```
