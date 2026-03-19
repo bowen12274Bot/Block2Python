@@ -18,3 +18,4 @@ metadata:
   stage: map-format-skeleton
   group_id: group-03
   slot: practice-04
+  placeholder_auto_ac: true

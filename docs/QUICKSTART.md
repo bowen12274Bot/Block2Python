@@ -1,17 +1,37 @@
-﻿# Block2Python 快速開始
+# Block2Python 快速開始
 
 - 版本：0.1.0
-- 更新日期：2026-03-18
+- 更新日期：2026-03-20
 
-這份文件提供目前專案的最短啟動路徑。
+這份文件提供目前專案最短、最直覺的啟動路徑。
 如果你需要更完整的環境設定、Wasm judge 或 Blockly vendor 說明，請看 `docs/contributing/environment_setup.md`。
+
+## 先做這四件事
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1
+powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1
+.\tools\run_tests.ps1
+.\tools\run_project_gate.ps1
+```
+
+意思分別是：
+
+- `setup_dev_env.ps1`
+  把 `.venv`、Godot、Wasmtime、Blockly vendor 都建好。
+- `run_godot_client.ps1`
+  啟動目前主 client。
+- `run_tests.ps1`
+  日常開發時手動跑 pytest。
+- `run_project_gate.ps1`
+  收尾前跑完整檢查。
 
 ## 1. 建立開發環境
 
 建議直接使用工具腳本：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/setup_project.ps1
+powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1
 ```
 
 如果要手動建立：
@@ -36,7 +56,7 @@ powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1
 powershell -ExecutionPolicy Bypass -File tools/run_godot_client.ps1 -Console
 ```
 
-## 3. 啟動 Python 端其他入口
+## 3. 其他入口
 
 CLI client：
 

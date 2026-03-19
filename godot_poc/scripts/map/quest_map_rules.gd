@@ -153,11 +153,11 @@ static func is_trackable_step(step: Dictionary) -> bool:
 		return true
 	if not level_ids.is_empty():
 		return true
-	if str(step.get("node_id", "")) != "":
+	if _has_non_empty_string(step.get("node_id", null)):
 		return true
-	if str(step.get("challenge_id", "")) != "":
+	if _has_non_empty_string(step.get("challenge_id", null)):
 		return true
-	if str(step.get("scene_id", "")) != "":
+	if _has_non_empty_string(step.get("scene_id", null)):
 		return true
 	return false
 
@@ -205,3 +205,7 @@ static func _string_array(value: Variant) -> Array[String]:
 		for item in value:
 			result.append(str(item))
 	return result
+
+
+static func _has_non_empty_string(value: Variant) -> bool:
+	return value is String and str(value) != ""

@@ -67,11 +67,11 @@ def test_dispatch_start_group_demo_opens_demo_scene() -> None:
     assert state.node_id == "group-01-story"
     assert state.scene is not None
     assert state.scene.scene_id == "scene-city-alarm"
-    assert state.progress.demo_seen_group_ids == ("group-01",)
+    assert state.progress.demo_seen_group_ids == ()
     assert state.map_route is not None
     group = state.map_route.groups[0]
     practice_step = next(step for step in group.practice_route if step.step_type == "practice")
-    assert practice_step.status_key == "available"
+    assert practice_step.status_key == "locked"
 
 
 def test_dispatch_start_group_practice_rejects_locked_group() -> None:
@@ -87,6 +87,7 @@ def test_dispatch_start_group_practice_rejects_locked_group() -> None:
 def test_dispatch_start_group_practice_opens_practice_entry() -> None:
     session = build_demo_session()
     dispatch(session, PlayerAction(action_type=ActionType.START_GROUP_DEMO, payload={"group_id": "group-01"}))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
 
     state = dispatch(
         session,

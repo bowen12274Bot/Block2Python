@@ -16,6 +16,6 @@
 
 如果你要跑目前正式主線，請優先使用：
 
-- `tools/setup_project.ps1`
+- `tools/setup_dev_env.ps1`
 - `tools/run_godot_client.ps1`
 - `tools/run_tests.ps1`

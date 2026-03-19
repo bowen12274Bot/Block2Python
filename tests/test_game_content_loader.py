@@ -26,8 +26,8 @@ def test_load_runtime_game_content_assets() -> None:
     assert "main-map-entry" in bundle.nodes
     assert "scene-city-alarm" in bundle.scenes
     assert "challenge-group-01-practice" in bundle.challenges
-    assert "toolbox-basic-io" in bundle.toolbox
-    assert "battery-basic-io" in bundle.battery_policies
+    assert "toolbox-group-01" in bundle.toolbox
+    assert "battery-group-01" in bundle.battery_policies
 
 
 def test_assemble_runtime_game_slice_against_levels_assets() -> None:

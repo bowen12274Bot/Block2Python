@@ -54,6 +54,12 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
                 {
                     "group_id": group.group_id,
                     "title": group.title,
+                    "status_key": group.status_key,
+                    "status_label": group.status_label,
+                    "is_enterable": group.is_enterable,
+                    "current_label": group.current_label,
+                    "demo_slot": _serialize_group_slot(group.demo_slot),
+                    "practice_slot": _serialize_group_slot(group.practice_slot),
                     "demo_route": [_serialize_map_route_step(step) for step in group.demo_route],
                     "practice_route": [_serialize_map_route_step(step) for step in group.practice_route],
                 }
@@ -99,6 +105,23 @@ def _serialize_map_route_step(step) -> dict[str, object]:
         "challenge_id": step.challenge_id,
         "is_planned": step.is_planned,
         "is_repeatable": step.is_repeatable,
+    }
+
+
+def _serialize_group_slot(slot) -> dict[str, object] | None:
+    if slot is None:
+        return None
+    return {
+        "slot_key": slot.slot_key,
+        "title": slot.title,
+        "status_key": slot.status_key,
+        "status_label": slot.status_label,
+        "is_unlocked": slot.is_unlocked,
+        "viewed": slot.viewed,
+        "completed_count": slot.completed_count,
+        "total_count": slot.total_count,
+        "next_level_id": slot.next_level_id,
+        "entry_level_id": slot.entry_level_id,
     }
 
 

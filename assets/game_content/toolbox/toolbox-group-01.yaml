@@ -1,4 +1,4 @@
-toolbox_id: toolbox-basic-io
+toolbox_id: toolbox-group-01
 unlocked_block_ids:
   - input
   - print

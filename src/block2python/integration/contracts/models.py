@@ -70,6 +70,20 @@ class SubmissionFeedback:
 
 
 @dataclass(frozen=True, slots=True)
+class GroupSlotState:
+    slot_key: str
+    title: str
+    status_key: str
+    status_label: str
+    is_unlocked: bool = False
+    viewed: bool = False
+    completed_count: int = 0
+    total_count: int = 0
+    next_level_id: str | None = None
+    entry_level_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class MapRouteStepState:
     step_id: str
     step_type: str
@@ -90,6 +104,12 @@ class MapRouteStepState:
 class GroupMapRouteState:
     group_id: str
     title: str
+    status_key: str = "locked"
+    status_label: str = "Locked"
+    is_enterable: bool = False
+    current_label: str = ""
+    demo_slot: GroupSlotState | None = None
+    practice_slot: GroupSlotState | None = None
     demo_route: tuple[MapRouteStepState, ...] = ()
     practice_route: tuple[MapRouteStepState, ...] = ()
 

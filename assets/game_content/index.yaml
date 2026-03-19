@@ -17,6 +17,6 @@ challenges:
 map_routes:
   - file: map_routes/main-map-routes.yaml
 toolbox:
-  - file: toolbox/toolbox-basic-io.yaml
+  - file: toolbox/toolbox-group-01.yaml
 battery:
-  - file: battery/battery-basic-io.yaml
+  - file: battery/battery-group-01.yaml

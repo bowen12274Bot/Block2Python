@@ -97,7 +97,7 @@ try {
             }
 
             Write-Host "Blockly vendor assets are missing; UI will run in placeholder mode." -ForegroundColor Yellow
-            Write-Host "Use tools/sync_blockly_vendor.ps1 or tools/vendor_blockly_from_dir.ps1 to install them." -ForegroundColor Yellow
+            Write-Host "Use tools/sync_blockly_vendor.ps1 to install them." -ForegroundColor Yellow
         }
     }
 

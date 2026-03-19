@@ -19,6 +19,8 @@ try {
         exit 1
     }
 
+    $localWasmtime = ".block2python\\tools\\wasmtime\\wasmtime.exe"
+
     $args = @(
         "tools/judge_precision_benchmark.py",
         "--runs", "$Runs",
@@ -27,6 +29,10 @@ try {
         "--precision-memory-limit-mb", "$PrecisionMemoryLimitMB",
         "--memory-probe-limit-mb", "$MemoryProbeLimitMB"
     )
+
+    if (Test-Path $localWasmtime) {
+        $args += @("--wasmtime-bin", $localWasmtime)
+    }
 
     if ($Strict) {
         $args += "--strict"

@@ -5,6 +5,8 @@ nodes:
     prerequisite_node_ids: []
     next_node_ids:
       - group-01-story
+      - group-02-story
+      - group-03-story
     scene_id: null
     challenge_group_id: null
 
@@ -44,7 +46,7 @@ nodes:
     prerequisite_node_ids:
       - group-01-practice
     next_node_ids:
-      - group-02-story
+      - main-map-entry
     scene_id: scene-result-success
     challenge_group_id: null
 
@@ -53,6 +55,77 @@ nodes:
     title: Group 02 Story
     prerequisite_node_ids:
       - group-01-result
-    next_node_ids: []
+    next_node_ids:
+      - group-02-demo
+    scene_id: scene-city-alarm
+    challenge_group_id: null
+
+  - node_id: group-02-demo
+    node_type: demo
+    title: Group 02 Demo
+    prerequisite_node_ids:
+      - group-02-story
+    next_node_ids:
+      - group-02-practice
+    scene_id: scene-practice-unlock
+    challenge_group_id: challenge-group-02-demo
+
+  - node_id: group-02-practice
+    node_type: practice
+    title: Group 02 Practice
+    prerequisite_node_ids:
+      - group-02-demo
+    next_node_ids:
+      - group-02-result
     scene_id: null
+    challenge_group_id: challenge-group-02-practice
+
+  - node_id: group-02-result
+    node_type: result
+    title: Group 02 Result
+    prerequisite_node_ids:
+      - group-02-practice
+    next_node_ids:
+      - main-map-entry
+    scene_id: scene-result-success
+    challenge_group_id: null
+
+  - node_id: group-03-story
+    node_type: story
+    title: Group 03 Story
+    prerequisite_node_ids:
+      - group-02-result
+    next_node_ids:
+      - group-03-demo
+    scene_id: scene-city-alarm
+    challenge_group_id: null
+
+  - node_id: group-03-demo
+    node_type: demo
+    title: Group 03 Demo
+    prerequisite_node_ids:
+      - group-03-story
+    next_node_ids:
+      - group-03-practice
+    scene_id: scene-practice-unlock
+    challenge_group_id: challenge-group-03-demo
+
+  - node_id: group-03-practice
+    node_type: practice
+    title: Group 03 Practice
+    prerequisite_node_ids:
+      - group-03-demo
+    next_node_ids:
+      - group-03-result
+    scene_id: null
+    challenge_group_id: challenge-group-03-practice
+
+  - node_id: group-03-result
+    node_type: result
+    title: Group 03 Result
+    prerequisite_node_ids:
+      - group-03-practice
+    next_node_ids:
+      - main-map-entry
+    scene_id: scene-result-success
     challenge_group_id: null

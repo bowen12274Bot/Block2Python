@@ -71,21 +71,25 @@ static func _build_group_views(map_route: Dictionary, progress_state: Dictionary
 	return group_views
 
 
-static func _build_group_view(group: Dictionary, group_index: int, prior_group_views: Array[Dictionary], progress_state: Dictionary) -> Dictionary:
+static func _build_group_view(group: Dictionary, _group_index: int, _prior_group_views: Array[Dictionary], progress_state: Dictionary) -> Dictionary:
 	var demo_route_steps: Array[Dictionary] = _step_dict_array(group.get("demo_route", []))
 	var practice_route_steps: Array[Dictionary] = _step_dict_array(group.get("practice_route", []))
 	var all_steps: Array[Dictionary] = []
 	all_steps.append_array(demo_route_steps)
 	all_steps.append_array(practice_route_steps)
 
-	var intrinsic_status_key: String = QuestMapRulesScript.intrinsic_group_status_key(all_steps)
-	var status_key: String = QuestMapRulesScript.group_status_key(group_index, intrinsic_status_key, prior_group_views)
-	var current_label: String = QuestMapRulesScript.group_current_label(all_steps)
 	var progress := QuestMapRulesScript.group_progress(all_steps)
 	var group_id: String = str(group.get("group_id", ""))
 	var title: String = str(group.get("title", "Group"))
-	var demo_slot: Dictionary = _build_slot_view("demo", "Demo", demo_route_steps, progress_state, group_id)
-	var practice_slot: Dictionary = _build_slot_view("practice", "Practice", practice_route_steps, progress_state, group_id)
+	var status_key: String = str(group.get("status_key", "locked"))
+	var status_label: String = str(group.get("status_label", QuestMapRulesScript.status_label(status_key)))
+	var current_label: String = str(group.get("current_label", ""))
+	var demo_slot: Dictionary = _slot_dict(group.get("demo_slot", {}))
+	var practice_slot: Dictionary = _slot_dict(group.get("practice_slot", {}))
+	if demo_slot.is_empty():
+		demo_slot = _build_slot_view("demo", "Demo", demo_route_steps, progress_state, group_id)
+	if practice_slot.is_empty():
+		practice_slot = _build_slot_view("practice", "Practice", practice_route_steps, progress_state, group_id)
 
 	return {
 		"group_id": group_id,
@@ -95,8 +99,8 @@ static func _build_group_view(group: Dictionary, group_index: int, prior_group_v
 		"theme_description": _theme_description_for_group(group_id),
 		"unlock_blocks": _unlock_blocks_for_group(group_id),
 		"status_key": status_key,
-		"status_label": QuestMapRulesScript.group_status_label(status_key, QuestMapRulesScript.is_planned_only_group(all_steps)),
-		"is_enterable": status_key != "locked",
+		"status_label": status_label,
+		"is_enterable": bool(group.get("is_enterable", status_key != "locked")),
 		"progress_label": "Progress: %d / %d tracked steps" % [progress["completed"], progress["total"]],
 		"current_label": current_label,
 		"node_titles": QuestMapRulesScript.tracked_titles(demo_route_steps, practice_route_steps),
@@ -207,6 +211,12 @@ static func _completed_level_count(primary_step: Dictionary, cleared_level_ids: 
 
 static func _level_count(primary_step: Dictionary) -> int:
 	return _string_array(primary_step.get("level_ids", [])).size()
+
+
+static func _slot_dict(value: Variant) -> Dictionary:
+	if value is Dictionary:
+		return value
+	return {}
 
 
 static func _step_dict_array(value: Variant) -> Array[Dictionary]:
