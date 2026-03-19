@@ -131,7 +131,7 @@
   - 帶入 `Submission.block_json` / `Submission.block_schema_version`
   - 標記積木步驟通過（建立期 gate）
 - Blockly 靜態檔 vendor 流程已文件化，並可用工具腳本從目錄/zip 匯入：
-  - `tools/vendor_blockly.ps1`
+  - `tools/vendor_blockly.ps1` / `tools/vendor_blockly_from_dir.ps1`
   - `docs/contributing/environment_setup.md`
 
 **未做到 / 跳過**

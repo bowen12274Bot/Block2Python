@@ -1,0 +1,44 @@
+level_id: judge-precision-sum-series
+title: Judge Precision - Sum of Squares Series
+chapter_id: benchmark
+order_index: 999
+
+prompt: |
+  Read an integer n, and output the value of:
+  1^2 + 2^2 + ... + n^2
+
+learning_markdown: |
+  Reference formula:
+  n(n+1)(2n+1)/6
+
+# Inline testcases are used so this level stays self-contained for benchmarking.
+testcases:
+  - name: n-1
+    stdin: |
+      1
+    expected_stdout: |
+      1
+  - name: n-5
+    stdin: |
+      5
+    expected_stdout: |
+      55
+  - name: n-50
+    stdin: |
+      50
+    expected_stdout: |
+      42925
+  - name: n-500
+    stdin: |
+      500
+    expected_stdout: |
+      41791750
+
+judge_policy:
+  time_limit_ms: 1200
+  memory_limit_mb: 256
+
+metadata:
+  stage: benchmark
+  track: wasm-judge-precision
+  difficulty: medium

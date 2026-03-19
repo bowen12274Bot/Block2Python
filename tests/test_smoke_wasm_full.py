@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import shutil
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -105,30 +106,46 @@ class TestWasmJudgeSmoke:
 @pytest.mark.requires_wasm
 @pytest.mark.integration
 class TestWasmJudgeYAMLLevels:
-    def test_load_and_judge_demo_basic_io_hello(self, wasm_judge: WasmJudge):
+    def test_load_and_judge_add_two_numbers(self, wasm_judge: WasmJudge):
         levels = load_levels(Path("assets/levels"))
-        level = levels.get("demo-basic-io-hello")
+        level = levels.get("add-two-numbers")
         if level is None:
-            pytest.skip("demo-basic-io-hello level id not found")
+            pytest.skip("add-two-numbers level id not found")
+
+        # On some Windows hosts the wasm Python runtime needs a higher memory cap.
+        level = replace(level, judge_policy=replace(level.judge_policy, memory_limit_kb=max(level.judge_policy.memory_limit_kb or 0, 256 * 1024)))
 
         submission = Submission(
             level_id=level.level_id,
-            python_code="name = input()\nprint('Hello, ' + name)",
+            python_code="a, b = map(int, input().split())\nprint(a + b)",
         )
         result = wasm_judge.judge(submission, level)
 
         assert result.status == JudgeStatus.AC
         assert all(case.status == "PASS" for case in result.case_results)
 
-    def test_load_and_judge_practice_basic_io_sum(self, wasm_judge: WasmJudge):
+    def test_load_and_judge_fizzbuzz_simple(self, wasm_judge: WasmJudge):
         levels = load_levels(Path("assets/levels"))
-        level = levels.get("practice-basic-io-sum")
+        level = levels.get("fizzbuzz-simple")
         if level is None:
-            pytest.skip("practice-basic-io-sum level id not found")
+            pytest.skip("fizzbuzz-simple level id not found")
+
+        # Keep test focused on correctness, not host-dependent memory ceilings.
+        level = replace(level, judge_policy=replace(level.judge_policy, memory_limit_kb=max(level.judge_policy.memory_limit_kb or 0, 256 * 1024)))
 
         submission = Submission(
             level_id=level.level_id,
-            python_code="a = int(input())\nb = int(input())\nprint(a + b)",
+            python_code=(
+                "n = int(input())\n"
+                "if n % 15 == 0:\n"
+                "    print('FizzBuzz')\n"
+                "elif n % 3 == 0:\n"
+                "    print('Fizz')\n"
+                "elif n % 5 == 0:\n"
+                "    print('Buzz')\n"
+                "else:\n"
+                "    print(n)\n"
+            ),
         )
         result = wasm_judge.judge(submission, level)
 

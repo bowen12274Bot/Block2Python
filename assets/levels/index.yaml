@@ -5,3 +5,11 @@ levels:
     file: practice-basic-io-sum.yaml
   - id: practice-basic-io-double
     file: practice-basic-io-double.yaml
+  - id: demo-1
+    file: demo-1.yaml
+  - id: add-two-numbers
+    file: add-two-numbers.yaml
+  - id: demo-2
+    file: demo-2.yaml
+  - id: fizzbuzz-simple
+    file: fizzbuzz-simple.yaml

@@ -5,16 +5,19 @@
 ## 快速開始
 
 ```powershell
-# 1. 安裝依賴
-pip install -e ".[dev]"
+# 1. 一鍵設定（建立 .venv、安裝依賴、執行 gate）
+powershell -ExecutionPolicy Bypass -File .\tools\setup_project.ps1
 
-# 2. 執行測試
+# 2. 啟用虛擬環境
+.\.venv\Scripts\Activate.ps1
+
+# 3. 執行測試
 pytest
 
-# 3. 啟動 GUI
+# 4. 啟動 GUI
 python -m block2python.ui
 
-# 4. 或啟動 CLI
+# 5. 或啟動 CLI
 python -m block2python
 ```
 
@@ -25,16 +28,16 @@ python -m block2python
 ### 使用與開發
 - **快速啟動指南**：[docs/QUICKSTART.md](docs/QUICKSTART.md)
 - **環境與 Wasm 設定**：[docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)
+- **Judge 介紹**：[docs/JUDGE_INTRO.md](docs/JUDGE_INTRO.md)
 - **貢獻指南**：[docs/contributing.md](docs/contributing.md)
 
 ### 規劃與設計
-- 產品內容：`docs/product/`
+- 專案計畫：`docs/project_plan.md`
 - 需求文件：`docs/requirements.md`
 - 技術策略說明：`docs/technical_rationale.md`
 - 專案架構：`docs/project_architecture.md`
 - 開發計畫資料夾：`docs/development_plans/`
 - 開發進度安排（待補）：`docs/development_timeline.md`
-- 專案計畫：`docs/project_plan.md`
 - 貢獻指南入口：`docs/contributing.md`
 - 貢獻細則：`docs/contributing/`
 - 規格（Specs）：`docs/specs/`
@@ -74,9 +77,3 @@ python -m block2python
 ```
 
 完整配置指南請見 [docs/contributing/environment_setup.md](docs/contributing/environment_setup.md)。
-
-## GameSession Demo
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tools/legacy/run_game_session_demo.ps1
-```

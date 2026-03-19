@@ -10,21 +10,17 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $repoRoot
 
 try {
-    $localWasmtime = Join-Path $repoRoot ".block2python\tools\wasmtime\wasmtime.exe"
-    $wasmtimeBin = if (Test-Path $localWasmtime) { $localWasmtime } else { "wasmtime" }
-    $env:BLOCK2PYTHON_WASMTIME_BIN = $wasmtimeBin
-
     Write-Host "=== Wasm Judge Verification ===" -ForegroundColor Cyan
     Write-Host ""
 
     # 1. Check wasmtime
     Write-Host "[1/5] Checking wasmtime..." -ForegroundColor Yellow
     try {
-        $wasmtimeVersion = & $wasmtimeBin --version 2>&1
+        $wasmtimeVersion = & wasmtime --version 2>&1
         Write-Host "OK wasmtime installed: $wasmtimeVersion" -ForegroundColor Green
     } catch {
         Write-Host "FAIL wasmtime not found" -ForegroundColor Red
-        Write-Host "Install: tools/setup_dev_env.ps1 or winget install BytecodeAlliance.Wasmtime" -ForegroundColor Yellow
+        Write-Host "Install: winget install BytecodeAlliance.Wasmtime" -ForegroundColor Yellow
         exit 1
     }
 
@@ -61,10 +57,7 @@ from pathlib import Path
 from block2python.judge import WasmJudge, WasmtimeRunner
 from block2python.contracts import Submission, LevelSpec, Testcase, JudgePolicy, JudgeStatus
 
-runner = WasmtimeRunner(
-    wasm_path=Path('assets/wasm/python.wasm'),
-    wasmtime_bin=Path('.block2python/tools/wasmtime/wasmtime.exe') if Path('.block2python/tools/wasmtime/wasmtime.exe').exists() else 'wasmtime'
-)
+runner = WasmtimeRunner(wasm_path=Path('assets/wasm/python.wasm'))
 judge = WasmJudge(runner=runner, fail_fast=True)
 
 level = LevelSpec(
@@ -115,10 +108,7 @@ from pathlib import Path
 from block2python.judge import WasmJudge, WasmtimeRunner
 from block2python.contracts import Submission, LevelSpec, Testcase, JudgePolicy, JudgeStatus
 
-runner = WasmtimeRunner(
-    wasm_path=Path('assets/wasm/python.wasm'),
-    wasmtime_bin=Path('.block2python/tools/wasmtime/wasmtime.exe') if Path('.block2python/tools/wasmtime/wasmtime.exe').exists() else 'wasmtime'
-)
+runner = WasmtimeRunner(wasm_path=Path('assets/wasm/python.wasm'))
 judge = WasmJudge(runner=runner, fail_fast=True)
 
 level = LevelSpec(

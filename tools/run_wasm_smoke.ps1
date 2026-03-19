@@ -14,12 +14,7 @@ if (-not $WasmPath) {
     $WasmPath = "assets/wasm/python.wasm"
 }
 if (-not $WasmtimeBin) {
-    $localWasmtime = Join-Path $repoRoot ".block2python\tools\wasmtime\wasmtime.exe"
-    if (Test-Path $localWasmtime) {
-        $WasmtimeBin = $localWasmtime
-    } else {
-        $WasmtimeBin = "wasmtime"
-    }
+    $WasmtimeBin = "wasmtime"
 }
 
 $env:BLOCK2PYTHON_JUDGE_MODE = "wasm"
