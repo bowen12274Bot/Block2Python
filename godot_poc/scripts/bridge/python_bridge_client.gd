@@ -1,11 +1,11 @@
-﻿extends Node
+extends Node
 class_name PythonBridgeClient
 
 signal bridge_started()
 signal bridge_failed(message: String)
 signal response_received(response: Dictionary)
 
-const BRIDGE_MODULE := "block2python.integration.bridge_stdio.server"
+const BridgeLaunchConfigScript = preload("res://scripts/bridge/python_bridge_launch_config.gd")
 const DEFAULT_PYTHON_REL_PATH := "../.venv/Scripts/python.exe"
 const DEFAULT_LEVELS_REL_PATH := "../assets/levels"
 const DEFAULT_GAME_CONTENT_REL_PATH := "../assets/game_content"
@@ -44,7 +44,7 @@ func start_bridge() -> bool:
 	if launch_config.is_empty():
 		return false
 
-	_apply_bridge_environment(launch_config)
+	BridgeLaunchConfigScript.apply_environment(launch_config)
 	_pipe = OS.execute_with_pipe(
 		str(launch_config.get("python_path", "")),
 		launch_config.get("args", PackedStringArray()),
@@ -140,60 +140,25 @@ func stop_bridge() -> void:
 
 
 func _build_launch_config() -> Dictionary:
-	var python_abs: String = _resolve_required_file(python_rel_path, "Python")
-	if python_abs == "":
-		return {}
+	var launch_config: Dictionary = BridgeLaunchConfigScript.build(
+		Callable(self, "_resolve_project_path"),
+		python_rel_path,
+		pythonpath_rel_path,
+		wasm_rel_path,
+		levels_rel_path,
+		game_content_rel_path,
+		wasmtime_candidate_rel_paths
+	)
+	if not launch_config.is_empty():
+		return launch_config
 
-	var pythonpath_abs: String = _resolve_project_path(pythonpath_rel_path)
-	var wasm_abs: String = _resolve_project_path(wasm_rel_path)
-	var levels_abs: String = _resolve_project_path(levels_rel_path)
-	var game_content_abs: String = _resolve_project_path(game_content_rel_path)
-	var args: PackedStringArray = PackedStringArray([
-		"-m",
-		BRIDGE_MODULE,
-		"--levels-dir",
-		levels_abs,
-		"--game-content-dir",
-		game_content_abs,
-	])
-
-	return {
-		"python_path": python_abs,
-		"pythonpath_path": pythonpath_abs,
-		"wasm_path": wasm_abs,
-		"wasmtime_bin": _find_wasmtime_bin(),
-		"args": args,
-	}
-
-
-func _apply_bridge_environment(launch_config: Dictionary) -> void:
-	OS.set_environment("PYTHONPATH", str(launch_config.get("pythonpath_path", "")))
-	OS.set_environment("BLOCK2PYTHON_WASM_PATH", str(launch_config.get("wasm_path", "")))
-	OS.set_environment("BLOCK2PYTHON_WASM_CODE_MODE", "stdin")
-
-	var wasmtime_bin: String = str(launch_config.get("wasmtime_bin", ""))
-	if wasmtime_bin != "":
-		OS.set_environment("BLOCK2PYTHON_WASMTIME_BIN", wasmtime_bin)
-
-
-func _resolve_required_file(relative_path: String, label: String) -> String:
-	var absolute_path: String = _resolve_project_path(relative_path)
-	if FileAccess.file_exists(absolute_path):
-		return absolute_path
-	_fail_bridge("%s not found: %s" % [label, absolute_path])
-	return ""
+	var python_abs: String = _resolve_project_path(python_rel_path)
+	_fail_bridge("Python not found: %s" % python_abs)
+	return {}
 
 
 func _resolve_project_path(relative_path: String) -> String:
 	return ProjectSettings.globalize_path("res://%s" % relative_path)
-
-
-func _find_wasmtime_bin() -> String:
-	for relative_path in wasmtime_candidate_rel_paths:
-		var absolute_path: String = _resolve_project_path(str(relative_path))
-		if FileAccess.file_exists(absolute_path):
-			return absolute_path
-	return ""
 
 
 func _read_stderr_text() -> String:

@@ -1,4 +1,4 @@
-﻿extends Control
+extends Control
 class_name QuestMapScreen
 
 const QuestMapSelectionPresenterScript = preload("res://scripts/map/quest_map_selection_presenter.gd")
@@ -8,7 +8,6 @@ signal reset_requested()
 signal advance_requested()
 signal node_open_requested()
 signal debug_toggled(visible: bool)
-signal group_route_requested(group_view: Dictionary)
 signal stage_demo_requested(group_id: String)
 signal stage_practice_requested(group_id: String)
 

@@ -1,12 +1,13 @@
-﻿extends Control
+extends Control
 class_name GameFlowCoordinator
 
 const DEFAULT_CHALLENGE_CODE := "print(3)\n"
 const BridgeStateStoreScript = preload("res://scripts/bridge/bridge_state_store.gd")
-const QuestMapSelectionPresenterScript = preload("res://scripts/map/quest_map_selection_presenter.gd")
 const QuestMapMapperScript = preload("res://scripts/map/quest_map_mapper.gd")
 const GameFlowFeedbackPresenterScript = preload("res://scripts/game_flow/game_flow_feedback_presenter.gd")
 const GameFlowMapperScript = preload("res://scripts/game_flow/game_flow_mapper.gd")
+const GameFlowPageRouterScript = preload("res://scripts/flow/game_flow_page_router.gd")
+const GameFlowScreenPresenterScript = preload("res://scripts/flow/game_flow_screen_presenter.gd")
 
 @onready var python_bridge_client = $PythonBridgeClient
 @onready var map_screen = $MapScreen
@@ -40,7 +41,7 @@ func _ready() -> void:
 	challenge_screen.initialize(DEFAULT_CHALLENGE_CODE)
 	map_screen.show_map(QuestMapMapperScript.empty_map_view("Click Start Bridge, then Reset to load the current quest map."))
 	map_screen.set_status("Status: idle")
-	map_screen.set_note("Use Reset to load the latest quest state. Route steps now come from bridge map_route data.")
+	map_screen.set_note("Use Reset to load the latest quest state. Group and slot state now come directly from bridge map_route data.")
 	map_screen.set_bridge_running(false)
 	map_screen.set_can_advance(false)
 	map_screen.set_current_node_enterable(false)
@@ -71,7 +72,7 @@ func _on_open_current_node_requested() -> void:
 		return
 
 	var state: Dictionary = _state_store.get_state()
-	var target_page: String = _resolved_page_for_state(state)
+	var target_page: String = GameFlowPageRouterScript.resolved_page_for_state(state)
 	if target_page != "map":
 		_show_page(target_page)
 		return
@@ -97,20 +98,6 @@ func _on_stage_practice_requested(group_id: String) -> void:
 		return
 	map_screen.set_status("Status: opening practice...")
 	python_bridge_client.send_start_group_practice(group_id)
-
-
-func _on_group_route_requested(group_view: Dictionary) -> void:
-	var status_key: String = str(group_view.get("status_key", "locked"))
-	if status_key == "locked":
-		map_screen.set_note("This group is still locked.")
-		return
-
-	var preferred_step: Dictionary = QuestMapSelectionPresenterScript.preferred_route_step(group_view)
-	if status_key == "current" and not preferred_step.is_empty() and _step_matches_live_page(preferred_step):
-		_on_open_current_node_requested()
-		return
-
-	_show_group_route_preview(group_view, preferred_step)
 
 
 func _on_advance_requested() -> void:
@@ -146,6 +133,7 @@ func _on_bridge_failed(message: String) -> void:
 		message
 	)
 
+
 func _on_response_received(response: Dictionary) -> void:
 	response_text.text = JSON.stringify(response, "  ")
 	_state_store.apply_response(response)
@@ -158,84 +146,22 @@ func _on_response_received(response: Dictionary) -> void:
 	_apply_error_response(response)
 
 
-func _render_map_view(map_view: Dictionary, state: Dictionary, view_model: Dictionary) -> void:
-	map_screen.show_map(map_view)
-	map_screen.set_status("Status: response ok=true")
-	var can_advance: bool = _can_advance_from_view_model(view_model)
-	var can_open: bool = _current_state_has_openable_page(state)
-	map_screen.set_can_advance(can_advance)
-	map_screen.set_current_node_enterable(can_open)
-	map_screen.set_note(_map_note_for_state(state, can_advance, can_open))
-
-
 func _apply_success_state(state: Dictionary, response: Dictionary) -> void:
 	var map_view: Dictionary = QuestMapMapperScript.map_game_state(state)
 	var view_model: Dictionary = GameFlowMapperScript.map_game_state(state)
 	var feedback_view: Dictionary = GameFlowFeedbackPresenterScript.build_feedback_view(view_model, response)
-	_render_map_view(map_view, state, view_model)
-	_render_flow_views(view_model, feedback_view)
+	var can_open: bool = GameFlowPageRouterScript.current_state_has_openable_page(state)
+	GameFlowScreenPresenterScript.render_map_view(map_screen, map_view, state, view_model, can_open)
+	GameFlowScreenPresenterScript.render_flow_views(scene_screen, challenge_screen, view_model, feedback_view)
 	_route_after_response(state)
 
 
 func _state_can_advance(state: Dictionary) -> bool:
-	return _can_advance_from_view_model(GameFlowMapperScript.map_game_state(state))
-
-
-func _show_group_route_preview(group_view: Dictionary, preferred_step: Dictionary) -> void:
-	var scene_view: Dictionary = QuestMapSelectionPresenterScript.build_group_route_scene_view(group_view, preferred_step)
-	scene_screen.show_scene(scene_view)
-	scene_screen.set_status("Status: group route preview")
-	scene_screen.set_can_advance(false)
-	_show_page("scene")
-
-
-func _can_advance_from_view_model(view_model: Dictionary) -> bool:
-	var action_view_variant: Variant = view_model.get("action_view", {})
-	if action_view_variant is Dictionary:
-		return bool(action_view_variant.get("can_advance", false))
-	return false
-
-
-func _current_state_has_openable_page(state: Dictionary) -> bool:
-	return _has_scene_payload(state) or _has_challenge_payload(state)
-
-
-func _map_note_for_state(state: Dictionary, can_advance: bool, can_open: bool) -> String:
-	if can_open:
-		return "Open Current Node to enter the active story or challenge page. The map now reflects live route step state."
-	if can_advance:
-		return "Current route step has no standalone page yet. Use Advance to move forward."
-	return "Current route step cannot be opened as a separate page."
-
-
-func _render_flow_views(view_model: Dictionary, feedback_view: Dictionary) -> void:
-	var action_view: Variant = view_model.get("action_view", {})
-	var can_advance: bool = false
-	var can_submit: bool = false
-	if action_view is Dictionary:
-		can_advance = bool(action_view.get("can_advance", false))
-		can_submit = bool(action_view.get("can_submit", false))
-
-	scene_screen.show_scene(view_model.get("scene_view", {}))
-	scene_screen.set_status("Status: scene flow ready")
-	scene_screen.set_can_advance(can_advance)
-	challenge_screen.show_challenge(view_model.get("challenge_view", {}))
-	challenge_screen.show_feedback(feedback_view)
-	challenge_screen.set_status("Challenge flow ready")
-	challenge_screen.set_can_submit(can_submit)
+	return GameFlowScreenPresenterScript.can_advance_from_view_model(GameFlowMapperScript.map_game_state(state))
 
 
 func _route_after_response(state: Dictionary) -> void:
-	_show_page(_resolved_page_for_state(state))
-
-
-func _resolved_page_for_state(state: Dictionary) -> String:
-	var mode_value: String = str(state.get("mode", ""))
-	if mode_value == "scene" and _has_scene_payload(state):
-		return "scene"
-	if mode_value == "challenge" and _has_challenge_payload(state):
-		return "challenge"
-	return "map"
+	_show_page(GameFlowPageRouterScript.resolved_page_for_state(state))
 
 
 func _apply_error_response(response: Dictionary) -> void:
@@ -247,15 +173,9 @@ func _apply_error_response(response: Dictionary) -> void:
 		error_text
 	)
 
+
 func _apply_error_ui(map_status: String, map_note: String, feedback_title: String, feedback_body: String) -> void:
-	map_screen.set_status(map_status)
-	map_screen.set_note(map_note)
-	scene_screen.set_status(map_status)
-	challenge_screen.set_status(map_status)
-	challenge_screen.show_feedback({
-		"title": feedback_title,
-		"body": feedback_body,
-	})
+	GameFlowScreenPresenterScript.apply_error_ui(map_screen, scene_screen, challenge_screen, map_status, map_note, feedback_title, feedback_body)
 	_show_page("map")
 
 
@@ -265,40 +185,10 @@ func _show_map_page() -> void:
 
 func _show_page(page: String) -> void:
 	_current_page = page
-	map_screen.visible = page == "map"
-	scene_screen.visible = page == "scene"
-	challenge_screen.visible = page == "challenge"
+	GameFlowPageRouterScript.show_page(page, map_screen, scene_screen, challenge_screen)
 
 
 func _set_debug_visible(debug_visible: bool) -> void:
 	debug_margin.visible = debug_visible
 	debug_panel.visible = debug_visible
 	map_screen.set_debug_visible(debug_visible)
-
-
-func _has_scene_payload(state: Dictionary) -> bool:
-	var scene_value: Variant = state.get("scene", null)
-	if scene_value is Dictionary:
-		var scene_dict: Dictionary = scene_value
-		return not scene_dict.is_empty()
-	return false
-
-
-func _has_challenge_payload(state: Dictionary) -> bool:
-	var challenge_value: Variant = state.get("challenge", null)
-	if challenge_value is Dictionary:
-		var challenge_dict: Dictionary = challenge_value
-		return not challenge_dict.is_empty()
-	return false
-
-
-func _step_matches_live_page(step: Dictionary) -> bool:
-	if _state_store == null or not _state_store.has_state():
-		return false
-	var state: Dictionary = _state_store.get_state()
-	var target_page: String = str(step.get("target_page", "map"))
-	if target_page == "scene":
-		return _has_scene_payload(state)
-	if target_page == "challenge":
-		return _has_challenge_payload(state)
-	return false
