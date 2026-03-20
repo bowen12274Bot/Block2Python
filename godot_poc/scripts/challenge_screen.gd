@@ -1,12 +1,15 @@
 extends Control
 class_name ChallengeScreen
 
+const ChallengePanelScript = preload("res://scripts/game_flow/challenge_panel.gd")
+const FeedbackPanelScript = preload("res://scripts/game_flow/feedback_panel.gd")
+
 signal submit_requested(python_code: String)
 signal back_requested()
 
 @onready var status_label: Label = $Margin/Scroll/Root/StatusLabel
-@onready var challenge_panel: ChallengePanel = $Margin/Scroll/Root/ChallengePanel
-@onready var feedback_panel: FeedbackPanel = $Margin/Scroll/Root/FeedbackPanel
+@onready var challenge_panel: ChallengePanelScript = $Margin/Scroll/Root/ChallengePanel
+@onready var feedback_panel: FeedbackPanelScript = $Margin/Scroll/Root/FeedbackPanel
 @onready var submit_button: Button = $Margin/Scroll/Root/Buttons/SubmitButton
 @onready var back_button: Button = $Margin/Scroll/Root/Buttons/BackButton
 

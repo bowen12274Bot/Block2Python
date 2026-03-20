@@ -1,6 +1,8 @@
 extends Control
 class_name QuestMapScreen
 
+const QuestMapPanelScript = preload("res://scripts/quest_map_panel.gd")
+
 signal start_bridge_requested()
 signal reset_requested()
 signal advance_requested()
@@ -13,7 +15,7 @@ signal debug_toggled(visible: bool)
 @onready var open_node_button: Button = $Margin/Root/Buttons/OpenNodeButton
 @onready var debug_toggle_button: Button = $Margin/Root/Buttons/DebugToggleButton
 @onready var status_label: Label = $Margin/Root/StatusLabel
-@onready var quest_map_panel: QuestMapPanel = $Margin/Root/QuestMapPanel
+@onready var quest_map_panel: QuestMapPanelScript = $Margin/Root/QuestMapPanel
 @onready var note_label: Label = $Margin/Root/NotePanel/NoteMargin/NoteRoot/NoteText
 
 
