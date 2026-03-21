@@ -1,6 +1,7 @@
+from .assembly import assemble_game_slice
 from .errors import GameContentAssemblyError, GameContentError, GameContentLoadError
 from .levels_loader import LevelsLoadError, load_levels
-from .loader import assemble_game_slice, load_game_content
+from .loader import load_game_content
 from .models import (
     AssembledGameSlice,
     BatteryPolicySpec,
