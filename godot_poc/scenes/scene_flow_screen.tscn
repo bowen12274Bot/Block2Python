@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://brmx56qw0wbp"]
 
-[ext_resource type="Script" path="res://scripts/game_flow/scene_flow_screen.gd" id="1_screen"]
-[ext_resource type="Script" path="res://scripts/game_flow/scene_panel.gd" id="2_scene"]
+[ext_resource type="Script" uid="uid://e20g12utnyq3" path="res://scripts/game_flow/scene_flow_screen.gd" id="1_screen"]
+[ext_resource type="Script" uid="uid://beqmnxxe2x13n" path="res://scripts/game_flow/scene_panel.gd" id="2_scene"]
 
-[node name="SceneFlowScreen" type="Control"]
+[node name="SceneFlowScreen" type="Control" unique_id=860123727]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_screen")
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=851185517]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,77 +24,75 @@ offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Scroll" type="ScrollContainer" parent="Margin"]
+[node name="Scroll" type="ScrollContainer" parent="Margin" unique_id=934968651]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Root" type="VBoxContainer" parent="Margin/Scroll"]
+[node name="Root" type="VBoxContainer" parent="Margin/Scroll" unique_id=1831636846]
+custom_minimum_size = Vector2(0, 760)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 16
-custom_minimum_size = Vector2(0, 760)
 
-[node name="Title" type="Label" parent="Margin/Scroll/Root"]
+[node name="Title" type="Label" parent="Margin/Scroll/Root" unique_id=1616603689]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "Story Scene"
 
-[node name="StatusLabel" type="Label" parent="Margin/Scroll/Root"]
+[node name="StatusLabel" type="Label" parent="Margin/Scroll/Root" unique_id=10916611]
 layout_mode = 2
 text = "Scene flow is idle."
 
-[node name="ScenePanel" type="PanelContainer" parent="Margin/Scroll/Root"]
+[node name="ScenePanel" type="PanelContainer" parent="Margin/Scroll/Root" unique_id=467850885]
 layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("2_scene")
 
-[node name="SceneMargin" type="MarginContainer" parent="Margin/Scroll/Root/ScenePanel"]
+[node name="SceneMargin" type="MarginContainer" parent="Margin/Scroll/Root/ScenePanel" unique_id=1943092495]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="SceneRoot" type="VBoxContainer" parent="Margin/Scroll/Root/ScenePanel/SceneMargin"]
+[node name="SceneRoot" type="VBoxContainer" parent="Margin/Scroll/Root/ScenePanel/SceneMargin" unique_id=486991349]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SceneMeta" type="HBoxContainer" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot"]
+[node name="SceneMeta" type="HBoxContainer" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot" unique_id=2053683879]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ModeLabel" type="Label" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot/SceneMeta"]
+[node name="ModeLabel" type="Label" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot/SceneMeta" unique_id=1328186010]
 layout_mode = 2
 text = "Mode: -"
 
-[node name="NodeLabel" type="Label" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot/SceneMeta"]
+[node name="NodeLabel" type="Label" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot/SceneMeta" unique_id=927123611]
 layout_mode = 2
 text = "Node: -"
 
-[node name="SceneTitle" type="Label" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot"]
+[node name="SceneTitle" type="Label" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot" unique_id=1625922280]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Scene"
 
-[node name="SceneBody" type="RichTextLabel" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot"]
-layout_mode = 2
+[node name="SceneBody" type="RichTextLabel" parent="Margin/Scroll/Root/ScenePanel/SceneMargin/SceneRoot" unique_id=1984374585]
 custom_minimum_size = Vector2(0, 420)
-bbcode_enabled = false
-fit_content = false
+layout_mode = 2
 size_flags_vertical = 3
 text = "No scene loaded yet."
 
-[node name="Buttons" type="HBoxContainer" parent="Margin/Scroll/Root"]
+[node name="Buttons" type="HBoxContainer" parent="Margin/Scroll/Root" unique_id=806177381]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="BackButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+[node name="BackButton" type="Button" parent="Margin/Scroll/Root/Buttons" unique_id=329793691]
 layout_mode = 2
 text = "Back to Map"
 
-[node name="AdvanceButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+[node name="AdvanceButton" type="Button" parent="Margin/Scroll/Root/Buttons" unique_id=289278211]
 layout_mode = 2
 text = "Advance"

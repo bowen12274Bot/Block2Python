@@ -62,6 +62,19 @@ def dispatch(session: GameSession, action: PlayerAction) -> GameState:
             session.start_group_practice(group_id)
             return session.current_game_state()
 
+        if action.action_type is ActionType.CREATE_PLAYER_PROFILE:
+            name = action.payload.get("name")
+            gender = action.payload.get("gender")
+            if not isinstance(name, str):
+                raise IntegrationDispatchError("create_player_profile requires payload.name")
+            if not isinstance(gender, str):
+                raise IntegrationDispatchError("create_player_profile requires payload.gender")
+
+            return session.create_player_profile(name=name, gender=gender)
+
+        if action.action_type is ActionType.COMPLETE_INTRO:
+            return session.complete_intro()
+
         if action.action_type is ActionType.RESTART_QUEST:
             raise IntegrationDispatchError("restart_quest is not implemented")
     except GameSessionError as exc:

@@ -31,6 +31,10 @@ func set_can_advance(can_advance: bool) -> void:
 	advance_button.disabled = not can_advance
 
 
+func set_can_go_back(can_go_back: bool) -> void:
+	back_button.disabled = not can_go_back
+
+
 func _on_advance_button_pressed() -> void:
 	status_label.text = "Status: requesting advance..."
 	advance_requested.emit()

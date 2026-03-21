@@ -24,7 +24,10 @@ def build_demo_session(
     game_content = load_game_content(game_content_dir or Path("assets/game_content"))
     game_slice = assemble_game_slice(game_content=game_content, levels=levels)
     app = AppCore(levels, judge=StubJudge(), progress=InMemoryProgress.empty())
-    return GameSession.start(app=app, game_slice=game_slice, quest_id=quest_id)
+    session = GameSession.start(app=app, game_slice=game_slice, quest_id=quest_id)
+    session.create_player_profile(name="Demo Player", gender="male")
+    session.complete_intro()
+    return session
 
 
 def run_auto_demo(
