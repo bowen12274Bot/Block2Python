@@ -133,12 +133,9 @@ def test_game_runtime_walks_runtime_quest() -> None:
     state = runtime.current_state()
     assert state is not None
     assert state.node.node_id == "group-01-demo"
-    assert state.scene is not None
-    assert state.scene.scene_id == "scene-practice-unlock"
+    assert state.scene is None
     assert state.challenge is not None
     assert state.challenge.challenge_id == "challenge-group-01-demo"
-
-
 def test_game_runtime_rejects_unknown_quest() -> None:
     levels = load_levels(Path("assets/levels"))
     bundle = load_game_content(Path("assets/game_content"))

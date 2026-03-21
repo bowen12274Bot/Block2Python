@@ -1,6 +1,7 @@
 from block2python.integration.contracts import (
     ActionType,
     AvailableActions,
+    DemoState,
     DialogueBlockState,
     GameMode,
     GameState,
@@ -51,6 +52,28 @@ def test_game_state_contract_supports_scene_payload() -> None:
     assert state.available_actions.submit is False
     assert state.last_submission is not None
     assert state.last_submission.judge_status == "AC"
+
+
+def test_game_state_contract_supports_demo_payload() -> None:
+    state = GameState(
+        mode=GameMode.DEMO,
+        quest_id="quest-main-map",
+        node_id="group-01-demo",
+        node_title="Group 01 Demo",
+        demo=DemoState(
+            demo_id="challenge-group-01-demo",
+            title="Group 01 Demo",
+            body="Placeholder demo body",
+            current_level_id="group-01-demo",
+        ),
+        available_actions=AvailableActions(advance=True),
+    )
+
+    assert state.mode is GameMode.DEMO
+    assert state.demo is not None
+    assert state.demo.demo_id == "challenge-group-01-demo"
+    assert state.available_actions.advance is True
+    assert state.challenge is None
 
 
 def test_player_action_contract_supports_submit_payload() -> None:

@@ -7,6 +7,7 @@ from typing import Any
 
 class GameMode(str, Enum):
     SCENE = "scene"
+    DEMO = "demo"
     CHALLENGE = "challenge"
     COMPLETE = "complete"
 
@@ -37,6 +38,14 @@ class SceneState:
     scene_id: str
     title: str
     dialogue_blocks: tuple[DialogueBlockState, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class DemoState:
+    demo_id: str
+    title: str
+    body: str = ""
+    current_level_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -145,6 +154,7 @@ class GameState:
     player_profile: PlayerProfileState = field(default_factory=PlayerProfileState)
     intro_completed: bool = False
     scene: SceneState | None = None
+    demo: DemoState | None = None
     challenge: ChallengeState | None = None
     progress: ProgressState = field(default_factory=ProgressState)
     available_actions: AvailableActions = field(default_factory=AvailableActions)

@@ -27,7 +27,7 @@ nodes:
       - group-01-story
     next_node_ids:
       - group-01-practice
-    scene_id: scene-practice-unlock
+    scene_id: null
     challenge_group_id: challenge-group-01-demo
 
   - node_id: group-01-practice
@@ -67,7 +67,7 @@ nodes:
       - group-02-story
     next_node_ids:
       - group-02-practice
-    scene_id: scene-practice-unlock
+    scene_id: null
     challenge_group_id: challenge-group-02-demo
 
   - node_id: group-02-practice
@@ -107,7 +107,7 @@ nodes:
       - group-03-story
     next_node_ids:
       - group-03-practice
-    scene_id: scene-practice-unlock
+    scene_id: null
     challenge_group_id: challenge-group-03-demo
 
   - node_id: group-03-practice

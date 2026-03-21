@@ -6,7 +6,6 @@ import json
 from block2python.integration.bridge_stdio import BridgeServer
 
 
-
 def test_bridge_server_handles_advance_over_stdio_streams() -> None:
     server = BridgeServer(use_stub_judge=True)
     instream = io.StringIO('{"action":{"action_type":"advance","payload":{}}}\n')
@@ -20,7 +19,6 @@ def test_bridge_server_handles_advance_over_stdio_streams() -> None:
     assert response["state"]["mode"] == "scene"
     assert response["state"]["node_id"] == "group-01-story"
     assert response["state"]["last_submission"] is None
-
 
 
 def test_bridge_server_persists_session_across_requests() -> None:
@@ -45,10 +43,10 @@ def test_bridge_server_persists_session_across_requests() -> None:
     assert last_response["ok"] is True
     assert last_response["state"]["mode"] == "challenge"
     assert last_response["state"]["challenge"]["challenge_id"] == "challenge-group-01-practice"
-    assert last_response["state"]["progress"]["cleared_level_ids"] == ["group-01-demo", "group-01-practice-01"]
+    assert last_response["state"]["challenge"]["current_level_id"] == "group-01-practice-02"
+    assert last_response["state"]["progress"]["cleared_level_ids"] == ["group-01-practice-01"]
     assert last_response["state"]["last_submission"]["level_id"] == "group-01-practice-01"
     assert last_response["state"]["last_submission"]["judge_status"] == "AC"
-
 
 
 def test_bridge_server_returns_error_for_invalid_json() -> None:
@@ -64,7 +62,6 @@ def test_bridge_server_returns_error_for_invalid_json() -> None:
     assert "Invalid JSON" in response["error"]
 
 
-
 def test_bridge_server_returns_error_for_invalid_action_shape() -> None:
     server = BridgeServer(use_stub_judge=True)
     instream = io.StringIO('{"action":{"action_type":123,"payload":{}}}\n')
@@ -76,7 +73,6 @@ def test_bridge_server_returns_error_for_invalid_action_shape() -> None:
     assert response["ok"] is False
     assert response["state"] is None
     assert "action_type" in response["error"]
-
 
 
 def test_bridge_server_supports_reset_command() -> None:
