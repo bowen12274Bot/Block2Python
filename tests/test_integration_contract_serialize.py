@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 
 from block2python.integration.contracts import (
     ActionType,
@@ -40,6 +40,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             completed_node_ids=("main-map-entry", "group-01-story"),
             cleared_level_ids=("demo-0",),
             demo_seen_group_ids=("group-01",),
+            toolbox_used_level_ids=("group-01-practice-01",),
         ),
         available_actions=AvailableActions(submit=True, restart_quest=True),
         last_submission=SubmissionFeedback(
@@ -50,6 +51,8 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             analysis_summary="OK",
             judge_status="AC",
             judge_summary="Accepted",
+            verification_only=False,
+            answer_correct=True,
         ),
         errors=("none",),
     )
@@ -62,12 +65,15 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     assert payload["challenge"]["current_level_prompt"] == "Print a greeting."
     assert payload["progress"]["completed_node_ids"] == ["main-map-entry", "group-01-story"]
     assert payload["progress"]["demo_seen_group_ids"] == ["group-01"]
+    assert payload["progress"]["toolbox_used_level_ids"] == ["group-01-practice-01"]
     assert payload["available_actions"] == {
         "advance": False,
         "submit": True,
         "restart_quest": True,
     }
     assert payload["last_submission"]["judge_status"] == "AC"
+    assert payload["last_submission"]["verification_only"] is False
+    assert payload["last_submission"]["answer_correct"] is True
     assert payload["errors"] == ["none"]
 
 

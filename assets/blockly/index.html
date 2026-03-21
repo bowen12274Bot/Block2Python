@@ -3,152 +3,528 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Block2Python - Blockly Placeholder</title>
-    <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 16px; }
-      .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-      textarea { width: 100%; min-height: 140px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-      .hint { color: #444; font-size: 12px; }
-      button { padding: 8px 10px; }
-      code { background: #f2f2f2; padding: 1px 4px; border-radius: 4px; }
-    </style>
-    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <title>Block2Python Toolbox</title>
     <script src="./vendor/blockly_compressed.js"></script>
     <script src="./vendor/blocks_compressed.js"></script>
     <script src="./vendor/python_compressed.js"></script>
     <script src="./vendor/msg/zh-hant.js"></script>
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: linear-gradient(180deg, #f4efe3 0%, #ebe4d2 100%);
+        color: #2d271b;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 18px;
+        border-bottom: 1px solid rgba(45, 39, 27, 0.12);
+        background: rgba(255, 252, 244, 0.9);
+      }
+
+      .toolbar-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .toolbar-copy strong {
+        font-size: 16px;
+      }
+
+      .toolbar-copy span {
+        font-size: 12px;
+        color: #635743;
+      }
+
+      .toolbar button {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 18px;
+        background: #146356;
+        color: #fffdf6;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .toolbar button:hover {
+        background: #0f4f45;
+      }
+
+      .status {
+        padding: 10px 18px 0;
+        font-size: 12px;
+        color: #635743;
+      }
+
+      .toolbar,
+      .status {
+        display: none;
+      }
+
+      #blocklyHost {
+        flex: 1;
+        min-height: 100vh;
+      }
+    </style>
   </head>
   <body>
-    <h2>積木區</h2>
-    <p class="hint">
-      建立期目標：先打通 <code>QWebEngineView</code> 與 Desktop 的資料橋接。
-      若你已放入 Blockly 靜態檔（<code>assets/blockly/vendor/</code>），此頁會顯示 Workspace；否則退回 placeholder 模式。
-    </p>
-
-    <div class="row">
-      <button id="btn-sample">填入範例</button>
-      <button id="btn-send">送回 App（標記積木通過）</button>
-      <span id="status" class="hint"></span>
-    </div>
-
-    <div id="blocklyArea" style="margin-top: 12px; display:none;">
-      <div id="blocklyDiv" style="height: 360px; width: 100%; border: 1px solid #ddd;"></div>
-      <p class="hint">Workspace 模式：請用右側按鈕生成 Python 與 Block JSON。</p>
-    </div>
-
-    <div class="grid" style="margin-top: 12px;">
-      <div>
-        <h3 style="margin: 8px 0;">Block JSON（placeholder）</h3>
-        <textarea id="blockJson" placeholder="{ ... }"></textarea>
+    <div class="toolbar">
+      <div class="toolbar-copy">
+        <strong>Logic Toolbox</strong>
+        <span>Use blocks to test logic. Final level completion still requires Python submission.</span>
       </div>
-      <div>
-        <h3 style="margin: 8px 0;">Python Code（generated）</h3>
-        <textarea id="pythonCode" placeholder="print('hello')"></textarea>
-      </div>
+      <button id="verifyButton" type="button">Verify Toolbox Logic</button>
     </div>
+    <div id="status" class="status">Preparing Blockly workspace...</div>
+    <div id="blocklyHost"></div>
 
     <script>
-      let bridge = null;
-
-      function setStatus(msg) {
-        document.getElementById("status").textContent = msg;
-      }
-
-      function fillSample() {
-        document.getElementById("blockJson").value = JSON.stringify(
-          {
-            schema_version: "0.1",
-            blocks: [{ type: "print", fields: { TEXT: "Hello" } }],
-          },
-          null,
-          2
-        );
-        document.getElementById("pythonCode").value = "print('Hello')";
-        setStatus("已填入範例");
-      }
-
-      function sendToApp() {
-        if (!bridge) {
-          setStatus("bridge 尚未就緒");
-          return;
-        }
-        const blockJson = document.getElementById("blockJson").value || "{}";
-        const pythonCode = document.getElementById("pythonCode").value || "";
-        bridge.setBlocklyOutput(pythonCode, blockJson);
-        setStatus("已送出");
-      }
-
-      document.getElementById("btn-sample").addEventListener("click", fillSample);
-      document.getElementById("btn-send").addEventListener("click", sendToApp);
-
-      // If Blockly is available, initialize a minimal workspace.
-      function initBlocklyIfAvailable() {
-        if (typeof Blockly === "undefined") {
-          setStatus("Blockly 靜態檔未就緒：使用 placeholder 模式");
-          return;
-        }
-        try {
-          Blockly.setLocale(Blockly.Msg);
-        } catch (e) {}
-
-        document.getElementById("blocklyArea").style.display = "block";
-        const toolbox = {
-          kind: "flyoutToolbox",
-          contents: [
-            { kind: "block", type: "text_print" },
-            { kind: "block", type: "math_number" },
-            { kind: "block", type: "math_arithmetic" }
-          ],
+      (() => {
+        const statusEl = document.getElementById("status");
+        const verifyButton = document.getElementById("verifyButton");
+        const blocklyHost = document.getElementById("blocklyHost");
+        const pythonGenerator = Blockly.Python || Blockly.pythonGenerator;
+        const PHASE1_BLOCK_FLAGS = {
+          b2p_input_text: true,
+          b2p_to_int: true,
+          text_print: true,
+          variables_set: true,
+          variables_get: true,
+          math_number: true,
+          math_arithmetic: true,
+          logic_compare: true,
+          b2p_if: true,
+          b2p_if_else: false,
+          b2p_for_range: true,
+          text: true,
         };
-        const workspace = Blockly.inject("blocklyDiv", { toolbox });
+        const DISABLED_REASON = {
+          b2p_if_else: "`if / else` still needs a dedicated validation pass, so it is locked in phase 1.",
+        };
+        let workspace = null;
+        let generatedPython = "";
+        let serializedWorkspace = {};
+        let desktopBridge = null;
 
-        function updateOutputs() {
-          let python = "";
-          try {
-            python = Blockly.Python.workspaceToCode(workspace) || "";
-            document.getElementById("pythonCode").value = python;
-          } catch (e) {
-            // Ignore generator errors.
+        function setStatus(message) {
+          statusEl.textContent = message;
+        }
+
+        function postToGodot(payload) {
+          if (!window.ipc || typeof window.ipc.postMessage !== "function") {
+            return false;
           }
+          window.ipc.postMessage(JSON.stringify(payload));
+          return true;
+        }
 
-          try {
-            // Prefer new serialization API if present.
-            let saved = null;
-            if (Blockly.serialization && Blockly.serialization.workspaces) {
-              saved = Blockly.serialization.workspaces.save(workspace);
+        function reportStatus(message) {
+          setStatus(message);
+          postToGodot({ type: "toolbox_status", message });
+        }
+
+        function reportError(message) {
+          setStatus(message);
+          postToGodot({ type: "toolbox_error", message });
+        }
+
+        function initializeQtBridge() {
+          if (typeof QWebChannel !== "function") {
+            return;
+          }
+          if (!window.qt || !window.qt.webChannelTransport) {
+            return;
+          }
+          new QWebChannel(window.qt.webChannelTransport, (channel) => {
+            desktopBridge = channel.objects.bridge || null;
+          });
+        }
+
+        function buildOutputPayload() {
+          const ok = updateGeneratedArtifacts();
+          if (!ok) {
+            return null;
+          }
+          if (!generatedPython || generatedPython.trim().length === 0) {
+            reportError("Place some blocks in the workspace before verification.");
+            return null;
+          }
+          return {
+            python_code: generatedPython,
+            block_json: {
+              kind: "toolbox_workspace",
+              schema_version: "phase1",
+              blockly_version: Blockly.VERSION || "unknown",
+              allowlist: PHASE1_BLOCK_FLAGS,
+              workspace: serializedWorkspace
             }
-            const payload = {
-              schema_version: "0.1",
-              workspace: saved,
-              generated: { python },
-              metadata: {
-                locale: "zh-hant",
-                blockly_version: (Blockly && Blockly.VERSION) ? Blockly.VERSION : undefined
-              }
-            };
-            document.getElementById("blockJson").value = JSON.stringify(payload, null, 2);
-          } catch (e) {
-            // Ignore JSON errors.
+          };
+        }
+
+        window.block2pythonSendOutputToBridge = function () {
+          const payload = buildOutputPayload();
+          if (!payload) {
+            return false;
+          }
+          if (desktopBridge && typeof desktopBridge.setBlocklyOutput === "function") {
+            desktopBridge.setBlocklyOutput(payload.python_code, JSON.stringify(payload.block_json));
+            return true;
+          }
+          return postToGodot({
+            type: "toolbox_verify",
+            python_code: payload.python_code,
+            block_json: payload.block_json,
+          });
+        };
+
+        function blurActiveElement() {
+          if (document.activeElement && typeof document.activeElement.blur === "function") {
+            document.activeElement.blur();
+          }
+          if (typeof window.focus === "function") {
+            window.focus();
+          }
+          setStatus("Toolbox: released DOM input focus.");
+        }
+
+        function handleHostMessage(rawMessage) {
+          if (typeof rawMessage !== "string" || rawMessage.length === 0) {
+            return;
+          }
+          let payload = null;
+          try {
+            payload = JSON.parse(rawMessage);
+          } catch (_error) {
+            return;
+          }
+          if (!payload || typeof payload !== "object") {
+            return;
+          }
+          if (payload.type === "blur_active_element") {
+            blurActiveElement();
           }
         }
 
-        workspace.addChangeListener(function () {
-          updateOutputs();
-        });
-        updateOutputs();
-        setStatus("Blockly workspace 已就緒");
-      }
+        function isBlockEnabled(blockType) {
+          return PHASE1_BLOCK_FLAGS[blockType] === true;
+        }
 
-      if (typeof qt !== "undefined") {
-        new QWebChannel(qt.webChannelTransport, function (channel) {
-          bridge = channel.objects.bridge || null;
-          setStatus(bridge ? "bridge 已就緒" : "bridge 缺失");
-          initBlocklyIfAvailable();
+        function defineCustomBlocks() {
+          Blockly.defineBlocksWithJsonArray([
+            {
+              type: "b2p_input_text",
+              message0: "input text",
+              output: null,
+              colour: 230,
+              tooltip: "Read one line from stdin.",
+              helpUrl: ""
+            },
+            {
+              type: "b2p_to_int",
+              message0: "int %1",
+              args0: [
+                {
+                  type: "input_value",
+                  name: "VALUE"
+                }
+              ],
+              output: "Number",
+              colour: 230,
+              tooltip: "Convert a value to an integer.",
+              helpUrl: ""
+            },
+            {
+              type: "b2p_if",
+              message0: "if %1 do %2",
+              args0: [
+                {
+                  type: "input_value",
+                  name: "CONDITION",
+                  check: "Boolean"
+                },
+                {
+                  type: "input_statement",
+                  name: "DO"
+                }
+              ],
+              previousStatement: null,
+              nextStatement: null,
+              colour: 210,
+              tooltip: "Phase 1 controlled if block.",
+              helpUrl: ""
+            },
+            {
+              type: "b2p_if_else",
+              message0: "if %1 do %2 else %3",
+              args0: [
+                {
+                  type: "input_value",
+                  name: "CONDITION",
+                  check: "Boolean"
+                },
+                {
+                  type: "input_statement",
+                  name: "THEN"
+                },
+                {
+                  type: "input_statement",
+                  name: "ELSE"
+                }
+              ],
+              previousStatement: null,
+              nextStatement: null,
+              colour: 210,
+              tooltip: "Phase 1 controlled if / else block.",
+              helpUrl: ""
+            },
+            {
+              type: "b2p_for_range",
+              message0: "repeat %1 times do %2",
+              args0: [
+                {
+                  type: "input_value",
+                  name: "COUNT",
+                  check: "Number"
+                },
+                {
+                  type: "input_statement",
+                  name: "DO"
+                }
+              ],
+              previousStatement: null,
+              nextStatement: null,
+              colour: 120,
+              tooltip: "Repeat statements with for i in range(n).",
+              helpUrl: ""
+            }
+          ]);
+
+          pythonGenerator.forBlock.b2p_input_text = function (_block, generator) {
+            return ["input()", generator.ORDER_FUNCTION_CALL || generator.ORDER_ATOMIC || 0];
+          };
+
+          pythonGenerator.forBlock.b2p_to_int = function (block, generator) {
+            const valueCode = generator.valueToCode(block, "VALUE", generator.ORDER_NONE) || "0";
+            return [`int(${valueCode})`, generator.ORDER_FUNCTION_CALL || generator.ORDER_ATOMIC || 0];
+          };
+
+          pythonGenerator.forBlock.b2p_if = function (block, generator) {
+            const conditionCode = generator.valueToCode(block, "CONDITION", generator.ORDER_NONE) || "False";
+            const branchCode = generator.statementToCode(block, "DO");
+            const bodyCode = branchCode && branchCode.trim().length > 0 ? branchCode : "    pass\n";
+            return `if ${conditionCode}:\n${bodyCode}`;
+          };
+
+          pythonGenerator.forBlock.b2p_if_else = function (block, generator) {
+            const conditionCode = generator.valueToCode(block, "CONDITION", generator.ORDER_NONE) || "False";
+            const thenBranchCode = generator.statementToCode(block, "THEN");
+            const elseBranchCode = generator.statementToCode(block, "ELSE");
+            const thenBodyCode = thenBranchCode && thenBranchCode.trim().length > 0 ? thenBranchCode : "    pass\n";
+            const elseBodyCode = elseBranchCode && elseBranchCode.trim().length > 0 ? elseBranchCode : "    pass\n";
+            return `if ${conditionCode}:\n${thenBodyCode}else:\n${elseBodyCode}`;
+          };
+
+          pythonGenerator.forBlock.b2p_for_range = function (block, generator) {
+            const countCode = generator.valueToCode(block, "COUNT", generator.ORDER_NONE) || "0";
+            const branchCode = generator.statementToCode(block, "DO");
+            const bodyCode = branchCode && branchCode.trim().length > 0 ? branchCode : "    pass\n";
+            return `for i in range(${countCode}):\n${bodyCode}`;
+          };
+        }
+
+        function enabledBlock(blockType) {
+          return isBlockEnabled(blockType) ? { kind: "block", type: blockType } : null;
+        }
+
+        function buildCategory(name, colour, contents) {
+          const enabledContents = contents.filter(Boolean);
+          if (enabledContents.length === 0) {
+            return null;
+          }
+          return { kind: "category", name, colour, contents: enabledContents };
+        }
+
+        function createToolbox() {
+          const categories = [
+            buildCategory("Input / Output", "230", [
+              enabledBlock("b2p_input_text"),
+              enabledBlock("b2p_to_int"),
+              enabledBlock("text_print"),
+              enabledBlock("text"),
+            ]),
+            (isBlockEnabled("variables_set") || isBlockEnabled("variables_get"))
+              ? { kind: "category", name: "Variables", colour: "330", custom: "VARIABLE" }
+              : null,
+            buildCategory("Math", "230", [
+              enabledBlock("math_number"),
+              enabledBlock("math_arithmetic"),
+            ]),
+            buildCategory("Logic", "210", [
+              enabledBlock("logic_compare"),
+              enabledBlock("b2p_if"),
+              enabledBlock("b2p_if_else"),
+            ]),
+            buildCategory("Loops", "120", [
+              enabledBlock("b2p_for_range"),
+            ]),
+          ].filter(Boolean);
+
+          return {
+            kind: "categoryToolbox",
+            contents: categories,
+          };
+        }
+
+        function collectDisallowedBlocks() {
+          if (!workspace) {
+            return [];
+          }
+          return workspace
+            .getAllBlocks(false)
+            .map((block) => block.type)
+            .filter((blockType) => !isBlockEnabled(blockType));
+        }
+
+        function validateWorkspaceAgainstPhase1() {
+          const disallowedBlocks = collectDisallowedBlocks();
+          if (disallowedBlocks.length === 0) {
+            return { ok: true, message: "" };
+          }
+
+          const uniqueBlocks = [...new Set(disallowedBlocks)];
+          const details = uniqueBlocks
+            .map((blockType) => `${blockType}: ${DISABLED_REASON[blockType] || "This block is locked by the current phase allowlist."}`)
+            .join("\n");
+          return {
+            ok: false,
+            message: `This workspace uses locked blocks.\n${details}`,
+          };
+        }
+
+        function updateGeneratedArtifacts() {
+          const validation = validateWorkspaceAgainstPhase1();
+          if (!validation.ok) {
+            generatedPython = "";
+            serializedWorkspace = {};
+            reportError(validation.message);
+            return false;
+          }
+
+          try {
+            generatedPython = pythonGenerator.workspaceToCode(workspace) || "";
+          } catch (error) {
+            generatedPython = "";
+            reportError(`Generator error: ${error.message}`);
+            return false;
+          }
+
+          try {
+            if (Blockly.serialization && Blockly.serialization.workspaces) {
+              serializedWorkspace = Blockly.serialization.workspaces.save(workspace);
+            } else {
+              const xml = Blockly.Xml.workspaceToDom(workspace);
+              serializedWorkspace = { xml: Blockly.Xml.domToText(xml) };
+            }
+          } catch (error) {
+            serializedWorkspace = {};
+            reportError(`Workspace serialization failed: ${error.message}`);
+            return false;
+          }
+
+          return true;
+        }
+
+        function initializeBlockly() {
+          if (typeof Blockly === "undefined" || !pythonGenerator) {
+            reportError("Blockly vendor files are missing. Re-run tools/setup_dev_env.ps1 to refresh Blockly assets.");
+            return;
+          }
+
+          try {
+            Blockly.setLocale(Blockly.Msg);
+          } catch (_error) {
+          }
+
+          defineCustomBlocks();
+          workspace = Blockly.inject(blocklyHost, {
+            toolbox: createToolbox(),
+            media: "./vendor/media/",
+            trashcan: true,
+            grid: {
+              spacing: 24,
+              length: 4,
+              colour: "rgba(45, 39, 27, 0.16)",
+              snap: true
+            },
+            zoom: {
+              controls: true,
+              wheel: true,
+              startScale: 0.9,
+              maxScale: 1.4,
+              minScale: 0.5,
+              scaleSpeed: 1.1
+            },
+            move: {
+              scrollbars: true,
+              drag: true,
+              wheel: true
+            }
+          });
+
+          workspace.addChangeListener(() => {
+            const ok = updateGeneratedArtifacts();
+            if (ok) {
+              reportStatus("Blockly workspace ready.");
+            }
+          });
+
+          updateGeneratedArtifacts();
+          postToGodot({ type: "blockly_ready", blockly_version: Blockly.VERSION || "unknown" });
+          reportStatus("Blockly workspace ready.");
+          window.addEventListener("resize", () => Blockly.svgResize(workspace));
+        }
+
+        window.addEventListener("message", (event) => {
+          handleHostMessage(event.data);
         });
-      } else {
-        setStatus("此頁需在 QWebEngineView 中開啟");
-      }
+        document.addEventListener("message", (event) => {
+          handleHostMessage(event.data);
+        });
+
+        verifyButton.addEventListener("click", () => {
+          if (!workspace) {
+            reportError("Blockly workspace is not ready yet.");
+            return;
+          }
+          const sent = window.block2pythonSendOutputToBridge();
+          if (!sent) {
+            reportError("No available desktop bridge for Blockly output.");
+            return;
+          }
+          reportStatus("Sent toolbox logic for verification.");
+        });
+
+        initializeQtBridge();
+        initializeBlockly();
+      })();
     </script>
   </body>
 </html>

@@ -18,9 +18,9 @@ def _progress_until(session: GameSession, stop) -> None:
             if state.node_id == "main-map-entry":
                 completed = set(session.current_game_state().progress.completed_node_ids)
                 if "group-02-result" in completed:
-                    session.start_group_demo("group-03")
+                    session.start_group_story("group-03")
                 elif "group-01-result" in completed:
-                    session.start_group_demo("group-02")
+                    session.start_group_story("group-02")
                 else:
                     session.advance()
             else:
@@ -113,10 +113,10 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.last_submission.judge_status == "AC"
 
 
-def test_game_session_start_group_demo_jumps_to_story() -> None:
+def test_game_session_start_group_story_jumps_to_story() -> None:
     session = build_session()
 
-    state = session.start_group_demo("group-01")
+    state = session.start_group_story("group-01")
     contract_state = session.current_game_state()
 
     assert state.mode is SessionMode.SCENE
@@ -125,6 +125,32 @@ def test_game_session_start_group_demo_jumps_to_story() -> None:
     assert contract_state.progress.demo_seen_group_ids == ()
     assert contract_state.scene is not None
     assert contract_state.scene.scene_id == "scene-city-alarm"
+
+
+def test_game_session_start_group_demo_requires_story_completion() -> None:
+    session = build_session()
+
+    with pytest.raises(GameSessionError, match="story"):
+        session.start_group_demo("group-01")
+
+
+def test_game_session_start_group_demo_jumps_to_demo_scene() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+
+    state = session.start_group_demo("group-01")
+    contract_state = session.current_game_state()
+
+    assert state.mode is SessionMode.SCENE
+    assert state.node_id == "group-01-demo"
+    assert state.scene_id == "scene-practice-unlock"
+    assert contract_state.progress.demo_seen_group_ids == ("group-01",)
+    assert contract_state.scene is not None
+    assert contract_state.scene.scene_id == "scene-practice-unlock"
+    assert contract_state.challenge is not None
+    assert contract_state.challenge.challenge_id == "challenge-group-01-demo"
+
 
 
 def test_game_session_start_group_practice_requires_demo_seen() -> None:
@@ -136,8 +162,9 @@ def test_game_session_start_group_practice_requires_demo_seen() -> None:
 
 def test_game_session_start_group_practice_jumps_to_challenge() -> None:
     session = build_session()
-    session.start_group_demo("group-01")
+    session.start_group_story("group-01")
     session.advance()
+    session.start_group_demo("group-01")
 
     state = session.start_group_practice("group-01")
     contract_state = session.current_game_state()
@@ -304,7 +331,7 @@ def test_group_story_does_not_unlock_practice_until_demo_node_is_reached() -> No
         else:
             session.submit_current_level(python_code="print(1)")
 
-    state = session.start_group_demo("group-02")
+    state = session.start_group_story("group-02")
     assert state.node_id == "group-02-story"
 
     contract_state = session.current_game_state()
@@ -322,6 +349,29 @@ def test_group_story_does_not_unlock_practice_until_demo_node_is_reached() -> No
     assert group_two.practice_slot is not None
     assert group_two.demo_slot.viewed is True
     assert group_two.practice_slot.is_unlocked is True
+
+
+def test_group_can_complete_after_entering_demo_without_finishing_demo_node() -> None:
+    session = build_session()
+
+    session.start_group_story("group-01")
+    session.advance()
+    session.start_group_practice("group-01")
+
+    while True:
+        state = session.current_state()
+        if state.node_id == "group-01-result":
+            break
+        if state.mode is SessionMode.SCENE:
+            session.advance()
+        else:
+            session.submit_current_level(python_code="print(1)")
+
+    session.advance()
+    contract_state = session.current_game_state()
+    assert contract_state.map_route is not None
+    group_one = next(group for group in contract_state.map_route.groups if group.group_id == "group-01")
+    assert group_one.status_key == "completed"
 
 
 def test_completed_group_switches_to_reviewing_when_reentering_practice() -> None:
@@ -476,6 +526,35 @@ def test_game_session_rejects_advance_during_challenge() -> None:
         assert "Cannot advance" in str(exc)
     else:
         raise AssertionError("Expected GameSessionError")
+
+
+def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.start_group_practice("group-01")
+
+    state, outcome = session.verify_current_level_with_toolbox(
+        python_code="print(1)",
+        block_json={"kind": "toolbox_workspace", "blocks": [{"type": "print_expr", "expr": "1"}]},
+    )
+
+    assert state.mode is SessionMode.CHALLENGE
+    assert state.current_level_id == "group-01-practice-01"
+    assert outcome.cleared is False
+    assert outcome.judge.status.value == "AC"
+
+    contract_state = session.current_game_state()
+    assert contract_state.progress.cleared_level_ids == ("group-01-demo",)
+    assert contract_state.progress.toolbox_used_level_ids == ("group-01-practice-01",)
+    assert contract_state.last_submission is not None
+    assert contract_state.last_submission.verification_only is True
+    assert contract_state.last_submission.answer_correct is True
+    assert contract_state.last_submission.cleared is False
+
+    state, outcome = session.submit_current_level(python_code="print(1)")
+    assert outcome.cleared is True
+    assert state.current_level_id == "group-01-practice-02"
 
 
 def build_session() -> GameSession:

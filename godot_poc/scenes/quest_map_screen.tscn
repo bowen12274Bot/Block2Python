@@ -263,6 +263,11 @@ text = "Choose Demo or Practice."
 layout_mode = 2
 theme_override_constants/separation = 12
 
+[node name="StartStoryButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Start Story"
+
 [node name="StartDemoButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons"]
 layout_mode = 2
 size_flags_horizontal = 3

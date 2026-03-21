@@ -29,7 +29,12 @@ static func build_feedback_view(view_model: Dictionary, response: Dictionary) ->
 static func _build_submission_feedback(last_submission: Dictionary) -> Dictionary:
     var lines: Array[String] = []
     lines.append("level_id: %s" % str(last_submission.get("level_id", "")))
-    lines.append("cleared: %s" % str(bool(last_submission.get("cleared", false))))
+    if bool(last_submission.get("verification_only", false)):
+        lines.append("toolbox verification: true")
+        lines.append("answer_correct: %s" % str(bool(last_submission.get("answer_correct", false))))
+        lines.append("formal clear granted: false")
+    else:
+        lines.append("cleared: %s" % str(bool(last_submission.get("cleared", false))))
     lines.append("analysis: %s" % str(last_submission.get("analysis_status", "")))
     var analysis_summary: String = str(last_submission.get("analysis_summary", ""))
     if analysis_summary != "":
@@ -39,8 +44,9 @@ static func _build_submission_feedback(last_submission: Dictionary) -> Dictionar
     if judge_summary != "":
         lines.append("judge_summary: %s" % judge_summary)
     return {
-        "title": "Submission Result",
-        "body": "\n".join(lines),
+        "title": "Toolbox Verification" if bool(last_submission.get("verification_only", false)) else "Submission Result",
+        "body": "
+".join(lines),
     }
 
 
@@ -52,12 +58,16 @@ static func _build_guidance_feedback(view_model: Dictionary) -> Dictionary:
     if mode_value == "scene":
         return {
             "title": "Scene Guidance",
-            "body": "Scene mode\n\nUse Advance to continue the story flow.",
+            "body": "Scene mode
+
+Use Advance to continue the story flow.",
         }
     if mode_value == "challenge":
         return {
             "title": "Challenge Guidance",
-            "body": "Challenge mode\n\nEdit the code and press Submit.",
+            "body": "Challenge mode
+
+Edit the code and press Submit. Use Toolbox in practice levels to test logic without clearing the level.",
         }
 
     return {
