@@ -1,0 +1,55 @@
+scene_id: scene-practice-unlock
+title: Practice Unlocked
+dialogue_blocks:
+  - speaker: Byte
+    text: The demo is complete. Practice mode is unlocked now.
+    portrait_id: byte-default
+    expression: happy
+    emphasis: success
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: happy
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: neutral
+      visual_state: dim
+  - speaker: Byte
+    text: Use the Python blocks to solve a few short repair exercises.
+    portrait_id: byte-default
+    expression: explain
+    emphasis: normal
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: explain
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: neutral
+      visual_state: dim
+  - speaker: Byte
+    text: Toolbox help is available, but using it will cost battery.
+    portrait_id: byte-default
+    expression: alert
+    emphasis: alert
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: alert
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: neutral
+      visual_state: dim
+next_action: goto_practice_basic_io

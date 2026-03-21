@@ -1,7 +1,7 @@
 # Godot Client Contract Surface
 
-- 版本：0.1
-- 日期：2026-03-15
+- 版本：0.2
+- 日期：2026-03-22
 - 狀態：草案
 - 文件定位：明文化目前 Godot client 對 integration contract 的最小依賴面
 
@@ -68,15 +68,23 @@ Godot 端目前正式依賴以下 top-level response 欄位：
 
 目前 `scene_view` 依賴：
 
+- `scene.scene_id`
 - `scene.title`
 - `scene.dialogue_blocks[*].speaker`
 - `scene.dialogue_blocks[*].text`
+- `scene.dialogue_blocks[*].portrait_id`
+- `scene.dialogue_blocks[*].expression`
+- `scene.dialogue_blocks[*].emphasis`
+- `scene.dialogue_blocks[*].speaker_side`
+- `scene.dialogue_blocks[*].background_id`
+- `scene.dialogue_blocks[*].left_actor`
+- `scene.dialogue_blocks[*].right_actor`
 
-目前未使用但保留在 contract 的欄位：
+目前仍視為資料層保留欄位，但 Godot 端先不做資源解析：
 
-- `portrait_id`
-- `expression`
-- `emphasis`
+- `background.image_path`
+- `left_actor.image_path`
+- `right_actor.image_path`
 
 ### 4.2 Challenge
 
@@ -111,162 +119,123 @@ Godot 端目前正式依賴以下 top-level response 欄位：
 
 目前未作為 UI 呈現必要欄位：
 
-- `last_submission.block_passed`
+- `last_submission.stdout`
+- `last_submission.stderr`
 
-## 5. StateMapper 輸出 shape
+## 5. Mapper 輸出的正式 view model 介面
 
-目前 `StateMapper.map_game_state()` 輸出固定為：
+### 5.1 scene_view
 
-```text
-view_model
-- meta
-- scene_view
-- challenge_view
-- feedback_view
-- action_view
+過渡期 `scene_view` 同時保留舊版文字摘要欄位與新版劇情演出資料骨架：
+
+```yaml
+scene_view:
+  mode_label: "Mode: scene"
+  node_label: "Node: story-intro"
+  title: "City Alarm"
+  body: "- Byte: ..."
+  scene_id: "scene-city-alarm"
+  current_index: 0
+  total_blocks: 3
+  can_advance: true
+  background:
+    background_id: "city-alarm-room"
+    image_path: ""
+  left_actor:
+    actor_id: "byte"
+    portrait_id: "byte-default"
+    image_path: ""
+    pose_id: "default"
+    expression_id: "alert"
+    visual_state: "focus"
+    display_name: "Byte"
+  right_actor:
+    actor_id: "player"
+    portrait_id: "player-default"
+    image_path: ""
+    pose_id: "default"
+    expression_id: "surprised"
+    visual_state: "dim"
+    display_name: "Player"
+  dialogue:
+    speaker: "Byte"
+    text: "城市警報響起了！"
+    emphasis: "warning"
+    speaker_side: "left"
+  dialogue_blocks:
+    - speaker: "Byte"
+      text: "城市警報響起了！"
+  continue_hint_text: "點擊繼續"
 ```
 
-### 5.1 meta
+說明：
 
-用途：保存主流程共用的節點與模式資訊。
+- `mode_label`、`node_label`、`title`、`body` 保留給既有文字型 scene panel 使用
+- `scene_id`、`current_index`、`total_blocks`、`can_advance` 提供劇情流程控制資訊
+- `background`、`left_actor`、`right_actor`、`dialogue`、`dialogue_blocks`、`continue_hint_text` 為正式劇情頁資料骨架
 
-目前欄位：
+### 5.2 challenge_view
 
-- `mode`
-- `quest_id`
-- `node_id`
-- `node_title`
+```yaml
+challenge_view:
+  mode_label: "Mode: challenge"
+  node_label: "Node: demo-basic-io"
+  title: "Challenge"
+  level_id: "level-basic-input"
+  prompt: "請完成輸入與輸出"
+```
 
-### 5.2 scene_view
+### 5.3 action_view
 
-用途：提供 `ScenePanel` 專用顯示資料。
-
-目前欄位：
-
-- `mode_label`
-- `node_label`
-- `title`
-- `body`
-
-### 5.3 challenge_view
-
-用途：提供 `ChallengePanel` 專用顯示資料。
-
-目前欄位：
-
-- `title`
-- `level_label`
-- `prompt_body`
-- `code_editable`
+```yaml
+action_view:
+  can_advance: true
+  can_submit: false
+```
 
 ### 5.4 feedback_view
 
-用途：提供 `FeedbackPanel` 專用顯示資料。
+```yaml
+feedback_view:
+  status_label: "Passed"
+  summary: "輸出正確"
+```
 
-目前欄位：
+## 6. Panel 責任邊界
 
-- `title`
-- `body`
+### 6.1 QuestMapPanel
 
-### 5.5 action_view
+只應消費 map / node 相關 view model，不應直接知道 scene raw payload。
 
-用途：提供 `MainController` 控制按鈕狀態。
+### 6.2 ScenePanel
 
-目前欄位：
+過渡期可同時消費：
 
-- `can_advance`
-- `can_submit`
+- 舊版 `title` + `body` 文字欄位
+- 新版劇情演出資料骨架 `background / left_actor / right_actor / dialogue / continue_hint_text`
 
-## 6. 目前面板依賴關係
+ScenePanel 不應自行回推 `speaker_side`、角色焦點或背景切換規則。
 
-### 6.0 QuestMapPanel
+### 6.3 ChallengePanel
 
-只吃：
+只應消費 `challenge_view`，不應自行解析 `state.challenge`。
 
-- quest map 專用 view model
+### 6.4 FeedbackPanel
 
-不應直接讀：
+只應消費 `feedback_view`，不應自行推導評測摘要。
 
-- raw `state.progress`
-- raw `state.node_id`
+## 7. 變更控制原則
 
-### 6.1 ScenePanel
+若 Python 端要調整 contract：
 
-只吃：
+1. 先更新本文件
+2. 再更新 `StateMapper`
+3. 最後更新 Godot panel
 
-- `scene_view`
+不要讓 panel 直接依賴新增 raw 欄位後再補文件。
 
-不應直接讀：
+## 8. 結論
 
-- raw `state.scene`
-- raw `state.mode`
+目前 Godot client 的 scene flow 依賴面，已從單純文字摘要擴充為正式劇情頁資料骨架。
 
-### 6.2 ChallengePanel
-
-只吃：
-
-- `challenge_view`
-
-另外暴露：
-
-- `get_python_code()`
-
-### 6.3 FeedbackPanel
-
-只吃：
-
-- `feedback_view`
-
-### 6.4 MainController
-
-負責：
-
-- 接收 bridge response
-- 呼叫 `StateMapper`
-- 分發 `scene_view / challenge_view / feedback_view`
-- 根據 `action_view` 控制按鈕
-
-不應再回退成直接組字串或散落讀 raw `state.get(...)`。
-
-### 6.5 QuestMapController
-
-負責：
-
-- 接收 bridge response
-- 驅動 quest map refresh
-- 透過 `StateMapper` 分發 flow panels
-- 控制 `Start Bridge / Reset / Advance / Submit`
-
-不應直接讓 `QuestMapPanel` 或 `ChallengePanel` 自行解析 raw `GameState`。
-
-## 7. 後續變更原則
-
-之後若 Python 端想調整 contract，請先區分兩種層級：
-
-1. 可自由調整但不影響 Godot 正式依賴面
-   - 例如額外新增欄位
-   - 例如 `debug` payload 結構調整
-
-2. 會影響 Godot 正式依賴面
-   - 刪除或改名本文件列出的欄位
-   - 改動 `StateMapper` 既有輸出 shape
-   - 改動 `ScenePanel / ChallengePanel / FeedbackPanel` 已依賴的 view model key
-
-若屬於第 2 類，應同步更新：
-
-- `StateMapper`
-- 對應 panel
-- 本文件
-- 必要時更新 `godot_client_structure_plan.md`
-
-## 8. 目前結論
-
-目前 Godot client 已不再直接依賴完整 raw `GameState`。
-
-正式依賴面已收斂為：
-
-- response envelope 的 `ok / state / error`
-- `GameState` 中少量穩定欄位
-- `StateMapper` 定義的固定 view model shape
-
-這代表之後要進一步做正式 UI、美術與互動擴充時，可以先維持這層邊界不變，再在 Godot 端持續演進畫面與控制流程。
+後續若要接開場劇情、地圖 story 節點與未來結局劇情，應持續沿著 `GameState -> StateMapper -> view model -> panel` 這條路徑演進。

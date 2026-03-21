@@ -1,0 +1,55 @@
+scene_id: scene-city-alarm
+title: City Alarm
+dialogue_blocks:
+  - speaker: Byte
+    text: Welcome to Code Planet. The city alarm is unstable and needs repair.
+    portrait_id: byte-default
+    expression: alert
+    emphasis: normal
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: alert
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: neutral
+      visual_state: dim
+  - speaker: Player
+    text: What do I need to fix first?
+    portrait_id: player-default
+    expression: thinking
+    emphasis: normal
+    speaker_side: right
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: alert
+      visual_state: dim
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: thinking
+      visual_state: focus
+  - speaker: Byte
+    text: Start with a short demo so we can confirm the input and output signal path.
+    portrait_id: byte-default
+    expression: explain
+    emphasis: normal
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: explain
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: thinking
+      visual_state: dim
+next_action: goto_demo_basic_io

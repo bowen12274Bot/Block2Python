@@ -4,6 +4,7 @@ from block2python.integration.contracts import (
     ActionType,
     AvailableActions,
     ChallengeState,
+    DemoState,
     DialogueBlockState,
     GameMode,
     GameState,
@@ -41,7 +42,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
         ),
         progress=ProgressState(
             completed_node_ids=("main-map-entry", "group-01-story"),
-            cleared_level_ids=("demo-0",),
+            cleared_level_ids=("practice-01",),
             demo_seen_group_ids=("group-01",),
             toolbox_used_level_ids=("group-01-practice-01",),
         ),
@@ -84,6 +85,33 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     assert payload["last_submission"]["verification_only"] is False
     assert payload["last_submission"]["answer_correct"] is True
     assert payload["errors"] == ["none"]
+
+
+def test_serialize_demo_mode_emits_demo_payload() -> None:
+    state = GameState(
+        mode=GameMode.DEMO,
+        quest_id="quest-main-map",
+        node_id="group-01-demo",
+        node_title="Group 01 Demo",
+        demo=DemoState(
+            demo_id="challenge-group-01-demo",
+            title="Group 01 Demo",
+            body="Placeholder demo body",
+            current_level_id="group-01-demo",
+        ),
+        available_actions=AvailableActions(advance=True),
+    )
+
+    payload = serialize_game_state(state)
+
+    assert payload["mode"] == "demo"
+    assert payload["demo"] == {
+        "demo_id": "challenge-group-01-demo",
+        "title": "Group 01 Demo",
+        "body": "Placeholder demo body",
+        "current_level_id": "group-01-demo",
+    }
+    assert payload["challenge"] is None
 
 
 def test_player_action_round_trip_serialize_and_deserialize() -> None:

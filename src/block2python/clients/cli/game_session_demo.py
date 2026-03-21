@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 from pathlib import Path
@@ -21,6 +21,9 @@ def build_demo_session(
     quest_id: str = DEFAULT_QUEST_ID,
 ) -> GameSession:
     levels = load_levels(levels_dir or Path("assets/levels"))
+    for level in levels.values():
+        level.metadata["stub_judge"] = {"status": "AC"}
+        level.metadata["placeholder_auto_ac"] = True
     game_content = load_game_content(game_content_dir or Path("assets/game_content"))
     game_slice = assemble_game_slice(game_content=game_content, levels=levels)
     app = AppCore(levels, judge=StubJudge(), progress=InMemoryProgress.empty())
@@ -44,6 +47,20 @@ def run_auto_demo(
         if state.mode is GameMode.COMPLETE:
             break
         if state.mode is GameMode.SCENE:
+            if state.node_id == "main-map-entry":
+                completed = set(state.progress.completed_node_ids)
+                if "group-03-result" in completed:
+                    session.runtime.current_node_id = None
+                elif "group-02-result" in completed:
+                    session.start_group_story("group-03")
+                elif "group-01-result" in completed:
+                    session.start_group_story("group-02")
+                else:
+                    session.advance()
+            else:
+                session.advance()
+            continue
+        if state.mode is GameMode.DEMO:
             session.advance()
             continue
         if state.challenge is None or state.challenge.current_level_id is None:
@@ -111,6 +128,8 @@ def _render_state(state: GameState) -> list[str]:
         lines.append(f"node={state.node_id} title={state.node_title}")
     if state.scene is not None:
         lines.append(f"scene={state.scene.scene_id} title={state.scene.title}")
+    if state.demo is not None:
+        lines.append(f"demo={state.demo.demo_id} title={state.demo.title}")
     if state.challenge is not None:
         lines.append(f"challenge={state.challenge.challenge_id} type={state.challenge.challenge_type}")
     if state.challenge is not None and state.challenge.current_level_id is not None:
@@ -132,4 +151,3 @@ def _default_code_factory(_level_id: str) -> str:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

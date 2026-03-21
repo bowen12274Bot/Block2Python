@@ -22,6 +22,15 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             ],
         }
 
+    demo = None
+    if state.demo is not None:
+        demo = {
+            "demo_id": state.demo.demo_id,
+            "title": state.demo.title,
+            "body": state.demo.body,
+            "current_level_id": state.demo.current_level_id,
+        }
+
     challenge = None
     if state.challenge is not None:
         challenge = {
@@ -81,6 +90,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
         },
         "intro_completed": state.intro_completed,
         "scene": scene,
+        "demo": demo,
         "challenge": challenge,
         "progress": {
             "completed_node_ids": list(state.progress.completed_node_ids),

@@ -18,6 +18,7 @@ const GameFlowScreenPresenterScript = preload("res://scripts/flow/game_flow_scre
 @onready var entry_screen = $EntryScreen
 @onready var map_screen = $MapScreen
 @onready var scene_screen = $SceneScreen
+@onready var demo_screen = $DemoScreen
 @onready var challenge_screen = $ChallengeScreen
 @onready var debug_margin: MarginContainer = $Margin
 @onready var debug_panel: PanelContainer = $Margin/DebugPanel
@@ -45,6 +46,8 @@ func _ready() -> void:
 	map_screen.stage_practice_requested.connect(_on_stage_practice_requested)
 	scene_screen.advance_requested.connect(_on_advance_requested)
 	scene_screen.back_requested.connect(_show_map_page)
+	demo_screen.advance_requested.connect(_on_demo_advance_requested)
+	demo_screen.back_requested.connect(_show_map_page)
 	challenge_screen.submit_requested.connect(_on_submit_requested)
 	challenge_screen.open_toolbox_requested.connect(_on_open_toolbox_requested)
 	challenge_screen.back_requested.connect(_show_map_page)
@@ -66,6 +69,10 @@ func _ready() -> void:
 	scene_screen.set_status("Scene flow is idle.")
 	scene_screen.set_can_advance(false)
 	scene_screen.set_can_go_back(false)
+	demo_screen.show_placeholder("Demo placeholder will appear here.")
+	demo_screen.set_status("Demo flow is idle.")
+	demo_screen.set_can_advance(false)
+	demo_screen.set_can_go_back(true)
 	challenge_screen.show_challenge({})
 	challenge_screen.show_feedback(GameFlowFeedbackPresenterScript.empty_feedback_view("Feedback will appear here."))
 	challenge_screen.set_status("Challenge flow is idle.")
@@ -144,6 +151,10 @@ func _on_submit_requested(python_code: String) -> void:
 	challenge_screen.set_status("Status: submitting code...")
 	python_bridge_client.send_submit_level(python_code)
 
+func _on_demo_advance_requested() -> void:
+	demo_screen.set_status("Status: continuing demo placeholder...")
+	python_bridge_client.send_advance()
+
 func _on_open_toolbox_requested() -> void:
 	if _toolbox_helper_pid > 0:
 		challenge_screen.set_status(TOOLBOX_LOCK_MESSAGE)
@@ -208,7 +219,7 @@ func _apply_success_state(state: Dictionary, response: Dictionary) -> void:
 	entry_screen.set_status(_entry_status_text(view_model.get("player_profile_view", {})))
 	entry_screen.set_bridge_running(python_bridge_client.is_running())
 	GameFlowScreenPresenterScript.render_map_view(map_screen, map_view, state, view_model, can_open)
-	GameFlowScreenPresenterScript.render_flow_views(scene_screen, challenge_screen, view_model, feedback_view)
+	GameFlowScreenPresenterScript.render_flow_views(scene_screen, demo_screen, challenge_screen, view_model, feedback_view)
 	scene_screen.set_can_go_back(bool(state.get("intro_completed", false)))
 	_apply_toolbox_lock_state()
 	_append_debug_state(view_model)
@@ -255,7 +266,7 @@ func _apply_error_response(response: Dictionary) -> void:
 
 func _apply_error_ui(map_status: String, map_note: String, feedback_title: String, feedback_body: String) -> void:
 	entry_screen.set_status(map_status)
-	GameFlowScreenPresenterScript.apply_error_ui(map_screen, scene_screen, challenge_screen, map_status, map_note, feedback_title, feedback_body)
+	GameFlowScreenPresenterScript.apply_error_ui(map_screen, scene_screen, demo_screen, challenge_screen, map_status, map_note, feedback_title, feedback_body)
 	_apply_toolbox_lock_state()
 	_show_page("entry")
 
@@ -266,7 +277,7 @@ func _show_page(page: String) -> void:
 	_current_page = page
 	if page != "challenge" and _toolbox_helper_pid > 0:
 		_stop_toolbox_helper(true)
-	GameFlowPageRouterScript.show_page(page, entry_screen, map_screen, scene_screen, challenge_screen)
+	GameFlowPageRouterScript.show_page(page, entry_screen, map_screen, scene_screen, demo_screen, challenge_screen)
 	_apply_toolbox_lock_state()
 
 func _apply_toolbox_lock_state() -> void:

@@ -3,6 +3,7 @@ quests:
 nodes:
   - file: nodes/main-map-nodes.yaml
 scenes:
+  - file: scenes/scene-opening-intro.yaml
   - file: scenes/scene-city-alarm.yaml
   - file: scenes/scene-practice-unlock.yaml
   - file: scenes/scene-result-success.yaml

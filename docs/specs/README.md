@@ -5,7 +5,7 @@
 - 關卡檔 schema（v0.1）：`docs/specs/levels_schema_v0_1.md`
 - Block JSON schema（v0.1）：`docs/specs/block_json_schema_v0_1.md`
 - 遊戲第一個切片 schema（v0.1）：`docs/specs/game_slice_schema_v0_1.md`
-- 遊戲第一個切片內容樣板：`docs/specs/examples/game_slice_v0_1/`
+- 遊戲第一個切片內容樣板：`docs/specs/examples/`
 
 目前樣板包含：
 

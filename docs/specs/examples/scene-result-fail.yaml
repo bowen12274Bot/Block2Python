@@ -1,0 +1,38 @@
+scene_id: scene-result-fail
+title: Repair Failed
+dialogue_blocks:
+  - speaker: Byte
+    text: The repair did not hold. We need another attempt.
+    portrait_id: byte-default
+    expression: sad
+    emphasis: alert
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: sad
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: neutral
+      visual_state: dim
+  - speaker: Byte
+    text: Review the failing cases, then retry after the cooldown.
+    portrait_id: byte-default
+    expression: explain
+    emphasis: normal
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: explain
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: neutral
+      visual_state: dim
+next_action: start_practice_cooldown

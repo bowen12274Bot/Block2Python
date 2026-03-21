@@ -40,17 +40,22 @@ def test_dispatch_submit_level_returns_updated_challenge_state() -> None:
     assert state.challenge is not None
     assert state.challenge.challenge_id == "challenge-group-01-practice"
     assert state.challenge.current_level_id == "group-01-practice-02"
-    assert state.progress.cleared_level_ids == ("group-01-demo", "group-01-practice-01")
+    assert state.progress.cleared_level_ids == ("group-01-practice-01",)
     assert state.last_submission is not None
     assert state.last_submission.level_id == "group-01-practice-01"
     assert state.last_submission.judge_status == "AC"
-
-
 def test_dispatch_verify_toolbox_level_returns_feedback_without_clearing() -> None:
     session = build_demo_session()
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(
+        session,
+        PlayerAction(
+            action_type=ActionType.SUBMIT_LEVEL,
+            payload={"python_code": "print(3)\n", "block_json": {"kind": "workspace"}},
+        ),
+    )
 
     state = dispatch(
         session,
@@ -62,18 +67,15 @@ def test_dispatch_verify_toolbox_level_returns_feedback_without_clearing() -> No
 
     assert state.mode is GameMode.CHALLENGE
     assert state.challenge is not None
-    assert state.challenge.current_level_id == "group-01-practice-01"
-    assert state.progress.cleared_level_ids == ("group-01-demo",)
-    assert state.progress.toolbox_used_level_ids == ("group-01-practice-01",)
+    assert state.challenge.current_level_id == "group-01-practice-02"
+    assert state.progress.cleared_level_ids == ("group-01-practice-01",)
+    assert state.progress.toolbox_used_level_ids == ("group-01-practice-02",)
     assert state.last_submission is not None
     assert state.last_submission.verification_only is True
     assert state.last_submission.answer_correct is True
     assert state.last_submission.cleared is False
-
-
 def test_dispatch_rejects_submit_without_python_code() -> None:
     session = build_demo_session()
-    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
 
@@ -110,7 +112,7 @@ def test_dispatch_start_group_demo_requires_story_completion() -> None:
         )
 
 
-def test_dispatch_start_group_demo_opens_demo_node() -> None:
+def test_dispatch_start_group_demo_opens_demo_mode() -> None:
     session = build_demo_session()
     dispatch(session, PlayerAction(action_type=ActionType.START_GROUP_STORY, payload={"group_id": "group-01"}))
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
@@ -120,13 +122,14 @@ def test_dispatch_start_group_demo_opens_demo_node() -> None:
         PlayerAction(action_type=ActionType.START_GROUP_DEMO, payload={"group_id": "group-01"}),
     )
 
-    assert state.mode is GameMode.SCENE
+    assert state.mode is GameMode.DEMO
     assert state.node_id == "group-01-demo"
-    assert state.scene is not None
-    assert state.scene.scene_id == "scene-practice-unlock"
+    assert state.scene is None
+    assert state.demo is not None
+    assert state.demo.demo_id == "challenge-group-01-demo"
+    assert state.demo.current_level_id == "group-01-demo"
+    assert state.challenge is None
     assert state.progress.demo_seen_group_ids == ("group-01",)
-
-
 def test_dispatch_start_group_practice_rejects_locked_group() -> None:
     session = build_demo_session()
 
