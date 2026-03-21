@@ -12,7 +12,10 @@ pytest-cache-files-*/
 htmlcov/
 .coverage
 godot_poc/.godot/
+godot_poc/addons/godot_wry/
 .vs/
 *.uid
 .vscode
 *.egg-info/
+godot_poc/blockly_assets/
+

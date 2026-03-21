@@ -23,7 +23,7 @@ static func build_group_selection_note(group_view: Dictionary) -> String:
 	if status_key == "locked":
 		lines.append("This group is not enterable yet.")
 	else:
-		lines.append("Opening the stage overlay for Demo / Practice selection.")
+		lines.append("Opening the stage overlay for Story / Demo / Practice selection.")
 
 	return "\n\n".join(lines)
 
@@ -41,6 +41,7 @@ static func _append_slot_note(lines: Array[String], slot_variant: Variant) -> vo
 	lines.append("%s: %s [%s]" % [str(slot.get("title", "Slot")), str(slot.get("progress_label", "0 / 0")), str(slot.get("status_label", "Unknown"))])
 	if str(slot.get("slot_key", "")) == "demo":
 		lines.append("Demo: %s" % ("Seen" if bool(slot.get("viewed", false)) else "Unseen"))
+		lines.append("Demo access: %s" % ("Available" if bool(slot.get("is_unlocked", false)) else "Locked until Story clears"))
 	if str(slot.get("slot_key", "")) == "practice":
 		lines.append("Practice: %s" % ("Available" if bool(slot.get("is_unlocked", false)) else "Locked"))
 		var entry_level_id: String = str(slot.get("entry_level_id", ""))

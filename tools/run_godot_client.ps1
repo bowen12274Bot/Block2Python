@@ -1,4 +1,4 @@
-param(
+﻿param(
   [switch]$Console,
   [string]$GodotVersion = "4.6.1"
 )

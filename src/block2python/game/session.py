@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -75,6 +75,7 @@ class GameSession:
     runtime: GameRuntime
     scene_seen_node_ids: set[str] = field(default_factory=set)
     demo_seen_group_ids: set[str] = field(default_factory=set)
+    toolbox_used_level_ids: set[str] = field(default_factory=set)
     group_runtime_states: dict[str, GroupRuntimeState] = field(default_factory=dict)
     last_submission: SubmissionFeedback | None = None
 
@@ -202,9 +203,31 @@ class GameSession:
         group = self._route_group(group_id)
         if group is None:
             raise GameSessionError(f"Unknown group_id: {group_id}")
-        target_node_id = self._entry_node_id_for_steps(group.demo_route)
+
+        progress = self._progress_state()
+        if not self._is_group_demo_unlocked(group, set(progress.completed_node_ids), set(progress.cleared_level_ids)):
+            raise GameSessionError(f"Demo for {group_id} is still locked until story is completed")
+
+        target_node_id = self._entry_node_id_for_steps(group.demo_route, allowed_step_types={"challenge", "demo"})
         if target_node_id is None:
             raise GameSessionError(f"Group {group_id} has no demo entry node")
+
+        self._sync_group_runtime_states(progress, self.current_state())
+        runtime_group = self.group_runtime_states.get(group_id)
+        if runtime_group is not None:
+            runtime_group.entered_once = True
+        self._jump_to_node(target_node_id)
+        return self.current_state()
+
+    def start_group_story(self, group_id: str) -> GameSessionState:
+        if not group_id:
+            raise GameSessionError("group_id is required")
+        group = self._route_group(group_id)
+        if group is None:
+            raise GameSessionError(f"Unknown group_id: {group_id}")
+        target_node_id = self._entry_node_id_for_steps(group.demo_route, allowed_step_types={"story"})
+        if target_node_id is None:
+            raise GameSessionError(f"Group {group_id} has no story entry node")
 
         self._sync_group_runtime_states(self._progress_state(), self.current_state())
         runtime_group = self.group_runtime_states.get(group_id)
@@ -263,8 +286,45 @@ class GameSession:
             analysis_summary=outcome.analysis.summary,
             judge_status=outcome.judge.status.value,
             judge_summary=outcome.judge.summary,
+            verification_only=False,
+            answer_correct=outcome.judge.status is JudgeStatus.AC,
         )
         self._advance_review_practice_level(state)
+        return self.current_state(), outcome
+
+    def verify_current_level_with_toolbox(
+        self,
+        *,
+        python_code: str,
+        block_json: dict | None = None,
+    ) -> tuple[GameSessionState, SubmitOutcome]:
+        state = self.current_state()
+        if state.mode is not SessionMode.CHALLENGE:
+            raise GameSessionError("Current node is not a challenge")
+        if state.current_level_id is None:
+            raise GameSessionError("Challenge node has no current level")
+
+        runtime_state = self.runtime.current_state()
+        if runtime_state is None or runtime_state.challenge is None:
+            raise GameSessionError("Current node is not a challenge")
+        if runtime_state.challenge.challenge_type != "practice":
+            raise GameSessionError("Toolbox verification is only available in practice challenges")
+
+        outcome = self.app.verify(
+            Submission(level_id=state.current_level_id, python_code=python_code, block_json=block_json)
+        )
+        self.toolbox_used_level_ids.add(state.current_level_id)
+        self.last_submission = SubmissionFeedback(
+            level_id=state.current_level_id,
+            cleared=False,
+            block_passed=False,
+            analysis_status=outcome.analysis.status.value,
+            analysis_summary=outcome.analysis.summary,
+            judge_status=outcome.judge.status.value,
+            judge_summary=outcome.judge.summary,
+            verification_only=True,
+            answer_correct=outcome.judge.status is JudgeStatus.AC,
+        )
         return self.current_state(), outcome
 
     def _current_level_for_challenge(self, challenge: ResolvedChallengeSpec) -> LevelSpec | None:
@@ -309,6 +369,7 @@ class GameSession:
             completed_node_ids=completed_node_ids,
             cleared_level_ids=cleared_level_ids,
             demo_seen_group_ids=tuple(sorted(self.demo_seen_group_ids)),
+            toolbox_used_level_ids=tuple(sorted(self.toolbox_used_level_ids)),
         )
 
     def _map_route_state(self, state: GameSessionState, progress: ProgressState) -> MapRouteState | None:
@@ -337,8 +398,8 @@ class GameSession:
         state: GameSessionState,
         progress: ProgressState,
     ) -> GroupMapRouteState:
-        demo_route = tuple(self._map_route_step_state(step, state, progress, group.demo_route) for step in group.demo_route)
-        practice_route = tuple(self._map_route_step_state(step, state, progress, group.practice_route) for step in group.practice_route)
+        demo_route = tuple(self._map_route_step_state(step, state, progress, group.demo_route, group.group_id) for step in group.demo_route)
+        practice_route = tuple(self._map_route_step_state(step, state, progress, group.practice_route, group.group_id) for step in group.practice_route)
         runtime_group = self.group_runtime_states[group.group_id]
         status_key = self._group_display_state(runtime_group, state)
         return GroupMapRouteState(
@@ -360,8 +421,9 @@ class GameSession:
         state: GameSessionState,
         progress: ProgressState,
         route_steps: tuple[MapRouteStepSpec, ...],
+        group_id: str,
     ) -> MapRouteStepState:
-        status_key = self._route_step_status_key(step, state, progress, route_steps)
+        status_key = self._route_step_status_key(step, state, progress, route_steps, group_id)
         return MapRouteStepState(
             step_id=step.step_id,
             step_type=step.step_type,
@@ -391,7 +453,7 @@ class GameSession:
             title=title,
             status_key=slot_status_key,
             status_label=self._group_status_label(slot_status_key, False),
-            is_unlocked=(runtime_group.unlock_state != "locked") if slot_key == "demo" else runtime_group.practice_unlocked,
+            is_unlocked=self._is_demo_slot_unlocked(route_steps, runtime_group) if slot_key == "demo" else runtime_group.practice_unlocked,
             viewed=runtime_group.demo_seen if slot_key == "demo" else False,
             completed_count=runtime_group.practice_completed_count if slot_key == "practice" else 0,
             total_count=runtime_group.practice_total_count if slot_key == "practice" else 0,
@@ -406,11 +468,11 @@ class GameSession:
         runtime_group: GroupRuntimeState,
     ) -> str:
         if slot_key == "demo":
-            if any(step.status_key == "current" for step in route_steps) and not runtime_group.completed:
+            if any(step.status_key == "current" and step.step_type in {"challenge", "demo"} for step in route_steps) and not runtime_group.completed:
                 return "current"
             if runtime_group.demo_seen:
                 return "completed"
-            if runtime_group.unlock_state != "locked":
+            if self._is_demo_slot_unlocked(route_steps, runtime_group):
                 return "available"
             return "locked"
 
@@ -423,6 +485,25 @@ class GameSession:
         if runtime_group.practice_total_count > 0 and runtime_group.practice_completed_count >= runtime_group.practice_total_count:
             return "completed"
         return "available"
+
+    @staticmethod
+    def _is_demo_slot_unlocked(route_steps: tuple[MapRouteStepState, ...], runtime_group: GroupRuntimeState) -> bool:
+        if runtime_group.unlock_state == "locked":
+            return False
+        return any(step.step_type in {"challenge", "demo"} and step.status_key in {"available", "current", "completed", "reviewing"} for step in route_steps)
+
+    def _is_group_demo_unlocked(
+        self,
+        group: GroupMapRoutesSpec,
+        completed_node_ids: set[str],
+        cleared_level_ids: set[str],
+    ) -> bool:
+        for step in group.demo_route:
+            if step.step_type in {"challenge", "demo"}:
+                return True
+            if step.step_type == "story" and not self._is_route_step_spec_completed(step, completed_node_ids, cleared_level_ids):
+                return False
+        return False
 
     def _group_display_state(self, runtime_group: GroupRuntimeState, _state: GameSessionState) -> str:
         current_group_id = self._current_mainline_group_id()
@@ -569,7 +650,7 @@ class GameSession:
     ) -> bool:
         trackable_steps = [step for step in group.demo_route + group.practice_route if self._is_trackable_spec_step(step)]
         return bool(trackable_steps) and all(
-            self._is_route_step_spec_completed(step, completed_node_ids, cleared_level_ids)
+            self._is_route_step_spec_completed(step, completed_node_ids, cleared_level_ids, group.group_id)
             for step in trackable_steps
         )
 
@@ -582,7 +663,10 @@ class GameSession:
         step: MapRouteStepSpec,
         completed_node_ids: set[str],
         cleared_level_ids: set[str],
+        group_id: str | None = None,
     ) -> bool:
+        if self._is_demo_step_counted_as_completed(step, group_id, self.demo_seen_group_ids):
+            return True
         if step.level_ids:
             return all(level_id in cleared_level_ids for level_id in step.level_ids)
         if step.node_id is not None:
@@ -700,6 +784,7 @@ class GameSession:
         state: GameSessionState,
         progress: ProgressState,
         route_steps: tuple[MapRouteStepSpec, ...],
+        group_id: str,
     ) -> str:
         completed_node_ids = set(progress.completed_node_ids)
         cleared_level_ids = set(progress.cleared_level_ids)
@@ -707,7 +792,7 @@ class GameSession:
 
         if self._is_route_step_current(step, state):
             return "current"
-        if self._is_route_step_completed(step, completed_node_ids, cleared_level_ids):
+        if self._is_route_step_completed(step, completed_node_ids, cleared_level_ids, demo_seen_group_ids, group_id):
             return "completed"
         if step.is_planned and not step.tracked_node_ids and not step.level_ids and step.node_id is None and step.challenge_id is None:
             return "planned"
@@ -733,7 +818,11 @@ class GameSession:
         step: MapRouteStepSpec,
         completed_node_ids: set[str],
         cleared_level_ids: set[str],
+        demo_seen_group_ids: set[str] | None = None,
+        group_id: str | None = None,
     ) -> bool:
+        if self._is_demo_step_counted_as_completed(step, group_id, demo_seen_group_ids):
+            return True
         if step.level_ids:
             return all(level_id in cleared_level_ids for level_id in step.level_ids)
         if step.node_id is not None:
@@ -741,6 +830,16 @@ class GameSession:
         if step.tracked_node_ids:
             return all(node_id in completed_node_ids for node_id in step.tracked_node_ids)
         return False
+
+    @staticmethod
+    def _is_demo_step_counted_as_completed(
+        step: MapRouteStepSpec,
+        group_id: str | None,
+        demo_seen_group_ids: set[str] | None,
+    ) -> bool:
+        if group_id is None or demo_seen_group_ids is None:
+            return False
+        return step.step_type in {"challenge", "demo"} and group_id in demo_seen_group_ids
 
     def _is_route_step_available(
         self,
@@ -760,7 +859,7 @@ class GameSession:
         for previous_step in route_steps[:step_index]:
             if previous_step.is_planned and not previous_step.level_ids and not previous_step.tracked_node_ids and previous_step.node_id is None:
                 continue
-            if not self._is_route_step_completed(previous_step, completed_node_ids, cleared_level_ids):
+            if not self._is_route_step_completed(previous_step, completed_node_ids, cleared_level_ids, demo_seen_group_ids):
                 return False
         return True
 
@@ -815,9 +914,15 @@ class GameSession:
         self.scene_seen_node_ids.discard(node_id)
 
     @staticmethod
-    def _entry_node_id_for_steps(route_steps: tuple[MapRouteStepSpec, ...]) -> str | None:
+    def _entry_node_id_for_steps(
+        route_steps: tuple[MapRouteStepSpec, ...],
+        *,
+        allowed_step_types: set[str] | None = None,
+    ) -> str | None:
         for step in route_steps:
             if step.target_page == "map":
+                continue
+            if allowed_step_types is not None and step.step_type not in allowed_step_types:
                 continue
             if step.node_id is not None:
                 return step.node_id

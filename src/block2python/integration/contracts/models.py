@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -14,6 +14,8 @@ class GameMode(str, Enum):
 class ActionType(str, Enum):
     ADVANCE = "advance"
     SUBMIT_LEVEL = "submit_level"
+    VERIFY_TOOLBOX_LEVEL = "verify_toolbox_level"
+    START_GROUP_STORY = "start_group_story"
     START_GROUP_DEMO = "start_group_demo"
     START_GROUP_PRACTICE = "start_group_practice"
     RESTART_QUEST = "restart_quest"
@@ -49,6 +51,7 @@ class ProgressState:
     completed_node_ids: tuple[str, ...] = ()
     cleared_level_ids: tuple[str, ...] = ()
     demo_seen_group_ids: tuple[str, ...] = ()
+    toolbox_used_level_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,6 +70,8 @@ class SubmissionFeedback:
     analysis_summary: str = ""
     judge_status: str = ""
     judge_summary: str = ""
+    verification_only: bool = False
+    answer_correct: bool = False
 
 
 @dataclass(frozen=True, slots=True)

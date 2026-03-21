@@ -8,6 +8,7 @@ signal reset_requested()
 signal advance_requested()
 signal node_open_requested()
 signal debug_toggled(visible: bool)
+signal stage_story_requested(group_id: String)
 signal stage_demo_requested(group_id: String)
 signal stage_practice_requested(group_id: String)
 
@@ -25,6 +26,7 @@ signal stage_practice_requested(group_id: String)
 @onready var stage_description_label: Label = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/StageDescription")
 @onready var stage_action_note_label: Label = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/ActionNote")
 @onready var unlock_blocks_container: HFlowContainer = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/UnlockBlocks")
+@onready var stage_story_button: Button = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartStoryButton")
 @onready var stage_demo_button: Button = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartDemoButton")
 @onready var stage_practice_button: Button = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartPracticeButton")
 @onready var stage_close_button: Button = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/CloseButton")
@@ -62,6 +64,8 @@ func _ready() -> void:
 		quest_map_panel.node_pressed.connect(_on_node_pressed)
 	if stage_close_button != null:
 		stage_close_button.pressed.connect(hide_stage_overlay)
+	if stage_story_button != null:
+		stage_story_button.pressed.connect(_on_stage_story_pressed)
 	if stage_demo_button != null:
 		stage_demo_button.pressed.connect(_on_stage_demo_pressed)
 	if stage_practice_button != null:
@@ -155,6 +159,14 @@ func _on_node_pressed(node_id: String) -> void:
 		note_label.text = QuestMapSelectionPresenterScript.build_node_selection_note(node_id)
 
 
+func _on_stage_story_pressed() -> void:
+	if _selected_group_id == "":
+		return
+	var group_id: String = _selected_group_id
+	hide_stage_overlay()
+	stage_story_requested.emit(group_id)
+
+
 func _on_stage_demo_pressed() -> void:
 	if _selected_group_id == "":
 		return
@@ -225,25 +237,34 @@ func _populate_unlock_blocks(group_view: Dictionary) -> void:
 
 
 func _refresh_overlay_actions(group_view: Dictionary) -> void:
+	var story_step_variant: Variant = group_view.get("story_step", {})
 	var demo_slot_variant: Variant = group_view.get("demo_slot", {})
 	var practice_slot_variant: Variant = group_view.get("practice_slot", {})
+	var story_step: Dictionary = story_step_variant if story_step_variant is Dictionary else {}
 	var demo_slot: Dictionary = demo_slot_variant if demo_slot_variant is Dictionary else {}
 	var practice_slot: Dictionary = practice_slot_variant if practice_slot_variant is Dictionary else {}
 	var practice_unlocked: bool = bool(practice_slot.get("is_unlocked", false))
 	var practice_completed: int = int(practice_slot.get("completed_count", 0))
 	var practice_total: int = int(practice_slot.get("total_count", 0))
 
+	if stage_story_button != null:
+		stage_story_button.disabled = story_step.is_empty()
+		stage_story_button.text = "Replay Story" if str(story_step.get("status_key", "")) == "completed" else "Start Story"
 	if stage_demo_button != null:
-		stage_demo_button.disabled = false
+		var demo_unlocked: bool = bool(demo_slot.get("is_unlocked", false))
+		stage_demo_button.disabled = not demo_unlocked
 		stage_demo_button.text = "Start Demo" if not bool(demo_slot.get("viewed", false)) else "Replay Demo"
 	if stage_practice_button != null:
 		stage_practice_button.disabled = not practice_unlocked
 		stage_practice_button.text = "Practice %d / %d" % [practice_completed, max(practice_total, 5)]
 	if stage_action_note_label != null:
+		var demo_unlocked: bool = bool(demo_slot.get("is_unlocked", false))
 		if practice_unlocked:
-			stage_action_note_label.text = "Practice bundle unlocked. The button will open the current practice entry level."
+			stage_action_note_label.text = "Story opens the scene route, Demo unlocks after Story is completed, and Practice opens the current practice entry level."
+		elif demo_unlocked:
+			stage_action_note_label.text = "Demo is now unlocked. Finish Demo once to unlock Practice."
 		else:
-			stage_action_note_label.text = "Practice unlocks after you start Demo once."
+			stage_action_note_label.text = "Complete Story first to unlock Demo. Practice remains locked until Demo is started."
 
 
 func _find_group_view(group_id: String) -> Dictionary:

@@ -1,12 +1,12 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://dypsytsdrembe"]
 
-[ext_resource type="Script" path="res://scripts/flow/game_flow_coordinator.gd" id="1_coordinator"]
-[ext_resource type="Script" path="res://scripts/bridge/python_bridge_client.gd" id="2_bridge"]
+[ext_resource type="Script" uid="uid://c1u0d7i2wj676" path="res://scripts/flow/game_flow_coordinator.gd" id="1_coordinator"]
+[ext_resource type="Script" uid="uid://b3tqqfek84ekn" path="res://scripts/bridge/python_bridge_client.gd" id="2_bridge"]
 [ext_resource type="PackedScene" path="res://scenes/quest_map_screen.tscn" id="3_map"]
 [ext_resource type="PackedScene" path="res://scenes/scene_flow_screen.tscn" id="4_scene"]
 [ext_resource type="PackedScene" path="res://scenes/challenge_screen.tscn" id="5_challenge"]
 
-[node name="GameFlowRoot" type="Control"]
+[node name="GameFlowRoot" type="Control" unique_id=239199389]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,36 +15,21 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_coordinator")
 
-[node name="PythonBridgeClient" type="Node" parent="."]
+[node name="PythonBridgeClient" type="Node" parent="." unique_id=264840698]
 script = ExtResource("2_bridge")
 
-[node name="MapScreen" parent="." instance=ExtResource("3_map")]
+[node name="MapScreen" parent="." unique_id=755329887 instance=ExtResource("3_map")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 
-[node name="SceneScreen" parent="." instance=ExtResource("4_scene")]
+[node name="SceneScreen" parent="." unique_id=1575853736 instance=ExtResource("4_scene")]
 visible = false
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 
-[node name="ChallengeScreen" parent="." instance=ExtResource("5_challenge")]
+[node name="ChallengeScreen" parent="." unique_id=778671232 instance=ExtResource("5_challenge")]
 visible = false
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=361107516]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -57,30 +42,28 @@ offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="DebugPanel" type="PanelContainer" parent="Margin"]
+[node name="DebugPanel" type="PanelContainer" parent="Margin" unique_id=2024157307]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DebugMargin" type="MarginContainer" parent="Margin/DebugPanel"]
+[node name="DebugMargin" type="MarginContainer" parent="Margin/DebugPanel" unique_id=540018476]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="DebugRoot" type="VBoxContainer" parent="Margin/DebugPanel/DebugMargin"]
+[node name="DebugRoot" type="VBoxContainer" parent="Margin/DebugPanel/DebugMargin" unique_id=2048640627]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="DebugTitle" type="Label" parent="Margin/DebugPanel/DebugMargin/DebugRoot"]
+[node name="DebugTitle" type="Label" parent="Margin/DebugPanel/DebugMargin/DebugRoot" unique_id=2094014568]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Debug Response"
 
-[node name="ResponseText" type="RichTextLabel" parent="Margin/DebugPanel/DebugMargin/DebugRoot"]
-layout_mode = 2
-bbcode_enabled = false
-fit_content = false
+[node name="ResponseText" type="RichTextLabel" parent="Margin/DebugPanel/DebugMargin/DebugRoot" unique_id=422618700]
 custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
 text = "No response yet."

@@ -93,6 +93,83 @@ function Expand-PackageToDirectory {
   }
 }
 
+function Resolve-ExistingLinkTarget {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path
+  )
+
+  if (-not (Test-Path -LiteralPath $Path)) {
+    return $null
+  }
+
+  $item = Get-Item -LiteralPath $Path -Force
+  if (-not ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+    return $null
+  }
+
+  $targetProperty = $item.PSObject.Properties["Target"]
+  if ($null -eq $targetProperty) {
+    return $null
+  }
+
+  $targetValue = $targetProperty.Value
+  if ($targetValue -is [System.Array]) {
+    $targetValue = $targetValue[0]
+  }
+
+  if (-not $targetValue) {
+    return $null
+  }
+
+  try {
+    return (Resolve-Path -LiteralPath $targetValue).Path
+  }
+  catch {
+    return [string]$targetValue
+  }
+}
+
+function Ensure-DirectoryJunction {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$LinkPath,
+    [Parameter(Mandatory = $true)]
+    [string]$TargetPath
+  )
+
+  if (-not (Test-Path -LiteralPath $TargetPath)) {
+    throw "Cannot create junction because target does not exist: $TargetPath"
+  }
+
+  $resolvedTarget = (Resolve-Path -LiteralPath $TargetPath).Path
+  $existingTarget = Resolve-ExistingLinkTarget -Path $LinkPath
+  if ($existingTarget) {
+    try {
+      $resolvedExisting = (Resolve-Path -LiteralPath $existingTarget).Path
+      if ($resolvedExisting -eq $resolvedTarget) {
+        Write-Host "Reusing directory junction: $LinkPath -> $resolvedTarget"
+        return
+      }
+    }
+    catch {
+    }
+  }
+
+  if (Test-Path -LiteralPath $LinkPath) {
+    Write-Host "Replacing existing path at $LinkPath"
+    Remove-Item -LiteralPath $LinkPath -Recurse -Force
+  }
+
+  New-DirectoryIfMissing -Path (Split-Path -Parent $LinkPath)
+  New-Item -ItemType Junction -Path $LinkPath -Target $resolvedTarget -Force | Out-Null
+  if (-not (Test-Path -LiteralPath $LinkPath)) {
+    throw "Failed to create directory junction: $LinkPath -> $resolvedTarget"
+  }
+
+  Write-Host "Created directory junction: $LinkPath -> $resolvedTarget"
+}
+
 function Install-Godot {
   param(
     [Parameter(Mandatory = $true)]
@@ -235,6 +312,15 @@ function Copy-BlocklyVendorFiles {
   Copy-RequiredFile -RelativePath "python_compressed.js"
   Copy-RequiredFile -RelativePath "msg\\zh-hant.js"
 
+  $mediaSource = Join-Path $SourceDir "media"
+  $mediaDestination = Join-Path $outDir "media"
+  if (Test-Path $mediaSource) {
+    if (Test-Path $mediaDestination) {
+      Remove-Item -Recurse -Force $mediaDestination
+    }
+    Copy-Item -Path $mediaSource -Destination $mediaDestination -Recurse -Force
+  }
+
   Write-Host "Vendored Blockly files to: $outDir"
 }
 
@@ -281,6 +367,13 @@ function Install-Blockly {
   Copy-BlocklyVendorFiles -SourceDir $packageDir
 }
 
+function Ensure-ProjectBlocklyJunction {
+  $projectBlocklyPath = Join-Path $repoRoot "godot_poc\blockly_assets"
+  $blocklyAssetPath = Join-Path $repoRoot "assets\blockly"
+  Ensure-DirectoryJunction -LinkPath $projectBlocklyPath -TargetPath $blocklyAssetPath
+}
+
+
 try {
   Install-Venv
 
@@ -298,12 +391,22 @@ try {
 
   if ([bool]$IncludeBlockly) {
     Install-Blockly -Version $BlocklyVersion -DistUrl $BlocklyDistUrl -DistDir $BlocklyDistDir
+    Ensure-ProjectBlocklyJunction
   } else {
     Write-Host "Skipping Blockly download."
   }
+
+  Write-Host "Skipping embedded webview setup. The toolbox now runs in an external PySide6 window."
 
   Write-Host "Done."
 }
 finally {
   Set-Location $pwdPath
 }
+
+
+
+
+
+
+

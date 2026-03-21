@@ -88,6 +88,29 @@ func send_submit_level(python_code: String) -> void:
 	})
 
 
+func send_verify_toolbox_level(python_code: String, block_json: Dictionary) -> void:
+	send_request({
+		"action": {
+			"action_type": "verify_toolbox_level",
+			"payload": {
+				"python_code": python_code,
+				"block_json": block_json,
+			},
+		},
+	})
+
+
+func send_start_group_story(group_id: String) -> void:
+	send_request({
+		"action": {
+			"action_type": "start_group_story",
+			"payload": {
+				"group_id": group_id,
+			},
+		},
+	})
+
+
 func send_start_group_demo(group_id: String) -> void:
 	send_request({
 		"action": {
