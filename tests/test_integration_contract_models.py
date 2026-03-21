@@ -19,6 +19,7 @@ def test_game_state_contract_supports_scene_payload() -> None:
         node_id="group-01-story",
         node_title="Group 01 Story",
         player_profile=PlayerProfileState(name="Nova", gender="female", profile_created=True),
+        intro_completed=True,
         scene=SceneState(
             scene_id="scene-city-alarm",
             title="City Alarm",
@@ -42,6 +43,7 @@ def test_game_state_contract_supports_scene_payload() -> None:
 
     assert state.mode is GameMode.SCENE
     assert state.player_profile.profile_created is True
+    assert state.intro_completed is True
     assert state.player_profile.gender == "female"
     assert state.scene is not None
     assert state.scene.dialogue_blocks[1].emphasis == "alert"

@@ -79,6 +79,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "gender": state.player_profile.gender,
             "profile_created": state.player_profile.profile_created,
         },
+        "intro_completed": state.intro_completed,
         "scene": scene,
         "challenge": challenge,
         "progress": {

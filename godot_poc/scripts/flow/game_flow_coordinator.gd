@@ -65,6 +65,7 @@ func _ready() -> void:
 	scene_screen.show_placeholder("No scene loaded yet.")
 	scene_screen.set_status("Scene flow is idle.")
 	scene_screen.set_can_advance(false)
+	scene_screen.set_can_go_back(false)
 	challenge_screen.show_challenge({})
 	challenge_screen.show_feedback(GameFlowFeedbackPresenterScript.empty_feedback_view("Feedback will appear here."))
 	challenge_screen.set_status("Challenge flow is idle.")
@@ -129,6 +130,10 @@ func _on_stage_practice_requested(group_id: String) -> void:
 	python_bridge_client.send_start_group_practice(group_id)
 
 func _on_advance_requested() -> void:
+	if _current_page == "scene" and _state_store.has_state() and not bool(_state_store.get_state().get("intro_completed", false)):
+		scene_screen.set_status("Status: completing opening intro...")
+		python_bridge_client.send_complete_intro()
+		return
 	if _current_page == "scene":
 		scene_screen.set_status("Status: requesting advance...")
 	else:
@@ -204,6 +209,7 @@ func _apply_success_state(state: Dictionary, response: Dictionary) -> void:
 	entry_screen.set_bridge_running(python_bridge_client.is_running())
 	GameFlowScreenPresenterScript.render_map_view(map_screen, map_view, state, view_model, can_open)
 	GameFlowScreenPresenterScript.render_flow_views(scene_screen, challenge_screen, view_model, feedback_view)
+	scene_screen.set_can_go_back(bool(state.get("intro_completed", false)))
 	_apply_toolbox_lock_state()
 	_append_debug_state(view_model)
 	_route_after_response(state)
@@ -361,8 +367,8 @@ func _set_debug_visible(debug_visible: bool) -> void:
 
 func _entry_status_text(profile_view: Dictionary) -> String:
 	if bool(profile_view.get("profile_created", false)):
-		return "Status: profile ready"
-	return "Status: create your profile to enter the map"
+		return "Status: profile ready, opening briefing unlocked"
+	return "Status: create your profile to enter the opening briefing"
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:

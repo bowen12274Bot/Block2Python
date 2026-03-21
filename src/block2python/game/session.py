@@ -80,6 +80,7 @@ class GameSession:
     group_runtime_states: dict[str, GroupRuntimeState] = field(default_factory=dict)
     last_submission: SubmissionFeedback | None = None
     player_profile: PlayerProfileState = field(default_factory=PlayerProfileState)
+    intro_completed: bool = False
 
     @classmethod
     def start(cls, *, app: AppCore, game_slice: AssembledGameSlice, quest_id: str) -> GameSession:
@@ -135,11 +136,27 @@ class GameSession:
         self._sync_group_runtime_states(progress, state)
         map_route = self._map_route_state(state, progress)
 
+        if self.player_profile.profile_created and not self.intro_completed:
+            return GameState(
+                mode=GameMode.SCENE,
+                quest_id=self.runtime.quest.quest_id,
+                node_id="opening-intro",
+                node_title="Opening Intro",
+                player_profile=self.player_profile,
+                intro_completed=False,
+                scene=self._opening_intro_scene(),
+                progress=progress,
+                available_actions=AvailableActions(advance=True),
+                last_submission=self.last_submission,
+                map_route=map_route,
+            )
+
         if state.mode is SessionMode.COMPLETE or runtime_state is None:
             return GameState(
                 mode=GameMode.COMPLETE,
                 quest_id=self.runtime.quest.quest_id,
                 player_profile=self.player_profile,
+                intro_completed=self.intro_completed,
                 progress=progress,
                 available_actions=AvailableActions(),
                 last_submission=self.last_submission,
@@ -171,6 +188,7 @@ class GameSession:
             node_id=state.node_id,
             node_title=state.node_title,
             player_profile=self.player_profile,
+            intro_completed=self.intro_completed,
             scene=scene,
             challenge=challenge,
             progress=progress,
@@ -193,6 +211,14 @@ class GameSession:
             gender=normalized_gender,
             profile_created=True,
         )
+        self.intro_completed = False
+        self.last_submission = None
+        return self.current_game_state()
+
+    def complete_intro(self) -> GameState:
+        if not self.player_profile.profile_created:
+            raise GameSessionError("player profile must be created before intro")
+        self.intro_completed = True
         self.last_submission = None
         return self.current_game_state()
 
@@ -219,6 +245,7 @@ class GameSession:
         return self.current_state()
 
     def start_group_demo(self, group_id: str) -> GameSessionState:
+        self._require_opening_flow_completed()
         if not group_id:
             raise GameSessionError("group_id is required")
         group = self._route_group(group_id)
@@ -241,6 +268,7 @@ class GameSession:
         return self.current_state()
 
     def start_group_story(self, group_id: str) -> GameSessionState:
+        self._require_opening_flow_completed()
         if not group_id:
             raise GameSessionError("group_id is required")
         group = self._route_group(group_id)
@@ -258,6 +286,7 @@ class GameSession:
         return self.current_state()
 
     def start_group_practice(self, group_id: str) -> GameSessionState:
+        self._require_opening_flow_completed()
         if not group_id:
             raise GameSessionError("group_id is required")
         self._sync_demo_seen_from_runtime()
@@ -347,6 +376,24 @@ class GameSession:
             answer_correct=outcome.judge.status is JudgeStatus.AC,
         )
         return self.current_state(), outcome
+
+    def _require_opening_flow_completed(self) -> None:
+        if not self.player_profile.profile_created:
+            raise GameSessionError("player profile must be created before entering main flow")
+        if not self.intro_completed:
+            raise GameSessionError("opening intro must be completed before entering main flow")
+
+    @staticmethod
+    def _opening_intro_scene() -> SceneState:
+        return SceneState(
+            scene_id="opening-intro",
+            title="Opening Mission",
+            dialogue_blocks=(
+                DialogueBlockState(speaker="Byte", text="Welcome to Code Planet. The system core is unstable."),
+                DialogueBlockState(speaker="Narrator", text="Your explorer profile is registered. The first mission is about to begin."),
+                DialogueBlockState(speaker="Byte", text="Finish this opening briefing, then head to the main map and begin repairs."),
+            ),
+        )
 
     def _current_level_for_challenge(self, challenge: ResolvedChallengeSpec) -> LevelSpec | None:
         review_level = self._review_level_for_challenge(challenge)

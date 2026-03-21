@@ -115,28 +115,53 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
 
 
 def test_game_session_create_player_profile_persists_in_contract_state() -> None:
-    session = build_session()
+    session = build_raw_session()
 
     contract_state = session.create_player_profile(name=" Nova ", gender="female")
 
     assert contract_state.player_profile.profile_created is True
     assert contract_state.player_profile.name == "Nova"
     assert contract_state.player_profile.gender == "female"
+    assert contract_state.intro_completed is False
+    assert contract_state.scene is not None
+    assert contract_state.scene.scene_id == "opening-intro"
     assert contract_state.progress.completed_node_ids == ()
 
     next_state = session.current_game_state()
     assert next_state.player_profile.profile_created is True
+    assert next_state.intro_completed is False
     assert next_state.player_profile.name == "Nova"
 
 
 def test_game_session_create_player_profile_rejects_invalid_payload() -> None:
-    session = build_session()
+    session = build_raw_session()
 
     with pytest.raises(GameSessionError, match="player name"):
         session.create_player_profile(name="   ", gender="female")
 
     with pytest.raises(GameSessionError, match="player gender"):
         session.create_player_profile(name="Nova", gender="robot")
+
+
+def test_game_session_complete_intro_enters_main_map_flow() -> None:
+    session = build_raw_session()
+    session.create_player_profile(name="Nova", gender="female")
+
+    contract_state = session.complete_intro()
+
+    assert contract_state.intro_completed is True
+    assert contract_state.mode is GameMode.SCENE
+    assert contract_state.node_id == "main-map-entry"
+    assert contract_state.scene is None
+
+
+def test_game_session_blocks_main_flow_until_intro_is_completed() -> None:
+    session = build_raw_session()
+    session.create_player_profile(name="Nova", gender="female")
+
+    with pytest.raises(GameSessionError, match="opening intro"):
+        session.start_group_story("group-01")
+
 
 
 def test_game_session_start_group_story_jumps_to_story() -> None:
@@ -583,11 +608,18 @@ def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
     assert state.current_level_id == "group-01-practice-02"
 
 
-def build_session() -> GameSession:
+def build_raw_session() -> GameSession:
     levels = load_levels(load_levels_dir())
     app = AppCore(levels, judge=StubJudge())
     assembled = assemble_game_slice(game_content=load_game_content(game_content_dir()), levels=levels)
     return GameSession.start(app=app, game_slice=assembled, quest_id="quest-main-map")
+
+
+def build_session() -> GameSession:
+    session = build_raw_session()
+    session.create_player_profile(name="Test Player", gender="male")
+    session.complete_intro()
+    return session
 
 
 def load_levels_dir():

@@ -26,6 +26,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
         node_id="group-01-practice",
         node_title="Group 01 Practice",
         player_profile=PlayerProfileState(name="Nova", gender="female", profile_created=True),
+        intro_completed=True,
         scene=SceneState(
             scene_id="scene-practice-unlock",
             title="Practice Unlock",
@@ -67,6 +68,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
         "gender": "female",
         "profile_created": True,
     }
+    assert payload["intro_completed"] is True
     assert payload["scene"]["scene_id"] == "scene-practice-unlock"
     assert payload["challenge"]["current_level_id"] == "group-01-practice-01"
     assert payload["challenge"]["current_level_prompt"] == "Print a greeting."
@@ -100,6 +102,18 @@ def test_create_profile_action_round_trip_serialize_and_deserialize() -> None:
     action = PlayerAction(
         action_type=ActionType.CREATE_PLAYER_PROFILE,
         payload={"name": "Nova", "gender": "female"},
+    )
+
+    serialized = serialize_player_action(action)
+    deserialized = deserialize_player_action(serialized)
+
+    assert deserialized == action
+
+
+def test_complete_intro_action_round_trip_serialize_and_deserialize() -> None:
+    action = PlayerAction(
+        action_type=ActionType.COMPLETE_INTRO,
+        payload={},
     )
 
     serialized = serialize_player_action(action)

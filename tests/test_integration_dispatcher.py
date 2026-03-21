@@ -5,6 +5,7 @@ import pytest
 from block2python.clients.cli.game_session_demo import build_demo_session
 from block2python.integration.contracts import ActionType, GameMode, PlayerAction
 from block2python.integration.service import IntegrationDispatchError, dispatch
+from tests.test_game_session import build_raw_session
 
 
 def test_dispatch_advance_returns_next_game_state() -> None:
@@ -154,8 +155,8 @@ def test_dispatch_start_group_practice_opens_practice_entry() -> None:
     assert state.challenge.current_level_id == "group-01-practice-01"
 
 
-def test_dispatch_create_player_profile_updates_game_state() -> None:
-    session = build_demo_session()
+def test_dispatch_create_player_profile_updates_game_state_and_opens_intro() -> None:
+    session = build_raw_session()
 
     state = dispatch(
         session,
@@ -168,10 +169,26 @@ def test_dispatch_create_player_profile_updates_game_state() -> None:
     assert state.player_profile.profile_created is True
     assert state.player_profile.name == "Nova"
     assert state.player_profile.gender == "female"
+    assert state.intro_completed is False
+    assert state.mode is GameMode.SCENE
+    assert state.scene is not None
+    assert state.scene.scene_id == "opening-intro"
+
+
+def test_dispatch_complete_intro_enters_map_flow() -> None:
+    session = build_raw_session()
+    dispatch(session, PlayerAction(action_type=ActionType.CREATE_PLAYER_PROFILE, payload={"name": "Nova", "gender": "female"}))
+
+    state = dispatch(session, PlayerAction(action_type=ActionType.COMPLETE_INTRO, payload={}))
+
+    assert state.intro_completed is True
+    assert state.mode is GameMode.SCENE
+    assert state.node_id == "main-map-entry"
+    assert state.scene is None
 
 
 def test_dispatch_create_player_profile_rejects_blank_name() -> None:
-    session = build_demo_session()
+    session = build_raw_session()
 
     with pytest.raises(IntegrationDispatchError, match="player name"):
         dispatch(
@@ -184,7 +201,7 @@ def test_dispatch_create_player_profile_rejects_blank_name() -> None:
 
 
 def test_dispatch_create_player_profile_rejects_invalid_gender() -> None:
-    session = build_demo_session()
+    session = build_raw_session()
 
     with pytest.raises(IntegrationDispatchError, match="player gender"):
         dispatch(

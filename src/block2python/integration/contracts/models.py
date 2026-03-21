@@ -19,6 +19,7 @@ class ActionType(str, Enum):
     START_GROUP_DEMO = "start_group_demo"
     START_GROUP_PRACTICE = "start_group_practice"
     CREATE_PLAYER_PROFILE = "create_player_profile"
+    COMPLETE_INTRO = "complete_intro"
     RESTART_QUEST = "restart_quest"
 
 
@@ -142,6 +143,7 @@ class GameState:
     node_id: str | None = None
     node_title: str = ""
     player_profile: PlayerProfileState = field(default_factory=PlayerProfileState)
+    intro_completed: bool = False
     scene: SceneState | None = None
     challenge: ChallengeState | None = None
     progress: ProgressState = field(default_factory=ProgressState)

@@ -72,6 +72,9 @@ def dispatch(session: GameSession, action: PlayerAction) -> GameState:
 
             return session.create_player_profile(name=name, gender=gender)
 
+        if action.action_type is ActionType.COMPLETE_INTRO:
+            return session.complete_intro()
+
         if action.action_type is ActionType.RESTART_QUEST:
             raise IntegrationDispatchError("restart_quest is not implemented")
     except GameSessionError as exc:

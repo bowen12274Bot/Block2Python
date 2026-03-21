@@ -145,6 +145,15 @@ func send_create_player_profile(name: String, gender: String) -> void:
 	})
 
 
+func send_complete_intro() -> void:
+	send_request({
+		"action": {
+			"action_type": "complete_intro",
+			"payload": {},
+		},
+	})
+
+
 func send_request(payload: Dictionary) -> void:
 	if not is_running():
 		_fail_bridge("Bridge is not running")

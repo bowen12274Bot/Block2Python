@@ -11,6 +11,7 @@ class SaveGame:
     player_name: str = ""
     player_gender: str = ""
     profile_created: bool = False
+    intro_completed: bool = False
     current_node_id: str | None = None
     completed_node_ids: tuple[str, ...] = ()
     cleared_level_ids: tuple[str, ...] = ()
