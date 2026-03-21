@@ -1,0 +1,100 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/entry/entry_screen.gd" id="1_screen"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_gender"]
+
+[node name="EntryScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_screen")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 48.0
+offset_right = -48.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Margin"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Content" type="VBoxContainer" parent="Margin/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Margin/Panel/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Create Your Explorer"
+
+[node name="Subtitle" type="Label" parent="Margin/Panel/Content"]
+layout_mode = 2
+autowrap_mode = 3
+text = "This is the formal game entry. Build your character first, then enter the main map."
+
+[node name="StatusLabel" type="Label" parent="Margin/Panel/Content"]
+layout_mode = 2
+text = "Status: idle"
+
+[node name="SummaryLabel" type="Label" parent="Margin/Panel/Content"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Choose your avatar and enter a player name to continue."
+
+[node name="BridgeButtons" type="HBoxContainer" parent="Margin/Panel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StartBridgeButton" type="Button" parent="Margin/Panel/Content/BridgeButtons"]
+layout_mode = 2
+text = "Start Bridge"
+
+[node name="ResetButton" type="Button" parent="Margin/Panel/Content/BridgeButtons"]
+layout_mode = 2
+text = "Reset"
+
+[node name="Form" type="VBoxContainer" parent="Margin/Panel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NameLabel" type="Label" parent="Margin/Panel/Content/Form"]
+layout_mode = 2
+text = "Player Name"
+
+[node name="NameInput" type="LineEdit" parent="Margin/Panel/Content/Form"]
+layout_mode = 2
+placeholder_text = "Enter your player name"
+
+[node name="GenderLabel" type="Label" parent="Margin/Panel/Content/Form"]
+layout_mode = 2
+text = "Avatar"
+
+[node name="GenderRow" type="HBoxContainer" parent="Margin/Panel/Content/Form"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MaleButton" type="CheckBox" parent="Margin/Panel/Content/Form/GenderRow"]
+layout_mode = 2
+button_group = SubResource("ButtonGroup_gender")
+text = "Male"
+
+[node name="FemaleButton" type="CheckBox" parent="Margin/Panel/Content/Form/GenderRow"]
+layout_mode = 2
+button_group = SubResource("ButtonGroup_gender")
+text = "Female"
+
+[node name="CreateButton" type="Button" parent="Margin/Panel/Content"]
+layout_mode = 2
+text = "Create Character"

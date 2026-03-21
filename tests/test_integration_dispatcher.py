@@ -154,6 +154,48 @@ def test_dispatch_start_group_practice_opens_practice_entry() -> None:
     assert state.challenge.current_level_id == "group-01-practice-01"
 
 
+def test_dispatch_create_player_profile_updates_game_state() -> None:
+    session = build_demo_session()
+
+    state = dispatch(
+        session,
+        PlayerAction(
+            action_type=ActionType.CREATE_PLAYER_PROFILE,
+            payload={"name": " Nova ", "gender": "female"},
+        ),
+    )
+
+    assert state.player_profile.profile_created is True
+    assert state.player_profile.name == "Nova"
+    assert state.player_profile.gender == "female"
+
+
+def test_dispatch_create_player_profile_rejects_blank_name() -> None:
+    session = build_demo_session()
+
+    with pytest.raises(IntegrationDispatchError, match="player name"):
+        dispatch(
+            session,
+            PlayerAction(
+                action_type=ActionType.CREATE_PLAYER_PROFILE,
+                payload={"name": "   ", "gender": "male"},
+            ),
+        )
+
+
+def test_dispatch_create_player_profile_rejects_invalid_gender() -> None:
+    session = build_demo_session()
+
+    with pytest.raises(IntegrationDispatchError, match="player gender"):
+        dispatch(
+            session,
+            PlayerAction(
+                action_type=ActionType.CREATE_PLAYER_PROFILE,
+                payload={"name": "Nova", "gender": "robot"},
+            ),
+        )
+
+
 def test_dispatch_rejects_restart_until_supported() -> None:
     session = build_demo_session()
 

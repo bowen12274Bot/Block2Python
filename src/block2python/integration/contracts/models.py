@@ -18,6 +18,7 @@ class ActionType(str, Enum):
     START_GROUP_STORY = "start_group_story"
     START_GROUP_DEMO = "start_group_demo"
     START_GROUP_PRACTICE = "start_group_practice"
+    CREATE_PLAYER_PROFILE = "create_player_profile"
     RESTART_QUEST = "restart_quest"
 
 
@@ -44,6 +45,13 @@ class ChallengeState:
     current_level_id: str | None = None
     current_level_title: str | None = None
     current_level_prompt: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class PlayerProfileState:
+    name: str = ""
+    gender: str = ""
+    profile_created: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,6 +141,7 @@ class GameState:
     quest_id: str
     node_id: str | None = None
     node_title: str = ""
+    player_profile: PlayerProfileState = field(default_factory=PlayerProfileState)
     scene: SceneState | None = None
     challenge: ChallengeState | None = None
     progress: ProgressState = field(default_factory=ProgressState)

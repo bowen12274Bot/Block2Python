@@ -10,15 +10,36 @@ static func map_game_state(state: Dictionary) -> Dictionary:
         "node_title": str(state.get("node_title", "")),
     }
 
+    var player_profile_view: Dictionary = _build_player_profile_view(state)
     var scene_view: Dictionary = _build_scene_view(state, meta)
     var challenge_view: Dictionary = _build_challenge_view(state)
     var action_view: Dictionary = build_action_view(state)
 
     return {
         "meta": meta,
+        "player_profile_view": player_profile_view,
         "scene_view": scene_view,
         "challenge_view": challenge_view,
         "action_view": action_view,
+    }
+
+
+static func _build_player_profile_view(state: Dictionary) -> Dictionary:
+    var profile: Variant = state.get("player_profile", {})
+    var name: String = ""
+    var gender: String = ""
+    var profile_created: bool = false
+    if profile is Dictionary:
+        name = str(profile.get("name", ""))
+        gender = str(profile.get("gender", ""))
+        profile_created = bool(profile.get("profile_created", false))
+
+    return {
+        "name": name,
+        "gender": gender,
+        "profile_created": profile_created,
+        "display_name": name if name != "" else "Player",
+        "gender_label": _gender_label(gender),
     }
 
 
@@ -95,3 +116,11 @@ static func build_action_view(state: Dictionary) -> Dictionary:
         "can_advance": false,
         "can_submit": false,
     }
+
+
+static func _gender_label(gender: String) -> String:
+    if gender == "male":
+        return "Male"
+    if gender == "female":
+        return "Female"
+    return "Unselected"

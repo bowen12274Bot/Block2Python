@@ -45,6 +45,7 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     contract_state = session.current_game_state()
     assert contract_state.mode is GameMode.SCENE
     assert contract_state.node_id == "main-map-entry"
+    assert contract_state.player_profile.profile_created is False
     assert contract_state.scene is None
     assert contract_state.challenge is None
     assert contract_state.available_actions.advance is True
@@ -111,6 +112,31 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.last_submission.level_id == "group-01-practice-01"
     assert contract_state.last_submission.analysis_status == "PASS"
     assert contract_state.last_submission.judge_status == "AC"
+
+
+def test_game_session_create_player_profile_persists_in_contract_state() -> None:
+    session = build_session()
+
+    contract_state = session.create_player_profile(name=" Nova ", gender="female")
+
+    assert contract_state.player_profile.profile_created is True
+    assert contract_state.player_profile.name == "Nova"
+    assert contract_state.player_profile.gender == "female"
+    assert contract_state.progress.completed_node_ids == ()
+
+    next_state = session.current_game_state()
+    assert next_state.player_profile.profile_created is True
+    assert next_state.player_profile.name == "Nova"
+
+
+def test_game_session_create_player_profile_rejects_invalid_payload() -> None:
+    session = build_session()
+
+    with pytest.raises(GameSessionError, match="player name"):
+        session.create_player_profile(name="   ", gender="female")
+
+    with pytest.raises(GameSessionError, match="player gender"):
+        session.create_player_profile(name="Nova", gender="robot")
 
 
 def test_game_session_start_group_story_jumps_to_story() -> None:
@@ -532,11 +558,11 @@ def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
     session = build_session()
     session.start_group_story("group-01")
     session.advance()
-    session.start_group_practice("group-01")
+    session.advance()
 
     state, outcome = session.verify_current_level_with_toolbox(
-        python_code="print(1)",
-        block_json={"kind": "toolbox_workspace", "blocks": [{"type": "print_expr", "expr": "1"}]},
+        python_code="name = input()\nprint(f\"Hello, {name}\")\n",
+        block_json={"kind": "toolbox_workspace", "blocks": [{"type": "print_expr", "expr": "Hello"}]},
     )
 
     assert state.mode is SessionMode.CHALLENGE
@@ -552,7 +578,7 @@ def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
     assert contract_state.last_submission.answer_correct is True
     assert contract_state.last_submission.cleared is False
 
-    state, outcome = session.submit_current_level(python_code="print(1)")
+    state, outcome = session.submit_current_level(python_code="name = input()\nprint(f\"Hello, {name}\")\n")
     assert outcome.cleared is True
     assert state.current_level_id == "group-01-practice-02"
 

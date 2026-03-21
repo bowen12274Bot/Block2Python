@@ -5,6 +5,7 @@ from block2python.integration.contracts import (
     GameMode,
     GameState,
     PlayerAction,
+    PlayerProfileState,
     ProgressState,
     SceneState,
     SubmissionFeedback,
@@ -17,6 +18,7 @@ def test_game_state_contract_supports_scene_payload() -> None:
         quest_id="quest-main-map",
         node_id="group-01-story",
         node_title="Group 01 Story",
+        player_profile=PlayerProfileState(name="Nova", gender="female", profile_created=True),
         scene=SceneState(
             scene_id="scene-city-alarm",
             title="City Alarm",
@@ -39,6 +41,8 @@ def test_game_state_contract_supports_scene_payload() -> None:
     )
 
     assert state.mode is GameMode.SCENE
+    assert state.player_profile.profile_created is True
+    assert state.player_profile.gender == "female"
     assert state.scene is not None
     assert state.scene.dialogue_blocks[1].emphasis == "alert"
     assert state.available_actions.advance is True
@@ -58,3 +62,17 @@ def test_player_action_contract_supports_submit_payload() -> None:
 
     assert action.action_type is ActionType.SUBMIT_LEVEL
     assert action.payload["python_code"] == "print(1)\n"
+
+
+def test_player_action_contract_supports_create_profile_payload() -> None:
+    action = PlayerAction(
+        action_type=ActionType.CREATE_PLAYER_PROFILE,
+        payload={
+            "name": "Nova",
+            "gender": "female",
+        },
+    )
+
+    assert action.action_type is ActionType.CREATE_PLAYER_PROFILE
+    assert action.payload["name"] == "Nova"
+    assert action.payload["gender"] == "female"

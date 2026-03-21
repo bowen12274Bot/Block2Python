@@ -24,6 +24,7 @@ from block2python.integration.contracts import (
     GroupSlotState,
     MapRouteState,
     MapRouteStepState,
+    PlayerProfileState,
     ProgressState,
     SceneState,
     SubmissionFeedback,
@@ -78,6 +79,7 @@ class GameSession:
     toolbox_used_level_ids: set[str] = field(default_factory=set)
     group_runtime_states: dict[str, GroupRuntimeState] = field(default_factory=dict)
     last_submission: SubmissionFeedback | None = None
+    player_profile: PlayerProfileState = field(default_factory=PlayerProfileState)
 
     @classmethod
     def start(cls, *, app: AppCore, game_slice: AssembledGameSlice, quest_id: str) -> GameSession:
@@ -137,6 +139,7 @@ class GameSession:
             return GameState(
                 mode=GameMode.COMPLETE,
                 quest_id=self.runtime.quest.quest_id,
+                player_profile=self.player_profile,
                 progress=progress,
                 available_actions=AvailableActions(),
                 last_submission=self.last_submission,
@@ -167,6 +170,7 @@ class GameSession:
             quest_id=state.quest_id,
             node_id=state.node_id,
             node_title=state.node_title,
+            player_profile=self.player_profile,
             scene=scene,
             challenge=challenge,
             progress=progress,
@@ -174,6 +178,23 @@ class GameSession:
             last_submission=self.last_submission,
             map_route=map_route,
         )
+
+    def create_player_profile(self, *, name: str, gender: str) -> GameState:
+        normalized_name = name.strip()
+        if not normalized_name:
+            raise GameSessionError("player name is required")
+
+        normalized_gender = gender.strip().lower()
+        if normalized_gender not in {"male", "female"}:
+            raise GameSessionError("player gender must be male or female")
+
+        self.player_profile = PlayerProfileState(
+            name=normalized_name,
+            gender=normalized_gender,
+            profile_created=True,
+        )
+        self.last_submission = None
+        return self.current_game_state()
 
     def advance(self) -> GameSessionState:
         self.last_submission = None

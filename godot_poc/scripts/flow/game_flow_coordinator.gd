@@ -15,6 +15,7 @@ const GameFlowPageRouterScript = preload("res://scripts/flow/game_flow_page_rout
 const GameFlowScreenPresenterScript = preload("res://scripts/flow/game_flow_screen_presenter.gd")
 
 @onready var python_bridge_client = $PythonBridgeClient
+@onready var entry_screen = $EntryScreen
 @onready var map_screen = $MapScreen
 @onready var scene_screen = $SceneScreen
 @onready var challenge_screen = $ChallengeScreen
@@ -23,7 +24,7 @@ const GameFlowScreenPresenterScript = preload("res://scripts/flow/game_flow_scre
 @onready var response_text: RichTextLabel = $Margin/DebugPanel/DebugMargin/DebugRoot/ResponseText
 
 var _state_store: RefCounted
-var _current_page: String = "map"
+var _current_page: String = "entry"
 var _toolbox_helper_pid: int = -1
 var _toolbox_result_file: String = ""
 var _toolbox_last_result_token: String = ""
@@ -31,6 +32,9 @@ var _toolbox_active_level_id: String = ""
 
 func _ready() -> void:
 	_state_store = BridgeStateStoreScript.new()
+	entry_screen.start_bridge_requested.connect(_on_start_bridge_requested)
+	entry_screen.reset_requested.connect(_on_reset_requested)
+	entry_screen.create_profile_requested.connect(_on_create_profile_requested)
 	map_screen.start_bridge_requested.connect(_on_start_bridge_requested)
 	map_screen.reset_requested.connect(_on_reset_requested)
 	map_screen.advance_requested.connect(_on_advance_requested)
@@ -48,6 +52,9 @@ func _ready() -> void:
 	python_bridge_client.bridge_failed.connect(_on_bridge_failed)
 	python_bridge_client.response_received.connect(_on_response_received)
 
+	entry_screen.show_profile({})
+	entry_screen.set_status("Status: start bridge, then create your profile.")
+	entry_screen.set_bridge_running(false)
 	challenge_screen.initialize(DEFAULT_CHALLENGE_CODE)
 	map_screen.show_map(QuestMapMapperScript.empty_map_view("Click Start Bridge, then Reset to load the current quest map."))
 	map_screen.set_status("Status: idle")
@@ -63,19 +70,25 @@ func _ready() -> void:
 	challenge_screen.set_status("Challenge flow is idle.")
 	challenge_screen.set_can_submit(false)
 	_set_debug_visible(false)
-	_show_page("map")
+	_show_page("entry")
 	set_process(true)
 
 func _process(_delta: float) -> void:
 	_poll_toolbox_helper()
 
 func _on_start_bridge_requested() -> void:
+	entry_screen.set_status("Status: starting bridge...")
 	map_screen.set_status("Status: starting bridge...")
 	python_bridge_client.start_bridge()
 
 func _on_reset_requested() -> void:
+	entry_screen.set_status("Status: requesting reset...")
 	map_screen.set_status("Status: requesting reset...")
 	python_bridge_client.send_reset()
+
+func _on_create_profile_requested(name: String, gender: String) -> void:
+	entry_screen.set_status("Status: creating profile...")
+	python_bridge_client.send_create_player_profile(name, gender)
 
 func _on_open_current_node_requested() -> void:
 	if not _state_store.has_state():
@@ -154,6 +167,8 @@ func _on_debug_toggled(debug_visible: bool) -> void:
 	_set_debug_visible(debug_visible)
 
 func _on_bridge_started() -> void:
+	entry_screen.set_status("Status: bridge running")
+	entry_screen.set_bridge_running(true)
 	map_screen.set_status("Status: bridge running")
 	map_screen.set_bridge_running(true)
 	map_screen.set_note("Bridge started. Press Reset to fetch current state.")
@@ -184,6 +199,9 @@ func _apply_success_state(state: Dictionary, response: Dictionary) -> void:
 	var view_model: Dictionary = GameFlowMapperScript.map_game_state(state)
 	var feedback_view: Dictionary = GameFlowFeedbackPresenterScript.build_feedback_view(view_model, response)
 	var can_open: bool = GameFlowPageRouterScript.current_state_has_openable_page(state)
+	entry_screen.show_profile(view_model.get("player_profile_view", {}))
+	entry_screen.set_status(_entry_status_text(view_model.get("player_profile_view", {})))
+	entry_screen.set_bridge_running(python_bridge_client.is_running())
 	GameFlowScreenPresenterScript.render_map_view(map_screen, map_view, state, view_model, can_open)
 	GameFlowScreenPresenterScript.render_flow_views(scene_screen, challenge_screen, view_model, feedback_view)
 	_apply_toolbox_lock_state()
@@ -230,9 +248,10 @@ func _apply_error_response(response: Dictionary) -> void:
 	)
 
 func _apply_error_ui(map_status: String, map_note: String, feedback_title: String, feedback_body: String) -> void:
+	entry_screen.set_status(map_status)
 	GameFlowScreenPresenterScript.apply_error_ui(map_screen, scene_screen, challenge_screen, map_status, map_note, feedback_title, feedback_body)
 	_apply_toolbox_lock_state()
-	_show_page("map")
+	_show_page("entry")
 
 func _show_map_page() -> void:
 	_show_page("map")
@@ -241,7 +260,7 @@ func _show_page(page: String) -> void:
 	_current_page = page
 	if page != "challenge" and _toolbox_helper_pid > 0:
 		_stop_toolbox_helper(true)
-	GameFlowPageRouterScript.show_page(page, map_screen, scene_screen, challenge_screen)
+	GameFlowPageRouterScript.show_page(page, entry_screen, map_screen, scene_screen, challenge_screen)
 	_apply_toolbox_lock_state()
 
 func _apply_toolbox_lock_state() -> void:
@@ -339,6 +358,11 @@ func _set_debug_visible(debug_visible: bool) -> void:
 	debug_margin.visible = debug_visible
 	debug_panel.visible = debug_visible
 	map_screen.set_debug_visible(debug_visible)
+
+func _entry_status_text(profile_view: Dictionary) -> String:
+	if bool(profile_view.get("profile_created", false)):
+		return "Status: profile ready"
+	return "Status: create your profile to enter the map"
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
