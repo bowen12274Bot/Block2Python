@@ -1,0 +1,55 @@
+scene_id: scene-result-success
+title: Repair Success
+dialogue_blocks:
+  - speaker: Byte
+    text: Repair complete. The city alarm signal is stable again.
+    portrait_id: byte-default
+    expression: happy
+    emphasis: success
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: happy
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: happy
+      visual_state: dim
+  - speaker: Player
+    text: Good. What opens next?
+    portrait_id: player-default
+    expression: happy
+    emphasis: normal
+    speaker_side: right
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: happy
+      visual_state: dim
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: happy
+      visual_state: focus
+  - speaker: Byte
+    text: The next story node is unlocked. We can move deeper into the map.
+    portrait_id: byte-default
+    expression: explain
+    emphasis: normal
+    speaker_side: left
+    background_id: city-alarm-room
+    left_actor:
+      actor_id: byte
+      pose_id: default
+      expression_id: explain
+      visual_state: focus
+    right_actor:
+      actor_id: player
+      pose_id: default
+      expression_id: happy
+      visual_state: dim
+next_action: unlock_next_main_node
