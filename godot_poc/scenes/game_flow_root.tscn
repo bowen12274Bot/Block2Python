@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://eyltd6ulqlee" path="res://scripts/flow/game_flow_coordinator.gd" id="1_coordinator"]
 [ext_resource type="Script" uid="uid://be4rumigoj50q" path="res://scripts/bridge/python_bridge_client.gd" id="2_bridge"]
-[ext_resource type="PackedScene" path="res://scenes/entry_screen.tscn" id="3_entry"]
+[ext_resource type="PackedScene" uid="uid://da3jf818oj6yx" path="res://scenes/entry_screen.tscn" id="3_entry"]
 [ext_resource type="PackedScene" path="res://scenes/quest_map_screen.tscn" id="4_map"]
-[ext_resource type="PackedScene" path="res://scenes/scene_flow_screen.tscn" id="5_scene"]
+[ext_resource type="PackedScene" uid="uid://brmx56qw0wbp" path="res://scenes/scene_flow_screen.tscn" id="5_scene"]
 [ext_resource type="PackedScene" path="res://scenes/challenge_screen.tscn" id="6_challenge"]
 
 [node name="GameFlowRoot" type="Control" unique_id=350612763]

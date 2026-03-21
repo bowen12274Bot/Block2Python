@@ -1,10 +1,10 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://da3jf818oj6yx"]
 
-[ext_resource type="Script" path="res://scripts/entry/entry_screen.gd" id="1_screen"]
+[ext_resource type="Script" uid="uid://djye6qfpu3scr" path="res://scripts/entry/entry_screen.gd" id="1_screen"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_gender"]
 
-[node name="EntryScreen" type="Control"]
+[node name="EntryScreen" type="Control" unique_id=1012217711]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +13,103 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_screen")
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="BackgroundLayer" type="Control" parent="." unique_id=1288321977]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BackgroundFill" type="ColorRect" parent="BackgroundLayer" unique_id=1972514075]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0784314, 0.0941176, 0.188235, 1)
+
+[node name="BackgroundTexture" type="TextureRect" parent="BackgroundLayer" unique_id=894842859]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackgroundAccent" type="ColorRect" parent="BackgroundLayer" unique_id=404932197]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -240.0
+offset_right = 400.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.176471, 0.188235, 0.396078, 0.45)
+
+[node name="DecorLayer" type="Control" parent="." unique_id=2072331293]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LeftDecorSlot" type="TextureRect" parent="DecorLayer" unique_id=688711571]
+custom_minimum_size = Vector2(220, 220)
+layout_mode = 1
+offset_left = 40.0
+offset_top = 140.0
+offset_right = 260.0
+offset_bottom = 360.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightDecorSlot" type="TextureRect" parent="DecorLayer" unique_id=441857786]
+custom_minimum_size = Vector2(220, 220)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -260.0
+offset_top = 120.0
+offset_right = -40.0
+offset_bottom = 340.0
+grow_horizontal = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TopGlowSlot" type="TextureRect" parent="DecorLayer" unique_id=1280246522]
+custom_minimum_size = Vector2(480, 160)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -240.0
+offset_top = 32.0
+offset_right = 240.0
+offset_bottom = 192.0
+grow_horizontal = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ContentLayer" type="MarginContainer" parent="." unique_id=1845754702]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,76 +121,212 @@ offset_bottom = -48.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="Margin"]
+[node name="ContentCenter" type="CenterContainer" parent="ContentLayer" unique_id=281956218]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="Content" type="VBoxContainer" parent="Margin/Panel"]
+[node name="ContentStack" type="VBoxContainer" parent="ContentLayer/ContentCenter" unique_id=1069725222]
+custom_minimum_size = Vector2(760, 0)
 layout_mode = 2
-theme_override_constants/separation = 16
+size_flags_horizontal = 4
+theme_override_constants/separation = 24
 
-[node name="Title" type="Label" parent="Margin/Panel/Content"]
+[node name="HeaderLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1204420168]
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/HeaderLayer" unique_id=710312950]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
 text = "Create Your Explorer"
+horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Margin/Panel/Content"]
+[node name="SubtitleLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/HeaderLayer" unique_id=533115205]
 layout_mode = 2
+text = "Build the entry-page art here. This layout is a placeholder shell for your future visuals."
+horizontal_alignment = 1
 autowrap_mode = 3
-text = "This is the formal game entry. Build your character first, then enter the main map."
 
-[node name="StatusLabel" type="Label" parent="Margin/Panel/Content"]
-layout_mode = 2
-text = "Status: idle"
-
-[node name="SummaryLabel" type="Label" parent="Margin/Panel/Content"]
-layout_mode = 2
-autowrap_mode = 3
-text = "Choose your avatar and enter a player name to continue."
-
-[node name="BridgeButtons" type="HBoxContainer" parent="Margin/Panel/Content"]
+[node name="CharacterSelectLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=714671000]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="StartBridgeButton" type="Button" parent="Margin/Panel/Content/BridgeButtons"]
+[node name="CharacterLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer" unique_id=1313737307]
 layout_mode = 2
-text = "Start Bridge"
+text = "Choose Avatar"
+horizontal_alignment = 1
 
-[node name="ResetButton" type="Button" parent="Margin/Panel/Content/BridgeButtons"]
+[node name="CharacterRow" type="HBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer" unique_id=418787987]
 layout_mode = 2
-text = "Reset"
+theme_override_constants/separation = 24
+alignment = 1
 
-[node name="Form" type="VBoxContainer" parent="Margin/Panel/Content"]
+[node name="MaleCard" type="PanelContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow" unique_id=116648761]
+custom_minimum_size = Vector2(240, 300)
 layout_mode = 2
-theme_override_constants/separation = 10
+size_flags_horizontal = 4
 
-[node name="NameLabel" type="Label" parent="Margin/Panel/Content/Form"]
+[node name="MaleCardMargin" type="MarginContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard" unique_id=1853811559]
 layout_mode = 2
-text = "Player Name"
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="NameInput" type="LineEdit" parent="Margin/Panel/Content/Form"]
-layout_mode = 2
-placeholder_text = "Enter your player name"
-
-[node name="GenderLabel" type="Label" parent="Margin/Panel/Content/Form"]
-layout_mode = 2
-text = "Avatar"
-
-[node name="GenderRow" type="HBoxContainer" parent="Margin/Panel/Content/Form"]
+[node name="MaleCardRoot" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin" unique_id=1652430979]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MaleButton" type="CheckBox" parent="Margin/Panel/Content/Form/GenderRow"]
+[node name="MaleArtSlot" type="TextureRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin/MaleCardRoot" unique_id=1347957922]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MaleSelectionGlow" type="ColorRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin/MaleCardRoot" unique_id=1134306853]
+visible = false
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.45098, 0.752941, 1, 1)
+
+[node name="MaleButton" type="CheckBox" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin/MaleCardRoot" unique_id=1557045659]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_gender")
 text = "Male"
 
-[node name="FemaleButton" type="CheckBox" parent="Margin/Panel/Content/Form/GenderRow"]
+[node name="FemaleCard" type="PanelContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow" unique_id=421620834]
+custom_minimum_size = Vector2(240, 300)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="FemaleCardMargin" type="MarginContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard" unique_id=1163610547]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="FemaleCardRoot" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin" unique_id=793226582]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FemaleArtSlot" type="TextureRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin/FemaleCardRoot" unique_id=1627057494]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FemaleSelectionGlow" type="ColorRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin/FemaleCardRoot" unique_id=1882168265]
+visible = false
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+color = Color(1, 0.623529, 0.811765, 1)
+
+[node name="FemaleButton" type="CheckBox" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin/FemaleCardRoot" unique_id=139512072]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_gender")
 text = "Female"
 
-[node name="CreateButton" type="Button" parent="Margin/Panel/Content"]
+[node name="NameInputLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1424255274]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NameLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/NameInputLayer" unique_id=1731397882]
+layout_mode = 2
+text = "Player Name"
+horizontal_alignment = 1
+
+[node name="NameInput" type="LineEdit" parent="ContentLayer/ContentCenter/ContentStack/NameInputLayer" unique_id=749678076]
+layout_mode = 2
+placeholder_text = "Enter your player name"
+
+[node name="ActionLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1405899763]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CreateButton" type="Button" parent="ContentLayer/ContentCenter/ContentStack/ActionLayer" unique_id=1284610651]
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 text = "Create Character"
+
+[node name="StatusLayer" type="PanelContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1197576899]
+layout_mode = 2
+
+[node name="StatusMargin" type="MarginContainer" parent="ContentLayer/ContentCenter/ContentStack/StatusLayer" unique_id=1105012674]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="StatusStack" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/StatusLayer/StatusMargin" unique_id=1344280146]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SummaryLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/StatusLayer/StatusMargin/StatusStack" unique_id=1994820955]
+layout_mode = 2
+text = "Choose your avatar and enter a player name to continue."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="StatusLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/StatusLayer/StatusMargin/StatusStack" unique_id=1103548342]
+layout_mode = 2
+text = "Status: idle"
+horizontal_alignment = 1
+
+[node name="OverlayLayer" type="Control" parent="." unique_id=1886863071]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DeveloperLayer" type="MarginContainer" parent="OverlayLayer" unique_id=1052958711]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 24.0
+offset_right = -20.0
+offset_bottom = 112.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="DeveloperPanel" type="PanelContainer" parent="OverlayLayer/DeveloperLayer" unique_id=520357595]
+layout_mode = 2
+
+[node name="DeveloperMargin" type="MarginContainer" parent="OverlayLayer/DeveloperLayer/DeveloperPanel" unique_id=854840070]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="DeveloperStack" type="VBoxContainer" parent="OverlayLayer/DeveloperLayer/DeveloperPanel/DeveloperMargin" unique_id=801165121]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DeveloperTitle" type="Label" parent="OverlayLayer/DeveloperLayer/DeveloperPanel/DeveloperMargin/DeveloperStack" unique_id=704672708]
+layout_mode = 2
+text = "Developer Controls"
+
+[node name="BridgeButtons" type="HBoxContainer" parent="OverlayLayer/DeveloperLayer/DeveloperPanel/DeveloperMargin/DeveloperStack" unique_id=1940867061]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StartBridgeButton" type="Button" parent="OverlayLayer/DeveloperLayer/DeveloperPanel/DeveloperMargin/DeveloperStack/BridgeButtons" unique_id=1039453388]
+layout_mode = 2
+text = "Start Bridge"
+
+[node name="ResetButton" type="Button" parent="OverlayLayer/DeveloperLayer/DeveloperPanel/DeveloperMargin/DeveloperStack/BridgeButtons" unique_id=617618466]
+layout_mode = 2
+text = "Reset"
