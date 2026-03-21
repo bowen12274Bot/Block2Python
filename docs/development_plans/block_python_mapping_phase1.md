@@ -82,7 +82,7 @@ for i in range(<expr>):
 - `Variable Base`
 - `If Canyon`
 - `Loop Lab`
-- `牛刀小試`
+- `Bug King Castle`
 
 `Input Gate` 主要依賴 `input`、`int`、`print`，建立玩家輸入與輸出結果的基本互動。
 
@@ -92,7 +92,7 @@ for i in range(<expr>):
 
 `Loop Lab` 主要依賴 `for in range(n)`，讓玩家練習固定次數的重複動作。
 
-`牛刀小試` 則作為上述積木的綜合應用，不額外增加新的首波積木類型。
+`Bug King Castle` 則作為上述積木的整合應用關，不額外增加新的首波積木類型。
 
 ## 6. 技術驗證清單
 
@@ -107,12 +107,12 @@ for i in range(<expr>):
 ### 變數與運算
 
 - 變數指定與取值是否不需額外 analyzer 支援。
-- 加減乘除是否足夠支撐前 2 關題型需求。
+- 加減乘除是否足夠支撐 `Input Gate` 與 `Variable Base` 的題型需求。
 
 ### 條件判斷
 
 - `if` / `if else` 是否能由現有 `required_keywords` 規則做第一層驗證。
-- 比較運算是否足以支撐條件題型。
+- 比較運算是否足以支撐 `If Canyon` 題型。
 
 ### 迴圈
 

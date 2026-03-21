@@ -21,11 +21,11 @@
 | `int` | 將輸入文字轉成整數 | `int(...)` | `Input Gate`、`Variable Base` |
 | 變數指定 | 建立變數並存放資料 | `x = ...` | `Variable Base` |
 | 變數取值 | 讀取既有變數內容 | `x` | `Variable Base`、`If Canyon`、`Loop Lab` |
-| 數學運算 | 進行加減乘除計算 | `+` `-` `*` `/` | `Variable Base`、`牛刀小試` |
+| 數學運算 | 進行加減乘除計算 | `+` `-` `*` `/` | `Variable Base`、`Bug King Castle` |
 | 比較運算 | 判斷大小與相等關係 | `==` `!=` `>` `<` `>=` `<=` | `If Canyon` |
 | `if` | 單一條件判斷 | `if ...:` | `If Canyon` |
-| `if / else` | 條件分支處理 | `if ...: ... else: ...` | `If Canyon`、`牛刀小試` |
-| `for in range(n)` | 固定次數迴圈 | `for i in range(n):` | `Loop Lab`、`牛刀小試` |
+| `if / else` | 條件分支處理 | `if ...: ... else: ...` | `If Canyon`、`Bug King Castle` |
+| `for in range(n)` | 固定次數迴圈 | `for i in range(n):` | `Loop Lab`、`Bug King Castle` |
 
 ## 4. 教學主題對應
 
@@ -35,9 +35,9 @@
 - `Variable Base`
 - `If Canyon`
 - `Loop Lab`
-- `牛刀小試`
+- `Bug King Castle`
 
-這代表首波積木的目標，是先支撐前 5 關的核心教學主線，讓輸入、變數、條件判斷、迴圈與基礎綜合應用可以先成立。
+這代表首波積木的目標，是先支撐前 4 關的核心能力建立，並延伸到 `Bug King Castle` 的整合應用需求。
 
 ## 5. 驗證可行性說明
 
