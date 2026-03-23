@@ -9,6 +9,8 @@ class ChallengeSelectionMixin:
         review_level = self._review_level_for_challenge(challenge)
         if review_level is not None:
             return review_level
+        if challenge.challenge_type == "demo":
+            return challenge.levels[0] if challenge.levels else None
         for level in challenge.levels:
             if self.app.is_cleared(level.level_id):
                 continue

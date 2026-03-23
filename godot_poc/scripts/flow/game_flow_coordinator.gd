@@ -1,7 +1,7 @@
 extends Control
 class_name GameFlowCoordinator
 
-const DEFAULT_CHALLENGE_CODE := "print(3)\n"
+const DEFAULT_PRACTICE_CODE := "print(3)\n"
 const DEFAULT_TOOLBOX_PYTHON_REL_PATH := "../.venv/Scripts/python.exe"
 const TOOLBOX_HTML_REL_PATH := "../assets/blockly/index.html"
 const TOOLBOX_MODULE := "block2python.clients.toolbox_window"
@@ -19,7 +19,7 @@ const GameFlowScreenPresenterScript = preload("res://scripts/flow/game_flow_scre
 @onready var map_screen = $MapScreen
 @onready var scene_screen = $SceneScreen
 @onready var demo_screen = $DemoScreen
-@onready var challenge_screen = $ChallengeScreen
+@onready var practice_screen = $PracticeScreen
 @onready var debug_margin: MarginContainer = $Margin
 @onready var debug_panel: PanelContainer = $Margin/DebugPanel
 @onready var response_text: RichTextLabel = $Margin/DebugPanel/DebugMargin/DebugRoot/ResponseText
@@ -48,9 +48,9 @@ func _ready() -> void:
 	scene_screen.back_requested.connect(_show_map_page)
 	demo_screen.advance_requested.connect(_on_demo_advance_requested)
 	demo_screen.back_requested.connect(_show_map_page)
-	challenge_screen.submit_requested.connect(_on_submit_requested)
-	challenge_screen.open_toolbox_requested.connect(_on_open_toolbox_requested)
-	challenge_screen.back_requested.connect(_show_map_page)
+	practice_screen.submit_requested.connect(_on_submit_requested)
+	practice_screen.open_toolbox_requested.connect(_on_open_toolbox_requested)
+	practice_screen.back_requested.connect(_show_map_page)
 	python_bridge_client.bridge_started.connect(_on_bridge_started)
 	python_bridge_client.bridge_failed.connect(_on_bridge_failed)
 	python_bridge_client.response_received.connect(_on_response_received)
@@ -58,7 +58,7 @@ func _ready() -> void:
 	entry_screen.show_profile({})
 	entry_screen.set_status("Status: start bridge, then create your profile.")
 	entry_screen.set_bridge_running(false)
-	challenge_screen.initialize(DEFAULT_CHALLENGE_CODE)
+	practice_screen.initialize(DEFAULT_PRACTICE_CODE)
 	map_screen.show_map(QuestMapMapperScript.empty_map_view("Click Start Bridge, then Reset to load the current quest map."))
 	map_screen.set_status("Status: idle")
 	map_screen.set_note("Use Reset to load the latest quest state. Group and slot state now come directly from bridge map_route data.")
@@ -73,10 +73,10 @@ func _ready() -> void:
 	demo_screen.set_status("Demo flow is idle.")
 	demo_screen.set_can_advance(false)
 	demo_screen.set_can_go_back(true)
-	challenge_screen.show_challenge({})
-	challenge_screen.show_feedback(GameFlowFeedbackPresenterScript.empty_feedback_view("Feedback will appear here."))
-	challenge_screen.set_status("Challenge flow is idle.")
-	challenge_screen.set_can_submit(false)
+	practice_screen.show_practice({})
+	practice_screen.show_feedback(GameFlowFeedbackPresenterScript.empty_feedback_view("Feedback will appear here."))
+	practice_screen.set_status("Practice flow is idle.")
+	practice_screen.set_can_submit(false)
 	_set_debug_visible(false)
 	_show_page("entry")
 	set_process(true)
@@ -148,7 +148,7 @@ func _on_advance_requested() -> void:
 	python_bridge_client.send_advance()
 
 func _on_submit_requested(python_code: String) -> void:
-	challenge_screen.set_status("Status: submitting code...")
+	practice_screen.set_status("Status: submitting code...")
 	python_bridge_client.send_submit_level(python_code)
 
 func _on_demo_advance_requested() -> void:
@@ -157,27 +157,27 @@ func _on_demo_advance_requested() -> void:
 
 func _on_open_toolbox_requested() -> void:
 	if _toolbox_helper_pid > 0:
-		challenge_screen.set_status(TOOLBOX_LOCK_MESSAGE)
+		practice_screen.set_status(TOOLBOX_LOCK_MESSAGE)
 		return
-	var challenge_view: Dictionary = GameFlowMapperScript.map_game_state(_state_store.get_state()).get("challenge_view", {}) if _state_store.has_state() else {}
-	if str(challenge_view.get("current_level_id", "")) == "":
-		challenge_screen.set_status("Toolbox is only available when a practice level is active.")
+	var practice_view: Dictionary = GameFlowMapperScript.map_game_state(_state_store.get_state()).get("practice_view", {}) if _state_store.has_state() else {}
+	if str(practice_view.get("current_level_id", "")) == "":
+		practice_screen.set_status("Toolbox is only available when a practice level is active.")
 		return
-	if not bool(challenge_view.get("toolbox_allowed", false)):
-		challenge_screen.set_status("Toolbox is only available in practice challenges.")
+	if not bool(practice_view.get("toolbox_allowed", false)):
+		practice_screen.set_status("Toolbox is only available in practice challenges.")
 		return
-	var launch_request: Dictionary = _build_toolbox_launch_request(challenge_view)
+	var launch_request: Dictionary = _build_toolbox_launch_request(practice_view)
 	if launch_request.is_empty():
 		return
 	var pid: int = OS.create_process(str(launch_request.get("python_path", "")), launch_request.get("args", PackedStringArray()), false)
 	if pid <= 0:
-		challenge_screen.set_status("Failed to launch toolbox window.")
+		practice_screen.set_status("Failed to launch toolbox window.")
 		return
 	_toolbox_helper_pid = pid
 	_toolbox_result_file = str(launch_request.get("result_file", ""))
 	_toolbox_last_result_token = ""
-	_toolbox_active_level_id = str(challenge_view.get("current_level_id", ""))
-	challenge_screen.set_toolbox_lock(true, TOOLBOX_LOCK_MESSAGE)
+	_toolbox_active_level_id = str(practice_view.get("current_level_id", ""))
+	practice_screen.set_toolbox_lock(true, TOOLBOX_LOCK_MESSAGE)
 
 func _on_debug_toggled(debug_visible: bool) -> void:
 	_set_debug_visible(debug_visible)
@@ -219,14 +219,14 @@ func _apply_success_state(state: Dictionary, response: Dictionary) -> void:
 	entry_screen.set_status(_entry_status_text(view_model.get("player_profile_view", {})))
 	entry_screen.set_bridge_running(python_bridge_client.is_running())
 	GameFlowScreenPresenterScript.render_map_view(map_screen, map_view, state, view_model, can_open)
-	GameFlowScreenPresenterScript.render_flow_views(scene_screen, demo_screen, challenge_screen, view_model, feedback_view)
+	GameFlowScreenPresenterScript.render_flow_views(scene_screen, demo_screen, practice_screen, view_model, feedback_view)
 	scene_screen.set_can_go_back(bool(state.get("intro_completed", false)))
 	_apply_toolbox_lock_state()
 	_append_debug_state(view_model)
 	_route_after_response(state)
 
 func _append_debug_state(view_model: Dictionary) -> void:
-	var challenge_view: Dictionary = view_model.get("challenge_view", {})
+	var practice_view: Dictionary = view_model.get("practice_view", {})
 	var action_view: Dictionary = view_model.get("action_view", {})
 	var focus_owner: Control = get_viewport().gui_get_focus_owner()
 	var focus_name: String = "<none>"
@@ -237,7 +237,7 @@ func _append_debug_state(view_model: Dictionary) -> void:
 		"",
 		"--- UI Debug ---",
 		"current_page=%s" % _current_page,
-		"challenge_view.code_editable=%s" % str(challenge_view.get("code_editable", false)),
+		"practice_view.code_editable=%s" % str(practice_view.get("code_editable", false)),
 		"action_view.can_submit=%s" % str(action_view.get("can_submit", false)),
 		"focus_owner=%s" % focus_name,
 		"toolbox_helper_pid=%s" % str(_toolbox_helper_pid),
@@ -266,7 +266,7 @@ func _apply_error_response(response: Dictionary) -> void:
 
 func _apply_error_ui(map_status: String, map_note: String, feedback_title: String, feedback_body: String) -> void:
 	entry_screen.set_status(map_status)
-	GameFlowScreenPresenterScript.apply_error_ui(map_screen, scene_screen, demo_screen, challenge_screen, map_status, map_note, feedback_title, feedback_body)
+	GameFlowScreenPresenterScript.apply_error_ui(map_screen, scene_screen, demo_screen, practice_screen, map_status, map_note, feedback_title, feedback_body)
 	_apply_toolbox_lock_state()
 	_show_page("entry")
 
@@ -277,25 +277,25 @@ func _show_page(page: String) -> void:
 	_current_page = page
 	if page != "challenge" and _toolbox_helper_pid > 0:
 		_stop_toolbox_helper(true)
-	GameFlowPageRouterScript.show_page(page, entry_screen, map_screen, scene_screen, demo_screen, challenge_screen)
+	GameFlowPageRouterScript.show_page(page, entry_screen, map_screen, scene_screen, demo_screen, practice_screen)
 	_apply_toolbox_lock_state()
 
 func _apply_toolbox_lock_state() -> void:
-	challenge_screen.set_toolbox_lock(_toolbox_helper_pid > 0, TOOLBOX_LOCK_MESSAGE if _toolbox_helper_pid > 0 else "")
+	practice_screen.set_toolbox_lock(_toolbox_helper_pid > 0, TOOLBOX_LOCK_MESSAGE if _toolbox_helper_pid > 0 else "")
 
-func _build_toolbox_launch_request(challenge_view: Dictionary) -> Dictionary:
+func _build_toolbox_launch_request(practice_view: Dictionary) -> Dictionary:
 	var python_path: String = _resolve_project_path(DEFAULT_TOOLBOX_PYTHON_REL_PATH)
 	if not FileAccess.file_exists(python_path):
-		challenge_screen.set_status("Python launcher not found: %s" % python_path)
+		practice_screen.set_status("Python launcher not found: %s" % python_path)
 		return {}
 	var html_path: String = _resolve_project_path(TOOLBOX_HTML_REL_PATH)
 	if not FileAccess.file_exists(html_path):
-		challenge_screen.set_status("Blockly HTML not found: %s" % html_path)
+		practice_screen.set_status("Blockly HTML not found: %s" % html_path)
 		return {}
 
 	var runtime_dir: String = ProjectSettings.globalize_path(TOOLBOX_RESULT_DIR)
 	DirAccess.make_dir_recursive_absolute(runtime_dir)
-	var result_file: String = runtime_dir.path_join("toolbox_%s_%s.json" % [str(challenge_view.get("current_level_id", "level")).replace("/", "_"), str(Time.get_ticks_msec())])
+	var result_file: String = runtime_dir.path_join("toolbox_%s_%s.json" % [str(practice_view.get("current_level_id", "level")).replace("/", "_"), str(Time.get_ticks_msec())])
 	if FileAccess.file_exists(result_file):
 		DirAccess.remove_absolute(result_file)
 
@@ -303,7 +303,7 @@ func _build_toolbox_launch_request(challenge_view: Dictionary) -> Dictionary:
 		"-m",
 		TOOLBOX_MODULE,
 		"--level-id",
-		str(challenge_view.get("current_level_id", "")),
+		str(practice_view.get("current_level_id", "")),
 		"--result-file",
 		result_file,
 		"--html-path",
@@ -350,7 +350,7 @@ func _handle_toolbox_result(payload: Dictionary) -> void:
 		var python_code: String = str(payload.get("python_code", ""))
 		var block_json: Variant = payload.get("block_json", {})
 		if block_json is Dictionary:
-			challenge_screen.set_status("Status: verifying toolbox logic...")
+			practice_screen.set_status("Status: verifying toolbox logic...")
 			python_bridge_client.send_verify_toolbox_level(python_code, block_json)
 		return
 	if status == "toolbox_closed":
@@ -363,10 +363,10 @@ func _stop_toolbox_helper(force_kill: bool) -> void:
 	_toolbox_result_file = ""
 	_toolbox_last_result_token = ""
 	_toolbox_active_level_id = ""
-	challenge_screen.set_toolbox_lock(false)
+	practice_screen.set_toolbox_lock(false)
 	if _current_page == "challenge":
-		challenge_screen.set_status("Challenge flow ready")
-		challenge_screen.focus_code_editor()
+		practice_screen.set_status("Practice flow ready")
+		practice_screen.focus_code_editor()
 
 func _resolve_project_path(relative_path: String) -> String:
 	return ProjectSettings.globalize_path("res://%s" % relative_path)
@@ -384,3 +384,6 @@ func _entry_status_text(profile_view: Dictionary) -> String:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_stop_toolbox_helper(true)
+
+
+

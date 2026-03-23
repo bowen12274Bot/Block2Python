@@ -15,7 +15,6 @@ from block2python.content import AssembledGameSlice, GameRuntime
 from block2python.contracts import AnalysisResult, AnalysisStatus, JudgeResult, JudgeStatus, Submission
 from block2python.integration.contracts import (
     AvailableActions,
-    ChallengeState,
     DemoState,
     GameMode,
     GameState,
@@ -140,7 +139,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         if not self._is_group_demo_unlocked(group, set(progress.completed_node_ids), set(progress.cleared_level_ids)):
             raise GameSessionError(f"Demo for {group_id} is still locked until story is completed")
 
-        target_node_id = self._entry_node_id_for_steps(group.demo_route, allowed_step_types={"challenge", "demo"})
+        target_node_id = self._entry_node_id_for_steps(group.demo_route, allowed_step_types={"demo"})
         if target_node_id is None:
             raise GameSessionError(f"Group {group_id} has no demo entry node")
 
@@ -215,11 +214,17 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             cleared=outcome.cleared,
             block_passed=outcome.block_passed,
             analysis_status=outcome.analysis.status.value,
+            kind="submission",
+            status_label="Passed" if outcome.cleared else "Needs Work",
             analysis_summary=outcome.analysis.summary,
             judge_status=outcome.judge.status.value,
             judge_summary=outcome.judge.summary,
             verification_only=False,
             answer_correct=outcome.judge.status is JudgeStatus.AC,
+            details={
+                "analysis_status": outcome.analysis.status.value,
+                "judge_status": outcome.judge.status.value,
+            },
         )
         self._advance_review_practice_level(state)
         return self.current_state(), outcome
@@ -251,11 +256,17 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             cleared=False,
             block_passed=False,
             analysis_status=outcome.analysis.status.value,
+            kind="toolbox_verification",
+            status_label="Toolbox Verified" if outcome.judge.status is JudgeStatus.AC else "Toolbox Needs Work",
             analysis_summary=outcome.analysis.summary,
             judge_status=outcome.judge.status.value,
             judge_summary=outcome.judge.summary,
             verification_only=True,
             answer_correct=outcome.judge.status is JudgeStatus.AC,
+            details={
+                "analysis_status": outcome.analysis.status.value,
+                "judge_status": outcome.judge.status.value,
+            },
         )
         return self.current_state(), outcome
 
@@ -271,5 +282,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         self.runtime.current_node_id = node_id
         self.last_submission = None
         self.scene_seen_node_ids.discard(node_id)
+
+
 
 

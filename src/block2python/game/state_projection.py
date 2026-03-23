@@ -4,13 +4,15 @@ from typing import TYPE_CHECKING
 
 from block2python.integration.contracts import (
     AvailableActions,
-    ChallengeState,
+    PracticeState,
     DemoState,
     GameMode,
     GameState,
 )
 
 if TYPE_CHECKING:
+    from block2python.content import ResolvedChallengeSpec
+    from block2python.contracts import LevelSpec
     from .session import GameSession
 
 
@@ -49,24 +51,10 @@ def build_game_state(session: GameSession) -> GameState:
         )
 
     scene = session._scene_state(runtime_state.scene) if state.mode is session._session_mode_scene() else None
-    demo = None
-    challenge = None
-    if runtime_state.challenge is not None:
-        if state.mode is session._session_mode_demo():
-            demo = DemoState(
-                demo_id=runtime_state.challenge.challenge_id,
-                title=state.node_title or state.current_level_title or "Demo",
-                body=state.current_level_prompt or "Demo placeholder.",
-                current_level_id=state.current_level_id,
-            )
-        else:
-            challenge = ChallengeState(
-                challenge_id=runtime_state.challenge.challenge_id,
-                challenge_type=runtime_state.challenge.challenge_type,
-                current_level_id=state.current_level_id,
-                current_level_title=state.current_level_title,
-                current_level_prompt=state.current_level_prompt,
-            )
+    current_challenge = runtime_state.challenge
+    current_level = session._current_level_for_challenge(current_challenge) if current_challenge is not None else None
+    group_id = _group_id_for_active_state(session, state, current_level)
+    runtime_group = session.group_runtime_states.get(group_id) if group_id is not None else None
 
     if state.mode is session._session_mode_scene():
         mode = GameMode.SCENE
@@ -79,6 +67,27 @@ def build_game_state(session: GameSession) -> GameState:
         mode = GameMode.CHALLENGE
         actions = AvailableActions(submit=True)
 
+    demo = None
+    practice = None
+    if current_challenge is not None and current_level is not None:
+        if state.mode is session._session_mode_demo():
+            demo = _build_demo_state(
+                challenge=current_challenge,
+                level=current_level,
+                group_id=group_id,
+                can_advance=actions.advance,
+                node_title=state.node_title,
+            )
+        else:
+            practice = _build_practice_state(
+                session=session,
+                challenge=current_challenge,
+                level=current_level,
+                group_id=group_id,
+                runtime_group=runtime_group,
+                can_submit=actions.submit,
+            )
+
     return GameState(
         mode=mode,
         quest_id=state.quest_id,
@@ -88,9 +97,89 @@ def build_game_state(session: GameSession) -> GameState:
         intro_completed=session.intro_completed,
         scene=scene,
         demo=demo,
-        challenge=challenge,
+        practice=practice,
         progress=progress,
         available_actions=actions,
         last_submission=session.last_submission,
         map_route=map_route,
     )
+
+
+def _group_id_for_active_state(session: GameSession, state, current_level: LevelSpec | None) -> str | None:
+    if current_level is not None:
+        group_id = session._group_id_for_level_id(current_level.level_id)
+        if group_id is not None:
+            return group_id
+    if state.node_id is not None:
+        return session._group_id_for_node_id(state.node_id)
+    return None
+
+
+def _build_demo_state(
+    *,
+    challenge: ResolvedChallengeSpec,
+    level: LevelSpec,
+    group_id: str | None,
+    can_advance: bool,
+    node_title: str,
+) -> DemoState:
+    prompt = level.prompt
+    learning_markdown = level.learning_markdown
+    story_intro_markdown = level.story_intro_markdown
+    story_outro_markdown = level.story_outro_markdown
+    body_parts = [part for part in (prompt, learning_markdown, story_intro_markdown, story_outro_markdown) if part]
+    return DemoState(
+        demo_id=challenge.challenge_id,
+        title=node_title or level.title or challenge.title,
+        group_id=group_id,
+        level_id=level.level_id,
+        prompt=prompt,
+        learning_markdown=learning_markdown,
+        story_intro_markdown=story_intro_markdown,
+        story_outro_markdown=story_outro_markdown,
+        can_advance=can_advance,
+        body="\n\n".join(body_parts),
+        current_level_id=level.level_id,
+    )
+
+
+def _build_practice_state(
+    *,
+    session: GameSession,
+    challenge: ResolvedChallengeSpec,
+    level: LevelSpec,
+    group_id: str | None,
+    runtime_group,
+    can_submit: bool,
+) -> PracticeState:
+    progress_current, progress_total = _practice_progress(challenge, level)
+    toolbox_allowed = bool(
+        challenge.toolbox_policy is not None
+        and challenge.toolbox_policy.allow_toolbox_in_practice
+        and challenge.challenge_type == "practice"
+    )
+    return PracticeState(
+        challenge_id=challenge.challenge_id,
+        challenge_type=challenge.challenge_type,
+        group_id=group_id,
+        level_id=level.level_id,
+        level_title=level.title,
+        prompt=level.prompt,
+        progress_current=progress_current,
+        progress_total=progress_total,
+        is_review_mode=bool(runtime_group.practice_reviewing) if runtime_group is not None else False,
+        toolbox_allowed=toolbox_allowed,
+        toolbox_used=level.level_id in session.toolbox_used_level_ids,
+        can_submit=can_submit,
+        current_level_id=level.level_id,
+        current_level_title=level.title,
+        current_level_prompt=level.prompt,
+    )
+
+
+def _practice_progress(challenge: ResolvedChallengeSpec, level: LevelSpec) -> tuple[int, int]:
+    total = len(challenge.levels)
+    for index, challenge_level in enumerate(challenge.levels, start=1):
+        if challenge_level.level_id == level.level_id:
+            return index, total
+    return 0, total

@@ -47,7 +47,7 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.node_id == "main-map-entry"
     assert contract_state.player_profile.profile_created is False
     assert contract_state.scene is None
-    assert contract_state.challenge is None
+    assert contract_state.practice is None
     assert contract_state.available_actions.advance is True
     assert contract_state.progress.completed_node_ids == ()
     assert contract_state.progress.demo_seen_group_ids == ()
@@ -62,7 +62,7 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.scene is not None
     assert contract_state.scene.scene_id == "scene-city-alarm"
     assert contract_state.scene.dialogue_blocks
-    assert contract_state.challenge is None
+    assert contract_state.practice is None
     assert contract_state.progress.demo_seen_group_ids == ()
 
     state = session.advance()
@@ -77,9 +77,12 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.scene is None
     assert contract_state.demo is not None
     assert contract_state.demo.demo_id == "challenge-group-01-demo"
+    assert contract_state.demo.group_id == "group-01"
+    assert contract_state.demo.level_id == "group-01-demo"
+    assert contract_state.demo.learning_markdown != ""
     assert contract_state.demo.current_level_id == "group-01-demo"
     assert contract_state.progress.demo_seen_group_ids == ("group-01",)
-    assert contract_state.challenge is None
+    assert contract_state.practice is None
 
     state = session.advance()
     assert state.mode is SessionMode.CHALLENGE
@@ -90,9 +93,14 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     contract_state = session.current_game_state()
     assert contract_state.mode is GameMode.CHALLENGE
     assert contract_state.scene is None
-    assert contract_state.challenge is not None
-    assert contract_state.challenge.challenge_id == "challenge-group-01-practice"
-    assert contract_state.challenge.current_level_id == "group-01-practice-01"
+    assert contract_state.practice is not None
+    assert contract_state.practice.challenge_id == "challenge-group-01-practice"
+    assert contract_state.practice.current_level_id == "group-01-practice-01"
+    assert contract_state.practice.progress_current == 1
+    assert contract_state.practice.progress_total == 5
+    assert contract_state.practice.toolbox_allowed is True
+    assert contract_state.practice.toolbox_used is False
+    assert contract_state.practice.can_submit is True
     assert contract_state.available_actions.submit is True
     assert contract_state.progress.completed_node_ids == ("main-map-entry", "group-01-story", "group-01-demo")
     assert contract_state.progress.cleared_level_ids == ()
@@ -108,13 +116,17 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.progress.completed_node_ids == ("main-map-entry", "group-01-story", "group-01-demo")
     assert contract_state.progress.cleared_level_ids == ("group-01-practice-01",)
     assert contract_state.progress.demo_seen_group_ids == ("group-01",)
-    assert contract_state.challenge is not None
-    assert contract_state.challenge.challenge_id == "challenge-group-01-practice"
-    assert contract_state.challenge.current_level_id == "group-01-practice-02"
+    assert contract_state.practice is not None
+    assert contract_state.practice.challenge_id == "challenge-group-01-practice"
+    assert contract_state.practice.current_level_id == "group-01-practice-02"
+    assert contract_state.practice.progress_current == 2
+    assert contract_state.practice.toolbox_used is False
     assert contract_state.last_submission is not None
     assert contract_state.last_submission.level_id == "group-01-practice-01"
     assert contract_state.last_submission.analysis_status == "PASS"
     assert contract_state.last_submission.judge_status == "AC"
+    assert contract_state.last_submission.kind == "submission"
+    assert contract_state.last_submission.status_label == "Passed"
 def test_game_session_create_player_profile_persists_in_contract_state() -> None:
     session = build_raw_session()
 
@@ -204,8 +216,35 @@ def test_game_session_start_group_demo_jumps_to_demo_mode() -> None:
     assert contract_state.scene is None
     assert contract_state.demo is not None
     assert contract_state.demo.demo_id == "challenge-group-01-demo"
+    assert contract_state.demo.group_id == "group-01"
+    assert contract_state.demo.level_id == "group-01-demo"
+    assert contract_state.demo.learning_markdown != ""
     assert contract_state.demo.current_level_id == "group-01-demo"
-    assert contract_state.challenge is None
+    assert contract_state.practice is None
+
+def test_start_group_demo_replay_stays_in_demo_mode_after_first_clear() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+
+    first_demo_state = session.start_group_demo("group-01")
+    assert first_demo_state.mode is SessionMode.DEMO
+    assert first_demo_state.current_level_id == "group-01-demo"
+
+    after_demo = session.advance()
+    assert after_demo.mode is SessionMode.CHALLENGE
+    assert after_demo.node_id == "group-01-practice"
+
+    replay_state = session.start_group_demo("group-01")
+    assert replay_state.mode is SessionMode.DEMO
+    assert replay_state.node_id == "group-01-demo"
+    assert replay_state.current_level_id == "group-01-demo"
+
+    contract_state = session.current_game_state()
+    assert contract_state.mode is GameMode.DEMO
+    assert contract_state.demo is not None
+    assert contract_state.demo.current_level_id == "group-01-demo"
+    assert contract_state.practice is None
 def test_game_session_start_group_practice_requires_demo_seen() -> None:
     session = build_session()
 
@@ -226,9 +265,9 @@ def test_game_session_start_group_practice_jumps_to_challenge() -> None:
     assert state.node_id == "group-01-practice"
     assert state.challenge_id == "challenge-group-01-practice"
     assert state.current_level_id == "group-01-practice-01"
-    assert contract_state.challenge is not None
-    assert contract_state.challenge.challenge_id == "challenge-group-01-practice"
-    assert contract_state.challenge.current_level_id == "group-01-practice-01"
+    assert contract_state.practice is not None
+    assert contract_state.practice.challenge_id == "challenge-group-01-practice"
+    assert contract_state.practice.current_level_id == "group-01-practice-01"
 
 
 
@@ -437,6 +476,8 @@ def test_completed_group_switches_to_reviewing_when_reentering_practice() -> Non
     status_by_group = {group.group_id: group.status_key for group in contract_state.map_route.groups}
     assert status_by_group["group-01"] == "reviewing"
     assert status_by_group["group-02"] == "current"
+    assert contract_state.practice is not None
+    assert contract_state.practice.is_review_mode is True
 
 
 def test_replaying_completed_group_does_not_relock_later_groups() -> None:
@@ -498,8 +539,8 @@ def test_reviewing_current_game_state_advances_to_third_level_after_second_submi
     assert state.current_level_id == "group-01-practice-03"
 
     contract_state = session.current_game_state()
-    assert contract_state.challenge is not None
-    assert contract_state.challenge.current_level_id == "group-01-practice-03"
+    assert contract_state.practice is not None
+    assert contract_state.practice.current_level_id == "group-01-practice-03"
 
 
 def test_reviewing_practice_fifth_level_returns_to_main_map() -> None:
@@ -539,6 +580,8 @@ def test_reviewing_group_does_not_clear_current_from_unfinished_mainline_group()
     status_by_group = {group.group_id: group.status_key for group in contract_state.map_route.groups}
     assert status_by_group["group-01"] == "reviewing"
     assert status_by_group["group-02"] == "current"
+    assert contract_state.practice is not None
+    assert contract_state.practice.is_review_mode is True
     assert status_by_group["group-03"] == "locked"
 
 
@@ -600,6 +643,10 @@ def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
     assert contract_state.last_submission.verification_only is True
     assert contract_state.last_submission.answer_correct is True
     assert contract_state.last_submission.cleared is False
+    assert contract_state.last_submission.kind == "toolbox_verification"
+    assert contract_state.last_submission.status_label == "Toolbox Verified"
+    assert contract_state.practice is not None
+    assert contract_state.practice.toolbox_used is True
 
     state, outcome = session.submit_current_level(python_code="name = input()\nprint(f\"Hello, {name}\")\n")
     assert outcome.cleared is True
@@ -633,4 +680,7 @@ def game_content_dir():
     from pathlib import Path
 
     return Path("assets/game_content")
+
+
+
 

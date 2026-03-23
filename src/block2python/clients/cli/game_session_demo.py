@@ -63,14 +63,14 @@ def run_auto_demo(
         if state.mode is GameMode.DEMO:
             session.advance()
             continue
-        if state.challenge is None or state.challenge.current_level_id is None:
-            raise RuntimeError("Challenge mode without current_level_id")
-        level_id = state.challenge.current_level_id
+        if state.practice is None or state.practice.current_level_id is None:
+            raise RuntimeError("Practice mode without current_level_id")
+        level_id = state.practice.current_level_id
         next_state, outcome = session.submit_current_level(python_code=code_factory(level_id))
         logs.append(f"submit {level_id}: {outcome.judge.status}")
         logs.append(f"cleared={outcome.cleared}")
         if next_state.mode.value == "CHALLENGE" and next_state.current_level_id == level_id:
-            raise RuntimeError(f"Challenge submission did not advance level {level_id}")
+            raise RuntimeError(f"Practice submission did not advance level {level_id}")
 
     return logs
 
@@ -94,15 +94,15 @@ def interactive_demo(session: GameSession) -> int:
             session.advance()
             continue
         if command == "submit":
-            if state.mode is not GameMode.CHALLENGE or state.challenge is None or state.challenge.current_level_id is None:
-                print("Current state is not a challenge")
+            if state.mode is not GameMode.CHALLENGE or state.practice is None or state.practice.current_level_id is None:
+                print("Current state is not in practice mode")
                 continue
-            level_id = state.challenge.current_level_id
+            level_id = state.practice.current_level_id
             code = _default_code_factory(level_id)
             next_state, outcome = session.submit_current_level(python_code=code)
             print(f"submit {level_id}: {outcome.judge.status} cleared={outcome.cleared}")
             if next_state.mode.value == "CHALLENGE" and next_state.current_level_id == level_id:
-                print("Challenge did not advance; submit again or inspect state")
+                print("Practice did not advance; submit again or inspect state")
             continue
         print("Unknown command")
 
@@ -130,11 +130,11 @@ def _render_state(state: GameState) -> list[str]:
         lines.append(f"scene={state.scene.scene_id} title={state.scene.title}")
     if state.demo is not None:
         lines.append(f"demo={state.demo.demo_id} title={state.demo.title}")
-    if state.challenge is not None:
-        lines.append(f"challenge={state.challenge.challenge_id} type={state.challenge.challenge_type}")
-    if state.challenge is not None and state.challenge.current_level_id is not None:
+    if state.practice is not None:
+        lines.append(f"practice={state.practice.challenge_id} type={state.practice.challenge_type}")
+    if state.practice is not None and state.practice.current_level_id is not None:
         lines.append(
-            f"level={state.challenge.current_level_id} title={state.challenge.current_level_title}"
+            f"level={state.practice.current_level_id} title={state.practice.current_level_title}"
         )
     lines.append(
         "actions="
@@ -151,3 +151,4 @@ def _default_code_factory(_level_id: str) -> str:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

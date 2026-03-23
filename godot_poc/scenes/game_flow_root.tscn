@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://da3jf818oj6yx" path="res://scenes/entry_screen.tscn" id="3_entry"]
 [ext_resource type="PackedScene" path="res://scenes/quest_map_screen.tscn" id="4_map"]
 [ext_resource type="PackedScene" uid="uid://brmx56qw0wbp" path="res://scenes/scene_flow_screen.tscn" id="5_scene"]
-[ext_resource type="PackedScene" path="res://scenes/challenge_screen.tscn" id="6_challenge"]
+[ext_resource type="PackedScene" path="res://scenes/practice_screen.tscn" id="6_practice"]
 [ext_resource type="PackedScene" path="res://scenes/demo_screen.tscn" id="7_demo"]
 
 [node name="GameFlowRoot" type="Control" unique_id=350612763]
@@ -35,7 +35,7 @@ layout_mode = 1
 visible = false
 layout_mode = 1
 
-[node name="ChallengeScreen" parent="." unique_id=1891997977 instance=ExtResource("6_challenge")]
+[node name="PracticeScreen" parent="." unique_id=1891997977 instance=ExtResource("6_practice")]
 visible = false
 layout_mode = 1
 

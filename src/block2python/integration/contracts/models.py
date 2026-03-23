@@ -44,14 +44,31 @@ class SceneState:
 class DemoState:
     demo_id: str
     title: str
+    group_id: str | None = None
+    level_id: str | None = None
+    prompt: str = ""
+    learning_markdown: str = ""
+    story_intro_markdown: str = ""
+    story_outro_markdown: str = ""
+    can_advance: bool = False
     body: str = ""
     current_level_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
-class ChallengeState:
+class PracticeState:
     challenge_id: str
     challenge_type: str
+    group_id: str | None = None
+    level_id: str | None = None
+    level_title: str | None = None
+    prompt: str = ""
+    progress_current: int = 0
+    progress_total: int = 0
+    is_review_mode: bool = False
+    toolbox_allowed: bool = False
+    toolbox_used: bool = False
+    can_submit: bool = False
     current_level_id: str | None = None
     current_level_title: str | None = None
     current_level_prompt: str | None = None
@@ -85,11 +102,14 @@ class SubmissionFeedback:
     cleared: bool
     block_passed: bool
     analysis_status: str
+    kind: str = "submission"
+    status_label: str = ""
     analysis_summary: str = ""
     judge_status: str = ""
     judge_summary: str = ""
     verification_only: bool = False
     answer_correct: bool = False
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,12 +175,38 @@ class GameState:
     intro_completed: bool = False
     scene: SceneState | None = None
     demo: DemoState | None = None
-    challenge: ChallengeState | None = None
+    practice: PracticeState | None = None
     progress: ProgressState = field(default_factory=ProgressState)
     available_actions: AvailableActions = field(default_factory=AvailableActions)
     last_submission: SubmissionFeedback | None = None
     map_route: MapRouteState | None = None
     errors: tuple[str, ...] = ()
+
+    @property
+    def challenge_id(self) -> str | None:
+        if self.practice is None:
+            return None
+        return self.practice.challenge_id
+
+    @property
+    def current_level_id(self) -> str | None:
+        if self.demo is not None and self.demo.current_level_id is not None:
+            return self.demo.current_level_id
+        if self.practice is not None:
+            return self.practice.current_level_id
+        return None
+
+    @property
+    def current_level_title(self) -> str | None:
+        if self.practice is not None:
+            return self.practice.current_level_title
+        return None
+
+    @property
+    def current_level_prompt(self) -> str | None:
+        if self.practice is not None:
+            return self.practice.current_level_prompt
+        return None
 
 
 @dataclass(frozen=True, slots=True)
