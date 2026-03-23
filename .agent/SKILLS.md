@@ -28,3 +28,5 @@
   - 用於建立或更新 repo 內的 canonical skills。
 - `encoding-safe-writes`
   - 用於修正亂碼、避免 PowerShell 寫檔改壞編碼，並驗證 UTF-8 位元組是否正確。
+- `external-window-alignment`
+  - 用於處理 Godot 與外部 PySide6 / Win32 工具視窗的對位、layout payload、DPI 與 Windows 定位邏輯。

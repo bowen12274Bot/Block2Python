@@ -21,9 +21,9 @@ map_routes:
             tracked_node_ids:
               - group-01-story
           - step_id: group-01-demo-level
-            step_type: challenge
+            step_type: demo
             title: Main Level
-            target_page: challenge
+            target_page: demo
             node_id: group-01-demo
             challenge_id: challenge-group-01-demo
             level_ids:
@@ -85,9 +85,9 @@ map_routes:
             tracked_node_ids:
               - group-02-story
           - step_id: group-02-demo-level
-            step_type: challenge
+            step_type: demo
             title: Main Level
-            target_page: challenge
+            target_page: demo
             node_id: group-02-demo
             challenge_id: challenge-group-02-demo
             level_ids:
@@ -149,9 +149,9 @@ map_routes:
             tracked_node_ids:
               - group-03-story
           - step_id: group-03-demo-level
-            step_type: challenge
+            step_type: demo
             title: Main Level
-            target_page: challenge
+            target_page: demo
             node_id: group-03-demo
             challenge_id: challenge-group-03-demo
             level_ids:
@@ -195,3 +195,5 @@ map_routes:
             node_id: group-03-result
             tracked_node_ids:
               - group-03-result
+
+

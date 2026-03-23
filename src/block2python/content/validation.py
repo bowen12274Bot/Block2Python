@@ -6,6 +6,15 @@ from .errors import GameContentAssemblyError
 from .models import ChallengeSpec, MapRouteSpec, MapRouteStepSpec, NodeSpec, QuestSpec, SceneSpec
 
 
+_ALLOWED_STEP_TYPES = {"map", "story", "demo", "practice", "map_return"}
+_ALLOWED_TARGET_PAGES = {"map", "scene", "demo", "challenge"}
+_STEP_TARGET_PAGE_RULES = {
+    "story": "scene",
+    "demo": "demo",
+    "practice": "challenge",
+}
+
+
 def validate_nodes(
     nodes: dict[str, NodeSpec],
     scenes: dict[str, SceneSpec],
@@ -75,6 +84,7 @@ def validate_map_route_steps(
                 f"Map route {route_id} group {group_id} has duplicate step_id: {step.step_id}"
             )
         seen_step_ids.add(step.step_id)
+        _validate_map_route_step_shape(route_id, group_id, step)
         if step.node_id is not None and step.node_id not in nodes:
             raise GameContentAssemblyError(
                 f"Map route {route_id} group {group_id} step {step.step_id} references missing node_id: {step.node_id}"
@@ -97,3 +107,19 @@ def validate_map_route_steps(
                 raise GameContentAssemblyError(
                     f"Map route {route_id} group {group_id} step {step.step_id} references missing level_id: {level_id}"
                 )
+
+
+def _validate_map_route_step_shape(route_id: str, group_id: str, step: MapRouteStepSpec) -> None:
+    if step.step_type not in _ALLOWED_STEP_TYPES:
+        raise GameContentAssemblyError(
+            f"Map route {route_id} group {group_id} step {step.step_id} has unsupported step_type: {step.step_type}"
+        )
+    if step.target_page not in _ALLOWED_TARGET_PAGES:
+        raise GameContentAssemblyError(
+            f"Map route {route_id} group {group_id} step {step.step_id} has unsupported target_page: {step.target_page}"
+        )
+    expected_target = _STEP_TARGET_PAGE_RULES.get(step.step_type)
+    if expected_target is not None and step.target_page != expected_target:
+        raise GameContentAssemblyError(
+            f"Map route {route_id} group {group_id} step {step.step_id} must use target_page {expected_target}"
+        )

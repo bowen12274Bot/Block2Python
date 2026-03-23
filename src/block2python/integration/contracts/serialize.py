@@ -4,6 +4,32 @@ from .errors import IntegrationContractValidationError
 from .models import ActionType, GameState, PlayerAction
 
 
+def _serialize_practice_payload(practice) -> dict[str, object]:
+    return {
+        "challenge_id": practice.challenge_id,
+        "challenge_type": practice.challenge_type,
+        "group_id": practice.group_id,
+        "level_id": practice.level_id,
+        "level_title": practice.level_title,
+        "prompt": practice.prompt,
+        "progress_current": practice.progress_current,
+        "progress_total": practice.progress_total,
+        "is_review_mode": practice.is_review_mode,
+        "toolbox_allowed": practice.toolbox_allowed,
+        "toolbox_used": practice.toolbox_used,
+        "can_run": practice.can_run,
+        "can_submit": practice.can_submit,
+        "can_next": practice.can_next,
+        "mission_text": practice.mission_text,
+        "battery_percent": practice.battery_percent,
+        "battery_threshold_percent": practice.battery_threshold_percent,
+        "assistant_messages": list(practice.assistant_messages),
+        "current_level_id": practice.current_level_id,
+        "current_level_title": practice.current_level_title,
+        "current_level_prompt": practice.current_level_prompt,
+    }
+
+
 def serialize_game_state(state: GameState) -> dict[str, object]:
     scene = None
     if state.scene is not None:
@@ -27,19 +53,20 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
         demo = {
             "demo_id": state.demo.demo_id,
             "title": state.demo.title,
+            "group_id": state.demo.group_id,
+            "level_id": state.demo.level_id,
+            "prompt": state.demo.prompt,
+            "learning_markdown": state.demo.learning_markdown,
+            "story_intro_markdown": state.demo.story_intro_markdown,
+            "story_outro_markdown": state.demo.story_outro_markdown,
+            "can_advance": state.demo.can_advance,
             "body": state.demo.body,
             "current_level_id": state.demo.current_level_id,
         }
 
-    challenge = None
-    if state.challenge is not None:
-        challenge = {
-            "challenge_id": state.challenge.challenge_id,
-            "challenge_type": state.challenge.challenge_type,
-            "current_level_id": state.challenge.current_level_id,
-            "current_level_title": state.challenge.current_level_title,
-            "current_level_prompt": state.challenge.current_level_prompt,
-        }
+    practice = None
+    if state.practice is not None:
+        practice = _serialize_practice_payload(state.practice)
 
     last_submission = None
     if state.last_submission is not None:
@@ -47,12 +74,16 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "level_id": state.last_submission.level_id,
             "cleared": state.last_submission.cleared,
             "block_passed": state.last_submission.block_passed,
+            "kind": state.last_submission.kind,
+            "status_label": state.last_submission.status_label,
             "analysis_status": state.last_submission.analysis_status,
             "analysis_summary": state.last_submission.analysis_summary,
             "judge_status": state.last_submission.judge_status,
             "judge_summary": state.last_submission.judge_summary,
             "verification_only": state.last_submission.verification_only,
             "answer_correct": state.last_submission.answer_correct,
+            "output_text": state.last_submission.output_text,
+            "details": dict(state.last_submission.details),
         }
 
     map_route = None
@@ -91,7 +122,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
         "intro_completed": state.intro_completed,
         "scene": scene,
         "demo": demo,
-        "challenge": challenge,
+        "practice": practice,
         "progress": {
             "completed_node_ids": list(state.progress.completed_node_ids),
             "cleared_level_ids": list(state.progress.cleared_level_ids),
@@ -100,7 +131,9 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
         },
         "available_actions": {
             "advance": state.available_actions.advance,
+            "run": state.available_actions.run,
             "submit": state.available_actions.submit,
+            "next_level": state.available_actions.next_level,
             "restart_quest": state.available_actions.restart_quest,
         },
         "last_submission": last_submission,
