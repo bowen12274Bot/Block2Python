@@ -14,9 +14,7 @@ from block2python.level_play import AppCore, SubmitOutcome
 from block2python.content import AssembledGameSlice, GameRuntime
 from block2python.contracts import AnalysisResult, AnalysisStatus, JudgeResult, JudgeStatus, Submission
 from block2python.integration.contracts import (
-    AvailableActions,
     DemoState,
-    GameMode,
     GameState,
     PlayerProfileState,
     SubmissionFeedback,
@@ -34,6 +32,8 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
     last_submission: SubmissionFeedback | None = None
     player_profile: PlayerProfileState = field(default_factory=PlayerProfileState)
     intro_completed: bool = False
+    active_practice_level_id_override: str | None = None
+    next_enabled_level_id: str | None = None
 
     @classmethod
     def start(cls, *, app: AppCore, game_slice: AssembledGameSlice, quest_id: str) -> GameSession:
@@ -125,6 +125,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             self.app.mark_cleared(state.current_level_id)
 
         self.runtime.complete_current_node()
+        self._reset_practice_action_state()
         return self.current_state()
 
     def start_group_demo(self, group_id: str) -> GameSessionState:
@@ -189,6 +190,35 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         self._jump_to_node(target_node_id)
         return self.current_state()
 
+    def run_current_level(self, *, python_code: str, block_json: dict | None = None) -> tuple[GameSessionState, SubmitOutcome]:
+        state = self.current_state()
+        if state.mode is not SessionMode.CHALLENGE:
+            raise GameSessionError("Current node is not a challenge")
+        if state.current_level_id is None:
+            raise GameSessionError("Challenge node has no current level")
+
+        if self._is_placeholder_auto_ac_level(state.current_level_id):
+            outcome = SubmitOutcome(
+                analysis=AnalysisResult(status=AnalysisStatus.PASS, summary="Placeholder level dry-run"),
+                judge=JudgeResult(status=JudgeStatus.AC, summary="Placeholder level dry-run"),
+                cleared=False,
+                block_passed=self.app.is_block_passed(state.current_level_id),
+            )
+        else:
+            outcome = self.app.verify(
+                Submission(level_id=state.current_level_id, python_code=python_code, block_json=block_json)
+            )
+        self.next_enabled_level_id = None
+        self.last_submission = self._build_feedback(
+            state.current_level_id,
+            outcome,
+            kind="run_result",
+            status_label="Run Passed" if outcome.judge.status is JudgeStatus.AC else "Run Needs Work",
+            output_prefix="Run output",
+            from_toolbox=False,
+        )
+        return self.current_state(), outcome
+
     def submit_current_level(self, *, python_code: str, block_json: dict | None = None) -> tuple[GameSessionState, SubmitOutcome]:
         state = self.current_state()
         if state.mode is not SessionMode.CHALLENGE:
@@ -209,24 +239,19 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             outcome = self.app.submit(
                 Submission(level_id=state.current_level_id, python_code=python_code, block_json=block_json)
             )
-        self.last_submission = SubmissionFeedback(
-            level_id=state.current_level_id,
-            cleared=outcome.cleared,
-            block_passed=outcome.block_passed,
-            analysis_status=outcome.analysis.status.value,
+        if outcome.cleared:
+            self.active_practice_level_id_override = state.current_level_id
+            self.next_enabled_level_id = state.current_level_id
+        else:
+            self.next_enabled_level_id = None
+        self.last_submission = self._build_feedback(
+            state.current_level_id,
+            outcome,
             kind="submission",
             status_label="Passed" if outcome.cleared else "Needs Work",
-            analysis_summary=outcome.analysis.summary,
-            judge_status=outcome.judge.status.value,
-            judge_summary=outcome.judge.summary,
-            verification_only=False,
-            answer_correct=outcome.judge.status is JudgeStatus.AC,
-            details={
-                "analysis_status": outcome.analysis.status.value,
-                "judge_status": outcome.judge.status.value,
-            },
+            output_prefix="Submit output",
+            from_toolbox=False,
         )
-        self._advance_review_practice_level(state)
         return self.current_state(), outcome
 
     def verify_current_level_with_toolbox(
@@ -245,30 +270,103 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         if runtime_state is None or runtime_state.challenge is None:
             raise GameSessionError("Current node is not a challenge")
         if runtime_state.challenge.challenge_type != "practice":
-            raise GameSessionError("Toolbox verification is only available in practice challenges")
+            raise GameSessionError("Toolbox run is only available in practice challenges")
 
         outcome = self.app.verify(
             Submission(level_id=state.current_level_id, python_code=python_code, block_json=block_json)
         )
         self.toolbox_used_level_ids.add(state.current_level_id)
-        self.last_submission = SubmissionFeedback(
-            level_id=state.current_level_id,
-            cleared=False,
-            block_passed=False,
+        self.next_enabled_level_id = None
+        self.last_submission = self._build_feedback(
+            state.current_level_id,
+            outcome,
+            kind="toolbox_run",
+            status_label="Toolbox Run Passed" if outcome.judge.status is JudgeStatus.AC else "Toolbox Run Needs Work",
+            output_prefix="Tool Kit output",
+            from_toolbox=True,
+        )
+        return self.current_state(), outcome
+
+    def next_practice_level(self) -> GameSessionState:
+        state = self.current_state()
+        if state.mode is not SessionMode.CHALLENGE:
+            raise GameSessionError("Current node is not a challenge")
+        if state.current_level_id is None:
+            raise GameSessionError("Challenge node has no current level")
+        if self.next_enabled_level_id != state.current_level_id:
+            raise GameSessionError("Next level is only available after a successful submit")
+
+        runtime_state = self.runtime.current_state()
+        if runtime_state is None or runtime_state.challenge is None:
+            raise GameSessionError("Current node is not a challenge")
+        group_id = self._group_id_for_level_id(state.current_level_id)
+        runtime_group = self.group_runtime_states.get(group_id) if group_id is not None else None
+
+        self.next_enabled_level_id = None
+        self.last_submission = None
+
+        if runtime_group is not None and runtime_group.practice_reviewing:
+            self._advance_review_practice_level(state)
+            return self.current_state()
+
+        next_level_id = self._next_uncleared_level_id(runtime_state.challenge, state.current_level_id)
+        self.active_practice_level_id_override = next_level_id
+        return self.current_state()
+
+    def _next_uncleared_level_id(self, challenge, current_level_id: str) -> str | None:
+        current_index = -1
+        for index, level in enumerate(challenge.levels):
+            if level.level_id == current_level_id:
+                current_index = index
+                break
+        for level in challenge.levels[current_index + 1 :]:
+            if self._should_auto_clear_on_enter(level):
+                self.app.mark_cleared(level.level_id)
+                continue
+            if not self.app.is_cleared(level.level_id):
+                return level.level_id
+        return None
+
+    def _build_feedback(
+        self,
+        level_id: str,
+        outcome: SubmitOutcome,
+        *,
+        kind: str,
+        status_label: str,
+        output_prefix: str,
+        from_toolbox: bool,
+    ) -> SubmissionFeedback:
+        output_lines = [
+            "%s:" % output_prefix,
+            "analysis=%s" % outcome.analysis.summary,
+            "judge=%s" % outcome.judge.summary,
+        ]
+        if from_toolbox:
+            output_lines.append("source=toolbox")
+        return SubmissionFeedback(
+            level_id=level_id,
+            cleared=outcome.cleared,
+            block_passed=outcome.block_passed,
             analysis_status=outcome.analysis.status.value,
-            kind="toolbox_verification",
-            status_label="Toolbox Verified" if outcome.judge.status is JudgeStatus.AC else "Toolbox Needs Work",
+            kind=kind,
+            status_label=status_label,
             analysis_summary=outcome.analysis.summary,
             judge_status=outcome.judge.status.value,
             judge_summary=outcome.judge.summary,
-            verification_only=True,
+            verification_only=False,
             answer_correct=outcome.judge.status is JudgeStatus.AC,
+            output_text="\n".join(output_lines),
             details={
                 "analysis_status": outcome.analysis.status.value,
                 "judge_status": outcome.judge.status.value,
+                "from_toolbox": from_toolbox,
             },
         )
-        return self.current_state(), outcome
+
+    def _reset_practice_action_state(self) -> None:
+        self.active_practice_level_id_override = None
+        self.next_enabled_level_id = None
 
     def _require_opening_flow_completed(self) -> None:
         if not self.player_profile.profile_created:
@@ -282,7 +380,4 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         self.runtime.current_node_id = node_id
         self.last_submission = None
         self.scene_seen_node_ids.discard(node_id)
-
-
-
-
+        self._reset_practice_action_state()

@@ -69,15 +69,16 @@ def run_auto_demo(
         next_state, outcome = session.submit_current_level(python_code=code_factory(level_id))
         logs.append(f"submit {level_id}: {outcome.judge.status}")
         logs.append(f"cleared={outcome.cleared}")
-        if next_state.mode.value == "CHALLENGE" and next_state.current_level_id == level_id:
-            raise RuntimeError(f"Practice submission did not advance level {level_id}")
+        if outcome.cleared and next_state.mode.value == "CHALLENGE":
+            next_state = session.next_practice_level()
+            logs.append(f"next={next_state.current_level_id or next_state.node_id}")
 
     return logs
 
 
 def interactive_demo(session: GameSession) -> int:
     print("Block2Python GameSession Demo")
-    print("Commands: next, submit, status, quit")
+    print("Commands: next, run, submit, status, quit")
     while True:
         state = session.current_game_state()
         for line in _render_state(state):
@@ -91,7 +92,19 @@ def interactive_demo(session: GameSession) -> int:
         if command == "status":
             continue
         if command == "next":
-            session.advance()
+            if state.mode is GameMode.CHALLENGE:
+                session.next_practice_level()
+            else:
+                session.advance()
+            continue
+        if command == "run":
+            if state.mode is not GameMode.CHALLENGE or state.practice is None or state.practice.current_level_id is None:
+                print("Current state is not in practice mode")
+                continue
+            level_id = state.practice.current_level_id
+            code = _default_code_factory(level_id)
+            _, outcome = session.run_current_level(python_code=code)
+            print(f"run {level_id}: {outcome.judge.status} cleared={outcome.cleared}")
             continue
         if command == "submit":
             if state.mode is not GameMode.CHALLENGE or state.practice is None or state.practice.current_level_id is None:
@@ -101,8 +114,8 @@ def interactive_demo(session: GameSession) -> int:
             code = _default_code_factory(level_id)
             next_state, outcome = session.submit_current_level(python_code=code)
             print(f"submit {level_id}: {outcome.judge.status} cleared={outcome.cleared}")
-            if next_state.mode.value == "CHALLENGE" and next_state.current_level_id == level_id:
-                print("Practice did not advance; submit again or inspect state")
+            if outcome.cleared and next_state.mode.value == "CHALLENGE":
+                print("Practice cleared. Press next to move on.")
             continue
         print("Unknown command")
 
@@ -139,7 +152,9 @@ def _render_state(state: GameState) -> list[str]:
     lines.append(
         "actions="
         f"advance:{state.available_actions.advance} "
+        f"run:{state.available_actions.run} "
         f"submit:{state.available_actions.submit} "
+        f"next:{state.available_actions.next_level} "
         f"restart_quest:{state.available_actions.restart_quest}"
     )
     return lines

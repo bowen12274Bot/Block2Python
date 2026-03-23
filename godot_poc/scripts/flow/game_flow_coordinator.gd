@@ -48,7 +48,9 @@ func _ready() -> void:
 	scene_screen.back_requested.connect(_show_map_page)
 	demo_screen.advance_requested.connect(_on_demo_advance_requested)
 	demo_screen.back_requested.connect(_show_map_page)
+	practice_screen.run_requested.connect(_on_run_requested)
 	practice_screen.submit_requested.connect(_on_submit_requested)
+	practice_screen.next_requested.connect(_on_next_requested)
 	practice_screen.open_toolbox_requested.connect(_on_open_toolbox_requested)
 	practice_screen.back_requested.connect(_show_map_page)
 	python_bridge_client.bridge_started.connect(_on_bridge_started)
@@ -76,7 +78,9 @@ func _ready() -> void:
 	practice_screen.show_practice({})
 	practice_screen.show_feedback(GameFlowFeedbackPresenterScript.empty_feedback_view("Feedback will appear here."))
 	practice_screen.set_status("Practice flow is idle.")
+	practice_screen.set_can_run(false)
 	practice_screen.set_can_submit(false)
+	practice_screen.set_can_next(false)
 	_set_debug_visible(false)
 	_show_page("entry")
 	set_process(true)
@@ -147,9 +151,17 @@ func _on_advance_requested() -> void:
 		map_screen.set_status("Status: requesting advance...")
 	python_bridge_client.send_advance()
 
+func _on_run_requested(python_code: String) -> void:
+	practice_screen.set_status("Status: running code...")
+	python_bridge_client.send_run_level(python_code)
+
 func _on_submit_requested(python_code: String) -> void:
 	practice_screen.set_status("Status: submitting code...")
 	python_bridge_client.send_submit_level(python_code)
+
+func _on_next_requested() -> void:
+	practice_screen.set_status("Status: moving to next level...")
+	python_bridge_client.send_next_level()
 
 func _on_demo_advance_requested() -> void:
 	demo_screen.set_status("Status: continuing demo placeholder...")
@@ -239,6 +251,7 @@ func _append_debug_state(view_model: Dictionary) -> void:
 		"current_page=%s" % _current_page,
 		"practice_view.code_editable=%s" % str(practice_view.get("code_editable", false)),
 		"action_view.can_submit=%s" % str(action_view.get("can_submit", false)),
+		"action_view.can_next=%s" % str(action_view.get("can_next", false)),
 		"focus_owner=%s" % focus_name,
 		"toolbox_helper_pid=%s" % str(_toolbox_helper_pid),
 	]
@@ -248,11 +261,6 @@ func _state_can_advance(state: Dictionary) -> bool:
 	return GameFlowScreenPresenterScript.can_advance_from_view_model(GameFlowMapperScript.map_game_state(state))
 
 func _route_after_response(state: Dictionary) -> void:
-	if _toolbox_helper_pid > 0:
-		var last_submission: Variant = state.get("last_submission", null)
-		if last_submission is Dictionary and bool(last_submission.get("verification_only", false)):
-			_show_page("challenge")
-			return
 	_show_page(GameFlowPageRouterScript.resolved_page_for_state(state))
 
 func _apply_error_response(response: Dictionary) -> void:
@@ -350,7 +358,7 @@ func _handle_toolbox_result(payload: Dictionary) -> void:
 		var python_code: String = str(payload.get("python_code", ""))
 		var block_json: Variant = payload.get("block_json", {})
 		if block_json is Dictionary:
-			practice_screen.set_status("Status: verifying toolbox logic...")
+			practice_screen.set_status("Status: running toolkit code...")
 			python_bridge_client.send_verify_toolbox_level(python_code, block_json)
 		return
 	if status == "toolbox_closed":
@@ -384,6 +392,3 @@ func _entry_status_text(profile_view: Dictionary) -> String:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_stop_toolbox_helper(true)
-
-
-

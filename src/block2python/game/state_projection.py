@@ -65,7 +65,8 @@ def build_game_state(session: GameSession) -> GameState:
         actions = AvailableActions(advance=True)
     else:
         mode = GameMode.CHALLENGE
-        actions = AvailableActions(submit=True)
+        can_next = current_level is not None and session.next_enabled_level_id == current_level.level_id
+        actions = AvailableActions(run=True, submit=True, next_level=can_next)
 
     demo = None
     practice = None
@@ -85,7 +86,9 @@ def build_game_state(session: GameSession) -> GameState:
                 level=current_level,
                 group_id=group_id,
                 runtime_group=runtime_group,
+                can_run=actions.run,
                 can_submit=actions.submit,
+                can_next=actions.next_level,
             )
 
     return GameState(
@@ -150,7 +153,9 @@ def _build_practice_state(
     level: LevelSpec,
     group_id: str | None,
     runtime_group,
+    can_run: bool,
     can_submit: bool,
+    can_next: bool,
 ) -> PracticeState:
     progress_current, progress_total = _practice_progress(challenge, level)
     toolbox_allowed = bool(
@@ -170,7 +175,13 @@ def _build_practice_state(
         is_review_mode=bool(runtime_group.practice_reviewing) if runtime_group is not None else False,
         toolbox_allowed=toolbox_allowed,
         toolbox_used=level.level_id in session.toolbox_used_level_ids,
+        can_run=can_run,
         can_submit=can_submit,
+        can_next=can_next,
+        mission_text=level.prompt,
+        battery_percent=_battery_percent(session, level.level_id),
+        battery_threshold_percent=80,
+        assistant_messages=_assistant_messages(session, level, toolbox_allowed, can_next),
         current_level_id=level.level_id,
         current_level_title=level.title,
         current_level_prompt=level.prompt,
@@ -183,3 +194,25 @@ def _practice_progress(challenge: ResolvedChallengeSpec, level: LevelSpec) -> tu
         if challenge_level.level_id == level.level_id:
             return index, total
     return 0, total
+
+
+def _battery_percent(session: GameSession, level_id: str) -> int:
+    if session.app.is_cleared(level_id):
+        return 100
+    if level_id in session.toolbox_used_level_ids:
+        return 80
+    return 60
+
+
+def _assistant_messages(session: GameSession, level: LevelSpec, toolbox_allowed: bool, can_next: bool) -> tuple[str, ...]:
+    messages = [
+        "Byte: Read the mission, then run the code to inspect output.",
+    ]
+    if can_next:
+        messages.append("Byte: This level is cleared. Press Next to continue.")
+    elif session.last_submission is not None and session.last_submission.level_id == level.level_id:
+        messages.append("Byte: Check the diagnostic output, then decide whether to rerun, edit, or submit.")
+    if toolbox_allowed:
+        messages.append("Byte: If you get stuck, open the Tool Kit to try a block-based run.")
+    return tuple(messages)
+

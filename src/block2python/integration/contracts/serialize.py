@@ -17,7 +17,13 @@ def _serialize_practice_payload(practice) -> dict[str, object]:
         "is_review_mode": practice.is_review_mode,
         "toolbox_allowed": practice.toolbox_allowed,
         "toolbox_used": practice.toolbox_used,
+        "can_run": practice.can_run,
         "can_submit": practice.can_submit,
+        "can_next": practice.can_next,
+        "mission_text": practice.mission_text,
+        "battery_percent": practice.battery_percent,
+        "battery_threshold_percent": practice.battery_threshold_percent,
+        "assistant_messages": list(practice.assistant_messages),
         "current_level_id": practice.current_level_id,
         "current_level_title": practice.current_level_title,
         "current_level_prompt": practice.current_level_prompt,
@@ -76,6 +82,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "judge_summary": state.last_submission.judge_summary,
             "verification_only": state.last_submission.verification_only,
             "answer_correct": state.last_submission.answer_correct,
+            "output_text": state.last_submission.output_text,
             "details": dict(state.last_submission.details),
         }
 
@@ -124,7 +131,9 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
         },
         "available_actions": {
             "advance": state.available_actions.advance,
+            "run": state.available_actions.run,
             "submit": state.available_actions.submit,
+            "next_level": state.available_actions.next_level,
             "restart_quest": state.available_actions.restart_quest,
         },
         "last_submission": last_submission,

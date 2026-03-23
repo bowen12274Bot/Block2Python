@@ -39,11 +39,70 @@ def test_dispatch_submit_level_returns_updated_challenge_state() -> None:
     assert state.node_id == "group-01-practice"
     assert state.practice is not None
     assert state.practice.challenge_id == "challenge-group-01-practice"
-    assert state.practice.current_level_id == "group-01-practice-02"
+    assert state.practice.current_level_id == "group-01-practice-01"
+    assert state.practice.can_next is True
     assert state.progress.cleared_level_ids == ("group-01-practice-01",)
     assert state.last_submission is not None
     assert state.last_submission.level_id == "group-01-practice-01"
     assert state.last_submission.judge_status == "AC"
+    assert state.last_submission.kind == "submission"
+
+
+def test_dispatch_run_level_returns_feedback_without_clearing() -> None:
+    session = build_demo_session()
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+
+    state = dispatch(
+        session,
+        PlayerAction(
+            action_type=ActionType.RUN_LEVEL,
+            payload={"python_code": "print(3)\n", "block_json": {"kind": "workspace"}},
+        ),
+    )
+
+    assert state.mode is GameMode.CHALLENGE
+    assert state.practice is not None
+    assert state.practice.current_level_id == "group-01-practice-01"
+    assert state.practice.can_next is False
+    assert state.progress.cleared_level_ids == ()
+    assert state.last_submission is not None
+    assert state.last_submission.kind == "run_result"
+    assert state.last_submission.cleared is False
+
+
+def test_dispatch_next_level_requires_successful_submit() -> None:
+    session = build_demo_session()
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+
+    with pytest.raises(IntegrationDispatchError, match="successful submit"):
+        dispatch(session, PlayerAction(action_type=ActionType.NEXT_LEVEL))
+
+
+def test_dispatch_next_level_advances_after_successful_submit() -> None:
+    session = build_demo_session()
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(
+        session,
+        PlayerAction(
+            action_type=ActionType.SUBMIT_LEVEL,
+            payload={"python_code": "print(3)\n", "block_json": {"kind": "workspace"}},
+        ),
+    )
+
+    state = dispatch(session, PlayerAction(action_type=ActionType.NEXT_LEVEL))
+
+    assert state.mode is GameMode.CHALLENGE
+    assert state.practice is not None
+    assert state.practice.current_level_id == "group-01-practice-02"
+    assert state.practice.can_next is False
+
+
 def test_dispatch_verify_toolbox_level_returns_feedback_without_clearing() -> None:
     session = build_demo_session()
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
@@ -67,13 +126,14 @@ def test_dispatch_verify_toolbox_level_returns_feedback_without_clearing() -> No
 
     assert state.mode is GameMode.CHALLENGE
     assert state.practice is not None
-    assert state.practice.current_level_id == "group-01-practice-02"
+    assert state.practice.current_level_id == "group-01-practice-01"
     assert state.progress.cleared_level_ids == ("group-01-practice-01",)
-    assert state.progress.toolbox_used_level_ids == ("group-01-practice-02",)
+    assert state.progress.toolbox_used_level_ids == ("group-01-practice-01",)
     assert state.last_submission is not None
-    assert state.last_submission.verification_only is True
+    assert state.last_submission.verification_only is False
     assert state.last_submission.answer_correct is True
     assert state.last_submission.cleared is False
+    assert state.last_submission.kind == "toolbox_run"
 def test_dispatch_rejects_submit_without_python_code() -> None:
     session = build_demo_session()
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))

@@ -14,6 +14,8 @@ class GameMode(str, Enum):
 
 class ActionType(str, Enum):
     ADVANCE = "advance"
+    RUN_LEVEL = "run_level"
+    NEXT_LEVEL = "next_level"
     SUBMIT_LEVEL = "submit_level"
     VERIFY_TOOLBOX_LEVEL = "verify_toolbox_level"
     START_GROUP_STORY = "start_group_story"
@@ -68,7 +70,13 @@ class PracticeState:
     is_review_mode: bool = False
     toolbox_allowed: bool = False
     toolbox_used: bool = False
+    can_run: bool = False
     can_submit: bool = False
+    can_next: bool = False
+    mission_text: str = ""
+    battery_percent: int = 0
+    battery_threshold_percent: int = 80
+    assistant_messages: tuple[str, ...] = ()
     current_level_id: str | None = None
     current_level_title: str | None = None
     current_level_prompt: str | None = None
@@ -92,7 +100,9 @@ class ProgressState:
 @dataclass(frozen=True, slots=True)
 class AvailableActions:
     advance: bool = False
+    run: bool = False
     submit: bool = False
+    next_level: bool = False
     restart_quest: bool = False
 
 
@@ -109,6 +119,7 @@ class SubmissionFeedback:
     judge_summary: str = ""
     verification_only: bool = False
     answer_correct: bool = False
+    output_text: str = ""
     details: dict[str, Any] = field(default_factory=dict)
 
 

@@ -4,7 +4,7 @@ class_name GameFlowFeedbackPresenter
 
 static func empty_feedback_view(message: String) -> Dictionary:
     return {
-        "title": "Feedback",
+        "title": "Diagnostic Output",
         "kind": "idle",
         "status_label": "Idle",
         "body": message,
@@ -38,31 +38,34 @@ static func _build_submission_feedback(last_submission: Dictionary) -> Dictionar
     if raw_details is Dictionary:
         details = raw_details
 
-    var lines: Array[String] = []
-    lines.append("level_id: %s" % str(last_submission.get("level_id", "")))
-    lines.append("status: %s" % str(last_submission.get("status_label", "")))
-    lines.append("analysis: %s" % str(last_submission.get("analysis_status", "")))
+    var title: String = "Diagnostic Output"
+    var kind: String = str(last_submission.get("kind", "submission"))
+    if kind == "run_result":
+        title = "Run Output"
+    elif kind == "toolbox_run":
+        title = "Tool Kit Output"
+    elif kind == "submission":
+        title = "Submission Result"
+
+    var body_parts: Array[String] = []
+    body_parts.append("status: %s" % str(last_submission.get("status_label", "")))
+    var output_text: String = str(last_submission.get("output_text", ""))
+    if output_text != "":
+        body_parts.append(output_text)
     var analysis_summary: String = str(last_submission.get("analysis_summary", ""))
     if analysis_summary != "":
-        lines.append("analysis_summary: %s" % analysis_summary)
-    lines.append("judge: %s" % str(last_submission.get("judge_status", "")))
+        body_parts.append("analysis: %s" % analysis_summary)
     var judge_summary: String = str(last_submission.get("judge_summary", ""))
     if judge_summary != "":
-        lines.append("judge_summary: %s" % judge_summary)
-    if bool(last_submission.get("verification_only", false)):
-        lines.append("toolbox verification: true")
-        lines.append("answer_correct: %s" % str(bool(last_submission.get("answer_correct", false))))
-        lines.append("formal clear granted: false")
-    else:
-        lines.append("cleared: %s" % str(bool(last_submission.get("cleared", false))))
+        body_parts.append("judge: %s" % judge_summary)
     if not details.is_empty():
-        lines.append("details: %s" % JSON.stringify(details))
+        body_parts.append("details: %s" % JSON.stringify(details))
 
     return {
-        "title": "Toolbox Verification" if bool(last_submission.get("verification_only", false)) else "Submission Result",
-        "kind": str(last_submission.get("kind", "submission")),
+        "title": title,
+        "kind": kind,
         "status_label": str(last_submission.get("status_label", "")),
-        "body": "\n".join(lines),
+        "body": "\n\n".join(body_parts),
         "details": details,
     }
 
@@ -81,11 +84,12 @@ static func _build_guidance_feedback(view_model: Dictionary) -> Dictionary:
             "details": {},
         }
     if mode_value == "challenge":
+        var practice_view: Dictionary = view_model.get("practice_view", {})
         return {
-            "title": "Practice Guidance",
+            "title": "Diagnostic Output",
             "kind": "guidance",
             "status_label": "Practice Mode",
-            "body": "Practice mode\n\nEdit the code and press Submit. Use Toolbox in practice levels to verify logic without clearing the level.",
+            "body": "Ready. Use Run to inspect output, Submit to clear the level, and Next after a successful submit.\n\n%s" % str(practice_view.get("toolkit_hint", "")),
             "details": {},
         }
     if mode_value == "demo":
@@ -98,10 +102,9 @@ static func _build_guidance_feedback(view_model: Dictionary) -> Dictionary:
         }
 
     return {
-        "title": "Feedback",
+        "title": "Diagnostic Output",
         "kind": "guidance",
         "status_label": "Ready",
         "body": "Request succeeded.",
         "details": {},
     }
-

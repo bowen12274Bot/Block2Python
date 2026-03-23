@@ -45,7 +45,13 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             is_review_mode=False,
             toolbox_allowed=True,
             toolbox_used=True,
+            can_run=True,
             can_submit=True,
+            can_next=False,
+            mission_text="Print a greeting.",
+            battery_percent=80,
+            battery_threshold_percent=80,
+            assistant_messages=("Byte: Read the mission.",),
             current_level_id="group-01-practice-01",
             current_level_title="Group 01 Practice 01 Hello",
             current_level_prompt="Print a greeting.",
@@ -69,6 +75,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             judge_summary="Accepted",
             verification_only=False,
             answer_correct=True,
+            output_text="Submit output:\nanalysis=OK\njudge=Accepted",
             details={"judge_status": "AC"},
         ),
         errors=("none",),
@@ -88,13 +95,20 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     assert payload["practice"]["level_id"] == "group-01-practice-01"
     assert payload["practice"]["progress_total"] == 5
     assert payload["practice"]["toolbox_allowed"] is True
+    assert payload["practice"]["can_run"] is True
+    assert payload["practice"]["can_next"] is False
+    assert payload["practice"]["mission_text"] == "Print a greeting."
+    assert payload["practice"]["battery_percent"] == 80
+    assert payload["practice"]["assistant_messages"] == ["Byte: Read the mission."]
     assert "challenge" not in payload
     assert payload["progress"]["completed_node_ids"] == ["main-map-entry", "group-01-story"]
     assert payload["progress"]["demo_seen_group_ids"] == ["group-01"]
     assert payload["progress"]["toolbox_used_level_ids"] == ["group-01-practice-01"]
     assert payload["available_actions"] == {
         "advance": False,
+        "run": False,
         "submit": True,
+        "next_level": False,
         "restart_quest": True,
     }
     assert payload["last_submission"]["judge_status"] == "AC"
@@ -102,6 +116,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     assert payload["last_submission"]["details"] == {"judge_status": "AC"}
     assert payload["last_submission"]["verification_only"] is False
     assert payload["last_submission"]["answer_correct"] is True
+    assert payload["last_submission"]["output_text"] == "Submit output:\nanalysis=OK\njudge=Accepted"
     assert payload["errors"] == ["none"]
 
 

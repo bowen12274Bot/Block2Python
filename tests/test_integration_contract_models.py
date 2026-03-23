@@ -42,6 +42,7 @@ def test_game_state_contract_supports_scene_payload() -> None:
             analysis_summary="OK",
             judge_status="AC",
             judge_summary="Accepted",
+            output_text="Submit output:\nanalysis=OK\njudge=Accepted",
         ),
     )
 
@@ -108,12 +109,18 @@ def test_game_state_contract_supports_practice_payload() -> None:
             is_review_mode=True,
             toolbox_allowed=True,
             toolbox_used=True,
+            can_run=True,
             can_submit=True,
+            can_next=False,
+            mission_text="Print another greeting.",
+            battery_percent=80,
+            battery_threshold_percent=80,
+            assistant_messages=("Byte: Read the mission.",),
             current_level_id="group-01-practice-02",
             current_level_title="Greeting Again",
             current_level_prompt="Print another greeting.",
         ),
-        available_actions=AvailableActions(submit=True),
+        available_actions=AvailableActions(run=True, submit=True),
     )
 
     assert state.practice is not None
@@ -122,7 +129,12 @@ def test_game_state_contract_supports_practice_payload() -> None:
     assert state.practice.is_review_mode is True
     assert state.practice.toolbox_allowed is True
     assert state.practice.toolbox_used is True
+    assert state.practice.can_run is True
     assert state.practice.can_submit is True
+    assert state.practice.can_next is False
+    assert state.practice.mission_text == "Print another greeting."
+    assert state.practice.battery_percent == 80
+    assert state.practice.assistant_messages == ("Byte: Read the mission.",)
 
 
 def test_player_action_contract_supports_submit_payload() -> None:
