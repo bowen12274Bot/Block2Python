@@ -300,24 +300,39 @@ theme_override_constants/margin_bottom = 14
 
 [node name="FeedbackRoot" type="VBoxContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin" unique_id=1617371664]
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 10
 
-[node name="FeedbackTitle" type="Label" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot" unique_id=127090085]
+[node name="HeaderRow" type="HBoxContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot" unique_id=1730010001]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FeedbackTitle" type="Label" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow" unique_id=127090085]
 modulate = Color(0.878431, 0.917647, 1, 0.9)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 16
 text = "DIAGNOSTIC OUTPUT"
 
-[node name="FeedbackSubhead" type="Label" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot" unique_id=1030007]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+[node name="StatusBadge" type="PanelContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow" unique_id=1730010002]
+layout_mode = 2
+
+[node name="StatusBadgeMargin" type="MarginContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow/StatusBadge" unique_id=1730010003]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 4
+
+[node name="StatusBadgeLabel" type="Label" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow/StatusBadge/StatusBadgeMargin" unique_id=1730010004]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.92)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
-text = "Run, submit, and toolkit output"
+text = "待命中"
 
 [node name="FeedbackText" type="RichTextLabel" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot" unique_id=527595361]
-custom_minimum_size = Vector2(0, 92)
+custom_minimum_size = Vector2(0, 116)
 layout_mode = 2
-size_flags_vertical = 0
+size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 15
 text = "Feedback will appear here."
 

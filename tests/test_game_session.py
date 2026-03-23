@@ -648,6 +648,41 @@ def test_game_session_rejects_advance_during_challenge() -> None:
         raise AssertionError("Expected GameSessionError")
 
 
+def test_python_run_records_emitted_output_for_print_empty_string() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    state, outcome = session.run_current_level(python_code='print("")')
+
+    assert state.mode is SessionMode.CHALLENGE
+    assert outcome.cleared is False
+
+    contract_state = session.current_game_state()
+    assert contract_state.last_submission is not None
+    assert contract_state.last_submission.kind == "run_result"
+    assert contract_state.last_submission.output_text == ""
+    assert contract_state.last_submission.details.get("emitted_output") is True
+
+
+def test_python_run_with_empty_output_keeps_output_text_empty() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    state, outcome = session.run_current_level(python_code="print("")")
+
+    assert state.mode is SessionMode.CHALLENGE
+    assert outcome.cleared is False
+
+    contract_state = session.current_game_state()
+    assert contract_state.last_submission is not None
+    assert contract_state.last_submission.kind == "run_result"
+    assert contract_state.last_submission.output_text == ""
+
+
 def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
     session = build_session()
     session.start_group_story("group-01")
@@ -672,7 +707,7 @@ def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
     assert contract_state.last_submission.cleared is False
     assert contract_state.last_submission.kind == "toolbox_run"
     assert contract_state.last_submission.status_label == "Toolbox Run Passed"
-    assert contract_state.last_submission.output_text != ""
+    assert contract_state.last_submission.output_text == ""
     assert contract_state.practice is not None
     assert contract_state.practice.toolbox_used is True
 

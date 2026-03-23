@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ast
+
 from dataclasses import dataclass, field
 
 from .challenge_selection import ChallengeSelectionMixin
@@ -216,6 +218,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             status_label="Run Passed" if outcome.judge.status is JudgeStatus.AC else "Run Needs Work",
             output_prefix="Run output",
             from_toolbox=False,
+            emitted_output=self._submission_emitted_output(python_code=python_code, block_json=block_json, from_toolbox=False),
         )
         return self.current_state(), outcome
 
@@ -251,6 +254,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             status_label="Passed" if outcome.cleared else "Needs Work",
             output_prefix="Submit output",
             from_toolbox=False,
+            emitted_output=self._submission_emitted_output(python_code=python_code, block_json=block_json, from_toolbox=False),
         )
         return self.current_state(), outcome
 
@@ -284,6 +288,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             status_label="Toolbox Run Passed" if outcome.judge.status is JudgeStatus.AC else "Toolbox Run Needs Work",
             output_prefix="Tool Kit output",
             from_toolbox=True,
+            emitted_output=self._submission_emitted_output(python_code=python_code, block_json=block_json, from_toolbox=True),
         )
         return self.current_state(), outcome
 
@@ -336,14 +341,9 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         status_label: str,
         output_prefix: str,
         from_toolbox: bool,
+        emitted_output: bool,
     ) -> SubmissionFeedback:
-        output_lines = [
-            "%s:" % output_prefix,
-            "analysis=%s" % outcome.analysis.summary,
-            "judge=%s" % outcome.judge.summary,
-        ]
-        if from_toolbox:
-            output_lines.append("source=toolbox")
+        display_output = self._display_output_text(outcome, kind)
         return SubmissionFeedback(
             level_id=level_id,
             cleared=outcome.cleared,
@@ -356,13 +356,78 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             judge_summary=outcome.judge.summary,
             verification_only=False,
             answer_correct=outcome.judge.status is JudgeStatus.AC,
-            output_text="\n".join(output_lines),
+            output_text=display_output,
             details={
                 "analysis_status": outcome.analysis.status.value,
                 "judge_status": outcome.judge.status.value,
                 "from_toolbox": from_toolbox,
+                "output_prefix": output_prefix,
+                "stdout": outcome.judge.stdout,
+                "stderr": outcome.judge.stderr,
+                "emitted_output": emitted_output,
             },
         )
+    def _submission_emitted_output(self, *, python_code: str, block_json: dict | None, from_toolbox: bool) -> bool:
+        if from_toolbox:
+            if block_json is not None and self._toolbox_block_json_emits_output(block_json):
+                return True
+            return self._python_code_emits_output(python_code)
+        return self._python_code_emits_output(python_code)
+
+    def _python_code_emits_output(self, python_code: str) -> bool:
+        if not python_code.strip():
+            return False
+        try:
+            tree = ast.parse(python_code)
+        except SyntaxError:
+            return False
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            if isinstance(func, ast.Name) and func.id == "print":
+                return True
+        return False
+
+    def _toolbox_block_json_emits_output(self, block_json: dict | None) -> bool:
+        if block_json is None:
+            return False
+
+        def _walk(value: object) -> bool:
+            if isinstance(value, dict):
+                block_type = value.get("type")
+                if isinstance(block_type, str) and block_type in {"print_expr", "text_print"}:
+                    return True
+                for nested in value.values():
+                    if _walk(nested):
+                        return True
+                return False
+            if isinstance(value, list):
+                for nested in value:
+                    if _walk(nested):
+                        return True
+            return False
+
+        return _walk(block_json)
+
+    def _display_output_text(self, outcome: SubmitOutcome, kind: str) -> str:
+        stdout_text = outcome.judge.stdout.strip()
+        if stdout_text:
+            return stdout_text
+
+        stderr_text = outcome.judge.stderr.strip()
+        if stderr_text:
+            return stderr_text
+
+        if outcome.analysis.status in {AnalysisStatus.SYNTAX_ERROR, AnalysisStatus.INTERNAL_ERROR}:
+            return outcome.analysis.summary
+
+        if kind in {"run_result", "toolbox_run"}:
+            return ""
+
+        return outcome.judge.summary or outcome.analysis.summary
+
 
     def _reset_practice_action_state(self) -> None:
         self.active_practice_level_id_override = None

@@ -16,7 +16,7 @@ def dispatch(session: GameSession, action: PlayerAction) -> GameState:
 
         if action.action_type is ActionType.RUN_LEVEL:
             python_code = action.payload.get("python_code")
-            if not isinstance(python_code, str) or not python_code:
+            if not isinstance(python_code, str):
                 raise IntegrationDispatchError("run_level requires payload.python_code")
 
             block_json = action.payload.get("block_json")
@@ -32,7 +32,7 @@ def dispatch(session: GameSession, action: PlayerAction) -> GameState:
 
         if action.action_type is ActionType.SUBMIT_LEVEL:
             python_code = action.payload.get("python_code")
-            if not isinstance(python_code, str) or not python_code:
+            if not isinstance(python_code, str):
                 raise IntegrationDispatchError("submit_level requires payload.python_code")
 
             block_json = action.payload.get("block_json")
@@ -44,7 +44,7 @@ def dispatch(session: GameSession, action: PlayerAction) -> GameState:
 
         if action.action_type is ActionType.VERIFY_TOOLBOX_LEVEL:
             python_code = action.payload.get("python_code")
-            if not isinstance(python_code, str) or not python_code:
+            if not isinstance(python_code, str):
                 raise IntegrationDispatchError("verify_toolbox_level requires payload.python_code")
 
             block_json = action.payload.get("block_json")

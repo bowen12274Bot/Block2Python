@@ -72,6 +72,27 @@ def test_dispatch_run_level_returns_feedback_without_clearing() -> None:
     assert state.last_submission.cleared is False
 
 
+def test_dispatch_run_level_accepts_empty_python_code() -> None:
+    session = build_demo_session()
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+
+    state = dispatch(
+        session,
+        PlayerAction(
+            action_type=ActionType.RUN_LEVEL,
+            payload={"python_code": "", "block_json": None},
+        ),
+    )
+
+    assert state.mode is GameMode.CHALLENGE
+    assert state.practice is not None
+    assert state.last_submission is not None
+    assert state.last_submission.kind == "run_result"
+    assert state.last_submission.output_text == ""
+
+
 def test_dispatch_next_level_requires_successful_submit() -> None:
     session = build_demo_session()
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
