@@ -52,6 +52,18 @@ class AppCore:
         return tuple(views)
 
     def submit(self, submission: Submission) -> SubmitOutcome:
+        return self._evaluate_submission(submission, require_block_passed=True, persist_clear=True)
+
+    def verify(self, submission: Submission) -> SubmitOutcome:
+        return self._evaluate_submission(submission, require_block_passed=False, persist_clear=False)
+
+    def _evaluate_submission(
+        self,
+        submission: Submission,
+        *,
+        require_block_passed: bool,
+        persist_clear: bool,
+    ) -> SubmitOutcome:
         level = self._levels.get(submission.level_id)
         if level is None:
             analysis = AnalysisResult(status=AnalysisStatus.INTERNAL_ERROR, summary="Unknown level_id")
@@ -63,7 +75,7 @@ class AppCore:
             judge = JudgeResult(status=JudgeStatus.WA, summary="Level is locked")
             return SubmitOutcome(analysis=analysis, judge=judge, cleared=False, block_passed=False)
 
-        if not self._progress.is_block_passed(level.level_id):
+        if require_block_passed and not self._progress.is_block_passed(level.level_id):
             analysis = AnalysisResult(status=AnalysisStatus.FAIL, summary="Block step not passed yet")
             judge = JudgeResult(
                 status=JudgeStatus.WA,
@@ -79,13 +91,13 @@ class AppCore:
                 summary="Skipped judge due to analysis failure",
                 debug={"skipped": True},
             )
-            return SubmitOutcome(analysis=analysis, judge=judge, cleared=False, block_passed=True)
+            return SubmitOutcome(analysis=analysis, judge=judge, cleared=False, block_passed=(not require_block_passed))
 
         judge = self._judge.judge(submission, level)
-        cleared = judge.status is JudgeStatus.AC
+        cleared = judge.status is JudgeStatus.AC and persist_clear
         if cleared:
             self._progress.mark_cleared(level.level_id)
-        return SubmitOutcome(analysis=analysis, judge=judge, cleared=cleared, block_passed=True)
+        return SubmitOutcome(analysis=analysis, judge=judge, cleared=cleared, block_passed=(not require_block_passed) or self._progress.is_block_passed(level.level_id))
 
     def _state_of(self, level: LevelSpec) -> LevelState:
         if self._progress.is_cleared(level.level_id):

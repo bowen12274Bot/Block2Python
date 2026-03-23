@@ -6,6 +6,7 @@
 
 - `docs/product/worldbuilding.md`
 - `docs/product/chapter_design.md`
+- `docs/product/teaching_outline.md`
 
 ## 使用原則
 

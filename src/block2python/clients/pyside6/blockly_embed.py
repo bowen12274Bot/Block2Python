@@ -27,12 +27,6 @@ class BlocklyBridge(QObject):
 
 
 class BlocklyEmbed(QWebEngineView):
-    """
-    Establishment-phase embed:
-      - Load a local placeholder page from `assets/blockly/index.html`
-      - Use QWebChannel to receive (python_code, block_json) from JS
-    """
-
     output_received = Signal(object)
 
     def __init__(self) -> None:
@@ -47,6 +41,11 @@ class BlocklyEmbed(QWebEngineView):
     def load_placeholder(self, html_path: Path) -> None:
         self.setUrl(QUrl.fromLocalFile(str(html_path.resolve())))
 
+    def request_output(self) -> None:
+        self.page().runJavaScript(
+            "window.block2pythonSendOutputToBridge && window.block2pythonSendOutputToBridge();"
+        )
+
     def _on_output_received(self, python_code: str, block_json_str: str) -> None:
         try:
             raw = json.loads(block_json_str or "{}")
@@ -54,11 +53,5 @@ class BlocklyEmbed(QWebEngineView):
                 raw = {"_raw": raw}
         except Exception:  # noqa: BLE001
             raw = {"_parse_error": True, "_raw": block_json_str}
-
-        schema_version = raw.get("schema_version")
-        if schema_version is not None and str(schema_version) != "0.1":
-            raw.setdefault("metadata", {})
-            if isinstance(raw["metadata"], dict):
-                raw["metadata"]["_schema_mismatch"] = {"expected": "0.1", "got": str(schema_version)}
 
         self.output_received.emit(BlocklyOutput(python_code=python_code, block_json=raw))

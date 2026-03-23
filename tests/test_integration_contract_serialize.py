@@ -1,14 +1,16 @@
-﻿import pytest
+import pytest
 
 from block2python.integration.contracts import (
     ActionType,
     AvailableActions,
     ChallengeState,
+    DemoState,
     DialogueBlockState,
     GameMode,
     GameState,
     IntegrationContractValidationError,
     PlayerAction,
+    PlayerProfileState,
     ProgressState,
     SceneState,
     SubmissionFeedback,
@@ -24,6 +26,8 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
         quest_id="quest-main-map",
         node_id="group-01-practice",
         node_title="Group 01 Practice",
+        player_profile=PlayerProfileState(name="Nova", gender="female", profile_created=True),
+        intro_completed=True,
         scene=SceneState(
             scene_id="scene-practice-unlock",
             title="Practice Unlock",
@@ -38,8 +42,9 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
         ),
         progress=ProgressState(
             completed_node_ids=("main-map-entry", "group-01-story"),
-            cleared_level_ids=("demo-0",),
+            cleared_level_ids=("practice-01",),
             demo_seen_group_ids=("group-01",),
+            toolbox_used_level_ids=("group-01-practice-01",),
         ),
         available_actions=AvailableActions(submit=True, restart_quest=True),
         last_submission=SubmissionFeedback(
@@ -50,6 +55,8 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             analysis_summary="OK",
             judge_status="AC",
             judge_summary="Accepted",
+            verification_only=False,
+            answer_correct=True,
         ),
         errors=("none",),
     )
@@ -57,24 +64,84 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     payload = serialize_game_state(state)
 
     assert payload["mode"] == "challenge"
+    assert payload["player_profile"] == {
+        "name": "Nova",
+        "gender": "female",
+        "profile_created": True,
+    }
+    assert payload["intro_completed"] is True
     assert payload["scene"]["scene_id"] == "scene-practice-unlock"
     assert payload["challenge"]["current_level_id"] == "group-01-practice-01"
     assert payload["challenge"]["current_level_prompt"] == "Print a greeting."
     assert payload["progress"]["completed_node_ids"] == ["main-map-entry", "group-01-story"]
     assert payload["progress"]["demo_seen_group_ids"] == ["group-01"]
+    assert payload["progress"]["toolbox_used_level_ids"] == ["group-01-practice-01"]
     assert payload["available_actions"] == {
         "advance": False,
         "submit": True,
         "restart_quest": True,
     }
     assert payload["last_submission"]["judge_status"] == "AC"
+    assert payload["last_submission"]["verification_only"] is False
+    assert payload["last_submission"]["answer_correct"] is True
     assert payload["errors"] == ["none"]
+
+
+def test_serialize_demo_mode_emits_demo_payload() -> None:
+    state = GameState(
+        mode=GameMode.DEMO,
+        quest_id="quest-main-map",
+        node_id="group-01-demo",
+        node_title="Group 01 Demo",
+        demo=DemoState(
+            demo_id="challenge-group-01-demo",
+            title="Group 01 Demo",
+            body="Placeholder demo body",
+            current_level_id="group-01-demo",
+        ),
+        available_actions=AvailableActions(advance=True),
+    )
+
+    payload = serialize_game_state(state)
+
+    assert payload["mode"] == "demo"
+    assert payload["demo"] == {
+        "demo_id": "challenge-group-01-demo",
+        "title": "Group 01 Demo",
+        "body": "Placeholder demo body",
+        "current_level_id": "group-01-demo",
+    }
+    assert payload["challenge"] is None
 
 
 def test_player_action_round_trip_serialize_and_deserialize() -> None:
     action = PlayerAction(
         action_type=ActionType.SUBMIT_LEVEL,
         payload={"python_code": "print(3)\n", "block_json": {"kind": "workspace"}},
+    )
+
+    serialized = serialize_player_action(action)
+    deserialized = deserialize_player_action(serialized)
+
+    assert deserialized == action
+
+
+def test_create_profile_action_round_trip_serialize_and_deserialize() -> None:
+    action = PlayerAction(
+        action_type=ActionType.CREATE_PLAYER_PROFILE,
+        payload={"name": "Nova", "gender": "female"},
+    )
+
+    serialized = serialize_player_action(action)
+    deserialized = deserialize_player_action(serialized)
+
+    assert deserialized == action
+
+
+def test_complete_intro_action_round_trip_serialize_and_deserialize() -> None:
+    action = PlayerAction(
+        action_type=ActionType.COMPLETE_INTRO,
+        payload={},
     )
 
     serialized = serialize_player_action(action)
@@ -94,5 +161,15 @@ def test_deserialize_player_action_rejects_invalid_block_json_shape() -> None:
             {
                 "action_type": "submit_level",
                 "payload": {"python_code": "print(1)\n", "block_json": ["bad"]},
+            }
+        )
+
+
+def test_deserialize_player_action_rejects_invalid_create_profile_payload_shape() -> None:
+    with pytest.raises(IntegrationContractValidationError, match="gender"):
+        deserialize_player_action(
+            {
+                "action_type": "create_player_profile",
+                "payload": {"name": "Nova", "gender": ["female"]},
             }
         )

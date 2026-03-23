@@ -126,6 +126,11 @@ theme_override_constants/separation = 12
 layout_mode = 2
 text = "Back to Map"
 
+[node name="ToolboxButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
+layout_mode = 2
+text = "Open Toolbox"
+visible = false
+
 [node name="SubmitButton" type="Button" parent="Margin/Scroll/Root/Buttons"]
 layout_mode = 2
 text = "Submit"

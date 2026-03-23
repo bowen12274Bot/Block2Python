@@ -65,6 +65,7 @@ static func _build_group_view(group: Dictionary) -> Dictionary:
 	var practice_route_steps: Array[Dictionary] = _step_dict_array(group.get("practice_route", []))
 	var demo_slot: Dictionary = _normalized_slot_view(group.get("demo_slot", {}), "demo", "Demo")
 	var practice_slot: Dictionary = _normalized_slot_view(group.get("practice_slot", {}), "practice", "Practice")
+	var story_step: Dictionary = _first_step_by_type(demo_route_steps, "story")
 
 	return {
 		"group_id": group_id,
@@ -83,6 +84,7 @@ static func _build_group_view(group: Dictionary) -> Dictionary:
 		"demo_route_summary": _build_route_summary(demo_route_steps),
 		"demo_route_step_titles": _route_step_titles(demo_route_steps),
 		"demo_route_steps": demo_route_steps,
+		"story_step": story_step,
 		"practice_route_summary": _build_route_summary(practice_route_steps),
 		"practice_route_step_titles": _route_step_titles(practice_route_steps),
 		"practice_route_steps": practice_route_steps,
@@ -224,6 +226,13 @@ static func _primary_step(route_steps: Array[Dictionary]) -> Dictionary:
 	for step in route_steps:
 		var status_key: String = str(step.get("status_key", ""))
 		if status_key == "available" or status_key == "completed":
+			return step
+	return {}
+
+
+static func _first_step_by_type(route_steps: Array[Dictionary], step_type: String) -> Dictionary:
+	for step in route_steps:
+		if str(step.get("step_type", "")) == step_type:
 			return step
 	return {}
 

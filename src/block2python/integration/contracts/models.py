@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -7,6 +7,7 @@ from typing import Any
 
 class GameMode(str, Enum):
     SCENE = "scene"
+    DEMO = "demo"
     CHALLENGE = "challenge"
     COMPLETE = "complete"
 
@@ -14,8 +15,12 @@ class GameMode(str, Enum):
 class ActionType(str, Enum):
     ADVANCE = "advance"
     SUBMIT_LEVEL = "submit_level"
+    VERIFY_TOOLBOX_LEVEL = "verify_toolbox_level"
+    START_GROUP_STORY = "start_group_story"
     START_GROUP_DEMO = "start_group_demo"
     START_GROUP_PRACTICE = "start_group_practice"
+    CREATE_PLAYER_PROFILE = "create_player_profile"
+    COMPLETE_INTRO = "complete_intro"
     RESTART_QUEST = "restart_quest"
 
 
@@ -36,6 +41,14 @@ class SceneState:
 
 
 @dataclass(frozen=True, slots=True)
+class DemoState:
+    demo_id: str
+    title: str
+    body: str = ""
+    current_level_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class ChallengeState:
     challenge_id: str
     challenge_type: str
@@ -45,10 +58,18 @@ class ChallengeState:
 
 
 @dataclass(frozen=True, slots=True)
+class PlayerProfileState:
+    name: str = ""
+    gender: str = ""
+    profile_created: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class ProgressState:
     completed_node_ids: tuple[str, ...] = ()
     cleared_level_ids: tuple[str, ...] = ()
     demo_seen_group_ids: tuple[str, ...] = ()
+    toolbox_used_level_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,6 +88,8 @@ class SubmissionFeedback:
     analysis_summary: str = ""
     judge_status: str = ""
     judge_summary: str = ""
+    verification_only: bool = False
+    answer_correct: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -128,7 +151,10 @@ class GameState:
     quest_id: str
     node_id: str | None = None
     node_title: str = ""
+    player_profile: PlayerProfileState = field(default_factory=PlayerProfileState)
+    intro_completed: bool = False
     scene: SceneState | None = None
+    demo: DemoState | None = None
     challenge: ChallengeState | None = None
     progress: ProgressState = field(default_factory=ProgressState)
     available_actions: AvailableActions = field(default_factory=AvailableActions)

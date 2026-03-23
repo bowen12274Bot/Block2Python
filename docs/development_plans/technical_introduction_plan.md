@@ -113,7 +113,7 @@
 - `ASTParser`：把 Python code 解析成 AST（語法錯誤要有可理解回傳）
 - `StructureChecker`：支援以下「教學型」規則（先做最小集）
   - 必須包含關鍵字（例如 `for`、`input`）
-  - 禁止關鍵字（對應 `docs/requirements.md` 的 out-of-scope，例如 `import`/`while`/`def`）
+- 禁止關鍵字（對應 `docs/requirements.md` 的 out-of-scope，例如 `import`/`while`/`def`）
   - 基本結構檢查（例如 `for` 是否使用 `range`）
 - `DiffProducer`：把結構差異整理成 UI/AI 可用的摘要格式（避免直接丟 AST）
 
@@ -121,7 +121,7 @@
 
 - 規則先以「關卡規格（LevelSpec）設定」驅動，而不是把規則寫死在程式碼各處
 - 先做「可解釋」：回傳差異原因（哪條規則、哪個節點）比做很聰明的比對更重要
-  - 專案建立期（MVP）先做：Syntax check + out-of-scope 禁用（`docs/requirements.md`）+ 關鍵字 required/forbidden
+- 專案建立期（MVP）先做：Syntax check + out-of-scope 禁用（`docs/requirements.md`）+ 關鍵字 required/forbidden
   - 後期再逐步加入：`for range` 形狀檢查、結構拓樸一致性、DiffProducer 精緻化、Blockly ↔ AST 映射
 
 ### 5.3 如何確認成功（最小驗收）

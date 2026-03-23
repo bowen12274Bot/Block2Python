@@ -69,7 +69,7 @@
 
 ### 4.1 文件樣板層
 
-目前已存在的 `docs/specs/examples/game_slice_v0_1/`：
+目前已存在的 `docs/specs/examples/`：
 
 - 只作為規格樣板
 - 不視為 runtime source of truth
@@ -117,21 +117,15 @@ assets/game_content/
 
 ```yaml
 quests:
-  - file: quests/quest-basic-io-repair.yaml
 nodes:
-  - file: nodes/nodes-basic-io.yaml
 scenes:
   - file: scenes/scene-city-alarm.yaml
   - file: scenes/scene-practice-unlock.yaml
   - file: scenes/scene-result-success.yaml
   - file: scenes/scene-result-fail.yaml
 challenges:
-  - file: challenges/challenge-demo-basic-io.yaml
-  - file: challenges/challenge-practice-basic-io.yaml
 toolbox:
-  - file: toolbox/toolbox-basic-io.yaml
 battery:
-  - file: battery/battery-basic-io.yaml
 ```
 
 ## 6. 建議模組落點
@@ -221,7 +215,7 @@ bundle = assemble_game_slice(game_content=game_content, levels=levels)
 
 ## 9. 實作順序
 
-1. 將 `docs/specs/examples/game_slice_v0_1/` 複製成 `assets/game_content/` 第一版 runtime 內容
+1. 將 `docs/specs/examples/` 複製成 `assets/game_content/` 第一版 runtime 內容
 2. 在 `src/block2python/game_content/` 建立 `models.py`
 3. 建立 `loader.py`
 4. 建立最小測試，驗證 index 與引用關係
@@ -238,5 +232,5 @@ bundle = assemble_game_slice(game_content=game_content, levels=levels)
 
 - `levels_loader.py` 保持 challenge loader 身分
 - 新增獨立的 `game_content` 模組與 loader
-- `docs/specs/examples/game_slice_v0_1/` 繼續作為規格樣板
+- `docs/specs/examples/` 繼續作為規格樣板
 - 第一版 runtime 遊戲資料應落在 `assets/game_content/`

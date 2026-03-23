@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from .errors import IntegrationContractValidationError
 from .models import ActionType, GameState, PlayerAction
@@ -22,6 +22,15 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             ],
         }
 
+    demo = None
+    if state.demo is not None:
+        demo = {
+            "demo_id": state.demo.demo_id,
+            "title": state.demo.title,
+            "body": state.demo.body,
+            "current_level_id": state.demo.current_level_id,
+        }
+
     challenge = None
     if state.challenge is not None:
         challenge = {
@@ -42,6 +51,8 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "analysis_summary": state.last_submission.analysis_summary,
             "judge_status": state.last_submission.judge_status,
             "judge_summary": state.last_submission.judge_summary,
+            "verification_only": state.last_submission.verification_only,
+            "answer_correct": state.last_submission.answer_correct,
         }
 
     map_route = None
@@ -72,12 +83,20 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
         "quest_id": state.quest_id,
         "node_id": state.node_id,
         "node_title": state.node_title,
+        "player_profile": {
+            "name": state.player_profile.name,
+            "gender": state.player_profile.gender,
+            "profile_created": state.player_profile.profile_created,
+        },
+        "intro_completed": state.intro_completed,
         "scene": scene,
+        "demo": demo,
         "challenge": challenge,
         "progress": {
             "completed_node_ids": list(state.progress.completed_node_ids),
             "cleared_level_ids": list(state.progress.cleared_level_ids),
             "demo_seen_group_ids": list(state.progress.demo_seen_group_ids),
+            "toolbox_used_level_ids": list(state.progress.toolbox_used_level_ids),
         },
         "available_actions": {
             "advance": state.available_actions.advance,
@@ -163,5 +182,13 @@ def deserialize_player_action(payload: object) -> PlayerAction:
     group_id = normalized_payload.get("group_id")
     if group_id is not None and not isinstance(group_id, str):
         raise IntegrationContractValidationError("PlayerAction.payload.group_id must be a string")
+
+    name = normalized_payload.get("name")
+    if name is not None and not isinstance(name, str):
+        raise IntegrationContractValidationError("PlayerAction.payload.name must be a string")
+
+    gender = normalized_payload.get("gender")
+    if gender is not None and not isinstance(gender, str):
+        raise IntegrationContractValidationError("PlayerAction.payload.gender must be a string")
 
     return PlayerAction(action_type=parsed_action_type, payload=normalized_payload)
