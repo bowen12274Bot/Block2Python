@@ -1,4 +1,4 @@
-﻿"""Smoke tests for real WasmJudge execution with wasmtime + python.wasm."""
+"""Smoke tests for real WasmJudge execution with wasmtime + python.wasm."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from block2python.app.levels_loader import load_levels
+from block2python.content import load_levels
 from block2python.contracts import (
     JudgePolicy,
     JudgeStatus,
@@ -106,45 +106,27 @@ class TestWasmJudgeSmoke:
 @pytest.mark.requires_wasm
 @pytest.mark.integration
 class TestWasmJudgeYAMLLevels:
-    def test_load_and_judge_add_two_numbers(self, wasm_judge: WasmJudge):
+    def test_load_and_judge_benchmark_level(self, wasm_judge: WasmJudge):
         levels = load_levels(Path("assets/levels"))
-        level = levels.get("add-two-numbers")
+        level = levels.get("judge-precision-sum-series")
         if level is None:
-            pytest.skip("add-two-numbers level id not found")
+            pytest.skip("judge-precision-sum-series level id not found")
 
         # On some Windows hosts the wasm Python runtime needs a higher memory cap.
-        level = replace(level, judge_policy=replace(level.judge_policy, memory_limit_kb=max(level.judge_policy.memory_limit_kb or 0, 256 * 1024)))
-
-        submission = Submission(
-            level_id=level.level_id,
-            python_code="a, b = map(int, input().split())\nprint(a + b)",
+        level = replace(
+            level,
+            judge_policy=replace(level.judge_policy, memory_limit_kb=max(level.judge_policy.memory_limit_kb or 0, 256 * 1024)),
         )
-        result = wasm_judge.judge(submission, level)
-
-        assert result.status == JudgeStatus.AC
-        assert all(case.status == "PASS" for case in result.case_results)
-
-    def test_load_and_judge_fizzbuzz_simple(self, wasm_judge: WasmJudge):
-        levels = load_levels(Path("assets/levels"))
-        level = levels.get("fizzbuzz-simple")
-        if level is None:
-            pytest.skip("fizzbuzz-simple level id not found")
-
-        # Keep test focused on correctness, not host-dependent memory ceilings.
-        level = replace(level, judge_policy=replace(level.judge_policy, memory_limit_kb=max(level.judge_policy.memory_limit_kb or 0, 256 * 1024)))
 
         submission = Submission(
             level_id=level.level_id,
             python_code=(
-                "n = int(input())\n"
-                "if n % 15 == 0:\n"
-                "    print('FizzBuzz')\n"
-                "elif n % 3 == 0:\n"
-                "    print('Fizz')\n"
-                "elif n % 5 == 0:\n"
-                "    print('Buzz')\n"
-                "else:\n"
-                "    print(n)\n"
+                "import sys\n"
+                "n = int(sys.stdin.readline().strip())\n"
+                "total = 0\n"
+                "for i in range(1, n + 1):\n"
+                "    total += i * i\n"
+                "print(total)\n"
             ),
         )
         result = wasm_judge.judge(submission, level)

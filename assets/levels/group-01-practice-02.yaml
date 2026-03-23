@@ -1,0 +1,20 @@
+level_id: group-01-practice-02
+title: Group 01 Practice 02 Sum
+chapter_id: map-groups
+order_index: 1002
+prerequisite_level_ids:
+  - group-01-practice-01
+next_level_ids:
+  - group-01-practice-03
+prompt: |
+  Read two integers from standard input and print their sum.
+learning_markdown: |
+  Practice converting input into integers and printing the computed result.
+testcase_dir: cases/group-01-practice-02
+judge_policy:
+  time_limit_ms: 3000
+  memory_limit_mb: 256
+metadata:
+  stage: group-01-foundation
+  group_id: group-01
+  slot: practice-02

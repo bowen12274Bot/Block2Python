@@ -1,9 +1,9 @@
 # 關卡檔 Schema 規格（v0.1）
 
-- 文件版本：0.1
-- 更新日期：2026-03-11
-- 適用範圍：目前 `assets/levels/` 的 prototype 題庫
-- Source of truth：`src/block2python/app/levels_loader.py`
+- 文件版本：0.2
+- 更新日期：2026-03-15
+- 適用範圍：目前 `assets/levels/` 的 Godot vertical slice 題庫
+- Source of truth：`src/block2python/content/levels_loader.py`
 
 ## 1. 目前採用的檔案格式
 
@@ -30,14 +30,12 @@
 
 ```yaml
 levels:
-  - id: demo-1
-    file: demo-1.yaml
-  - id: add-two-numbers
-    file: add-two-numbers.yaml
-  - id: demo-2
-    file: demo-2.yaml
-  - id: fizzbuzz-simple
-    file: fizzbuzz-simple.yaml
+  - id: demo-basic-io-hello
+    file: demo-basic-io-hello.yaml
+  - id: practice-basic-io-sum
+    file: practice-basic-io-sum.yaml
+  - id: practice-basic-io-double
+    file: practice-basic-io-double.yaml
 ```
 
 ### 2.3 Loader 行為
@@ -98,14 +96,14 @@ testcases:
 ```yaml
 testcases:
   - name: case-01
-    stdin_file: cases/fizzbuzz/01.in
-    expected_stdout_file: cases/fizzbuzz/01.out
+    stdin_file: cases/basic-io-hello/01.in
+    expected_stdout_file: cases/basic-io-hello/01.out
 ```
 
 #### 形式 C：資料夾自動掃描
 
 ```yaml
-testcase_dir: cases/add-two-numbers
+testcase_dir: cases/basic-io-hello
 testcase_glob: "*.in"
 ```
 
@@ -154,7 +152,7 @@ metadata:
 
 ## 6. Prototype / dev-only metadata
 
-目前 prototype flow 仍保留 stub 路徑，因此 `metadata` 中可出現下列 dev-only 欄位：
+目前題庫仍保留 prototype / vertical-slice 標記，因此 `metadata` 中可出現下列 dev-only 欄位：
 
 - `metadata.stage`
 - `metadata.track`
@@ -169,48 +167,55 @@ metadata:
 - `metadata.stub_analysis.status`：`PASS` / `FAIL` / `SYNTAX_ERROR`
 - `metadata.stub_analysis.summary`
 
-這些欄位屬於 demo / prototype 過渡用途，不應視為未來正式課程資料格式的穩定契約。
+這些欄位屬於過渡用途，不應視為未來正式課程資料格式的穩定契約。
 
 ## 7. 範例
 
-### 7.1 `demo-1.yaml`
+### 7.1 `demo-basic-io-hello.yaml`
 
 ```yaml
-level_id: demo-1
-title: 兩數相加（Stub）
-prompt: 讀入兩個整數並輸出相加結果。
+level_id: demo-basic-io-hello
+title: 示範關：輸入名字並打招呼
+chapter_id: basic-io
+order_index: 100
+prompt: |
+  讀取一行名字，輸出：
+  Hello, <名字>
 next_level_ids:
-  - add-two-numbers
+  - practice-basic-io-sum
 testcases:
-  - name: basic
-    stdin: |
-      1 2
-    expected_stdout: |
-      3
+  - name: hello-byte
+    stdin_file: cases/basic-io-hello/01.in
+    expected_stdout_file: cases/basic-io-hello/01.out
+judge_policy:
+  time_limit_ms: 10000
+  memory_limit_mb: 384
 metadata:
-  stage: prototype
-  track: demo-flow
-  stub_judge:
-    status: AC
-    summary: "StubJudge: forced AC for demo-1."
+  stage: godot-vertical-slice
+  track: quest-map
 ```
 
-### 7.2 `add-two-numbers.yaml`
+### 7.2 `practice-basic-io-sum.yaml`
 
 ```yaml
-level_id: add-two-numbers
-title: 兩數相加（YAML 題庫）
+level_id: practice-basic-io-sum
+title: 練習關：兩數相加
+chapter_id: basic-io
+order_index: 101
 prerequisite_level_ids:
-  - demo-1
+  - demo-basic-io-hello
 next_level_ids:
-  - demo-2
-testcase_dir: cases/add-two-numbers
+  - practice-basic-io-double
+testcases:
+  - name: basic
+    stdin_file: cases/basic-io-sum/01.in
+    expected_stdout_file: cases/basic-io-sum/01.out
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 10000
+  memory_limit_mb: 384
 metadata:
-  stage: prototype
-  track: yaml-judge
+  stage: godot-vertical-slice
+  track: quest-map
 ```
 
 ## 8. 相關文件

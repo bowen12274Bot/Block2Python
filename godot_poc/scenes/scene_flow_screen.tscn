@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/scene_flow_screen.gd" id="1_screen"]
-[ext_resource type="Script" path="res://scripts/scene_panel.gd" id="2_scene"]
+[ext_resource type="Script" path="res://scripts/game_flow/scene_flow_screen.gd" id="1_screen"]
+[ext_resource type="Script" path="res://scripts/game_flow/scene_panel.gd" id="2_scene"]
 
 [node name="SceneFlowScreen" type="Control"]
 layout_mode = 3

@@ -1,15 +1,37 @@
 levels:
-  - id: demo-basic-io-hello
-    file: demo-basic-io-hello.yaml
-  - id: practice-basic-io-sum
-    file: practice-basic-io-sum.yaml
-  - id: practice-basic-io-double
-    file: practice-basic-io-double.yaml
-  - id: demo-1
-    file: demo-1.yaml
-  - id: add-two-numbers
-    file: add-two-numbers.yaml
-  - id: demo-2
-    file: demo-2.yaml
-  - id: fizzbuzz-simple
-    file: fizzbuzz-simple.yaml
+  - id: group-01-demo
+    file: group-01-demo.yaml
+  - id: group-01-practice-01
+    file: group-01-practice-01.yaml
+  - id: group-01-practice-02
+    file: group-01-practice-02.yaml
+  - id: group-01-practice-03
+    file: group-01-practice-03.yaml
+  - id: group-01-practice-04
+    file: group-01-practice-04.yaml
+  - id: group-01-practice-05
+    file: group-01-practice-05.yaml
+  - id: group-02-demo
+    file: group-02-demo.yaml
+  - id: group-02-practice-01
+    file: group-02-practice-01.yaml
+  - id: group-02-practice-02
+    file: group-02-practice-02.yaml
+  - id: group-02-practice-03
+    file: group-02-practice-03.yaml
+  - id: group-02-practice-04
+    file: group-02-practice-04.yaml
+  - id: group-02-practice-05
+    file: group-02-practice-05.yaml
+  - id: group-03-demo
+    file: group-03-demo.yaml
+  - id: group-03-practice-01
+    file: group-03-practice-01.yaml
+  - id: group-03-practice-02
+    file: group-03-practice-02.yaml
+  - id: group-03-practice-03
+    file: group-03-practice-03.yaml
+  - id: group-03-practice-04
+    file: group-03-practice-04.yaml
+  - id: group-03-practice-05
+    file: group-03-practice-05.yaml

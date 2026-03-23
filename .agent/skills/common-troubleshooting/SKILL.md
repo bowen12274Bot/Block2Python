@@ -29,7 +29,7 @@ description: 排查 Block2Python 專案中的常見開發問題，例如測試�
 ## 優先使用的正式入口
 
 - 測試：`powershell -ExecutionPolicy Bypass -File tools/run_tests.ps1`
-- CLI demo：`powershell -ExecutionPolicy Bypass -File tools/run_demo.ps1`
+- CLI demo：`powershell -ExecutionPolicy Bypass -File tools/legacy/run_cli_demo.ps1`
 - GameSession demo：`powershell -ExecutionPolicy Bypass -File tools/run_game_session_demo.ps1`
 
 ## 何時讀哪份 reference

@@ -1,50 +1,55 @@
-# Tools（待補）
+# Tools
 
-本資料夾預留放開發用工具腳本（例如：關卡資料檢查、輸出比對、文件產生等）。
+這個目錄放的是專案用的 PowerShell 腳本。
 
-- `tools/setup_dev_env.ps1`：建立 `.venv` 並安裝開發依賴（目前含 `PySide6`）
-- `tools/run_demo.ps1`：用 `PYTHONPATH=src` 啟動目前的 demo placeholder
-- `tools/run_ui.ps1`：啟動 PySide6 UI（需先安裝 `PySide6`）
-- `tools/reset_progress.ps1`：清除本機進度檔（`.block2python/progress.json`）
-- `tools/vendor_blockly.ps1`：下載並擺放 Blockly 靜態檔到 `assets/blockly/vendor/`（需自行提供 `BLOCKLY_DIST_URL`）
-- `tools/vendor_blockly_from_dir.ps1`：從已解壓的 dist 目錄擺放 Blockly 靜態檔到 `assets/blockly/vendor/`（使用 `BLOCKLY_DIST_DIR`）
-- `tools/run_judge_precision_benchmark.ps1`：重複壓測 Wasm Judge 的 AC 精度、耗時分佈、記憶體成長與 TLE/MLE 防護
+## 先記這四支
 
-## 一鍵設定
+- `tools/setup_dev_env.ps1`
+  主環境建置入口。第一次把專案拉下來時，先跑這支。
+- `tools/run_godot_client.ps1`
+  啟動 Godot client。這是目前主要的前端入口。
+- `tools/run_tests.ps1`
+  手動跑 pytest。適合日常開發時快速驗證。
+- `tools/run_project_gate.ps1`
+  跑比較完整的 gate。適合收尾前一次檢查 coverage 與 judge。
 
-建議用以下指令完成環境初始化（建立 `.venv`、安裝 `requirements.txt`、安裝 editable package、跑 project gate）：
+## 環境建置
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\setup_project.ps1
-```
+- `tools/setup_dev_env.ps1`
+  主環境建置入口。建立 `.venv`，安裝開發依賴，並下載 Godot、Wasmtime、Blockly vendor 資源。
+- `tools/setup_project.ps1`
+  包裝腳本。先呼叫 `setup_dev_env.ps1`，再視需要執行 project gate。
+  如果你只是想把環境建好，優先用 `setup_dev_env.ps1`。
+- `tools/sync_blockly_vendor.ps1`
+  只處理 Blockly vendor 同步。當你只想更新 Blockly，不想重跑整個 setup 時用這支。
 
-常用參數：
+## 日常開發
 
-```powershell
-# 重新建立虛擬環境
-powershell -ExecutionPolicy Bypass -File .\tools\setup_project.ps1 -RecreateVenv
+- `tools/run_godot_client.ps1`
+  啟動 `godot_poc/`，這是目前主要的 client 入口。
+- `tools/run_tests.ps1`
+  執行 pytest，可附帶 pattern、marker、coverage。
+- `tools/reset_progress.ps1`
+  清除本機 progress 檔案 `.block2python/progress.json`。
 
-# 只做安裝，不跑 gate
-powershell -ExecutionPolicy Bypass -File .\tools\setup_project.ps1 -SkipGate
+## 驗證與 Smoke Test
 
-# gate 時要求 Blockly vendor 必須存在
-powershell -ExecutionPolicy Bypass -File .\tools\setup_project.ps1 -RequireBlocklyVendor
-```
+- `tools/smoke_bridge.ps1`
+  用最小請求驗證 stdio bridge server 是否能正常回應。
+- `tools/smoke_wasm.ps1`
+  用 wasm judge 跑最小 CLI smoke flow。
+- `tools/verify_wasm_env.ps1`
+  驗證 wasmtime、`assets/wasm/python.wasm`、Wasm judge 的基本 AC/WA 流程。
+- `tools/verify_wasm_limits.ps1`
+  驗證 Wasm judge 的 TLE / MLE 類邊界情況。
+- `tools/run_judge_precision_benchmark.ps1`
+  跑 judge benchmark，觀察穩定性、耗時與記憶體表現。
 
-相容性：
+## Legacy
 
-- `tools/setup_dev_env.ps1` 仍可使用，但目前只是轉呼叫 `tools/setup_project.ps1`。
+舊的 CLI / PySide6 腳本已移到 `tools/legacy/`。
+它們仍可作為開發或回歸檢查用途，但不是主線入口。
 
-## Judge 精度壓測
-
-建立期可用以下指令快速確認「多次判題是否穩定 AC、是否異常變慢、是否可能記憶體飆升」：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\run_judge_precision_benchmark.ps1 -Runs 30 -WarnElapsedMs 1800 -CodeMode auto
-```
-
-補充：
-
-- 壓測題目使用 `assets/levels/judge-precision-sum-series.yaml`。
-- 會另外執行 sandbox guard：TLE 應觸發 `TLE`；記憶體壓力測試應觸發 `MLE` 或 `RE`。
-- 若希望檢查不通過時回傳非 0，可加 `-Strict`。
+- `tools/legacy/run_cli_demo.ps1`
+- `tools/legacy/run_pyside6_client.ps1`
+- `tools/legacy/run_game_session_demo.ps1`

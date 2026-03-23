@@ -28,10 +28,10 @@ description: 說明如何參與 Block2Python 專案。用於加入專案、快�
 ```powershell
 # 最短上手
 powershell -ExecutionPolicy Bypass -File tools/setup_dev_env.ps1
-powershell -ExecutionPolicy Bypass -File tools/run_demo.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_cli_demo.ps1
 
 # UI 驗證
-powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
+powershell -ExecutionPolicy Bypass -File tools/legacy/run_pyside6_client.ps1
 ```
 
 更完整的命令與說明：
@@ -43,7 +43,7 @@ powershell -ExecutionPolicy Bypass -File tools/run_ui.ps1
 目前驗證原則：
 
 - `pytest` 是主要測試入口
-- `tools/run_demo.ps1`、`tools/run_ui.ps1`、`tools/run_wasm_smoke.ps1` 是輔助 smoke 驗證
+- `tools/run_demo.ps1`、`tools/run_ui.ps1`、`tools/smoke_wasm.ps1` 是輔助 smoke 驗證
 
 ## 使用原則
 

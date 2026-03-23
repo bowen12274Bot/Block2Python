@@ -1,7 +1,0 @@
-battery_policy_id: battery-basic-io
-full_reward_percent: 20
-toolbox_reward_percent: 10
-pass_threshold_percent: 80
-accepted_pass_values:
-  - 90
-  - 100

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from .errors import IntegrationContractValidationError
 from .models import ActionType, GameState, PlayerAction
@@ -44,6 +44,29 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "judge_summary": state.last_submission.judge_summary,
         }
 
+    map_route = None
+    if state.map_route is not None:
+        map_route = {
+            "route_id": state.map_route.route_id,
+            "quest_id": state.map_route.quest_id,
+            "title": state.map_route.title,
+            "groups": [
+                {
+                    "group_id": group.group_id,
+                    "title": group.title,
+                    "status_key": group.status_key,
+                    "status_label": group.status_label,
+                    "is_enterable": group.is_enterable,
+                    "current_label": group.current_label,
+                    "demo_slot": _serialize_group_slot(group.demo_slot),
+                    "practice_slot": _serialize_group_slot(group.practice_slot),
+                    "demo_route": [_serialize_map_route_step(step) for step in group.demo_route],
+                    "practice_route": [_serialize_map_route_step(step) for step in group.practice_route],
+                }
+                for group in state.map_route.groups
+            ],
+        }
+
     return {
         "mode": state.mode.value,
         "quest_id": state.quest_id,
@@ -54,6 +77,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
         "progress": {
             "completed_node_ids": list(state.progress.completed_node_ids),
             "cleared_level_ids": list(state.progress.cleared_level_ids),
+            "demo_seen_group_ids": list(state.progress.demo_seen_group_ids),
         },
         "available_actions": {
             "advance": state.available_actions.advance,
@@ -61,7 +85,43 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "restart_quest": state.available_actions.restart_quest,
         },
         "last_submission": last_submission,
+        "map_route": map_route,
         "errors": list(state.errors),
+    }
+
+
+def _serialize_map_route_step(step) -> dict[str, object]:
+    return {
+        "step_id": step.step_id,
+        "step_type": step.step_type,
+        "title": step.title,
+        "target_page": step.target_page,
+        "status_key": step.status_key,
+        "status_label": step.status_label,
+        "tracked_node_ids": list(step.tracked_node_ids),
+        "level_ids": list(step.level_ids),
+        "node_id": step.node_id,
+        "scene_id": step.scene_id,
+        "challenge_id": step.challenge_id,
+        "is_planned": step.is_planned,
+        "is_repeatable": step.is_repeatable,
+    }
+
+
+def _serialize_group_slot(slot) -> dict[str, object] | None:
+    if slot is None:
+        return None
+    return {
+        "slot_key": slot.slot_key,
+        "title": slot.title,
+        "status_key": slot.status_key,
+        "status_label": slot.status_label,
+        "is_unlocked": slot.is_unlocked,
+        "viewed": slot.viewed,
+        "completed_count": slot.completed_count,
+        "total_count": slot.total_count,
+        "next_level_id": slot.next_level_id,
+        "entry_level_id": slot.entry_level_id,
     }
 
 
@@ -99,5 +159,9 @@ def deserialize_player_action(payload: object) -> PlayerAction:
     python_code = normalized_payload.get("python_code")
     if python_code is not None and not isinstance(python_code, str):
         raise IntegrationContractValidationError("PlayerAction.payload.python_code must be a string")
+
+    group_id = normalized_payload.get("group_id")
+    if group_id is not None and not isinstance(group_id, str):
+        raise IntegrationContractValidationError("PlayerAction.payload.group_id must be a string")
 
     return PlayerAction(action_type=parsed_action_type, payload=normalized_payload)

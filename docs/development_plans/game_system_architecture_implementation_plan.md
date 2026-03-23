@@ -390,7 +390,7 @@ clients 過渡階段可搬遷：
 - `src/block2python/integration/godot_adapter/`
 - `tests/test_integration_dispatcher.py`
 - `tests/test_bridge_stdio.py`
-- `tools/run_bridge_smoke.ps1`
+- `tools/smoke_bridge.ps1`
 
 完成條件：
 
