@@ -8,6 +8,8 @@ const TOOLBOX_MODULE := "block2python.clients.toolbox_window"
 const TOOLBOX_LOCK_MESSAGE := "Toolbox is active. Close toolbox to resume Python editing."
 const TOOLBOX_RESULT_DIR := "user://toolbox_runtime"
 const BridgeStateStoreScript = preload("res://scripts/bridge/bridge_state_store.gd")
+const WindowAlignmentHelperScript = preload("res://scripts/bridge/window_alignment.gd")
+const WindowLayoutSyncScript = preload("res://scripts/bridge/window_layout_sync.gd")
 const QuestMapMapperScript = preload("res://scripts/map/quest_map_mapper.gd")
 const GameFlowFeedbackPresenterScript = preload("res://scripts/game_flow/game_flow_feedback_presenter.gd")
 const GameFlowMapperScript = preload("res://scripts/game_flow/game_flow_mapper.gd")
@@ -28,8 +30,12 @@ var _state_store: RefCounted
 var _current_page: String = "entry"
 var _toolbox_helper_pid: int = -1
 var _toolbox_result_file: String = ""
+var _toolbox_layout_file: String = ""
 var _toolbox_last_result_token: String = ""
+var _toolbox_last_layout_payload: String = ""
 var _toolbox_active_level_id: String = ""
+var _toolbox_workspace_python_code: String = ""
+var _toolbox_workspace_block_json: Dictionary = {}
 
 func _ready() -> void:
 	_state_store = BridgeStateStoreScript.new()
@@ -152,6 +158,10 @@ func _on_advance_requested() -> void:
 	python_bridge_client.send_advance()
 
 func _on_run_requested(python_code: String) -> void:
+	if _toolbox_helper_pid > 0 and not _toolbox_workspace_block_json.is_empty():
+		practice_screen.set_status("Status: running toolkit...")
+		python_bridge_client.send_verify_toolbox_level(_toolbox_workspace_python_code, _toolbox_workspace_block_json)
+		return
 	practice_screen.set_status("Status: running code...")
 	python_bridge_client.send_run_level(python_code)
 
@@ -169,7 +179,8 @@ func _on_demo_advance_requested() -> void:
 
 func _on_open_toolbox_requested() -> void:
 	if _toolbox_helper_pid > 0:
-		practice_screen.set_status(TOOLBOX_LOCK_MESSAGE)
+		_stop_toolbox_helper(true)
+		practice_screen.set_status("Toolbox closed.")
 		return
 	var practice_view: Dictionary = GameFlowMapperScript.map_game_state(_state_store.get_state()).get("practice_view", {}) if _state_store.has_state() else {}
 	if str(practice_view.get("current_level_id", "")) == "":
@@ -187,8 +198,11 @@ func _on_open_toolbox_requested() -> void:
 		return
 	_toolbox_helper_pid = pid
 	_toolbox_result_file = str(launch_request.get("result_file", ""))
+	_toolbox_layout_file = str(launch_request.get("layout_file", ""))
 	_toolbox_last_result_token = ""
+	_toolbox_last_layout_payload = ""
 	_toolbox_active_level_id = str(practice_view.get("current_level_id", ""))
+	_sync_toolbox_layout_file()
 	practice_screen.set_toolbox_lock(true, TOOLBOX_LOCK_MESSAGE)
 
 func _on_debug_toggled(debug_visible: bool) -> void:
@@ -306,6 +320,7 @@ func _build_toolbox_launch_request(practice_view: Dictionary) -> Dictionary:
 	var result_file: String = runtime_dir.path_join("toolbox_%s_%s.json" % [str(practice_view.get("current_level_id", "level")).replace("/", "_"), str(Time.get_ticks_msec())])
 	if FileAccess.file_exists(result_file):
 		DirAccess.remove_absolute(result_file)
+	var layout_file: String = runtime_dir.path_join("toolbox_layout_%s_%s.json" % [str(practice_view.get("current_level_id", "level")).replace("/", "_"), str(Time.get_ticks_msec())])
 
 	var args := PackedStringArray([
 		"-m",
@@ -316,16 +331,20 @@ func _build_toolbox_launch_request(practice_view: Dictionary) -> Dictionary:
 		result_file,
 		"--html-path",
 		html_path,
+		"--layout-file",
+		layout_file,
 	])
 	return {
 		"python_path": python_path,
 		"args": args,
 		"result_file": result_file,
+		"layout_file": layout_file,
 	}
 
 func _poll_toolbox_helper() -> void:
 	if _toolbox_helper_pid <= 0:
 		return
+	_sync_toolbox_layout_file()
 	_poll_toolbox_result_file()
 
 func _poll_toolbox_result_file() -> void:
@@ -349,17 +368,34 @@ func _poll_toolbox_result_file() -> void:
 	_toolbox_last_result_token = token
 	_handle_toolbox_result(payload)
 
+func _sync_toolbox_layout_file() -> void:
+	if _toolbox_layout_file == "" or _toolbox_active_level_id == "":
+		return
+	var payload: Dictionary = _build_toolbox_layout_payload()
+	_toolbox_last_layout_payload = WindowLayoutSyncScript.sync_layout_file(_toolbox_layout_file, payload, _toolbox_last_layout_payload)
+
+func _build_toolbox_layout_payload() -> Dictionary:
+	var owner_title: String = get_window().title if get_window() != null else str(ProjectSettings.get_setting("application/config/name", "Block2Python Godot POC"))
+	var target_control: Control = practice_screen.practice_panel.get_toolbox_target_control()
+	return WindowAlignmentHelperScript.build_layout_payload(
+		_toolbox_active_level_id,
+		owner_title,
+		int(DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE)),
+		target_control,
+		practice_screen.visible and practice_screen.is_visible_in_tree()
+	)
+
 func _handle_toolbox_result(payload: Dictionary) -> void:
 	var status: String = str(payload.get("status", ""))
-	if status == "verified_request":
+	if status == "toolbox_sync":
 		var level_id: String = str(payload.get("level_id", ""))
 		if level_id != _toolbox_active_level_id:
 			return
 		var python_code: String = str(payload.get("python_code", ""))
 		var block_json: Variant = payload.get("block_json", {})
 		if block_json is Dictionary:
-			practice_screen.set_status("Status: running toolkit code...")
-			python_bridge_client.send_verify_toolbox_level(python_code, block_json)
+			_toolbox_workspace_python_code = python_code
+			_toolbox_workspace_block_json = block_json
 		return
 	if status == "toolbox_closed":
 		_stop_toolbox_helper(false)
@@ -369,8 +405,12 @@ func _stop_toolbox_helper(force_kill: bool) -> void:
 		OS.kill(_toolbox_helper_pid)
 	_toolbox_helper_pid = -1
 	_toolbox_result_file = ""
+	_toolbox_layout_file = ""
 	_toolbox_last_result_token = ""
+	_toolbox_last_layout_payload = ""
 	_toolbox_active_level_id = ""
+	_toolbox_workspace_python_code = ""
+	_toolbox_workspace_block_json = {}
 	practice_screen.set_toolbox_lock(false)
 	if _current_page == "challenge":
 		practice_screen.set_status("Practice flow ready")

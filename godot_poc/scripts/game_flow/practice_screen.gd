@@ -82,6 +82,7 @@ func set_can_next(can_next: bool) -> void:
 func set_toolbox_lock(active: bool, status_message: String = "") -> void:
 	_toolbox_locked = active
 	_toolbox_status_message = status_message
+	toolbox_button.text = "Close Tool Kit" if _toolbox_locked else "Open Tool Kit"
 	_apply_toolbox_lock_state()
 	if _toolbox_locked:
 		status_label.text = _toolbox_status_message if _toolbox_status_message != "" else "Toolbox is active."
@@ -95,15 +96,15 @@ func focus_code_editor() -> void:
 
 func _apply_toolbox_lock_state() -> void:
 	practice_panel.set_code_editable(_base_code_editable and not _toolbox_locked)
-	run_button.disabled = (not _base_can_run) or _toolbox_locked
+	run_button.disabled = not _base_can_run
 	submit_button.disabled = (not _base_can_submit) or _toolbox_locked
 	next_button.disabled = (not _base_can_next) or _toolbox_locked
-	toolbox_button.disabled = (not _base_can_open_toolbox) or _toolbox_locked
+	toolbox_button.disabled = not _base_can_open_toolbox
 	if _toolbox_locked and _toolbox_status_message != "":
 		status_label.text = _toolbox_status_message
 
 func _on_run_button_pressed() -> void:
-	status_label.text = "Status: running code..."
+	status_label.text = "Status: running toolkit..." if _toolbox_locked else "Status: running code..."
 	var python_code: String = practice_panel.get_python_code()
 	run_requested.emit(python_code)
 
@@ -117,7 +118,7 @@ func _on_next_button_pressed() -> void:
 	next_requested.emit()
 
 func _on_toolbox_button_pressed() -> void:
-	status_label.text = "Status: opening toolkit..."
+	status_label.text = "Status: closing toolkit..." if _toolbox_locked else "Status: opening toolkit..."
 	open_toolbox_requested.emit()
 
 func _on_back_button_pressed() -> void:

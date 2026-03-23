@@ -39,6 +39,7 @@ grow_vertical = 2
 color = Color(0.25098, 0.258824, 0.572549, 0.22)
 
 [node name="MainFrame" type="PanelContainer" parent="." unique_id=1030003]
+modulate = Color(0.92, 0.97, 1, 0.98)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -51,7 +52,6 @@ offset_right = 600.0
 offset_bottom = 360.0
 grow_horizontal = 2
 grow_vertical = 2
-modulate = Color(0.92, 0.97, 1, 0.98)
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=987708837]
 layout_mode = 1
@@ -78,9 +78,9 @@ size_flags_vertical = 3
 theme_override_constants/separation = 14
 
 [node name="TopBar" type="PanelContainer" parent="Margin/Root" unique_id=827992744]
+modulate = Color(0.9, 0.96, 1, 0.92)
 custom_minimum_size = Vector2(0, 68)
 layout_mode = 2
-modulate = Color(0.9, 0.96, 1, 0.92)
 
 [node name="TopBarMargin" type="MarginContainer" parent="Margin/Root/TopBar" unique_id=1440076081]
 layout_mode = 2
@@ -143,8 +143,8 @@ visible = false
 modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
 layout_mode = 2
 size_flags_horizontal = 3
-horizontal_alignment = 1
 text = "Practice flow is idle."
+horizontal_alignment = 1
 
 [node name="Body" type="HBoxContainer" parent="Margin/Root" unique_id=218947452]
 layout_mode = 2
@@ -160,10 +160,10 @@ size_flags_stretch_ratio = 0.92
 theme_override_constants/separation = 14
 
 [node name="MissionPanel" type="PanelContainer" parent="Margin/Root/Body/LeftColumn" unique_id=288450360]
+modulate = Color(0.9, 0.96, 1, 0.9)
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 1.7
-modulate = Color(0.9, 0.96, 1, 0.9)
 
 [node name="MissionMargin" type="MarginContainer" parent="Margin/Root/Body/LeftColumn/MissionPanel" unique_id=1249674771]
 layout_mode = 2
@@ -195,10 +195,10 @@ theme_override_font_sizes/normal_font_size = 16
 text = "No mission loaded yet."
 
 [node name="BatteryPanel" type="PanelContainer" parent="Margin/Root/Body/LeftColumn" unique_id=634340887]
+modulate = Color(0.9, 0.96, 1, 0.9)
 custom_minimum_size = Vector2(0, 148)
 layout_mode = 2
 size_flags_vertical = 0
-modulate = Color(0.9, 0.96, 1, 0.9)
 
 [node name="BatteryMargin" type="MarginContainer" parent="Margin/Root/Body/LeftColumn/BatteryPanel" unique_id=647335298]
 layout_mode = 2
@@ -242,10 +242,10 @@ size_flags_stretch_ratio = 2.1
 theme_override_constants/separation = 14
 
 [node name="PracticePanel" type="PanelContainer" parent="Margin/Root/Body/CenterColumn" unique_id=1545154746]
+modulate = Color(0.9, 0.96, 1, 0.9)
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 2.0
-modulate = Color(0.9, 0.96, 1, 0.9)
 script = ExtResource("2_practice")
 
 [node name="Margin" type="MarginContainer" parent="Margin/Root/Body/CenterColumn/PracticePanel" unique_id=1904554966]
@@ -274,9 +274,9 @@ text = "EDITOR"
 modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
 layout_mode = 2
 size_flags_horizontal = 3
-horizontal_alignment = 2
 theme_override_font_sizes/font_size = 13
 text = "Python / Block workspace"
+horizontal_alignment = 2
 
 [node name="CodeInput" type="TextEdit" parent="Margin/Root/Body/CenterColumn/PracticePanel/Margin/Root" unique_id=1354777734]
 custom_minimum_size = Vector2(0, 280)
@@ -285,10 +285,10 @@ size_flags_vertical = 3
 placeholder_text = "Write Python code here."
 
 [node name="OutputPanel" type="PanelContainer" parent="Margin/Root/Body/CenterColumn" unique_id=864563411]
+modulate = Color(0.9, 0.96, 1, 0.9)
 custom_minimum_size = Vector2(0, 170)
 layout_mode = 2
 size_flags_vertical = 0
-modulate = Color(0.9, 0.96, 1, 0.9)
 script = ExtResource("3_feedback")
 
 [node name="FeedbackMargin" type="MarginContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel" unique_id=1869321838]
@@ -329,10 +329,10 @@ size_flags_stretch_ratio = 0.86
 theme_override_constants/separation = 14
 
 [node name="AssistantPanel" type="PanelContainer" parent="Margin/Root/Body/RightColumn" unique_id=763061505]
+modulate = Color(0.9, 0.96, 1, 0.9)
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 1.2
-modulate = Color(0.9, 0.96, 1, 0.9)
 
 [node name="AssistantMargin" type="MarginContainer" parent="Margin/Root/Body/RightColumn/AssistantPanel" unique_id=1738542169]
 layout_mode = 2
@@ -371,10 +371,10 @@ placeholder_text = "Chat input is coming in a later iteration."
 editable = false
 
 [node name="ToolkitPanel" type="PanelContainer" parent="Margin/Root/Body/RightColumn" unique_id=1019384351]
+modulate = Color(0.9, 0.96, 1, 0.9)
 custom_minimum_size = Vector2(0, 136)
 layout_mode = 2
 size_flags_vertical = 0
-modulate = Color(0.9, 0.96, 1, 0.9)
 
 [node name="ToolkitMargin" type="MarginContainer" parent="Margin/Root/Body/RightColumn/ToolkitPanel" unique_id=1946423185]
 layout_mode = 2

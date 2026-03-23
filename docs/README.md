@@ -13,6 +13,7 @@
 - 開發流程：`docs/contributing/developer_workflow.md`
 - 程式碼規範：`docs/contributing/code_guidelines.md`
 - AI 協作：`docs/contributing/ai_collaboration.md`
+- Godot 外部工具視窗對位：`docs/contributing/toolbox_window_alignment_guide.md`
 
 ## 專案核心文件
 
