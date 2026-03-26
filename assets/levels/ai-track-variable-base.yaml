@@ -1,0 +1,23 @@
+level_id: ai-track-variable-base
+title: Variable Base
+chapter_id: ai-integration
+order_index: 4102
+prerequisite_level_ids:
+  - ai-track-input-gate
+next_level_ids:
+  - ai-track-if-canyon
+prompt: |
+  輸入兩個整數 a, b。
+  輸出兩行：
+  sum=<a+b>
+  diff=<a-b>
+learning_markdown: |
+  目標：練習把輸入存進變數，並用變數完成運算與格式化輸出。
+testcase_dir: cases/ai-track-variable-base
+judge_policy:
+  time_limit_ms: 3000
+  memory_limit_mb: 256
+metadata:
+  stage: ai-integration-foundation
+  track: ai-track
+  slot: variable-base

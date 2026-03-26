@@ -1,0 +1,22 @@
+level_id: ai-track-if-canyon
+title: If Canyon
+chapter_id: ai-integration
+order_index: 4103
+prerequisite_level_ids:
+  - ai-track-variable-base
+next_level_ids:
+  - ai-track-loop-lab
+prompt: |
+  讀入一個整數 score。
+  如果 score >= 60，輸出 PASS；否則輸出 FAIL。
+learning_markdown: |
+  目標：練習 if/else 條件分支。
+  只需要輸出單一判斷結果。
+testcase_dir: cases/ai-track-if-canyon
+judge_policy:
+  time_limit_ms: 3000
+  memory_limit_mb: 256
+metadata:
+  stage: ai-integration-foundation
+  track: ai-track
+  slot: if-canyon

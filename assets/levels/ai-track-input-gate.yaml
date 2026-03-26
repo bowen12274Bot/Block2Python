@@ -1,0 +1,20 @@
+level_id: ai-track-input-gate
+title: Input Gate
+chapter_id: ai-integration
+order_index: 4101
+next_level_ids:
+  - ai-track-variable-base
+prompt: |
+  請讀取一行文字 name，輸出：
+  Hello, <name>!
+learning_markdown: |
+  目標：練習最基本輸入與字串輸出格式。
+  你需要使用 input() 讀取資料，並組出固定格式的回應字串。
+testcase_dir: cases/ai-track-input-gate
+judge_policy:
+  time_limit_ms: 3000
+  memory_limit_mb: 256
+metadata:
+  stage: ai-integration-foundation
+  track: ai-track
+  slot: input-gate
