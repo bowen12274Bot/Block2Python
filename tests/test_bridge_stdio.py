@@ -42,11 +42,44 @@ def test_bridge_server_persists_session_across_requests() -> None:
     last_response = responses[-1]
     assert last_response["ok"] is True
     assert last_response["state"]["mode"] == "challenge"
-    assert last_response["state"]["challenge"]["challenge_id"] == "challenge-group-01-practice"
-    assert last_response["state"]["challenge"]["current_level_id"] == "group-01-practice-02"
+    assert last_response["state"]["practice"]["challenge_id"] == "challenge-group-01-practice"
+    assert last_response["state"]["practice"]["current_level_id"] == "group-01-practice-01"
+    assert last_response["state"]["practice"]["can_next"] is True
     assert last_response["state"]["progress"]["cleared_level_ids"] == ["group-01-practice-01"]
     assert last_response["state"]["last_submission"]["level_id"] == "group-01-practice-01"
     assert last_response["state"]["last_submission"]["judge_status"] == "AC"
+
+
+def test_bridge_server_accepts_unicode_python_code_payload() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        "\n".join(
+            [
+                '{"action":{"action_type":"advance","payload":{}}}',
+                '{"action":{"action_type":"advance","payload":{}}}',
+                '{"action":{"action_type":"advance","payload":{}}}',
+                json.dumps(
+                    {
+                        "action": {
+                            "action_type": "run_level",
+                            "payload": {"python_code": "print(\"??\")\n", "block_json": None},
+                        }
+                    },
+                    ensure_ascii=False,
+                ),
+            ]
+        )
+        + "\n"
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    responses = [json.loads(line) for line in outstream.getvalue().splitlines() if line.strip()]
+    last_response = responses[-1]
+    assert last_response["ok"] is True
+    assert last_response["state"]["mode"] == "challenge"
+    assert last_response["state"]["last_submission"]["kind"] == "run_result"
 
 
 def test_bridge_server_returns_error_for_invalid_json() -> None:

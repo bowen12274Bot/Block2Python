@@ -80,7 +80,7 @@ class MapRouteRuntimeSyncMixin:
         completed_node_ids = set(self.runtime.completed_node_ids)
         for group in route_spec.groups:
             for step in group.demo_route:
-                if step.step_type not in {"challenge", "demo"}:
+                if step.step_type != "demo":
                     continue
                 if step.node_id == current_node_id:
                     self.demo_seen_group_ids.add(group.group_id)
@@ -89,3 +89,4 @@ class MapRouteRuntimeSyncMixin:
                 if tracked_ids and tracked_ids & completed_node_ids:
                     self.demo_seen_group_ids.add(group.group_id)
                     break
+

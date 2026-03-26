@@ -44,8 +44,11 @@ def test_assemble_runtime_game_slice_against_levels_assets() -> None:
         "group-01-practice-04",
         "group-01-practice-05",
     ]
-    assert practice.toolbox_policy is None
-    assert practice.battery_policy is None
+    assert practice.toolbox_policy is not None
+    assert practice.toolbox_policy.toolbox_id == "toolbox-group-01"
+    assert practice.toolbox_policy.allow_toolbox_in_practice is True
+    assert practice.battery_policy is not None
+    assert practice.battery_policy.battery_policy_id == "battery-group-01"
 
     group_02_practice = assembled.challenges["challenge-group-02-practice"]
     assert [level.level_id for level in group_02_practice.levels] == [
@@ -136,6 +139,11 @@ def test_game_runtime_walks_runtime_quest() -> None:
     assert state.scene is None
     assert state.challenge is not None
     assert state.challenge.challenge_id == "challenge-group-01-demo"
+
+    route = assembled.map_routes["main-map-routes"]
+    group_one_demo = route.groups[0].demo_route[2]
+    assert group_one_demo.step_type == "demo"
+    assert group_one_demo.target_page == "demo"
 def test_game_runtime_rejects_unknown_quest() -> None:
     levels = load_levels(Path("assets/levels"))
     bundle = load_game_content(Path("assets/game_content"))
@@ -241,3 +249,4 @@ def _make_temp_test_dir() -> Path:
     path = Path(".tmp") / f"test-game-content-{uuid.uuid4().hex}"
     path.mkdir(parents=True, exist_ok=False)
     return path
+

@@ -9,6 +9,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--level-id", required=True)
     parser.add_argument("--result-file", required=True)
     parser.add_argument("--html-path", required=True)
+    parser.add_argument("--layout-file", required=True)
     return parser
 
 
@@ -27,6 +28,6 @@ def main() -> int:
         level_id=args.level_id,
         result_file=Path(args.result_file),
         html_path=Path(args.html_path),
+        layout_file=Path(args.layout_file),
     )
-    window.show()
     return app.exec()

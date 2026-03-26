@@ -76,6 +76,27 @@ func send_advance() -> void:
 	})
 
 
+func send_run_level(python_code: String) -> void:
+	send_request({
+		"action": {
+			"action_type": "run_level",
+			"payload": {
+				"python_code": python_code,
+				"block_json": null,
+			},
+		},
+	})
+
+
+func send_next_level() -> void:
+	send_request({
+		"action": {
+			"action_type": "next_level",
+			"payload": {},
+		},
+	})
+
+
 func send_submit_level(python_code: String) -> void:
 	send_request({
 		"action": {

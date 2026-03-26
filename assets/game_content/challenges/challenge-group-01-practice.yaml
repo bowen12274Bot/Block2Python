@@ -7,8 +7,9 @@ level_ids:
   - group-01-practice-03
   - group-01-practice-04
   - group-01-practice-05
-toolbox_policy_id: null
-battery_policy_id: null
+toolbox_policy_id: toolbox-group-01
+battery_policy_id: battery-group-01
 metadata:
   stage: map-format-skeleton
   group_id: group-01
+

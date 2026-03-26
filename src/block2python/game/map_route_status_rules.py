@@ -17,7 +17,7 @@ class MapRouteStatusRulesMixin:
         runtime_group: GroupRuntimeState,
     ) -> str:
         if slot_key == "demo":
-            if any(step.status_key == "current" and step.step_type in {"challenge", "demo"} for step in route_steps) and not runtime_group.completed:
+            if any(step.status_key == "current" and step.step_type == "demo" for step in route_steps) and not runtime_group.completed:
                 return "current"
             if runtime_group.demo_seen:
                 return "completed"
@@ -39,7 +39,7 @@ class MapRouteStatusRulesMixin:
     def _is_demo_slot_unlocked(route_steps: tuple[MapRouteStepState, ...], runtime_group: GroupRuntimeState) -> bool:
         if runtime_group.unlock_state == "locked":
             return False
-        return any(step.step_type in {"challenge", "demo"} and step.status_key in {"available", "current", "completed", "reviewing"} for step in route_steps)
+        return any(step.step_type == "demo" and step.status_key in {"available", "current", "completed", "reviewing"} for step in route_steps)
 
     def _is_group_demo_unlocked(
         self,
@@ -48,7 +48,7 @@ class MapRouteStatusRulesMixin:
         cleared_level_ids: set[str],
     ) -> bool:
         for step in group.demo_route:
-            if step.step_type in {"challenge", "demo"}:
+            if step.step_type == "demo":
                 return True
             if step.step_type == "story" and not self._is_route_step_spec_completed(step, completed_node_ids, cleared_level_ids):
                 return False
@@ -222,7 +222,7 @@ class MapRouteStatusRulesMixin:
     ) -> bool:
         if group_id is None or demo_seen_group_ids is None:
             return False
-        return step.step_type in {"challenge", "demo"} and group_id in demo_seen_group_ids
+        return step.step_type == "demo" and group_id in demo_seen_group_ids
 
     def _is_route_step_available(
         self,
@@ -264,3 +264,4 @@ class MapRouteStatusRulesMixin:
         if status_key == "planned":
             return "Planned"
         return "Locked"
+

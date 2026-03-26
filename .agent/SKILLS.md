@@ -30,3 +30,5 @@
   - 用於以 Codeforces/testlib 標準流程生成題目，包含規格拆解、generator/validator/checker、測資分層與對拍驗證。
 - `encoding-safe-writes`
   - 用於修正亂碼、避免 PowerShell 寫檔改壞編碼，並驗證 UTF-8 位元組是否正確。
+- `external-window-alignment`
+  - 用於處理 Godot 與外部 PySide6 / Win32 工具視窗的對位、layout payload、DPI 與 Windows 定位邏輯。

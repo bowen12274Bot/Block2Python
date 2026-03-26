@@ -1,6 +1,7 @@
 from block2python.integration.contracts import (
     ActionType,
     AvailableActions,
+    PracticeState,
     DemoState,
     DialogueBlockState,
     GameMode,
@@ -36,9 +37,12 @@ def test_game_state_contract_supports_scene_payload() -> None:
             cleared=True,
             block_passed=True,
             analysis_status="PASS",
+            kind="submission",
+            status_label="Passed",
             analysis_summary="OK",
             judge_status="AC",
             judge_summary="Accepted",
+            output_text="Submit output:\nanalysis=OK\njudge=Accepted",
         ),
     )
 
@@ -52,6 +56,7 @@ def test_game_state_contract_supports_scene_payload() -> None:
     assert state.available_actions.submit is False
     assert state.last_submission is not None
     assert state.last_submission.judge_status == "AC"
+    assert state.last_submission.status_label == "Passed"
 
 
 def test_game_state_contract_supports_demo_payload() -> None:
@@ -63,8 +68,19 @@ def test_game_state_contract_supports_demo_payload() -> None:
         demo=DemoState(
             demo_id="challenge-group-01-demo",
             title="Group 01 Demo",
-            body="Placeholder demo body",
+            group_id="group-01",
+            level_id="group-01-demo",
+            prompt="Demo prompt",
+            learning_markdown="Learn print().",
+            story_intro_markdown="Byte explains the task.",
+            story_outro_markdown="Next up: practice.",
+            can_advance=True,
+            body="Demo prompt\n\nLearn print().",
             current_level_id="group-01-demo",
+            unlock_blocks=(
+                {"title": "print", "description": "Output text to the screen."},
+                {"title": "input", "description": "Read user input into your program."},
+            ),
         ),
         available_actions=AvailableActions(advance=True),
     )
@@ -72,8 +88,58 @@ def test_game_state_contract_supports_demo_payload() -> None:
     assert state.mode is GameMode.DEMO
     assert state.demo is not None
     assert state.demo.demo_id == "challenge-group-01-demo"
+    assert state.demo.group_id == "group-01"
+    assert state.demo.level_id == "group-01-demo"
+    assert state.demo.learning_markdown == "Learn print()."
+    assert state.demo.unlock_blocks[0]["title"] == "print"
+    assert state.demo.can_advance is True
     assert state.available_actions.advance is True
-    assert state.challenge is None
+    assert state.practice is None
+
+
+def test_game_state_contract_supports_practice_payload() -> None:
+    state = GameState(
+        mode=GameMode.CHALLENGE,
+        quest_id="quest-main-map",
+        node_id="group-01-practice",
+        practice=PracticeState(
+            challenge_id="challenge-group-01-practice",
+            challenge_type="practice",
+            group_id="group-01",
+            level_id="group-01-practice-02",
+            level_title="Greeting Again",
+            prompt="Print another greeting.",
+            progress_current=2,
+            progress_total=5,
+            is_review_mode=True,
+            toolbox_allowed=True,
+            toolbox_used=True,
+            can_run=True,
+            can_submit=True,
+            can_next=False,
+            mission_text="Print another greeting.",
+            battery_percent=80,
+            battery_threshold_percent=80,
+            assistant_messages=("Byte: Read the mission.",),
+            current_level_id="group-01-practice-02",
+            current_level_title="Greeting Again",
+            current_level_prompt="Print another greeting.",
+        ),
+        available_actions=AvailableActions(run=True, submit=True),
+    )
+
+    assert state.practice is not None
+    assert state.practice.progress_current == 2
+    assert state.practice.progress_total == 5
+    assert state.practice.is_review_mode is True
+    assert state.practice.toolbox_allowed is True
+    assert state.practice.toolbox_used is True
+    assert state.practice.can_run is True
+    assert state.practice.can_submit is True
+    assert state.practice.can_next is False
+    assert state.practice.mission_text == "Print another greeting."
+    assert state.practice.battery_percent == 80
+    assert state.practice.assistant_messages == ("Byte: Read the mission.",)
 
 
 def test_player_action_contract_supports_submit_payload() -> None:

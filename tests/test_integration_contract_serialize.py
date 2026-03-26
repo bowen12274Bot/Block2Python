@@ -3,7 +3,7 @@ import pytest
 from block2python.integration.contracts import (
     ActionType,
     AvailableActions,
-    ChallengeState,
+    PracticeState,
     DemoState,
     DialogueBlockState,
     GameMode,
@@ -33,9 +33,25 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             title="Practice Unlock",
             dialogue_blocks=(DialogueBlockState(speaker="Byte", text="Try it."),),
         ),
-        challenge=ChallengeState(
+        practice=PracticeState(
             challenge_id="challenge-group-01-practice",
             challenge_type="practice",
+            group_id="group-01",
+            level_id="group-01-practice-01",
+            level_title="Group 01 Practice 01 Hello",
+            prompt="Print a greeting.",
+            progress_current=1,
+            progress_total=5,
+            is_review_mode=False,
+            toolbox_allowed=True,
+            toolbox_used=True,
+            can_run=True,
+            can_submit=True,
+            can_next=False,
+            mission_text="Print a greeting.",
+            battery_percent=80,
+            battery_threshold_percent=80,
+            assistant_messages=("Byte: Read the mission.",),
             current_level_id="group-01-practice-01",
             current_level_title="Group 01 Practice 01 Hello",
             current_level_prompt="Print a greeting.",
@@ -52,11 +68,15 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             cleared=True,
             block_passed=True,
             analysis_status="PASS",
+            kind="submission",
+            status_label="Passed",
             analysis_summary="OK",
             judge_status="AC",
             judge_summary="Accepted",
             verification_only=False,
             answer_correct=True,
+            output_text="Submit output:\nanalysis=OK\njudge=Accepted",
+            details={"judge_status": "AC"},
         ),
         errors=("none",),
     )
@@ -71,19 +91,32 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     }
     assert payload["intro_completed"] is True
     assert payload["scene"]["scene_id"] == "scene-practice-unlock"
-    assert payload["challenge"]["current_level_id"] == "group-01-practice-01"
-    assert payload["challenge"]["current_level_prompt"] == "Print a greeting."
+    assert payload["practice"]["current_level_id"] == "group-01-practice-01"
+    assert payload["practice"]["level_id"] == "group-01-practice-01"
+    assert payload["practice"]["progress_total"] == 5
+    assert payload["practice"]["toolbox_allowed"] is True
+    assert payload["practice"]["can_run"] is True
+    assert payload["practice"]["can_next"] is False
+    assert payload["practice"]["mission_text"] == "Print a greeting."
+    assert payload["practice"]["battery_percent"] == 80
+    assert payload["practice"]["assistant_messages"] == ["Byte: Read the mission."]
+    assert "challenge" not in payload
     assert payload["progress"]["completed_node_ids"] == ["main-map-entry", "group-01-story"]
     assert payload["progress"]["demo_seen_group_ids"] == ["group-01"]
     assert payload["progress"]["toolbox_used_level_ids"] == ["group-01-practice-01"]
     assert payload["available_actions"] == {
         "advance": False,
+        "run": False,
         "submit": True,
+        "next_level": False,
         "restart_quest": True,
     }
     assert payload["last_submission"]["judge_status"] == "AC"
+    assert payload["last_submission"]["status_label"] == "Passed"
+    assert payload["last_submission"]["details"] == {"judge_status": "AC"}
     assert payload["last_submission"]["verification_only"] is False
     assert payload["last_submission"]["answer_correct"] is True
+    assert payload["last_submission"]["output_text"] == "Submit output:\nanalysis=OK\njudge=Accepted"
     assert payload["errors"] == ["none"]
 
 
@@ -96,8 +129,19 @@ def test_serialize_demo_mode_emits_demo_payload() -> None:
         demo=DemoState(
             demo_id="challenge-group-01-demo",
             title="Group 01 Demo",
+            group_id="group-01",
+            level_id="group-01-demo",
+            prompt="Demo prompt",
+            learning_markdown="Learn print().",
+            story_intro_markdown="Intro",
+            story_outro_markdown="Outro",
+            can_advance=True,
             body="Placeholder demo body",
             current_level_id="group-01-demo",
+            unlock_blocks=(
+                {"title": "print", "description": "Output text to the screen."},
+                {"title": "input", "description": "Read user input into your program."},
+            ),
         ),
         available_actions=AvailableActions(advance=True),
     )
@@ -108,10 +152,22 @@ def test_serialize_demo_mode_emits_demo_payload() -> None:
     assert payload["demo"] == {
         "demo_id": "challenge-group-01-demo",
         "title": "Group 01 Demo",
+        "group_id": "group-01",
+        "level_id": "group-01-demo",
+        "prompt": "Demo prompt",
+        "learning_markdown": "Learn print().",
+        "story_intro_markdown": "Intro",
+        "story_outro_markdown": "Outro",
+        "can_advance": True,
         "body": "Placeholder demo body",
         "current_level_id": "group-01-demo",
+        "unlock_blocks": [
+            {"title": "print", "description": "Output text to the screen."},
+            {"title": "input", "description": "Read user input into your program."},
+        ],
     }
-    assert payload["challenge"] is None
+    assert payload["practice"] is None
+    assert "challenge" not in payload
 
 
 def test_player_action_round_trip_serialize_and_deserialize() -> None:

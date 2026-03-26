@@ -1,27 +1,30 @@
 from __future__ import annotations
 
+import ctypes
 import json
 import uuid
 from pathlib import Path
 
 from block2python.clients.pyside6.blockly_embed import BlocklyEmbed, BlocklyOutput
+from block2python.clients.pyside6.window_alignment import apply_window_rect, compute_target_rect
 
 try:
-    from PySide6.QtCore import QEvent, QPoint, Qt
-    from PySide6.QtGui import QCloseEvent, QMouseEvent
-    from PySide6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
+    from PySide6.QtCore import QTimer, Qt
+    from PySide6.QtGui import QCloseEvent
+    from PySide6.QtWidgets import QVBoxLayout, QWidget
 except ModuleNotFoundError as e:  # pragma: no cover
     raise RuntimeError("PySide6 is required to use the toolbox window.") from e
 
 
 class ToolboxWindow(QWidget):
-    def __init__(self, level_id: str, result_file: Path, html_path: Path) -> None:
+    def __init__(self, level_id: str, result_file: Path, html_path: Path, layout_file: Path) -> None:
         super().__init__()
         self._level_id = level_id
         self._result_file = result_file
         self._html_path = html_path
-        self._drag_offset: QPoint | None = None
+        self._layout_file = layout_file
         self._closed_written = False
+        self._last_layout_signature: tuple[int, int, int, int, bool] | None = None
 
         self.setWindowTitle("Logic Toolbox")
         self.setWindowFlag(Qt.WindowType.Tool, True)
@@ -30,31 +33,26 @@ class ToolboxWindow(QWidget):
         self.resize(920, 680)
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(12, 12, 12, 12)
-        root.setSpacing(10)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
 
         self._blockly = BlocklyEmbed()
         self._blockly.output_received.connect(self._on_blockly_output)
+        self._blockly.message_received.connect(self._on_blockly_message)
         self._blockly.load_placeholder(self._html_path)
         root.addWidget(self._blockly, 1)
 
-        self._footer = QFrame()
-        self._footer.setObjectName("toolboxFooter")
-        self._footer.installEventFilter(self)
-        footer_layout = QHBoxLayout(self._footer)
-        footer_layout.setContentsMargins(8, 8, 8, 8)
-        footer_layout.setSpacing(8)
-        footer_layout.addStretch(1)
+        self._sync_timer = QTimer(self)
+        self._sync_timer.setInterval(700)
+        self._sync_timer.timeout.connect(self._request_workspace_sync)
+        self._sync_timer.start()
 
-        self._verify_button = QPushButton("Verify")
-        self._verify_button.clicked.connect(self._on_verify_clicked)
-        footer_layout.addWidget(self._verify_button)
-
-        self._close_button = QPushButton("Close Toolbox")
-        self._close_button.clicked.connect(self._on_close_clicked)
-        footer_layout.addWidget(self._close_button)
-
-        root.addWidget(self._footer)
+        self._layout_timer = QTimer(self)
+        self._layout_timer.setInterval(120)
+        self._layout_timer.timeout.connect(self._refresh_layout)
+        self._layout_timer.start()
+        self.hide()
+        self._refresh_layout()
 
         self.setStyleSheet(
             """
@@ -62,34 +60,8 @@ class ToolboxWindow(QWidget):
                 background: #1f1f1f;
                 color: #f3f3f3;
             }
-            QFrame#toolboxFooter {
-                background: #2b2b2b;
-                border-radius: 10px;
-            }
-            QPushButton {
-                padding: 8px 14px;
-                border-radius: 8px;
-                background: #3b3b3b;
-                color: #f3f3f3;
-            }
-            QPushButton:hover {
-                background: #4a4a4a;
-            }
             """
         )
-
-    def eventFilter(self, watched: object, event: QEvent) -> bool:
-        if watched is self._footer and isinstance(event, QMouseEvent):
-            if event.type() == QEvent.Type.MouseButtonPress and event.button() == Qt.MouseButton.LeftButton:
-                self._drag_offset = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-                return True
-            if event.type() == QEvent.Type.MouseMove and self._drag_offset is not None:
-                self.move(event.globalPosition().toPoint() - self._drag_offset)
-                return True
-            if event.type() == QEvent.Type.MouseButtonRelease:
-                self._drag_offset = None
-                return True
-        return super().eventFilter(watched, event)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if not self._closed_written:
@@ -101,26 +73,62 @@ class ToolboxWindow(QWidget):
             self._closed_written = True
         super().closeEvent(event)
 
-    def _on_verify_clicked(self) -> None:
+    def _request_workspace_sync(self) -> None:
         self._blockly.request_output()
 
-    def _on_close_clicked(self) -> None:
-        self._write_result({
-            "status": "toolbox_closed",
-            "level_id": self._level_id,
-            "request_id": uuid.uuid4().hex,
-        })
-        self._closed_written = True
-        self.close()
+    def _refresh_layout(self) -> None:
+        try:
+            raw = json.loads(self._layout_file.read_text(encoding="utf-8"))
+        except Exception:
+            return
+        if not isinstance(raw, dict):
+            return
+        if str(raw.get("level_id", "")) not in {"", self._level_id}:
+            return
+        if not bool(raw.get("visible", False)):
+            self.hide()
+            self._last_layout_signature = None
+            return
+
+        target_rect = compute_target_rect(raw)
+        if target_rect is None:
+            return
+        x, y, move_width, move_height = target_rect
+
+        signature = (x, y, move_width, move_height, True)
+        if signature == self._last_layout_signature:
+            return
+        self._last_layout_signature = signature
+
+        if not self.isVisible():
+            self.setFixedSize(move_width, move_height)
+            self.move(x, y)
+            self.show()
+        if ctypes.windll.user32 is not None:
+            apply_window_rect(int(self.winId()), x, y, move_width, move_height)
+        else:
+            self.setFixedSize(move_width, move_height)
+            self.move(x, y)
 
     def _on_blockly_output(self, output: BlocklyOutput) -> None:
         self._write_result(
             {
-                "status": "verified_request",
+                "status": "toolbox_sync",
                 "request_id": uuid.uuid4().hex,
                 "level_id": self._level_id,
                 "python_code": output.python_code,
                 "block_json": output.block_json,
+            }
+        )
+
+    def _on_blockly_message(self, kind: str, message: str) -> None:
+        normalized_status = "toolbox_error" if kind == "error" else "toolbox_status"
+        self._write_result(
+            {
+                "status": normalized_status,
+                "request_id": uuid.uuid4().hex,
+                "level_id": self._level_id,
+                "message": message,
             }
         )
 

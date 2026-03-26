@@ -13,7 +13,7 @@ static func map_game_state(state: Dictionary) -> Dictionary:
     var player_profile_view: Dictionary = _build_player_profile_view(state)
     var scene_view: Dictionary = _build_scene_view(state, meta)
     var demo_view: Dictionary = _build_demo_view(state)
-    var challenge_view: Dictionary = _build_challenge_view(state)
+    var practice_view: Dictionary = _build_practice_view(state)
     var action_view: Dictionary = build_action_view(state)
 
     return {
@@ -21,7 +21,7 @@ static func map_game_state(state: Dictionary) -> Dictionary:
         "player_profile_view": player_profile_view,
         "scene_view": scene_view,
         "demo_view": demo_view,
-        "challenge_view": challenge_view,
+        "practice_view": practice_view,
         "action_view": action_view,
     }
 
@@ -71,8 +71,7 @@ static func _build_scene_view(state: Dictionary, meta: Dictionary) -> Dictionary
     if mode_value == "scene":
         body = "Scene mode active, but no dialogue blocks are available."
         if not lines.is_empty():
-            body = "
-".join(lines)
+            body = "\n".join(lines)
 
     var current_index: int = 0
     var total_blocks: int = dialogue_views.size()
@@ -103,53 +102,134 @@ static func _build_scene_view(state: Dictionary, meta: Dictionary) -> Dictionary
 
 
 static func _build_demo_view(state: Dictionary) -> Dictionary:
-    var demo_id: String = ""
-    var title: String = "Demo Placeholder"
-    var body: String = "This demo flow is not defined yet."
-    var current_level_id: String = ""
+    var default_title: String = "Demo Placeholder"
+    var default_body: String = "This demo flow is not defined yet."
+    var demo_view: Dictionary = {
+        "demo_id": "",
+        "title": default_title,
+        "group_id": "",
+        "level_id": "",
+        "prompt": "",
+        "learning_markdown": "",
+        "story_intro_markdown": "",
+        "story_outro_markdown": "",
+        "can_advance": false,
+        "body": default_body,
+        "current_level_id": "",
+        "unlock_blocks": [],
+    }
+
     var demo: Variant = state.get("demo", null)
     if demo is Dictionary:
-        demo_id = str(demo.get("demo_id", ""))
-        title = str(demo.get("title", title))
-        body = str(demo.get("body", body))
-        current_level_id = str(demo.get("current_level_id", ""))
+        demo_view["demo_id"] = str(demo.get("demo_id", ""))
+        demo_view["title"] = str(demo.get("title", default_title))
+        demo_view["group_id"] = str(demo.get("group_id", ""))
+        demo_view["level_id"] = str(demo.get("level_id", demo.get("current_level_id", "")))
+        demo_view["prompt"] = str(demo.get("prompt", ""))
+        demo_view["learning_markdown"] = str(demo.get("learning_markdown", ""))
+        demo_view["story_intro_markdown"] = str(demo.get("story_intro_markdown", ""))
+        demo_view["story_outro_markdown"] = str(demo.get("story_outro_markdown", ""))
+        demo_view["can_advance"] = bool(demo.get("can_advance", false))
+        demo_view["body"] = str(demo.get("body", default_body))
+        demo_view["current_level_id"] = str(demo.get("current_level_id", demo_view["level_id"]))
+        demo_view["unlock_blocks"] = _normalize_unlock_blocks(demo.get("unlock_blocks", _default_demo_unlock_blocks(str(demo_view.get("group_id", "")))))
 
-    return {
-        "demo_id": demo_id,
-        "title": title,
-        "body": body,
-        "current_level_id": current_level_id,
+    return demo_view
+
+
+static func _normalize_unlock_blocks(value: Variant) -> Array[Dictionary]:
+    var blocks: Array[Dictionary] = []
+    if value is Array:
+        for block_variant in value:
+            if block_variant is Dictionary:
+                blocks.append(block_variant)
+    return blocks
+
+
+static func _default_demo_unlock_blocks(group_id: String) -> Array[Dictionary]:
+    match group_id:
+        "group-01":
+            return [
+                {"title": "print", "description": "Output text to the screen."},
+                {"title": "input", "description": "Read user input into your program."},
+            ]
+        _:
+            return []
+
+
+static func _build_practice_view(state: Dictionary) -> Dictionary:
+    var practice_title: String = "Practice"
+    var practice_view: Dictionary = {
+        "title": practice_title,
+        "group_id": "",
+        "level_id": "",
+        "level_title": "",
+        "prompt": "",
+        "progress_current": 0,
+        "progress_total": 0,
+        "progress_label": "Progress: --",
+        "is_review_mode": false,
+        "toolbox_allowed": false,
+        "toolbox_used": false,
+        "can_run": false,
+        "can_submit": false,
+        "can_next": false,
+        "challenge_type": "",
+        "mission_text": "No mission loaded yet.",
+        "battery_percent": 0,
+        "battery_threshold_percent": 80,
+        "assistant_messages": [],
+        "assistant_chat_text": "Byte: Practice assistant is standing by.",
+        "toolkit_hint": "Open the toolkit when you need help exploring a block-based solution.",
+        "current_level_id": "",
+        "current_level_title": "",
+        "current_level_prompt": "",
     }
 
+    var practice: Variant = state.get("practice", null)
+    if practice is Dictionary:
+        practice_view["challenge_type"] = str(practice.get("challenge_type", ""))
+        practice_view["group_id"] = str(practice.get("group_id", ""))
+        practice_view["level_id"] = str(practice.get("level_id", practice.get("current_level_id", "")))
+        practice_view["level_title"] = str(practice.get("level_title", practice.get("current_level_title", "")))
+        practice_view["prompt"] = str(practice.get("prompt", practice.get("current_level_prompt", "")))
+        practice_view["progress_current"] = int(practice.get("progress_current", 0))
+        practice_view["progress_total"] = int(practice.get("progress_total", 0))
+        practice_view["is_review_mode"] = bool(practice.get("is_review_mode", false))
+        practice_view["toolbox_allowed"] = bool(practice.get("toolbox_allowed", false))
+        practice_view["toolbox_used"] = bool(practice.get("toolbox_used", false))
+        practice_view["can_run"] = bool(practice.get("can_run", false))
+        practice_view["can_submit"] = bool(practice.get("can_submit", false))
+        practice_view["can_next"] = bool(practice.get("can_next", false))
+        practice_view["mission_text"] = str(practice.get("mission_text", practice_view["prompt"]))
+        practice_view["battery_percent"] = int(practice.get("battery_percent", 0))
+        practice_view["battery_threshold_percent"] = int(practice.get("battery_threshold_percent", 80))
+        practice_view["current_level_id"] = str(practice.get("current_level_id", practice_view["level_id"]))
+        practice_view["current_level_title"] = str(practice.get("current_level_title", practice_view["level_title"]))
+        practice_view["current_level_prompt"] = str(practice.get("current_level_prompt", practice_view["prompt"]))
+        practice_view["title"] = str(practice_view["level_title"] if practice_view["level_title"] != "" else practice_title)
 
-static func _build_challenge_view(state: Dictionary) -> Dictionary:
-    var challenge_title: String = "Challenge"
-    var level_label: String = "Waiting for challenge mode."
-    var prompt_body: String = "No challenge prompt loaded yet."
-    var challenge_type: String = ""
-    var current_level_id: String = ""
-    var challenge: Variant = state.get("challenge", null)
-    if challenge is Dictionary:
-        challenge_type = str(challenge.get("challenge_type", ""))
-        challenge_title = str(challenge.get("current_level_title", "Challenge"))
-        current_level_id = str(challenge.get("current_level_id", ""))
-        if current_level_id != "":
-            level_label = "level_id: %s" % current_level_id
-        var current_level_prompt: String = str(challenge.get("current_level_prompt", ""))
-        if current_level_prompt != "":
-            prompt_body = current_level_prompt
+        var assistant_messages: Array[String] = []
+        var raw_messages: Variant = practice.get("assistant_messages", [])
+        if raw_messages is Array:
+            for message_variant in raw_messages:
+                assistant_messages.append(str(message_variant))
+        practice_view["assistant_messages"] = assistant_messages
+        practice_view["assistant_chat_text"] = "\n\n".join(assistant_messages) if not assistant_messages.is_empty() else "Byte: Practice assistant is standing by."
+        practice_view["toolkit_hint"] = "Tool Kit is ready for block-based runs." if bool(practice_view["toolbox_allowed"]) else "Tool Kit is unavailable for this practice level."
+
+    var current_level_id: String = str(practice_view.get("current_level_id", ""))
+    var progress_total: int = int(practice_view.get("progress_total", 0))
+    var progress_current: int = int(practice_view.get("progress_current", 0))
+    if progress_total > 0 and progress_current > 0:
+        practice_view["progress_label"] = "Progress: %d/%d" % [progress_current, progress_total]
+    elif current_level_id != "":
+        practice_view["progress_label"] = "Progress: %s" % current_level_id
 
     var mode_value: String = str(state.get("mode", ""))
+    practice_view["code_editable"] = mode_value == "challenge" and current_level_id != ""
 
-    return {
-        "title": challenge_title,
-        "level_label": level_label,
-        "prompt_body": prompt_body,
-        "challenge_type": challenge_type,
-        "current_level_id": current_level_id,
-        "toolbox_allowed": challenge_type == "practice",
-        "code_editable": mode_value == "challenge" and current_level_id != "",
-    }
+    return practice_view
 
 
 static func build_action_view(state: Dictionary) -> Dictionary:
@@ -157,12 +237,16 @@ static func build_action_view(state: Dictionary) -> Dictionary:
     if raw_actions is Dictionary:
         return {
             "can_advance": bool(raw_actions.get("advance", false)),
+            "can_run": bool(raw_actions.get("run", false)),
             "can_submit": bool(raw_actions.get("submit", false)),
+            "can_next": bool(raw_actions.get("next_level", false)),
         }
 
     return {
         "can_advance": false,
+        "can_run": false,
         "can_submit": false,
+        "can_next": false,
     }
 
 

@@ -2,7 +2,6 @@ from .errors import IntegrationContractError, IntegrationContractValidationError
 from .models import (
     ActionType,
     AvailableActions,
-    ChallengeState,
     DemoState,
     DialogueBlockState,
     GameMode,
@@ -13,6 +12,7 @@ from .models import (
     MapRouteStepState,
     PlayerAction,
     PlayerProfileState,
+    PracticeState,
     ProgressState,
     SceneState,
     SubmissionFeedback,
@@ -22,7 +22,6 @@ from .serialize import deserialize_player_action, serialize_game_state, serializ
 __all__ = [
     "ActionType",
     "AvailableActions",
-    "ChallengeState",
     "DemoState",
     "DialogueBlockState",
     "GameMode",
@@ -35,6 +34,7 @@ __all__ = [
     "MapRouteStepState",
     "PlayerAction",
     "PlayerProfileState",
+    "PracticeState",
     "ProgressState",
     "SceneState",
     "SubmissionFeedback",

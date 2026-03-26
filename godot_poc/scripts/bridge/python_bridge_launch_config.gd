@@ -43,6 +43,8 @@ static func find_wasmtime_bin(project_resolver: Callable, candidate_rel_paths: P
 
 static func apply_environment(launch_config: Dictionary) -> void:
 	OS.set_environment("PYTHONPATH", str(launch_config.get("pythonpath_path", "")))
+	OS.set_environment("PYTHONUTF8", "1")
+	OS.set_environment("PYTHONIOENCODING", "utf-8")
 	OS.set_environment("BLOCK2PYTHON_WASM_PATH", str(launch_config.get("wasm_path", "")))
 	OS.set_environment("BLOCK2PYTHON_WASM_CODE_MODE", "stdin")
 
