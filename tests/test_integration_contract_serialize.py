@@ -138,6 +138,10 @@ def test_serialize_demo_mode_emits_demo_payload() -> None:
             can_advance=True,
             body="Placeholder demo body",
             current_level_id="group-01-demo",
+            unlock_blocks=(
+                {"title": "print", "description": "Output text to the screen."},
+                {"title": "input", "description": "Read user input into your program."},
+            ),
         ),
         available_actions=AvailableActions(advance=True),
     )
@@ -157,6 +161,10 @@ def test_serialize_demo_mode_emits_demo_payload() -> None:
         "can_advance": True,
         "body": "Placeholder demo body",
         "current_level_id": "group-01-demo",
+        "unlock_blocks": [
+            {"title": "print", "description": "Output text to the screen."},
+            {"title": "input", "description": "Read user input into your program."},
+        ],
     }
     assert payload["practice"] is None
     assert "challenge" not in payload

@@ -28,9 +28,9 @@ static func render_flow_views(scene_screen: Control, demo_screen: Control, pract
 	var demo_view: Dictionary = view_model.get("demo_view", {})
 	demo_screen.show_demo(demo_view)
 	demo_screen.set_status("Demo flow ready")
+	demo_screen.set_can_convert(str(demo_view.get("current_level_id", "")) != "")
 	demo_screen.set_can_advance(can_advance)
 	demo_screen.set_can_go_back(true)
-
 	var practice_view: Dictionary = view_model.get("practice_view", {})
 	practice_screen.show_practice(practice_view)
 	practice_screen.show_feedback(feedback_view)

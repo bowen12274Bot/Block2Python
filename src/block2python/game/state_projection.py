@@ -143,6 +143,18 @@ def _build_demo_state(
         can_advance=can_advance,
         body="\n\n".join(body_parts),
         current_level_id=level.level_id,
+        unlock_blocks=_demo_unlock_blocks(group_id),
+    )
+
+
+def _demo_unlock_blocks(group_id: str | None) -> tuple[dict[str, str], ...]:
+    if group_id == "group-01":
+        return (
+            {"title": "print", "description": "Output text to the screen."},
+            {"title": "input", "description": "Read user input into your program."},
+        )
+    return (
+        {"title": "Coming Soon", "description": "Future stages will add more blocks here."},
     )
 
 

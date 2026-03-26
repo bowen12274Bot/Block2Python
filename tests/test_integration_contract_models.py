@@ -77,6 +77,10 @@ def test_game_state_contract_supports_demo_payload() -> None:
             can_advance=True,
             body="Demo prompt\n\nLearn print().",
             current_level_id="group-01-demo",
+            unlock_blocks=(
+                {"title": "print", "description": "Output text to the screen."},
+                {"title": "input", "description": "Read user input into your program."},
+            ),
         ),
         available_actions=AvailableActions(advance=True),
     )
@@ -87,6 +91,7 @@ def test_game_state_contract_supports_demo_payload() -> None:
     assert state.demo.group_id == "group-01"
     assert state.demo.level_id == "group-01-demo"
     assert state.demo.learning_markdown == "Learn print()."
+    assert state.demo.unlock_blocks[0]["title"] == "print"
     assert state.demo.can_advance is True
     assert state.available_actions.advance is True
     assert state.practice is None

@@ -62,6 +62,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "can_advance": state.demo.can_advance,
             "body": state.demo.body,
             "current_level_id": state.demo.current_level_id,
+            "unlock_blocks": [dict(block) for block in state.demo.unlock_blocks],
         }
 
     practice = None

@@ -20,19 +20,26 @@ class BlocklyOutput:
 
 class BlocklyBridge(QObject):
     output_received = Signal(str, str)
+    message_received = Signal(str, str)
 
     @Slot(str, str)
     def setBlocklyOutput(self, python_code: str, block_json_str: str) -> None:  # noqa: N802
         self.output_received.emit(python_code, block_json_str)
 
+    @Slot(str, str)
+    def setBlocklyMessage(self, kind: str, message: str) -> None:  # noqa: N802
+        self.message_received.emit(kind, message)
+
 
 class BlocklyEmbed(QWebEngineView):
     output_received = Signal(object)
+    message_received = Signal(str, str)
 
     def __init__(self) -> None:
         super().__init__()
         self._bridge = BlocklyBridge()
         self._bridge.output_received.connect(self._on_output_received)
+        self._bridge.message_received.connect(self._on_message_received)
 
         channel = QWebChannel(self.page())
         channel.registerObject("bridge", self._bridge)
@@ -55,3 +62,6 @@ class BlocklyEmbed(QWebEngineView):
             raw = {"_parse_error": True, "_raw": block_json_str}
 
         self.output_received.emit(BlocklyOutput(python_code=python_code, block_json=raw))
+
+    def _on_message_received(self, kind: str, message: str) -> None:
+        self.message_received.emit(kind, message)

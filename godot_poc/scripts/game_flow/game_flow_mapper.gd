@@ -116,6 +116,7 @@ static func _build_demo_view(state: Dictionary) -> Dictionary:
         "can_advance": false,
         "body": default_body,
         "current_level_id": "",
+        "unlock_blocks": [],
     }
 
     var demo: Variant = state.get("demo", null)
@@ -131,8 +132,29 @@ static func _build_demo_view(state: Dictionary) -> Dictionary:
         demo_view["can_advance"] = bool(demo.get("can_advance", false))
         demo_view["body"] = str(demo.get("body", default_body))
         demo_view["current_level_id"] = str(demo.get("current_level_id", demo_view["level_id"]))
+        demo_view["unlock_blocks"] = _normalize_unlock_blocks(demo.get("unlock_blocks", _default_demo_unlock_blocks(str(demo_view.get("group_id", "")))))
 
     return demo_view
+
+
+static func _normalize_unlock_blocks(value: Variant) -> Array[Dictionary]:
+    var blocks: Array[Dictionary] = []
+    if value is Array:
+        for block_variant in value:
+            if block_variant is Dictionary:
+                blocks.append(block_variant)
+    return blocks
+
+
+static func _default_demo_unlock_blocks(group_id: String) -> Array[Dictionary]:
+    match group_id:
+        "group-01":
+            return [
+                {"title": "print", "description": "Output text to the screen."},
+                {"title": "input", "description": "Read user input into your program."},
+            ]
+        _:
+            return []
 
 
 static func _build_practice_view(state: Dictionary) -> Dictionary:
