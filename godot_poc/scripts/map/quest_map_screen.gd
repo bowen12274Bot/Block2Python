@@ -12,14 +12,13 @@ signal stage_story_requested(group_id: String)
 signal stage_demo_requested(group_id: String)
 signal stage_practice_requested(group_id: String)
 
-@onready var start_bridge_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/StartBridgeButton")
-@onready var reset_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/ResetButton")
-@onready var advance_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/AdvanceButton")
-@onready var open_node_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/OpenNodeButton")
-@onready var debug_toggle_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/DebugToggleButton")
-@onready var status_label: Label = get_node_or_null("Margin/Scroll/Root/StatusLabel")
-@onready var quest_map_panel: QuestMapPanel = get_node_or_null("Margin/Scroll/Root/QuestMapPanel")
-@onready var note_label: Label = get_node_or_null("Margin/Scroll/Root/NotePanel/NoteMargin/NoteRoot/NoteText")
+@onready var start_bridge_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/StartBridgeButton")
+@onready var reset_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/ResetButton")
+@onready var advance_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/AdvanceButton")
+@onready var open_node_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/OpenNodeButton")
+@onready var debug_toggle_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/DebugToggleButton")
+@onready var status_label: Label = get_node_or_null("HudMargin/HudRoot/StatusLabel")
+@onready var quest_map_stage: QuestMapStage = get_node_or_null("StageFrame")
 @onready var stage_overlay: Control = get_node_or_null("StageOverlay")
 @onready var stage_title_label: Label = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn/StageTitle")
 @onready var stage_subtitle_label: Label = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn/StageSubtitle")
@@ -34,9 +33,12 @@ signal stage_practice_requested(group_id: String)
 var _last_map_view: Dictionary = {}
 var _selected_group_id: String = ""
 var _overlay_group_view: Dictionary = {}
+var _group_cards: Dictionary = {}
 
 
 func _ready() -> void:
+	_collect_group_cards()
+
 	if start_bridge_button != null:
 		start_bridge_button.pressed.connect(func() -> void:
 			start_bridge_requested.emit()
@@ -59,9 +61,6 @@ func _ready() -> void:
 		debug_toggle_button.toggled.connect(func(button_pressed: bool) -> void:
 			debug_toggled.emit(button_pressed)
 		)
-	if quest_map_panel != null:
-		quest_map_panel.group_pressed.connect(_on_group_pressed)
-		quest_map_panel.node_pressed.connect(_on_node_pressed)
 	if stage_close_button != null:
 		stage_close_button.pressed.connect(hide_stage_overlay)
 	if stage_story_button != null:
@@ -74,10 +73,13 @@ func _ready() -> void:
 		stage_overlay.visible = false
 
 
+
+
 func show_map(map_view: Dictionary) -> void:
 	_last_map_view = map_view.duplicate(true)
-	if quest_map_panel != null:
-		quest_map_panel.show_map(map_view)
+	if quest_map_stage != null:
+		quest_map_stage.show_map(map_view)
+	_render_group_cards(map_view)
 	if stage_overlay != null and stage_overlay.visible and _selected_group_id != "":
 		var refreshed_group: Dictionary = _find_group_view(_selected_group_id)
 		if refreshed_group.is_empty():
@@ -92,8 +94,8 @@ func set_status(text: String) -> void:
 
 
 func set_note(text: String) -> void:
-	if note_label != null:
-		note_label.text = text
+	if quest_map_stage != null:
+		quest_map_stage.set_helper_text(text)
 
 
 func set_bridge_running(is_running: bool) -> void:
@@ -137,26 +139,99 @@ func hide_stage_overlay() -> void:
 	_selected_group_id = ""
 
 
-func _on_group_pressed(group_id: String) -> void:
-	if note_label == null:
+func _collect_group_cards() -> void:
+	_group_cards.clear()
+	for group_id in ["group-01", "group-02", "group-03"]:
+		var base_name: String = _scene_group_name(group_id)
+		var root: Button = get_node_or_null("StageFrame/HotspotLayer/%s" % base_name)
+		if root == null:
+			continue
+
+		var bound_group_id: String = group_id
+		root.mouse_filter = Control.MOUSE_FILTER_STOP
+		root.focus_mode = Control.FOCUS_NONE
+		root.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		root.pressed.connect(func() -> void:
+			_on_group_pressed(bound_group_id)
+		)
+
+		var title_label: Label = get_node_or_null("StageFrame/HotspotLayer/%s/Content/Title" % base_name)
+		var subtitle_label: Label = get_node_or_null("StageFrame/HotspotLayer/%s/Content/Subtitle" % base_name)
+		var current_label: Label = get_node_or_null("StageFrame/HotspotLayer/%s/Content/Current" % base_name)
+		var badge_label: Label = get_node_or_null("StageFrame/HotspotLayer/%s/Badge" % base_name)
+
+		for node in [title_label, subtitle_label, current_label, badge_label]:
+			if node != null:
+				node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		_group_cards[group_id] = {
+			"root": root,
+			"title": title_label,
+			"subtitle": subtitle_label,
+			"current": current_label,
+			"badge": badge_label,
+		}
+
+
+func _render_group_cards(map_view: Dictionary) -> void:
+	for card_view in _group_cards.values():
+		_apply_group_card(card_view, {})
+
+	var groups_variant: Variant = map_view.get("groups", [])
+	if not (groups_variant is Array):
 		return
 
+	for group_variant in groups_variant:
+		if not (group_variant is Dictionary):
+			continue
+		var group_view: Dictionary = group_variant
+		var group_id: String = str(group_view.get("group_id", ""))
+		if _group_cards.has(group_id):
+			_apply_group_card(_group_cards[group_id], group_view)
+
+
+func _apply_group_card(card_view: Dictionary, group_view: Dictionary) -> void:
+	var root: Button = card_view.get("root", null)
+	if root == null:
+		return
+	var title_label: Label = card_view.get("title", null)
+	var subtitle_label: Label = card_view.get("subtitle", null)
+	var current_label: Label = card_view.get("current", null)
+	var badge_label: Label = card_view.get("badge", null)
+
+	if group_view.is_empty():
+		root.visible = false
+		return
+
+	root.visible = true
+	if title_label != null:
+		title_label.text = str(group_view.get("theme_title", group_view.get("title", "Stage")))
+	if subtitle_label != null:
+		subtitle_label.text = str(group_view.get("progress_label", group_view.get("status_label", "Locked")))
+	if current_label != null:
+		current_label.text = str(group_view.get("current_label", ""))
+		current_label.visible = current_label.text != ""
+	if badge_label != null:
+		badge_label.visible = false
+	root.add_theme_stylebox_override("normal", _card_style())
+	root.add_theme_stylebox_override("hover", _card_hover_style())
+	root.add_theme_stylebox_override("pressed", _card_hover_style())
+	root.add_theme_stylebox_override("focus", _card_hover_style())
+	root.add_theme_stylebox_override("disabled", _card_style())
+
+
+func _on_group_pressed(group_id: String) -> void:
 	var group_view: Dictionary = _find_group_view(group_id)
 	if group_view.is_empty():
-		note_label.text = "Selected level group: %s" % group_id
+		set_note("Selected level group: %s" % group_id)
 		return
 
 	if not bool(group_view.get("is_enterable", false)):
-		note_label.text = "This group is still locked."
+		set_note("This group is still locked.")
 		return
 
-	note_label.text = QuestMapSelectionPresenterScript.build_group_selection_note(group_view)
+	set_note(QuestMapSelectionPresenterScript.build_group_selection_note(group_view))
 	show_stage_overlay(group_view)
-
-
-func _on_node_pressed(node_id: String) -> void:
-	if note_label != null:
-		note_label.text = QuestMapSelectionPresenterScript.build_node_selection_note(node_id)
 
 
 func _on_stage_story_pressed() -> void:
@@ -277,3 +352,40 @@ func _find_group_view(group_id: String) -> Dictionary:
 			if str(group_view.get("group_id", "")) == group_id:
 				return group_view
 	return {}
+
+
+func _scene_group_name(group_id: String) -> String:
+	match group_id:
+		"group-01":
+			return "Group01Card"
+		"group-02":
+			return "Group02Card"
+		"group-03":
+			return "Group03Card"
+		_:
+			return group_id
+
+
+func _card_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.corner_radius_top_left = 24
+	style.corner_radius_top_right = 24
+	style.corner_radius_bottom_right = 24
+	style.corner_radius_bottom_left = 24
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.35)
+	style.shadow_size = 6
+	style.bg_color = Color(1, 1, 1, 0.06)
+	style.border_color = Color(1, 1, 1, 0.28)
+	return style
+
+
+func _card_hover_style() -> StyleBoxFlat:
+	var style := _card_style()
+	style.bg_color = Color(1, 1, 1, 0.10)
+	style.border_color = Color(1, 1, 1, 0.42)
+	style.shadow_size = 10
+	return style
