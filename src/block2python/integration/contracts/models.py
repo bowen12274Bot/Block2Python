@@ -55,7 +55,7 @@ class DemoState:
     can_advance: bool = False
     body: str = ""
     current_level_id: str | None = None
-
+    unlock_blocks: tuple[dict[str, str], ...] = ()
 
 @dataclass(frozen=True, slots=True)
 class PracticeState:

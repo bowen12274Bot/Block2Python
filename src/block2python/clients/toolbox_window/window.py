@@ -38,6 +38,7 @@ class ToolboxWindow(QWidget):
 
         self._blockly = BlocklyEmbed()
         self._blockly.output_received.connect(self._on_blockly_output)
+        self._blockly.message_received.connect(self._on_blockly_message)
         self._blockly.load_placeholder(self._html_path)
         root.addWidget(self._blockly, 1)
 
@@ -117,6 +118,17 @@ class ToolboxWindow(QWidget):
                 "level_id": self._level_id,
                 "python_code": output.python_code,
                 "block_json": output.block_json,
+            }
+        )
+
+    def _on_blockly_message(self, kind: str, message: str) -> None:
+        normalized_status = "toolbox_error" if kind == "error" else "toolbox_status"
+        self._write_result(
+            {
+                "status": normalized_status,
+                "request_id": uuid.uuid4().hex,
+                "level_id": self._level_id,
+                "message": message,
             }
         )
 

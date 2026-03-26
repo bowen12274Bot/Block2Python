@@ -136,14 +136,22 @@
           return true;
         }
 
+        function publishBridgeMessage(kind, message) {
+          if (desktopBridge && typeof desktopBridge.setBlocklyMessage === "function") {
+            desktopBridge.setBlocklyMessage(kind, message);
+            return true;
+          }
+          return postToGodot({ type: `toolbox_${kind}`, message });
+        }
+
         function reportStatus(message) {
           setStatus(message);
-          postToGodot({ type: "toolbox_status", message });
+          publishBridgeMessage("status", message);
         }
 
         function reportError(message) {
           setStatus(message);
-          postToGodot({ type: "toolbox_error", message });
+          publishBridgeMessage("error", message);
         }
 
         function initializeQtBridge() {

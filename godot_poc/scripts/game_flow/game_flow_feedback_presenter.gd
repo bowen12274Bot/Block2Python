@@ -192,7 +192,7 @@ static func _readable_error_text(
 	has_runtime_error: bool,
 	analysis_status: String,
 	analysis_summary: String,
-	judge_status: String,
+	_judge_status: String,
 	judge_summary: String,
 	output_text: String
 ) -> String:
