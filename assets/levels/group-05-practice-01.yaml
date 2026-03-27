@@ -1,0 +1,34 @@
+level_id: group-05-practice-01
+title: Bug King Castle
+chapter_id: map-groups
+order_index: 5001
+prerequisite_level_ids:
+  - group-05-demo
+next_level_ids:
+  - group-05-practice-02
+prompt: |
+  Read an integer n.
+  Then read n integers, one per line.
+
+  Print two numbers:
+  1. how many numbers are greater than or equal to 0
+  2. how many numbers are odd
+learning_markdown: |
+  You can solve this with a loop and int(input()) only.
+  No map(), split(), or list() is needed.
+  Example structure:
+  n = int(input())
+  non_negative_count = 0
+  odd_count = 0
+  for _ in range(n):
+      x = int(input())
+      ...
+  print(non_negative_count, odd_count)
+testcase_dir: cases/group-05-practice-01
+judge_policy:
+  time_limit_ms: 3000
+  memory_limit_mb: 256
+metadata:
+  stage: bug-king-castle
+  group_id: group-05
+  slot: practice-01

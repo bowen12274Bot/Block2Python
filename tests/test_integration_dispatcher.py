@@ -155,6 +155,8 @@ def test_dispatch_verify_toolbox_level_returns_feedback_without_clearing() -> No
     assert state.last_submission.answer_correct is True
     assert state.last_submission.cleared is False
     assert state.last_submission.kind == "toolbox_run"
+
+
 def test_dispatch_rejects_submit_without_python_code() -> None:
     session = build_demo_session()
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
@@ -322,4 +324,5 @@ def test_dispatch_rejects_restart_until_supported() -> None:
 
     with pytest.raises(IntegrationDispatchError, match="not implemented"):
         dispatch(session, PlayerAction(action_type=ActionType.RESTART_QUEST))
+
 

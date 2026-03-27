@@ -129,7 +129,15 @@ static func _normalized_slot_view(slot_variant: Variant, slot_key: String, title
 static func _theme_title_for_group(group_id: String, fallback_title: String) -> String:
 	match group_id:
 		"group-01":
-			return "Stage 01: Basic IO"
+			return "Input Gate"
+		"group-02":
+			return "Variable Base"
+		"group-03":
+			return "If Canyon"
+		"group-04":
+			return "Loop Lab"
+		"group-05":
+			return "Bug King Castle"
 		_:
 			return fallback_title
 
@@ -137,7 +145,15 @@ static func _theme_title_for_group(group_id: String, fallback_title: String) -> 
 static func _theme_description_for_group(group_id: String) -> String:
 	match group_id:
 		"group-01":
-			return "Learn the new IO blocks in Demo, then unlock a 5-stage Practice bundle."
+			return "Start with input and output basics, then unlock a guided five-level practice chain."
+		"group-02":
+			return "Build a base camp around variables and storing values before the next branch opens."
+		"group-03":
+			return "Cross the canyon by learning condition checks and branching decisions."
+		"group-04":
+			return "Enter the loop lab and repeat patterns until the route becomes second nature."
+		"group-05":
+			return "Climb through the final castle route and prepare for the full five-stage handoff."
 		_:
 			return "This stage will unlock new blocks and guided practice in a later update."
 
@@ -148,6 +164,26 @@ static func _unlock_blocks_for_group(group_id: String) -> Array[Dictionary]:
 			return [
 				{"title": "print", "description": "Output text to the screen."},
 				{"title": "input", "description": "Read user input into your program."},
+			]
+		"group-02":
+			return [
+				{"title": "variable", "description": "Store a value and reuse it later in the program."},
+				{"title": "assignment", "description": "Update a named value as the program continues."},
+			]
+		"group-03":
+			return [
+				{"title": "if", "description": "Run code only when a condition is true."},
+				{"title": "compare", "description": "Check values before choosing a branch."},
+			]
+		"group-04":
+			return [
+				{"title": "loop", "description": "Repeat a block of work with the same structure."},
+				{"title": "range", "description": "Control how many times a loop should run."},
+			]
+		"group-05":
+			return [
+				{"title": "debug", "description": "Trace the final route and inspect how the logic behaves."},
+				{"title": "boss review", "description": "Combine the earlier concepts in one longer stage."},
 			]
 		_:
 			return [
@@ -299,3 +335,4 @@ static func _status_label(status_key: String) -> String:
 			return "Reviewing"
 		_:
 			return "Locked"
+

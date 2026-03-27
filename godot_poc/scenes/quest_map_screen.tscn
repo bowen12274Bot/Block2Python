@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://d1uk74xrpivi8"]
+[gd_scene format=3 uid="uid://dq7spdgo201ok"]
 
 [ext_resource type="Script" uid="uid://c8slj06v84bni" path="res://scripts/map/quest_map_screen.gd" id="1_screen"]
 [ext_resource type="Script" uid="uid://kr3awo7su5ce" path="res://scripts/map/quest_map_stage.gd" id="3_stage"]
@@ -87,9 +87,9 @@ mouse_filter = 1
 [node name="Group01Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=1939054249]
 layout_mode = 0
 offset_left = 100.0
-offset_top = 300.0
+offset_top = 200.0
 offset_right = 320.0
-offset_bottom = 390.0
+offset_bottom = 290.0
 flat = true
 
 [node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group01Card" unique_id=1789254780]
@@ -129,9 +129,9 @@ vertical_alignment = 1
 [node name="Group02Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=250360789]
 layout_mode = 0
 offset_left = 480.0
-offset_top = 300.0
+offset_top = 200.0
 offset_right = 700.0
-offset_bottom = 390.0
+offset_bottom = 290.0
 flat = true
 
 [node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group02Card" unique_id=957999308]
@@ -171,9 +171,9 @@ vertical_alignment = 1
 [node name="Group03Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=1179423723]
 layout_mode = 0
 offset_left = 860.0
-offset_top = 300.0
+offset_top = 200.0
 offset_right = 1080.0
-offset_bottom = 390.0
+offset_bottom = 290.0
 flat = true
 
 [node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group03Card" unique_id=1501362480]
@@ -205,6 +205,90 @@ layout_mode = 2
 text = "Current"
 
 [node name="Badge" type="Label" parent="StageFrame/HotspotLayer/Group03Card" unique_id=1272657237]
+layout_mode = 0
+text = "Locked"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Group04Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=1144000004]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 400.0
+offset_right = 460.0
+offset_bottom = 490.0
+flat = true
+
+[node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group04Card" unique_id=1144000005]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 12.0
+offset_right = -14.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="StageFrame/HotspotLayer/Group04Card/Content" unique_id=1144000006]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Stage 04"
+
+[node name="Subtitle" type="Label" parent="StageFrame/HotspotLayer/Group04Card/Content" unique_id=1144000007]
+layout_mode = 2
+text = "Loading"
+
+[node name="Current" type="Label" parent="StageFrame/HotspotLayer/Group04Card/Content" unique_id=1144000008]
+visible = false
+layout_mode = 2
+text = "Current"
+
+[node name="Badge" type="Label" parent="StageFrame/HotspotLayer/Group04Card" unique_id=1144000009]
+layout_mode = 0
+text = "Locked"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Group05Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=1144000010]
+layout_mode = 0
+offset_left = 720.0
+offset_top = 400.0
+offset_right = 940.0
+offset_bottom = 490.0
+flat = true
+
+[node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group05Card" unique_id=1144000011]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 12.0
+offset_right = -14.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="StageFrame/HotspotLayer/Group05Card/Content" unique_id=1144000012]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Stage 05"
+
+[node name="Subtitle" type="Label" parent="StageFrame/HotspotLayer/Group05Card/Content" unique_id=1144000013]
+layout_mode = 2
+text = "Loading"
+
+[node name="Current" type="Label" parent="StageFrame/HotspotLayer/Group05Card/Content" unique_id=1144000014]
+visible = false
+layout_mode = 2
+text = "Current"
+
+[node name="Badge" type="Label" parent="StageFrame/HotspotLayer/Group05Card" unique_id=1144000015]
 layout_mode = 0
 text = "Locked"
 horizontal_alignment = 1

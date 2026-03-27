@@ -1,0 +1,21 @@
+level_id: group-04-practice-02
+title: Group 04 Practice 02 Placeholder
+chapter_id: map-groups
+order_index: 4002
+prerequisite_level_ids:
+  - group-04-practice-01
+next_level_ids:
+  - group-04-practice-03
+prompt: |
+  Placeholder practice level 02 for group-04.
+learning_markdown: |
+  Placeholder practice scaffold.
+testcase_dir: cases/group-04-practice-02
+judge_policy:
+  time_limit_ms: 1000
+  memory_limit_mb: 64
+metadata:
+  stage: map-format-skeleton
+  group_id: group-04
+  slot: practice-02
+  placeholder_auto_ac: true

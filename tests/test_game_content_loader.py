@@ -26,6 +26,7 @@ def test_load_runtime_game_content_assets() -> None:
     assert "main-map-entry" in bundle.nodes
     assert "scene-city-alarm" in bundle.scenes
     assert "challenge-group-01-practice" in bundle.challenges
+    assert "challenge-group-05-practice" in bundle.challenges
     assert "toolbox-group-01" in bundle.toolbox
     assert "battery-group-01" in bundle.battery_policies
 
@@ -37,13 +38,8 @@ def test_assemble_runtime_game_slice_against_levels_assets() -> None:
     assembled = assemble_game_slice(game_content=bundle, levels=levels)
     practice = assembled.challenges["challenge-group-01-practice"]
 
-    assert [level.level_id for level in practice.levels] == [
-        "group-01-practice-01",
-        "group-01-practice-02",
-        "group-01-practice-03",
-        "group-01-practice-04",
-        "group-01-practice-05",
-    ]
+    assert [level.level_id for level in practice.levels] == ["group-01-practice-01", "group-01-practice-02", "group-01-practice-03", "group-01-practice-04", "group-01-practice-05"]
+    assert practice.levels[0].title == "Input Gate"
     assert practice.toolbox_policy is not None
     assert practice.toolbox_policy.toolbox_id == "toolbox-group-01"
     assert practice.toolbox_policy.allow_toolbox_in_practice is True
@@ -51,15 +47,14 @@ def test_assemble_runtime_game_slice_against_levels_assets() -> None:
     assert practice.battery_policy.battery_policy_id == "battery-group-01"
 
     group_02_practice = assembled.challenges["challenge-group-02-practice"]
-    assert [level.level_id for level in group_02_practice.levels] == [
-        "group-02-practice-01",
-        "group-02-practice-02",
-        "group-02-practice-03",
-        "group-02-practice-04",
-        "group-02-practice-05",
-    ]
+    assert [level.level_id for level in group_02_practice.levels] == ["group-02-practice-01", "group-02-practice-02", "group-02-practice-03", "group-02-practice-04", "group-02-practice-05"]
+    assert group_02_practice.levels[0].title == "Variable Base"
     assert group_02_practice.toolbox_policy is None
     assert group_02_practice.battery_policy is None
+
+    group_05_practice = assembled.challenges["challenge-group-05-practice"]
+    assert [level.level_id for level in group_05_practice.levels] == ["group-05-practice-01", "group-05-practice-02", "group-05-practice-03", "group-05-practice-04", "group-05-practice-05"]
+    assert group_05_practice.levels[0].title == "Bug King Castle"
 
 
 def test_missing_level_reference_raises() -> None:
@@ -144,6 +139,16 @@ def test_game_runtime_walks_runtime_quest() -> None:
     group_one_demo = route.groups[0].demo_route[2]
     assert group_one_demo.step_type == "demo"
     assert group_one_demo.target_page == "demo"
+
+    assert [group.group_id for group in route.groups] == [
+        "group-01",
+        "group-02",
+        "group-03",
+        "group-04",
+        "group-05",
+    ]
+
+
 def test_game_runtime_rejects_unknown_quest() -> None:
     levels = load_levels(Path("assets/levels"))
     bundle = load_game_content(Path("assets/game_content"))

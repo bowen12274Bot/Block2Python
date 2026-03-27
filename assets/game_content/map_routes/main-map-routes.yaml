@@ -4,7 +4,7 @@ map_routes:
     title: Block2Python Main Map Routes
     groups:
       - group_id: group-01
-        title: Group 01
+        title: Input Gate
         demo_route:
           - step_id: group-01-demo-map-entry
             step_type: map
@@ -68,7 +68,7 @@ map_routes:
             tracked_node_ids:
               - group-01-result
       - group_id: group-02
-        title: Group 02
+        title: Variable Base
         demo_route:
           - step_id: group-02-demo-map-entry
             step_type: map
@@ -132,7 +132,7 @@ map_routes:
             tracked_node_ids:
               - group-02-result
       - group_id: group-03
-        title: Group 03
+        title: If Canyon
         demo_route:
           - step_id: group-03-demo-map-entry
             step_type: map
@@ -195,5 +195,133 @@ map_routes:
             node_id: group-03-result
             tracked_node_ids:
               - group-03-result
+      - group_id: group-04
+        title: Loop Lab
+        demo_route:
+          - step_id: group-04-demo-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-04-demo-story
+            step_type: story
+            title: Story Scene
+            target_page: scene
+            node_id: group-04-story
+            scene_id: scene-city-alarm
+            tracked_node_ids:
+              - group-04-story
+          - step_id: group-04-demo-level
+            step_type: demo
+            title: Main Level
+            target_page: demo
+            node_id: group-04-demo
+            challenge_id: challenge-group-04-demo
+            level_ids:
+              - group-04-demo
+            tracked_node_ids:
+              - group-04-demo
+          - step_id: group-04-demo-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+        practice_route:
+          - step_id: group-04-practice-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-04-practice-level
+            step_type: practice
+            title: Practice Level
+            target_page: challenge
+            node_id: group-04-practice
+            challenge_id: challenge-group-04-practice
+            level_ids:
+              - group-04-practice-01
+              - group-04-practice-02
+              - group-04-practice-03
+              - group-04-practice-04
+              - group-04-practice-05
+            tracked_node_ids:
+              - group-04-practice
+            is_repeatable: true
+            metadata:
+              requires_demo_seen_group_id: group-04
+          - step_id: group-04-practice-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            node_id: group-04-result
+            tracked_node_ids:
+              - group-04-result
+      - group_id: group-05
+        title: Bug King Castle
+        demo_route:
+          - step_id: group-05-demo-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-05-demo-story
+            step_type: story
+            title: Story Scene
+            target_page: scene
+            node_id: group-05-story
+            scene_id: scene-city-alarm
+            tracked_node_ids:
+              - group-05-story
+          - step_id: group-05-demo-level
+            step_type: demo
+            title: Main Level
+            target_page: demo
+            node_id: group-05-demo
+            challenge_id: challenge-group-05-demo
+            level_ids:
+              - group-05-demo
+            tracked_node_ids:
+              - group-05-demo
+          - step_id: group-05-demo-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+        practice_route:
+          - step_id: group-05-practice-map-entry
+            step_type: map
+            title: Main Map Entry
+            target_page: map
+            tracked_node_ids: []
+            is_planned: true
+          - step_id: group-05-practice-level
+            step_type: practice
+            title: Practice Level
+            target_page: challenge
+            node_id: group-05-practice
+            challenge_id: challenge-group-05-practice
+            level_ids:
+              - group-05-practice-01
+              - group-05-practice-02
+              - group-05-practice-03
+              - group-05-practice-04
+              - group-05-practice-05
+            tracked_node_ids:
+              - group-05-practice
+            is_repeatable: true
+            metadata:
+              requires_demo_seen_group_id: group-05
+          - step_id: group-05-practice-map-return
+            step_type: map_return
+            title: Return To Map
+            target_page: map
+            node_id: group-05-result
+            tracked_node_ids:
+              - group-05-result
 
 

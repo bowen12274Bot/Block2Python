@@ -12,5 +12,7 @@ def test_run_auto_demo_completes_runtime_quest() -> None:
     assert any("demo=challenge-group-01-demo" in line for line in logs)
     assert any("practice=challenge-group-01-practice" in line for line in logs)
     assert any("actions=advance:False run:True submit:True next:False restart_quest:False" in line for line in logs)
-    assert any("submit group-01-practice-05: JudgeStatus.AC" in line for line in logs)
+    assert any("submit group-01-practice-01: JudgeStatus.AC" in line for line in logs)
     assert any("next=group-01-practice-02" in line for line in logs)
+    assert any("submit group-05-practice-05: JudgeStatus.AC" in line for line in logs)
+

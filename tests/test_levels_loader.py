@@ -143,16 +143,19 @@ class TestLevelsLoader:
         assert level.judge_policy.memory_limit_kb == 2048
 
 
-def test_assets_levels_include_three_group_scaffolds() -> None:
+def test_assets_levels_include_five_group_scaffolds() -> None:
     levels = load_levels(Path("assets/levels"))
 
     assert "group-01-demo" in levels
     assert "group-02-demo" in levels
     assert "group-03-demo" in levels
+    assert "group-04-demo" in levels
+    assert "group-05-demo" in levels
 
     assert levels["group-01-demo"].next_level_ids == ("group-01-practice-01",)
     assert levels["group-01-practice-01"].next_level_ids == ("group-01-practice-02",)
     assert levels["group-01-practice-05"].next_level_ids == ()
 
-    assert levels["group-02-practice-03"].prerequisite_level_ids == ("group-02-practice-02",)
+    assert levels["group-02-practice-01"].prerequisite_level_ids == ("group-02-demo",)
     assert len(levels["group-03-demo"].testcases) == 1
+

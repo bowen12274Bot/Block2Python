@@ -17,7 +17,11 @@ def _progress_until(session: GameSession, stop) -> None:
         if state.mode in {SessionMode.SCENE, SessionMode.DEMO}:
             if state.node_id == "main-map-entry":
                 completed = set(session.current_game_state().progress.completed_node_ids)
-                if "group-02-result" in completed:
+                if "group-04-result" in completed:
+                    session.start_group_story("group-05")
+                elif "group-03-result" in completed:
+                    session.start_group_story("group-04")
+                elif "group-02-result" in completed:
                     session.start_group_story("group-03")
                 elif "group-01-result" in completed:
                     session.start_group_story("group-02")
@@ -139,6 +143,7 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
 
     state = session.next_practice_level()
     assert state.mode is SessionMode.CHALLENGE
+    assert state.node_id == "group-01-practice"
     assert state.current_level_id == "group-01-practice-02"
 def test_game_session_create_player_profile_persists_in_contract_state() -> None:
     session = build_raw_session()
@@ -284,10 +289,10 @@ def test_game_session_start_group_practice_jumps_to_challenge() -> None:
 
 
 
-def test_game_session_can_complete_all_three_groups() -> None:
+def test_game_session_can_complete_all_five_groups() -> None:
     session = build_session()
 
-    _progress_until(session, lambda state: state.node_id == "group-03-result")
+    _progress_until(session, lambda state: state.node_id == "group-05-result")
 
     state = session.advance()
     assert state.node_id == "main-map-entry"
@@ -296,43 +301,27 @@ def test_game_session_can_complete_all_three_groups() -> None:
     assert contract_state.mode is GameMode.SCENE
     assert contract_state.node_id == "main-map-entry"
     assert contract_state.available_actions.advance is False
-    assert contract_state.progress.completed_node_ids == (
-        "main-map-entry",
-        "group-01-story",
-        "group-01-demo",
-        "group-01-practice",
-        "group-01-result",
-        "group-02-story",
-        "group-02-demo",
-        "group-02-practice",
-        "group-02-result",
-        "group-03-story",
-        "group-03-demo",
-        "group-03-practice",
-        "group-03-result",
-    )
-    assert contract_state.progress.cleared_level_ids == (
-        "group-01-practice-01",
-        "group-01-practice-02",
-        "group-01-practice-03",
-        "group-01-practice-04",
-        "group-01-practice-05",
-        "group-02-practice-01",
-        "group-02-practice-02",
-        "group-02-practice-03",
-        "group-02-practice-04",
-        "group-02-practice-05",
-        "group-03-practice-01",
-        "group-03-practice-02",
-        "group-03-practice-03",
-        "group-03-practice-04",
-        "group-03-practice-05",
-    )
+    expected_completed_nodes = ["main-map-entry"]
+    for group_number in range(1, 6):
+        for slot in ("story", "demo", "practice", "result"):
+            expected_completed_nodes.append("group-%02d-%s" % (group_number, slot))
+    assert contract_state.progress.completed_node_ids == tuple(expected_completed_nodes)
+
+    expected_cleared_levels = []
+    for group_number in range(1, 6):
+        for level_number in range(1, 6):
+            expected_cleared_levels.append("group-%02d-practice-%02d" % (group_number, level_number))
+    assert contract_state.progress.cleared_level_ids == tuple(expected_cleared_levels)
+
     assert contract_state.map_route is not None
     status_by_group = {group.group_id: group.status_key for group in contract_state.map_route.groups}
-    assert status_by_group["group-01"] == "completed"
-    assert status_by_group["group-02"] == "completed"
-    assert status_by_group["group-03"] == "completed"
+    assert status_by_group == {
+        "group-01": "completed",
+        "group-02": "completed",
+        "group-03": "completed",
+        "group-04": "completed",
+        "group-05": "completed",
+    }
 
 def test_map_route_marks_only_one_group_current_for_shared_story_scene() -> None:
     session = build_session()
@@ -345,6 +334,8 @@ def test_map_route_marks_only_one_group_current_for_shared_story_scene() -> None
     assert status_by_group["group-01"] != "current"
     assert status_by_group["group-02"] == "current"
     assert status_by_group["group-03"] != "current"
+    assert status_by_group["group-04"] != "current"
+    assert status_by_group["group-05"] != "current"
 
 def test_initial_map_marks_group_one_available_not_current() -> None:
     session = build_session()
@@ -355,6 +346,8 @@ def test_initial_map_marks_group_one_available_not_current() -> None:
     assert status_by_group["group-01"] == "available"
     assert status_by_group["group-02"] == "locked"
     assert status_by_group["group-03"] == "locked"
+    assert status_by_group["group-04"] == "locked"
+    assert status_by_group["group-05"] == "locked"
 
 
 def test_group_one_result_returns_to_main_map_entry() -> None:
@@ -384,9 +377,10 @@ def test_group_one_result_returns_to_main_map_entry() -> None:
     assert status_by_group["group-01"] == "completed"
     assert status_by_group["group-02"] == "available"
     assert status_by_group["group-03"] == "locked"
+    assert status_by_group["group-04"] == "locked"
+    assert status_by_group["group-05"] == "locked"
 
-
-def test_group_three_result_returns_to_main_map_entry() -> None:
+def test_group_three_result_returns_to_main_map_entry_and_unlocks_group_four() -> None:
     session = build_session()
 
     _progress_until(session, lambda state: state.node_id == "group-03-result")
@@ -397,7 +391,7 @@ def test_group_three_result_returns_to_main_map_entry() -> None:
     runtime_state = session.runtime.current_state()
     assert runtime_state is not None
     assert runtime_state.node.node_id == "main-map-entry"
-    assert runtime_state.available_next_node_ids == ("group-01-story", "group-02-story", "group-03-story")
+    assert runtime_state.available_next_node_ids == ("group-01-story", "group-02-story", "group-03-story", "group-04-story")
 
     contract_state = session.current_game_state()
     assert contract_state.available_actions.advance is False
@@ -406,6 +400,8 @@ def test_group_three_result_returns_to_main_map_entry() -> None:
     assert status_by_group["group-01"] == "completed"
     assert status_by_group["group-02"] == "completed"
     assert status_by_group["group-03"] == "completed"
+    assert status_by_group["group-04"] == "available"
+    assert status_by_group["group-05"] == "locked"
 
 
 def test_group_two_becomes_available_after_group_one_completion() -> None:
@@ -419,6 +415,8 @@ def test_group_two_becomes_available_after_group_one_completion() -> None:
     assert status_by_group["group-01"] == "completed"
     assert status_by_group["group-02"] == "current"
     assert status_by_group["group-03"] == "locked"
+    assert status_by_group["group-04"] == "locked"
+    assert status_by_group["group-05"] == "locked"
 
 
 def test_group_story_does_not_unlock_practice_until_demo_node_is_reached() -> None:
@@ -496,7 +494,7 @@ def test_completed_group_switches_to_reviewing_when_reentering_practice() -> Non
 def test_replaying_completed_group_does_not_relock_later_groups() -> None:
     session = build_session()
 
-    _progress_until(session, lambda state: state.node_id == "group-03-practice" and state.current_level_id == "group-03-practice-03")
+    _progress_until(session, lambda state: state.node_id == "group-03-practice" and state.current_level_id == "group-03-practice-01")
 
     session.start_group_practice("group-01")
 
@@ -506,12 +504,14 @@ def test_replaying_completed_group_does_not_relock_later_groups() -> None:
     assert status_by_group["group-01"] == "reviewing"
     assert status_by_group["group-02"] == "completed"
     assert status_by_group["group-03"] == "current"
+    assert status_by_group["group-04"] == "locked"
+    assert status_by_group["group-05"] == "locked"
 
 
 def test_all_groups_completed_then_replay_marks_only_replayed_group_reviewing() -> None:
     session = build_session()
 
-    _progress_until(session, lambda state: state.node_id == "group-03-result")
+    _progress_until(session, lambda state: state.node_id == "group-05-result")
     session.advance()
 
     session.start_group_practice("group-01")
@@ -522,12 +522,14 @@ def test_all_groups_completed_then_replay_marks_only_replayed_group_reviewing() 
     assert status_by_group["group-01"] == "reviewing"
     assert status_by_group["group-02"] == "completed"
     assert status_by_group["group-03"] == "completed"
+    assert status_by_group["group-04"] == "completed"
+    assert status_by_group["group-05"] == "completed"
 
 
 def test_reviewing_practice_advances_to_next_level() -> None:
     session = build_session()
 
-    _progress_until(session, lambda state: state.node_id == "group-03-result")
+    _progress_until(session, lambda state: state.node_id == "group-05-result")
     session.advance()
 
     state = session.start_group_practice("group-01")
@@ -539,34 +541,43 @@ def test_reviewing_practice_advances_to_next_level() -> None:
     assert state.current_level_id == "group-01-practice-01"
 
     state = session.next_practice_level()
+    assert state.mode is SessionMode.CHALLENGE
+    assert state.node_id == "group-01-practice"
     assert state.current_level_id == "group-01-practice-02"
 
 
-def test_reviewing_current_game_state_advances_to_third_level_after_second_submit() -> None:
+def test_reviewing_fifth_level_returns_to_map_after_review() -> None:
     session = build_session()
 
-    _progress_until(session, lambda state: state.node_id == "group-03-result")
+    _progress_until(session, lambda state: state.node_id == "group-05-result")
     session.advance()
 
     session.start_group_practice("group-01")
-    session.submit_current_level(python_code="print(1)")
-    session.next_practice_level()
+    for expected_level in ("group-01-practice-01", "group-01-practice-02", "group-01-practice-03", "group-01-practice-04"):
+        state, outcome = session.submit_current_level(python_code="print(1)")
+        assert outcome.cleared is True
+        assert state.current_level_id == expected_level
+        state = session.next_practice_level()
+        assert state.mode is SessionMode.CHALLENGE
+
     state, outcome = session.submit_current_level(python_code="print(1)")
     assert outcome.cleared is True
-    assert state.current_level_id == "group-01-practice-02"
+    assert state.mode is SessionMode.CHALLENGE
+    assert state.current_level_id == "group-01-practice-05"
 
     state = session.next_practice_level()
-    assert state.current_level_id == "group-01-practice-03"
+    assert state.mode is SessionMode.SCENE
+    assert state.node_id == "main-map-entry"
 
     contract_state = session.current_game_state()
-    assert contract_state.practice is not None
-    assert contract_state.practice.current_level_id == "group-01-practice-03"
+    assert contract_state.mode is GameMode.SCENE
+    assert contract_state.node_id == "main-map-entry"
 
 
 def test_reviewing_practice_fifth_level_returns_to_main_map() -> None:
     session = build_session()
 
-    _progress_until(session, lambda state: state.node_id == "group-03-result")
+    _progress_until(session, lambda state: state.node_id == "group-05-result")
     session.advance()
 
     session.start_group_practice("group-01")
@@ -592,12 +603,16 @@ def test_reviewing_practice_fifth_level_returns_to_main_map() -> None:
     assert contract_state.map_route is not None
     status_by_group = {group.group_id: group.status_key for group in contract_state.map_route.groups}
     assert status_by_group["group-01"] == "completed"
+    assert status_by_group["group-02"] == "completed"
+    assert status_by_group["group-03"] == "completed"
+    assert status_by_group["group-04"] == "completed"
+    assert status_by_group["group-05"] == "completed"
 
 
 def test_reviewing_group_does_not_clear_current_from_unfinished_mainline_group() -> None:
     session = build_session()
 
-    _progress_until(session, lambda state: state.node_id == "group-02-practice" and state.current_level_id == "group-02-practice-03")
+    _progress_until(session, lambda state: state.node_id == "group-02-practice" and state.current_level_id == "group-02-practice-01")
 
     session.start_group_practice("group-01")
 
@@ -609,12 +624,14 @@ def test_reviewing_group_does_not_clear_current_from_unfinished_mainline_group()
     assert contract_state.practice is not None
     assert contract_state.practice.is_review_mode is True
     assert status_by_group["group-03"] == "locked"
+    assert status_by_group["group-04"] == "locked"
+    assert status_by_group["group-05"] == "locked"
 
 
 def test_finishing_review_keeps_current_on_unfinished_mainline_group() -> None:
     session = build_session()
 
-    _progress_until(session, lambda state: state.node_id == "group-02-practice" and state.current_level_id == "group-02-practice-03")
+    _progress_until(session, lambda state: state.node_id == "group-02-practice" and state.current_level_id == "group-02-practice-01")
     session.start_group_practice("group-01")
     for _ in range(5):
         session.submit_current_level(python_code="print(1)")
@@ -628,6 +645,8 @@ def test_finishing_review_keeps_current_on_unfinished_mainline_group() -> None:
     assert status_by_group["group-01"] == "completed"
     assert status_by_group["group-02"] == "current"
     assert status_by_group["group-03"] == "locked"
+    assert status_by_group["group-04"] == "locked"
+    assert status_by_group["group-05"] == "locked"
 
 
 def test_game_session_rejects_advance_during_challenge() -> None:
@@ -716,6 +735,8 @@ def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
     assert state.current_level_id == "group-01-practice-01"
 
     state = session.next_practice_level()
+    assert state.mode is SessionMode.CHALLENGE
+    assert state.node_id == "group-01-practice"
     assert state.current_level_id == "group-01-practice-02"
 
 

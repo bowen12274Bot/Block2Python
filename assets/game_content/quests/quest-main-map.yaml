@@ -14,5 +14,13 @@ node_ids:
   - group-03-demo
   - group-03-practice
   - group-03-result
+  - group-04-story
+  - group-04-demo
+  - group-04-practice
+  - group-04-result
+  - group-05-story
+  - group-05-demo
+  - group-05-practice
+  - group-05-result
 entry_node_id: main-map-entry
-completion_node_id: group-03-result
+completion_node_id: group-05-result

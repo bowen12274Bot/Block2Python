@@ -141,7 +141,7 @@ func hide_stage_overlay() -> void:
 
 func _collect_group_cards() -> void:
 	_group_cards.clear()
-	for group_id in ["group-01", "group-02", "group-03"]:
+	for group_id in ["group-01", "group-02", "group-03", "group-04", "group-05"]:
 		var base_name: String = _scene_group_name(group_id)
 		var root: Button = get_node_or_null("StageFrame/HotspotLayer/%s" % base_name)
 		if root == null:
@@ -362,6 +362,10 @@ func _scene_group_name(group_id: String) -> String:
 			return "Group02Card"
 		"group-03":
 			return "Group03Card"
+		"group-04":
+			return "Group04Card"
+		"group-05":
+			return "Group05Card"
 		_:
 			return group_id
 
