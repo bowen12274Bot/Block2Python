@@ -1,7 +1,39 @@
 [gd_scene format=3 uid="uid://dq7spdgo201ok"]
 
 [ext_resource type="Script" uid="uid://c8slj06v84bni" path="res://scripts/map/quest_map_screen.gd" id="1_screen"]
+[ext_resource type="Texture2D" uid="uid://c4fad12ucxsqj" path="res://art/map/main_map_background.png" id="3_bfiii"]
 [ext_resource type="Script" uid="uid://kr3awo7su5ce" path="res://scripts/map/quest_map_stage.gd" id="3_stage"]
+[ext_resource type="Texture2D" uid="uid://b8u2m2uvdjjxk" path="res://art/map/stages/floating_islands1.png" id="4_i8k62"]
+[ext_resource type="Texture2D" uid="uid://duv8r0cnsnh7p" path="res://art/map/icons/lock.png" id="5_cnc8n"]
+[ext_resource type="Texture2D" uid="uid://dxjcvbsgt1erp" path="res://art/map/stages/floating_islands2.png" id="5_tq048"]
+[ext_resource type="Texture2D" uid="uid://cah1qaqaafolc" path="res://art/map/nameplates/stage_nameplate.png" id="6_ketox"]
+[ext_resource type="Texture2D" uid="uid://cjakmxynjs2" path="res://art/map/stages/floating_islands3.png" id="6_rkax8"]
+[ext_resource type="Texture2D" uid="uid://bjjw0p76njclt" path="res://art/map/stages/floating_islands4.png" id="7_ketox"]
+[ext_resource type="Texture2D" uid="uid://coxhfos7ywnuh" path="res://art/map/decor/floating_island_decor_04.png" id="7_kgrhd"]
+[ext_resource type="Texture2D" uid="uid://c7b4ptflyqmvg" path="res://art/map/decor/floating_island_decor_03.png" id="8_ekp7g"]
+[ext_resource type="Texture2D" uid="uid://bwepxlws31x7k" path="res://art/map/stages/Final_Castle1.png" id="8_fqf2m"]
+[ext_resource type="Texture2D" uid="uid://b07grtrfr2md2" path="res://art/map/decor/cloud_04.png" id="9_j2spx"]
+[ext_resource type="Script" uid="uid://bj3abwe3wci04" path="res://scripts/map/stage_nameplate.gd" id="9_nameplate_script"]
+[ext_resource type="Shader" uid="uid://by3rh3xkue47j" path="res://art/shaders/stage_number_glow.gdshader" id="10_nameplate_shader"]
+[ext_resource type="Texture2D" uid="uid://btd4ucsbqila6" path="res://art/map/decor/cloud_06.png" id="11_ijtf8"]
+[ext_resource type="FontFile" uid="uid://chorfjnqa8soa" path="res://art/fonts/Orbitron-Bold.ttf" id="11_nameplate_font"]
+[ext_resource type="Texture2D" uid="uid://d265gw4rfih4" path="res://art/map/decor/floating_platform.png" id="12_decor_platform"]
+[ext_resource type="Texture2D" uid="uid://cupq01b6k5oi0" path="res://art/map/decor/cloud_05.png" id="12_p5m1e"]
+[ext_resource type="Texture2D" uid="uid://c70xaop2idoap" path="res://art/map/decor/cloud_03.png" id="13_54blv"]
+[ext_resource type="Texture2D" uid="uid://dxby85sdtfkto" path="res://art/map/decor/floating_island_decor_01.png" id="13_decor_island_01"]
+[ext_resource type="Texture2D" uid="uid://dli83vtb1v0ra" path="res://art/map/decor/floating_island_decor_02.png" id="14_decor_island_02"]
+[ext_resource type="Texture2D" uid="uid://d3317bd147cn6" path="res://art/map/decor/cloud_01.png" id="15_decor_cloud_01"]
+[ext_resource type="Texture2D" uid="uid://o5y5k2ud80vq" path="res://art/map/decor/cloud_02.png" id="16_decor_cloud_02"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nameplate_root"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_stage_number_local"]
+shader = ExtResource("10_nameplate_shader")
+shader_parameter/base_tint = Color(1, 0.93, 0.72, 1)
+shader_parameter/glow_tint = Color(0.92, 0.62, 0.18, 1)
+shader_parameter/glow_strength = 1.15
+shader_parameter/edge_power = 1.8
+shader_parameter/scanline_strength = 0.08
 
 [node name="QuestMapScreen" type="Control" unique_id=1999448533]
 layout_mode = 3
@@ -38,6 +70,7 @@ mouse_filter = 2
 color = Color(0.0509804, 0.0470588, 0.133333, 1)
 
 [node name="BackgroundTexture" type="TextureRect" parent="StageFrame" unique_id=37323369]
+self_modulate = Color(0.85882354, 0.85882354, 0.85882354, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,26 +78,254 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("3_bfiii")
 stretch_mode = 6
 
-[node name="BackgroundHint" type="Label" parent="StageFrame/BackgroundTexture" unique_id=263756715]
-visible = false
+[node name="DecorLayer" type="Control" parent="StageFrame" unique_id=2053000001]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -164.0
-offset_top = -17.0
-offset_right = 164.0
-offset_bottom = 17.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 18
-text = "Map Background Placeholder"
-horizontal_alignment = 1
-vertical_alignment = 1
+mouse_filter = 2
+
+[node name="DecorIslands" type="Control" parent="StageFrame/DecorLayer" unique_id=2053000002]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="IslandDecorA" type="TextureRect" parent="StageFrame/DecorLayer/DecorIslands" unique_id=2053000003]
+modulate = Color(0.79607844, 0.8352941, 0.69411767, 1)
+z_index = 2
+layout_mode = 0
+offset_left = -99.0
+offset_top = 628.0
+offset_right = 320.0
+offset_bottom = 774.0
+mouse_filter = 2
+texture = ExtResource("12_decor_platform")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="IslandDecorB" type="TextureRect" parent="StageFrame/DecorLayer/DecorIslands" unique_id=2053000004]
+modulate = Color(1, 1, 1, 0.88)
+z_index = 1
+layout_mode = 0
+offset_left = 956.928
+offset_top = 276.0
+offset_right = 1155.0002
+offset_bottom = 413.0
+mouse_filter = 2
+texture = ExtResource("13_decor_island_01")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="IslandDecorC" type="TextureRect" parent="StageFrame/DecorLayer/DecorIslands" unique_id=2053000005]
+modulate = Color(1, 1, 0.75686276, 0.7529412)
+z_index = 1
+layout_mode = 0
+offset_left = 720.0
+offset_top = 586.0
+offset_right = 849.0
+offset_bottom = 681.7778
+mouse_filter = 2
+texture = ExtResource("14_decor_island_02")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="IslandDecorD" type="TextureRect" parent="StageFrame/DecorLayer/DecorIslands" unique_id=968292826]
+modulate = Color(1.1730844, 1.1730844, 1.0224411, 0.8392157)
+layout_mode = 0
+offset_left = 57.0
+offset_top = 88.0
+offset_right = 234.0
+offset_bottom = 244.0
+mouse_filter = 2
+texture = ExtResource("7_kgrhd")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="IslandDecorE" type="TextureRect" parent="StageFrame/DecorLayer/DecorIslands" unique_id=1888845666]
+modulate = Color(1, 1, 1, 0.84)
+layout_mode = 0
+offset_left = 111.0
+offset_top = 299.0
+offset_right = 258.9148
+offset_bottom = 445.77783
+mouse_filter = 2
+texture = ExtResource("8_ekp7g")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudLayer" type="Control" parent="StageFrame" unique_id=2053000006]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Clouds" type="Control" parent="StageFrame/CloudLayer" unique_id=2053000007]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CloudA" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=2053000008]
+modulate = Color(1, 1, 1, 0.6862745)
+layout_mode = 0
+offset_left = 631.0
+offset_top = 568.0
+offset_right = 1307.0
+offset_bottom = 858.0
+mouse_filter = 2
+texture = ExtResource("9_j2spx")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudB" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=2053000009]
+modulate = Color(1, 1, 1, 0.7294118)
+layout_mode = 0
+offset_left = 693.0
+offset_top = -61.0
+offset_right = 1231.0
+offset_bottom = 129.0
+mouse_filter = 2
+texture = ExtResource("16_decor_cloud_02")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudC" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=336347169]
+modulate = Color(1, 1, 1, 0.77254903)
+layout_mode = 0
+offset_left = -214.0
+offset_top = -84.0
+offset_right = 298.0
+offset_bottom = 101.0
+mouse_filter = 2
+texture = ExtResource("11_ijtf8")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudD" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=960803904]
+modulate = Color(1, 1, 1, 0.6039216)
+layout_mode = 0
+offset_left = 146.0
+offset_top = 403.0
+offset_right = 283.0
+offset_bottom = 444.0
+mouse_filter = 2
+texture = ExtResource("11_ijtf8")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudE" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=1589651974]
+modulate = Color(1, 1, 1, 0.8117647)
+layout_mode = 0
+offset_left = 941.0
+offset_top = 484.0
+offset_right = 1298.0
+offset_bottom = 602.0
+mouse_filter = 2
+texture = ExtResource("12_p5m1e")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudF" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=2060090372]
+modulate = Color(1, 1, 1, 0.8117647)
+z_index = 1
+layout_mode = 0
+offset_left = -215.0
+offset_top = 484.0
+offset_right = 297.0
+offset_bottom = 669.0
+mouse_filter = 2
+texture = ExtResource("13_54blv")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudG" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=1454021384]
+modulate = Color(1, 1, 1, 0.8117647)
+z_index = 2
+layout_mode = 0
+offset_left = -191.0
+offset_top = 436.0
+offset_right = 176.0
+offset_bottom = 570.0
+mouse_filter = 2
+texture = ExtResource("15_decor_cloud_01")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudH" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=776959076]
+modulate = Color(1, 1, 1, 0.47843137)
+layout_mode = 0
+offset_left = 571.0
+offset_top = 277.0
+offset_right = 881.0
+offset_bottom = 394.0
+mouse_filter = 2
+texture = ExtResource("15_decor_cloud_01")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudI" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=1206523354]
+modulate = Color(1, 1, 1, 0.3764706)
+layout_mode = 0
+offset_left = 393.0
+offset_top = 103.0
+offset_right = 548.0
+offset_bottom = 162.0
+mouse_filter = 2
+texture = ExtResource("11_ijtf8")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudJ" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=942771573]
+modulate = Color(1, 1, 1, 0.2509804)
+layout_mode = 0
+offset_left = 289.0
+offset_top = 642.0
+offset_right = 670.0
+offset_bottom = 765.0
+mouse_filter = 2
+texture = ExtResource("11_ijtf8")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudK" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=429501389]
+modulate = Color(1, 1, 1, 0.20784314)
+layout_mode = 0
+offset_left = -13.0
+offset_top = 180.0
+offset_right = 499.0
+offset_bottom = 365.0
+mouse_filter = 2
+texture = ExtResource("11_ijtf8")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CloudL" type="TextureRect" parent="StageFrame/CloudLayer/Clouds" unique_id=967369663]
+modulate = Color(1, 1, 1, 0.1764706)
+z_index = 2
+layout_mode = 0
+offset_left = 837.0
+offset_top = 234.0
+offset_right = 1369.0
+offset_bottom = 450.0
+mouse_filter = 2
+texture = ExtResource("11_ijtf8")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="RouteLayer" type="Control" parent="StageFrame" unique_id=1978067461]
 layout_mode = 1
@@ -74,6 +335,123 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="RouteAnchors" type="Control" parent="StageFrame/RouteLayer" unique_id=83289283]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Route01Start" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=49848656]
+layout_mode = 0
+offset_left = 460.0
+offset_top = 550.0
+offset_right = 472.0
+offset_bottom = 562.0
+mouse_filter = 2
+color = Color(0.37, 1, 0.69, 0.85)
+
+[node name="Route01Control" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=1414420650]
+layout_mode = 0
+offset_left = 633.0
+offset_top = 580.0
+offset_right = 645.0
+offset_bottom = 592.0
+mouse_filter = 2
+color = Color(1, 0.84, 0.42, 0.85)
+
+[node name="Route01End" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=1940492918]
+layout_mode = 0
+offset_left = 861.0
+offset_top = 540.0
+offset_right = 873.0
+offset_bottom = 552.0
+mouse_filter = 2
+color = Color(0.49, 0.83, 1, 0.85)
+
+[node name="Route02Start" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=1891095352]
+layout_mode = 0
+offset_left = 860.0
+offset_top = 520.0
+offset_right = 872.0
+offset_bottom = 532.0
+mouse_filter = 2
+color = Color(0.37, 1, 0.69, 0.85)
+
+[node name="Route02Control" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=1529055144]
+layout_mode = 0
+offset_left = 800.0
+offset_top = 456.0
+offset_right = 812.0
+offset_bottom = 468.0
+mouse_filter = 2
+color = Color(1, 0.84, 0.42, 0.85)
+
+[node name="Route02End" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=1161048221]
+layout_mode = 0
+offset_left = 714.0
+offset_top = 415.0
+offset_right = 726.0
+offset_bottom = 427.0
+mouse_filter = 2
+color = Color(0.49, 0.83, 1, 0.85)
+
+[node name="Route03Start" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=421203373]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 395.0
+offset_right = 512.0
+offset_bottom = 407.0
+mouse_filter = 2
+color = Color(0.37, 1, 0.69, 0.85)
+
+[node name="Route03Control" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=1445975963]
+layout_mode = 0
+offset_left = 425.0
+offset_top = 346.0
+offset_right = 437.0
+offset_bottom = 358.0
+mouse_filter = 2
+color = Color(1, 0.84, 0.42, 0.85)
+
+[node name="Route03End" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=867061923]
+layout_mode = 0
+offset_left = 400.0
+offset_top = 246.0
+offset_right = 412.0
+offset_bottom = 258.0
+mouse_filter = 2
+color = Color(0.49, 0.83, 1, 0.85)
+
+[node name="Route04Start" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=1558403068]
+layout_mode = 0
+offset_left = 472.0
+offset_top = 200.0
+offset_right = 484.0
+offset_bottom = 212.0
+mouse_filter = 2
+color = Color(0.37, 1, 0.69, 0.85)
+
+[node name="Route04Control" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=526391246]
+layout_mode = 0
+offset_left = 602.0
+offset_top = 170.0
+offset_right = 614.0
+offset_bottom = 182.0
+mouse_filter = 2
+color = Color(1, 0.84, 0.42, 0.85)
+
+[node name="Route04End" type="ColorRect" parent="StageFrame/RouteLayer/RouteAnchors" unique_id=1387527976]
+layout_mode = 0
+offset_left = 732.0
+offset_top = 185.0
+offset_right = 744.0
+offset_bottom = 197.0
+mouse_filter = 2
+color = Color(0.49, 0.83, 1, 0.85)
 
 [node name="HotspotLayer" type="Control" parent="StageFrame" unique_id=494979297]
 layout_mode = 1
@@ -86,215 +464,613 @@ mouse_filter = 1
 
 [node name="Group01Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=1939054249]
 layout_mode = 0
-offset_left = 100.0
-offset_top = 200.0
-offset_right = 320.0
-offset_bottom = 290.0
+offset_left = 250.0
+offset_top = 480.0
+offset_right = 500.0
+offset_bottom = 640.0
+scale = Vector2(0.9, 0.9)
 flat = true
 
-[node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group01Card" unique_id=1789254780]
+[node name="Art" type="TextureRect" parent="StageFrame/HotspotLayer/Group01Card" unique_id=1939054250]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = 12.0
-offset_right = -14.0
-offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+texture = ExtResource("4_i8k62")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Title" type="Label" parent="StageFrame/HotspotLayer/Group01Card/Content" unique_id=1773148832]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Stage 01"
-
-[node name="Subtitle" type="Label" parent="StageFrame/HotspotLayer/Group01Card/Content" unique_id=2145652033]
-layout_mode = 2
-text = "Loading"
-
-[node name="Current" type="Label" parent="StageFrame/HotspotLayer/Group01Card/Content" unique_id=580946846]
+[node name="ArtPlaceholder" type="Label" parent="StageFrame/HotspotLayer/Group01Card" unique_id=1939054251]
 visible = false
-layout_mode = 2
-text = "Current"
-
-[node name="Badge" type="Label" parent="StageFrame/HotspotLayer/Group01Card" unique_id=850087149]
-layout_mode = 0
-text = "Locked"
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -88.0
+offset_top = -22.0
+offset_right = 88.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Drop art
+res://art/map/stages/group-01.png"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="LockIcon" type="TextureRect" parent="StageFrame/HotspotLayer/Group01Card" unique_id=850087149]
+layout_mode = 0
+offset_left = 158.0
+offset_top = 22.222
+offset_right = 203.0
+offset_bottom = 67.222
+mouse_filter = 2
+texture = ExtResource("5_cnc8n")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Group02Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=250360789]
 layout_mode = 0
-offset_left = 480.0
-offset_top = 200.0
-offset_right = 700.0
-offset_bottom = 290.0
+offset_left = 828.12494
+offset_top = 436.0
+offset_right = 1102.4305
+offset_bottom = 611.55554
+scale = Vector2(0.9, 0.9)
 flat = true
 
-[node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group02Card" unique_id=957999308]
+[node name="Art" type="TextureRect" parent="StageFrame/HotspotLayer/Group02Card" unique_id=250360790]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = 12.0
-offset_right = -14.0
-offset_bottom = -12.0
+offset_left = 14.305624
+offset_top = -5.555556
+offset_right = 14.305634
+offset_bottom = -5.5555573
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+texture = ExtResource("5_tq048")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Title" type="Label" parent="StageFrame/HotspotLayer/Group02Card/Content" unique_id=542454845]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Stage 02"
-
-[node name="Subtitle" type="Label" parent="StageFrame/HotspotLayer/Group02Card/Content" unique_id=1234037989]
-layout_mode = 2
-text = "Loading"
-
-[node name="Current" type="Label" parent="StageFrame/HotspotLayer/Group02Card/Content" unique_id=28507080]
+[node name="ArtPlaceholder" type="Label" parent="StageFrame/HotspotLayer/Group02Card" unique_id=250360791]
 visible = false
-layout_mode = 2
-text = "Current"
-
-[node name="Badge" type="Label" parent="StageFrame/HotspotLayer/Group02Card" unique_id=67260181]
-layout_mode = 0
-text = "Locked"
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -88.0
+offset_top = -22.0
+offset_right = 88.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Drop art
+res://art/map/stages/group-02.png"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="LockIcon" type="TextureRect" parent="StageFrame/HotspotLayer/Group02Card" unique_id=67260181]
+layout_mode = 0
+offset_left = 155.0
+offset_top = 12.0
+offset_right = 200.0
+offset_bottom = 57.0
+mouse_filter = 2
+texture = ExtResource("5_cnc8n")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Group03Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=1179423723]
 layout_mode = 0
-offset_left = 860.0
-offset_top = 200.0
-offset_right = 1080.0
-offset_bottom = 290.0
+offset_left = 500.0
+offset_top = 330.0
+offset_right = 750.0
+offset_bottom = 490.0
+scale = Vector2(0.9, 0.9)
 flat = true
 
-[node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group03Card" unique_id=1501362480]
+[node name="Art" type="TextureRect" parent="StageFrame/HotspotLayer/Group03Card" unique_id=1179423724]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = 12.0
-offset_right = -14.0
-offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+texture = ExtResource("6_rkax8")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Title" type="Label" parent="StageFrame/HotspotLayer/Group03Card/Content" unique_id=1696194397]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Stage 03"
-
-[node name="Subtitle" type="Label" parent="StageFrame/HotspotLayer/Group03Card/Content" unique_id=789457930]
-layout_mode = 2
-text = "Loading"
-
-[node name="Current" type="Label" parent="StageFrame/HotspotLayer/Group03Card/Content" unique_id=395060819]
+[node name="ArtPlaceholder" type="Label" parent="StageFrame/HotspotLayer/Group03Card" unique_id=1179423725]
 visible = false
-layout_mode = 2
-text = "Current"
-
-[node name="Badge" type="Label" parent="StageFrame/HotspotLayer/Group03Card" unique_id=1272657237]
-layout_mode = 0
-text = "Locked"
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -88.0
+offset_top = -22.0
+offset_right = 88.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Drop art
+res://art/map/stages/group-03.png"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="LockIcon" type="TextureRect" parent="StageFrame/HotspotLayer/Group03Card" unique_id=1272657237]
+layout_mode = 0
+offset_left = 138.88889
+offset_top = 8.888903
+offset_right = 183.88889
+offset_bottom = 53.8889
+mouse_filter = 2
+texture = ExtResource("5_cnc8n")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Group04Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=1144000004]
 layout_mode = 0
-offset_left = 240.0
-offset_top = 400.0
-offset_right = 460.0
-offset_bottom = 490.0
+offset_left = 275.0
+offset_top = 128.0
+offset_right = 525.0
+offset_bottom = 288.0
+scale = Vector2(0.9, 0.9)
 flat = true
 
-[node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group04Card" unique_id=1144000005]
+[node name="Art" type="TextureRect" parent="StageFrame/HotspotLayer/Group04Card" unique_id=1144000016]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = 12.0
-offset_right = -14.0
-offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+texture = ExtResource("7_ketox")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Title" type="Label" parent="StageFrame/HotspotLayer/Group04Card/Content" unique_id=1144000006]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Stage 04"
-
-[node name="Subtitle" type="Label" parent="StageFrame/HotspotLayer/Group04Card/Content" unique_id=1144000007]
-layout_mode = 2
-text = "Loading"
-
-[node name="Current" type="Label" parent="StageFrame/HotspotLayer/Group04Card/Content" unique_id=1144000008]
+[node name="ArtPlaceholder" type="Label" parent="StageFrame/HotspotLayer/Group04Card" unique_id=1144000017]
 visible = false
-layout_mode = 2
-text = "Current"
-
-[node name="Badge" type="Label" parent="StageFrame/HotspotLayer/Group04Card" unique_id=1144000009]
-layout_mode = 0
-text = "Locked"
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -88.0
+offset_top = -22.0
+offset_right = 88.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Drop art
+res://art/map/stages/group-04.png"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="LockIcon" type="TextureRect" parent="StageFrame/HotspotLayer/Group04Card" unique_id=1144000009]
+layout_mode = 0
+offset_left = 154.0
+offset_top = 22.222
+offset_right = 199.0
+offset_bottom = 67.222
+mouse_filter = 2
+texture = ExtResource("5_cnc8n")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Group05Card" type="Button" parent="StageFrame/HotspotLayer" unique_id=1144000010]
 layout_mode = 0
-offset_left = 720.0
-offset_top = 400.0
-offset_right = 940.0
-offset_bottom = 490.0
+offset_left = 735.0
+offset_top = 100.0
+offset_right = 985.0
+offset_bottom = 260.0
+scale = Vector2(0.9, 0.9)
 flat = true
 
-[node name="Content" type="VBoxContainer" parent="StageFrame/HotspotLayer/Group05Card" unique_id=1144000011]
+[node name="Art" type="TextureRect" parent="StageFrame/HotspotLayer/Group05Card" unique_id=1144000019]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = 12.0
-offset_right = -14.0
-offset_bottom = -12.0
+offset_left = -10.0
+offset_top = -77.0
+offset_right = -10.0
+offset_bottom = 13.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(1.1, 1.1)
 mouse_filter = 2
-theme_override_constants/separation = 8
+texture = ExtResource("8_fqf2m")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Title" type="Label" parent="StageFrame/HotspotLayer/Group05Card/Content" unique_id=1144000012]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Stage 05"
-
-[node name="Subtitle" type="Label" parent="StageFrame/HotspotLayer/Group05Card/Content" unique_id=1144000013]
-layout_mode = 2
-text = "Loading"
-
-[node name="Current" type="Label" parent="StageFrame/HotspotLayer/Group05Card/Content" unique_id=1144000014]
+[node name="ArtPlaceholder" type="Label" parent="StageFrame/HotspotLayer/Group05Card" unique_id=1144000020]
 visible = false
-layout_mode = 2
-text = "Current"
-
-[node name="Badge" type="Label" parent="StageFrame/HotspotLayer/Group05Card" unique_id=1144000015]
-layout_mode = 0
-text = "Locked"
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -88.0
+offset_top = -22.0
+offset_right = 88.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Drop art
+res://art/map/stages/group-05.png"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="LockIcon" type="TextureRect" parent="StageFrame/HotspotLayer/Group05Card" unique_id=1144000015]
+layout_mode = 0
+offset_left = 131.11111
+offset_top = 17.777775
+offset_right = 176.11111
+offset_bottom = 62.777775
+mouse_filter = 2
+texture = ExtResource("5_cnc8n")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameplateLayer" type="Control" parent="StageFrame" unique_id=2042000001]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 143.0
+offset_top = 85.0
+offset_right = 143.0
+offset_bottom = 85.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.75, 0.75)
+mouse_filter = 2
+
+[node name="Group01Nameplate" type="PanelContainer" parent="StageFrame/NameplateLayer" unique_id=1455413174]
+layout_mode = 0
+offset_left = 170.0
+offset_top = 614.667
+offset_right = 472.0
+offset_bottom = 679.667
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_nameplate_root")
+script = ExtResource("9_nameplate_script")
+stage_title = "Input Gate"
+plate_texture = ExtResource("6_ketox")
+orbitron_font = ExtResource("11_nameplate_font")
+
+[node name="PlateArt" type="TextureRect" parent="StageFrame/NameplateLayer/Group01Nameplate" unique_id=853230535]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_ketox")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PlatePlaceholder" type="Label" parent="StageFrame/NameplateLayer/Group01Nameplate" unique_id=1803047702]
+visible = false
+modulate = Color(0.89, 0.95, 1, 0.55)
+layout_mode = 2
+text = "Nameplate Art Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlateShade" type="ColorRect" parent="StageFrame/NameplateLayer/Group01Nameplate" unique_id=368765094]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.027451, 0.0431373, 0.0980392, 0.68)
+
+[node name="ContentRoot" type="Control" parent="StageFrame/NameplateLayer/Group01Nameplate" unique_id=1083796845]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NumberLabel" type="Label" parent="StageFrame/NameplateLayer/Group01Nameplate/ContentRoot" unique_id=2035993025]
+material = SubResource("ShaderMaterial_stage_number_local")
+layout_mode = 0
+offset_left = 44.999992
+offset_top = 8.333354
+offset_right = 108.999985
+offset_bottom = 56.333355
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 34
+text = "01"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="StageFrame/NameplateLayer/Group01Nameplate/ContentRoot" unique_id=1247552324]
+modulate = Color(0.91, 0.98, 1, 1)
+layout_mode = 0
+offset_left = 116.666664
+offset_top = 18.333353
+offset_right = 312.66666
+offset_bottom = 50.33335
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 22
+text = "Input Gate"
+vertical_alignment = 1
+
+[node name="Group02Nameplate" type="PanelContainer" parent="StageFrame/NameplateLayer" unique_id=1777976817]
+layout_mode = 0
+offset_left = 969.3332
+offset_top = 572.0
+offset_right = 1280.3333
+offset_bottom = 637.0
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_nameplate_root")
+script = ExtResource("9_nameplate_script")
+stage_number = "02"
+stage_title = "Variable Base"
+plate_texture = ExtResource("6_ketox")
+orbitron_font = ExtResource("11_nameplate_font")
+
+[node name="PlateArt" type="TextureRect" parent="StageFrame/NameplateLayer/Group02Nameplate" unique_id=791919896]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_ketox")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PlatePlaceholder" type="Label" parent="StageFrame/NameplateLayer/Group02Nameplate" unique_id=72441570]
+visible = false
+modulate = Color(0.89, 0.95, 1, 0.55)
+layout_mode = 2
+text = "Nameplate Art Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlateShade" type="ColorRect" parent="StageFrame/NameplateLayer/Group02Nameplate" unique_id=498720506]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.027451, 0.0431373, 0.0980392, 0.68)
+
+[node name="ContentRoot" type="Control" parent="StageFrame/NameplateLayer/Group02Nameplate" unique_id=1926700169]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NumberLabel" type="Label" parent="StageFrame/NameplateLayer/Group02Nameplate/ContentRoot" unique_id=1362899184]
+material = SubResource("ShaderMaterial_stage_number_local")
+layout_mode = 0
+offset_left = 35.00022
+offset_top = 8.333354
+offset_right = 99.00022
+offset_bottom = 56.333355
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 34
+text = "02"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="StageFrame/NameplateLayer/Group02Nameplate/ContentRoot" unique_id=1713532482]
+modulate = Color(0.91, 0.98, 1, 1)
+layout_mode = 0
+offset_left = 103.33356
+offset_top = 18.0
+offset_right = 299.33356
+offset_bottom = 50.0
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 22
+text = "Variable Base"
+vertical_alignment = 1
+
+[node name="Group03Nameplate" type="PanelContainer" parent="StageFrame/NameplateLayer" unique_id=574157503]
+layout_mode = 0
+offset_left = 498.667
+offset_top = 415.0
+offset_right = 804.667
+offset_bottom = 480.0
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_nameplate_root")
+script = ExtResource("9_nameplate_script")
+stage_number = "03"
+stage_title = "If Canyon"
+plate_texture = ExtResource("6_ketox")
+orbitron_font = ExtResource("11_nameplate_font")
+
+[node name="PlateArt" type="TextureRect" parent="StageFrame/NameplateLayer/Group03Nameplate" unique_id=757787491]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_ketox")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PlatePlaceholder" type="Label" parent="StageFrame/NameplateLayer/Group03Nameplate" unique_id=1839122043]
+visible = false
+modulate = Color(0.89, 0.95, 1, 0.55)
+layout_mode = 2
+text = "Nameplate Art Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlateShade" type="ColorRect" parent="StageFrame/NameplateLayer/Group03Nameplate" unique_id=2071677895]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.027451, 0.0431373, 0.0980392, 0.68)
+
+[node name="ContentRoot" type="Control" parent="StageFrame/NameplateLayer/Group03Nameplate" unique_id=443749809]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NumberLabel" type="Label" parent="StageFrame/NameplateLayer/Group03Nameplate/ContentRoot" unique_id=484234503]
+material = SubResource("ShaderMaterial_stage_number_local")
+layout_mode = 0
+offset_left = 56.666687
+offset_top = 8.333354
+offset_right = 120.66669
+offset_bottom = 56.333355
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 34
+text = "03"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="StageFrame/NameplateLayer/Group03Nameplate/ContentRoot" unique_id=311128256]
+modulate = Color(0.91, 0.98, 1, 1)
+layout_mode = 0
+offset_left = 130.00002
+offset_top = 18.333353
+offset_right = 326.0
+offset_bottom = 50.33335
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 22
+text = "If Canyon"
+vertical_alignment = 1
+
+[node name="Group04Nameplate" type="PanelContainer" parent="StageFrame/NameplateLayer" unique_id=755630488]
+layout_mode = 0
+offset_left = 205.333
+offset_top = 160.0
+offset_right = 514.333
+offset_bottom = 225.00002
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_nameplate_root")
+script = ExtResource("9_nameplate_script")
+stage_number = "04"
+stage_title = "Loop Lab"
+plate_texture = ExtResource("6_ketox")
+orbitron_font = ExtResource("11_nameplate_font")
+
+[node name="PlateArt" type="TextureRect" parent="StageFrame/NameplateLayer/Group04Nameplate" unique_id=1107268027]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_ketox")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PlatePlaceholder" type="Label" parent="StageFrame/NameplateLayer/Group04Nameplate" unique_id=1186375091]
+visible = false
+modulate = Color(0.89, 0.95, 1, 0.55)
+layout_mode = 2
+text = "Nameplate Art Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlateShade" type="ColorRect" parent="StageFrame/NameplateLayer/Group04Nameplate" unique_id=1906174445]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.027451, 0.0431373, 0.0980392, 0.68)
+
+[node name="ContentRoot" type="Control" parent="StageFrame/NameplateLayer/Group04Nameplate" unique_id=1985330882]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NumberLabel" type="Label" parent="StageFrame/NameplateLayer/Group04Nameplate/ContentRoot" unique_id=700892951]
+material = SubResource("ShaderMaterial_stage_number_local")
+layout_mode = 0
+offset_left = 55.000015
+offset_top = 8.333328
+offset_right = 119.000015
+offset_bottom = 56.33333
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 34
+text = "04"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="StageFrame/NameplateLayer/Group04Nameplate/ContentRoot" unique_id=1355018328]
+modulate = Color(0.91, 0.98, 1, 1)
+layout_mode = 0
+offset_left = 125.000015
+offset_top = 18.333328
+offset_right = 321.0
+offset_bottom = 50.33333
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 22
+text = "Loop Lab"
+vertical_alignment = 1
+
+[node name="Group05Nameplate" type="PanelContainer" parent="StageFrame/NameplateLayer" unique_id=729432103]
+layout_mode = 0
+offset_left = 813.333
+offset_top = 140.0
+offset_right = 1122.333
+offset_bottom = 205.0
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_nameplate_root")
+script = ExtResource("9_nameplate_script")
+stage_number = "05"
+stage_title = "Bug King Castle"
+plate_texture = ExtResource("6_ketox")
+orbitron_font = ExtResource("11_nameplate_font")
+
+[node name="PlateArt" type="TextureRect" parent="StageFrame/NameplateLayer/Group05Nameplate" unique_id=2033159482]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_ketox")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PlatePlaceholder" type="Label" parent="StageFrame/NameplateLayer/Group05Nameplate" unique_id=1541173378]
+visible = false
+modulate = Color(0.89, 0.95, 1, 0.55)
+layout_mode = 2
+text = "Nameplate Art Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlateShade" type="ColorRect" parent="StageFrame/NameplateLayer/Group05Nameplate" unique_id=1268907489]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.027451, 0.0431373, 0.0980392, 0.68)
+
+[node name="ContentRoot" type="Control" parent="StageFrame/NameplateLayer/Group05Nameplate" unique_id=202709277]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NumberLabel" type="Label" parent="StageFrame/NameplateLayer/Group05Nameplate/ContentRoot" unique_id=1668934491]
+material = SubResource("ShaderMaterial_stage_number_local")
+layout_mode = 0
+offset_left = 19.999918
+offset_top = 8.3333025
+offset_right = 83.999916
+offset_bottom = 56.3333
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 34
+text = "05"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="StageFrame/NameplateLayer/Group05Nameplate/ContentRoot" unique_id=291036833]
+modulate = Color(0.91, 0.98, 1, 1)
+layout_mode = 0
+offset_left = 86.66659
+offset_top = 18.333303
+offset_right = 282.6666
+offset_bottom = 50.333305
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("11_nameplate_font")
+theme_override_font_sizes/font_size = 22
+text = "Bug King Castle"
+vertical_alignment = 1
+
 [node name="ForegroundTexture" type="TextureRect" parent="StageFrame" unique_id=388371556]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

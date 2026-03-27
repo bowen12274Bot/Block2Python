@@ -2,6 +2,21 @@ extends Control
 class_name QuestMapScreen
 
 const QuestMapSelectionPresenterScript = preload("res://scripts/map/quest_map_selection_presenter.gd")
+const GROUP_ART_DIRECTORY := "res://art/map/stages"
+const GROUP_ART_FILES := {
+	"group-01": "floating_islands1.png",
+	"group-02": "floating_islands2.png",
+	"group-03": "floating_islands3.png",
+	"group-04": "floating_islands4.png",
+	"group-05": "Final_Castle1.png",
+}
+const GROUP_DISPLAY_TITLES := {
+	"group-01": "Input Gate",
+	"group-02": "Variable Base",
+	"group-03": "If Canyon",
+	"group-04": "Loop Lab",
+	"group-05": "Bug King Castle",
+}
 
 signal start_bridge_requested()
 signal reset_requested()
@@ -70,6 +85,7 @@ func _ready() -> void:
 	if stage_practice_button != null:
 		stage_practice_button.pressed.connect(_on_stage_practice_pressed)
 	if stage_overlay != null:
+		stage_overlay.z_index = 100
 		stage_overlay.visible = false
 
 
@@ -155,21 +171,22 @@ func _collect_group_cards() -> void:
 			_on_group_pressed(bound_group_id)
 		)
 
-		var title_label: Label = get_node_or_null("StageFrame/HotspotLayer/%s/Content/Title" % base_name)
-		var subtitle_label: Label = get_node_or_null("StageFrame/HotspotLayer/%s/Content/Subtitle" % base_name)
-		var current_label: Label = get_node_or_null("StageFrame/HotspotLayer/%s/Content/Current" % base_name)
-		var badge_label: Label = get_node_or_null("StageFrame/HotspotLayer/%s/Badge" % base_name)
+		var lock_icon: TextureRect = get_node_or_null("StageFrame/HotspotLayer/%s/LockIcon" % base_name)
+		var art_rect: TextureRect = get_node_or_null("StageFrame/HotspotLayer/%s/Art" % base_name)
+		var art_placeholder: Label = get_node_or_null("StageFrame/HotspotLayer/%s/ArtPlaceholder" % base_name)
+		var nameplate: Node = get_node_or_null("StageFrame/NameplateLayer/%s" % _scene_nameplate_name(group_id))
 
-		for node in [title_label, subtitle_label, current_label, badge_label]:
+		for node in [lock_icon, art_rect, art_placeholder, nameplate]:
 			if node != null:
 				node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 		_group_cards[group_id] = {
+			"group_id": group_id,
 			"root": root,
-			"title": title_label,
-			"subtitle": subtitle_label,
-			"current": current_label,
-			"badge": badge_label,
+			"lock_icon": lock_icon,
+			"art": art_rect,
+			"art_placeholder": art_placeholder,
+			"nameplate": nameplate,
 		}
 
 
@@ -194,30 +211,63 @@ func _apply_group_card(card_view: Dictionary, group_view: Dictionary) -> void:
 	var root: Button = card_view.get("root", null)
 	if root == null:
 		return
-	var title_label: Label = card_view.get("title", null)
-	var subtitle_label: Label = card_view.get("subtitle", null)
-	var current_label: Label = card_view.get("current", null)
-	var badge_label: Label = card_view.get("badge", null)
+	var card_group_id: String = str(card_view.get("group_id", ""))
+	var lock_icon: TextureRect = card_view.get("lock_icon", null)
+	var art_rect: TextureRect = card_view.get("art", null)
+	var art_placeholder: Label = card_view.get("art_placeholder", null)
+	var nameplate: Node = card_view.get("nameplate", null)
 
 	if group_view.is_empty():
 		root.visible = false
+		if nameplate != null:
+			nameplate.visible = false
 		return
 
 	root.visible = true
-	if title_label != null:
-		title_label.text = str(group_view.get("theme_title", group_view.get("title", "Stage")))
-	if subtitle_label != null:
-		subtitle_label.text = str(group_view.get("progress_label", group_view.get("status_label", "Locked")))
-	if current_label != null:
-		current_label.text = str(group_view.get("current_label", ""))
-		current_label.visible = current_label.text != ""
-	if badge_label != null:
-		badge_label.visible = false
+	if nameplate != null:
+		nameplate.visible = true
+	var group_id: String = str(group_view.get("group_id", card_group_id))
+	var group_art: Texture2D = _load_group_art(group_id)
+	if art_rect != null:
+		art_rect.texture = group_art
+		art_rect.modulate = Color(1, 1, 1, 1) if bool(group_view.get("is_enterable", false)) else Color(0.72, 0.72, 0.72, 0.92)
+	if art_placeholder != null:
+		art_placeholder.visible = group_art == null
+		art_placeholder.text = "Drop art\n%s/%s.png" % [GROUP_ART_DIRECTORY, group_id]
+	var fallback_title: String = str(group_view.get("theme_title", group_view.get("title", "Stage")))
+	var stage_title: String = _display_title_for_group(group_id, fallback_title)
+	if nameplate != null:
+		if nameplate.has_method("set_stage_number_text"):
+			nameplate.call("set_stage_number_text", _stage_number_text(group_id))
+		if nameplate.has_method("set_stage_title_text"):
+			nameplate.call("set_stage_title_text", stage_title)
+	if lock_icon != null:
+		lock_icon.visible = str(group_view.get("status_key", "locked")) == "locked"
 	root.add_theme_stylebox_override("normal", _card_style())
 	root.add_theme_stylebox_override("hover", _card_hover_style())
 	root.add_theme_stylebox_override("pressed", _card_hover_style())
 	root.add_theme_stylebox_override("focus", _card_hover_style())
 	root.add_theme_stylebox_override("disabled", _card_style())
+
+
+func _load_group_art(group_id: String) -> Texture2D:
+	if group_id == "":
+		return null
+	var file_name: String = str(GROUP_ART_FILES.get(group_id, "%s.png" % group_id))
+	var path := "%s/%s" % [GROUP_ART_DIRECTORY, file_name]
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
+
+
+func _stage_number_text(group_id: String) -> String:
+	var parts := group_id.split("-")
+	if parts.size() < 2:
+		return group_id
+	return parts[1]
+
+func _display_title_for_group(group_id: String, fallback_title: String) -> String:
+	return str(GROUP_DISPLAY_TITLES.get(group_id, fallback_title))
 
 
 func _on_group_pressed(group_id: String) -> void:
@@ -369,6 +419,21 @@ func _scene_group_name(group_id: String) -> String:
 		_:
 			return group_id
 
+func _scene_nameplate_name(group_id: String) -> String:
+	match group_id:
+		"group-01":
+			return "Group01Nameplate"
+		"group-02":
+			return "Group02Nameplate"
+		"group-03":
+			return "Group03Nameplate"
+		"group-04":
+			return "Group04Nameplate"
+		"group-05":
+			return "Group05Nameplate"
+		_:
+			return group_id
+
 
 func _card_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -382,14 +447,14 @@ func _card_style() -> StyleBoxFlat:
 	style.border_width_bottom = 2
 	style.shadow_color = Color(0.0, 0.0, 0.0, 0.35)
 	style.shadow_size = 6
-	style.bg_color = Color(1, 1, 1, 0.06)
-	style.border_color = Color(1, 1, 1, 0.28)
+	style.bg_color = Color(1, 1, 1, 0.02)
+	style.border_color = Color(1, 1, 1, 0.30)
 	return style
 
 
 func _card_hover_style() -> StyleBoxFlat:
 	var style := _card_style()
-	style.bg_color = Color(1, 1, 1, 0.10)
-	style.border_color = Color(1, 1, 1, 0.42)
+	style.bg_color = Color(1, 1, 1, 0.08)
+	style.border_color = Color(1, 1, 1, 0.52)
 	style.shadow_size = 10
 	return style

@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://bcwmeao5smhjp"]
+
+[ext_resource type="Script" uid="uid://bj3abwe3wci04" path="res://scripts/map/stage_nameplate.gd" id="1_script"]
+[ext_resource type="Shader" uid="uid://by3rh3xkue47j" path="res://art/shaders/stage_number_glow.gdshader" id="2_shader"]
+[ext_resource type="FontFile" uid="uid://chorfjnqa8soa" path="res://art/fonts/Orbitron-Bold.ttf" id="3_orbitron"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_root"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_stage_number"]
+shader = ExtResource("2_shader")
+
+[node name="StageNameplate" type="PanelContainer" unique_id=1894164718]
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_root")
+script = ExtResource("1_script")
+orbitron_font = ExtResource("3_orbitron")
+
+[node name="PlateArt" type="TextureRect" parent="." unique_id=1262440649]
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PlatePlaceholder" type="Label" parent="." unique_id=1891131179]
+modulate = Color(0.89, 0.95, 1, 0.55)
+layout_mode = 2
+text = "Nameplate Art Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlateShade" type="ColorRect" parent="." unique_id=204935820]
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.027451, 0.0431373, 0.0980392, 0.68)
+
+[node name="PlateMargin" type="MarginContainer" parent="." unique_id=219205350]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 6
+
+[node name="PlateRoot" type="HBoxContainer" parent="PlateMargin" unique_id=940718823]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NumberChip" type="MarginContainer" parent="PlateMargin/PlateRoot" unique_id=2096647787]
+layout_mode = 2
+
+[node name="NumberLabel" type="Label" parent="PlateMargin/PlateRoot/NumberChip" unique_id=2146270809]
+material = SubResource("ShaderMaterial_stage_number")
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_orbitron")
+theme_override_font_sizes/font_size = 34
+text = "01"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="PlateMargin/PlateRoot" unique_id=1913506723]
+modulate = Color(0.91, 0.98, 1, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "Class Cosmos"
+vertical_alignment = 1
