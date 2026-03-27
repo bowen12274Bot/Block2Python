@@ -15,6 +15,10 @@ challenges:
   - file: challenges/challenge-group-02-practice.yaml
   - file: challenges/challenge-group-03-demo.yaml
   - file: challenges/challenge-group-03-practice.yaml
+  - file: challenges/challenge-group-04-demo.yaml
+  - file: challenges/challenge-group-04-practice.yaml
+  - file: challenges/challenge-group-05-demo.yaml
+  - file: challenges/challenge-group-05-practice.yaml
 map_routes:
   - file: map_routes/main-map-routes.yaml
 toolbox:

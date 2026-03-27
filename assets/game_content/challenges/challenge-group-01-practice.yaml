@@ -10,6 +10,6 @@ level_ids:
 toolbox_policy_id: toolbox-group-01
 battery_policy_id: battery-group-01
 metadata:
-  stage: map-format-skeleton
+  stage: input-gate
   group_id: group-01
 

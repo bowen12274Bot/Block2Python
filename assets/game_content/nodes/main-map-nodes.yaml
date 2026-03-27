@@ -7,6 +7,8 @@ nodes:
       - group-01-story
       - group-02-story
       - group-03-story
+      - group-04-story
+      - group-05-story
     scene_id: null
     challenge_group_id: null
 
@@ -125,6 +127,86 @@ nodes:
     title: Group 03 Result
     prerequisite_node_ids:
       - group-03-practice
+    next_node_ids:
+      - main-map-entry
+    scene_id: scene-result-success
+    challenge_group_id: null
+
+  - node_id: group-04-story
+    node_type: story
+    title: Group 04 Story
+    prerequisite_node_ids:
+      - group-03-result
+    next_node_ids:
+      - group-04-demo
+    scene_id: scene-city-alarm
+    challenge_group_id: null
+
+  - node_id: group-04-demo
+    node_type: demo
+    title: Group 04 Demo
+    prerequisite_node_ids:
+      - group-04-story
+    next_node_ids:
+      - group-04-practice
+    scene_id: null
+    challenge_group_id: challenge-group-04-demo
+
+  - node_id: group-04-practice
+    node_type: practice
+    title: Group 04 Practice
+    prerequisite_node_ids:
+      - group-04-demo
+    next_node_ids:
+      - group-04-result
+    scene_id: null
+    challenge_group_id: challenge-group-04-practice
+
+  - node_id: group-04-result
+    node_type: result
+    title: Group 04 Result
+    prerequisite_node_ids:
+      - group-04-practice
+    next_node_ids:
+      - main-map-entry
+    scene_id: scene-result-success
+    challenge_group_id: null
+
+  - node_id: group-05-story
+    node_type: story
+    title: Group 05 Story
+    prerequisite_node_ids:
+      - group-04-result
+    next_node_ids:
+      - group-05-demo
+    scene_id: scene-city-alarm
+    challenge_group_id: null
+
+  - node_id: group-05-demo
+    node_type: demo
+    title: Group 05 Demo
+    prerequisite_node_ids:
+      - group-05-story
+    next_node_ids:
+      - group-05-practice
+    scene_id: null
+    challenge_group_id: challenge-group-05-demo
+
+  - node_id: group-05-practice
+    node_type: practice
+    title: Group 05 Practice
+    prerequisite_node_ids:
+      - group-05-demo
+    next_node_ids:
+      - group-05-result
+    scene_id: null
+    challenge_group_id: challenge-group-05-practice
+
+  - node_id: group-05-result
+    node_type: result
+    title: Group 05 Result
+    prerequisite_node_ids:
+      - group-05-practice
     next_node_ids:
       - main-map-entry
     scene_id: scene-result-success

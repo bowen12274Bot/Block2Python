@@ -106,10 +106,10 @@ def test_game_state_contract_supports_practice_payload() -> None:
             challenge_id="challenge-group-01-practice",
             challenge_type="practice",
             group_id="group-01",
-            level_id="group-01-practice-02",
-            level_title="Greeting Again",
-            prompt="Print another greeting.",
-            progress_current=2,
+            level_id="group-01-practice-01",
+            level_title="Input Gate",
+            prompt="Read the temperature in Celsius, convert it to Fahrenheit, and print the result.",
+            progress_current=1,
             progress_total=5,
             is_review_mode=True,
             toolbox_allowed=True,
@@ -117,19 +117,19 @@ def test_game_state_contract_supports_practice_payload() -> None:
             can_run=True,
             can_submit=True,
             can_next=False,
-            mission_text="Print another greeting.",
+            mission_text="Read the temperature in Celsius, convert it to Fahrenheit, and print the result.",
             battery_percent=80,
             battery_threshold_percent=80,
             assistant_messages=("Byte: Read the mission.",),
-            current_level_id="group-01-practice-02",
-            current_level_title="Greeting Again",
-            current_level_prompt="Print another greeting.",
+            current_level_id="group-01-practice-01",
+            current_level_title="Input Gate",
+            current_level_prompt="Read the temperature in Celsius, convert it to Fahrenheit, and print the result.",
         ),
         available_actions=AvailableActions(run=True, submit=True),
     )
 
     assert state.practice is not None
-    assert state.practice.progress_current == 2
+    assert state.practice.progress_current == 1
     assert state.practice.progress_total == 5
     assert state.practice.is_review_mode is True
     assert state.practice.toolbox_allowed is True
@@ -137,7 +137,7 @@ def test_game_state_contract_supports_practice_payload() -> None:
     assert state.practice.can_run is True
     assert state.practice.can_submit is True
     assert state.practice.can_next is False
-    assert state.practice.mission_text == "Print another greeting."
+    assert state.practice.mission_text == "Read the temperature in Celsius, convert it to Fahrenheit, and print the result."
     assert state.practice.battery_percent == 80
     assert state.practice.assistant_messages == ("Byte: Read the mission.",)
 
@@ -167,3 +167,4 @@ def test_player_action_contract_supports_create_profile_payload() -> None:
     assert action.action_type is ActionType.CREATE_PLAYER_PROFILE
     assert action.payload["name"] == "Nova"
     assert action.payload["gender"] == "female"
+

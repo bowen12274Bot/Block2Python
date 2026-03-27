@@ -12,6 +12,7 @@ from block2python.judge import StubJudge
 
 
 DEFAULT_QUEST_ID = "quest-main-map"
+DEFAULT_GROUP_IDS = ("group-01", "group-02", "group-03", "group-04", "group-05")
 
 
 def build_demo_session(
@@ -49,14 +50,16 @@ def run_auto_demo(
         if state.mode is GameMode.SCENE:
             if state.node_id == "main-map-entry":
                 completed = set(state.progress.completed_node_ids)
-                if "group-03-result" in completed:
+                next_group_id = next(
+                    (group_id for group_id in DEFAULT_GROUP_IDS if f"{group_id}-result" not in completed),
+                    None,
+                )
+                if next_group_id is None:
                     session.runtime.current_node_id = None
-                elif "group-02-result" in completed:
-                    session.start_group_story("group-03")
-                elif "group-01-result" in completed:
-                    session.start_group_story("group-02")
-                else:
+                elif next_group_id == "group-01" and "group-01-story" not in completed:
                     session.advance()
+                else:
+                    session.start_group_story(next_group_id)
             else:
                 session.advance()
             continue
@@ -166,4 +169,3 @@ def _default_code_factory(_level_id: str) -> str:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

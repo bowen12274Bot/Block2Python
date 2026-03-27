@@ -1,0 +1,19 @@
+level_id: group-05-practice-05
+title: Group 05 Practice 05 Placeholder
+chapter_id: map-groups
+order_index: 5005
+prerequisite_level_ids:
+  - group-05-practice-04
+prompt: |
+  Placeholder practice level 05 for group-05.
+learning_markdown: |
+  Placeholder practice scaffold.
+testcase_dir: cases/group-05-practice-05
+judge_policy:
+  time_limit_ms: 1000
+  memory_limit_mb: 64
+metadata:
+  stage: map-format-skeleton
+  group_id: group-05
+  slot: practice-05
+  placeholder_auto_ac: true

@@ -2,6 +2,21 @@ extends Control
 class_name QuestMapScreen
 
 const QuestMapSelectionPresenterScript = preload("res://scripts/map/quest_map_selection_presenter.gd")
+const GROUP_ART_DIRECTORY := "res://art/map/stages"
+const GROUP_ART_FILES := {
+	"group-01": "floating_islands1.png",
+	"group-02": "floating_islands2.png",
+	"group-03": "floating_islands3.png",
+	"group-04": "floating_islands4.png",
+	"group-05": "Final_Castle1.png",
+}
+const GROUP_DISPLAY_TITLES := {
+	"group-01": "Input Gate",
+	"group-02": "Variable Base",
+	"group-03": "If Canyon",
+	"group-04": "Loop Lab",
+	"group-05": "Bug King Castle",
+}
 
 signal start_bridge_requested()
 signal reset_requested()
@@ -12,14 +27,13 @@ signal stage_story_requested(group_id: String)
 signal stage_demo_requested(group_id: String)
 signal stage_practice_requested(group_id: String)
 
-@onready var start_bridge_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/StartBridgeButton")
-@onready var reset_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/ResetButton")
-@onready var advance_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/AdvanceButton")
-@onready var open_node_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/OpenNodeButton")
-@onready var debug_toggle_button: Button = get_node_or_null("Margin/Scroll/Root/Buttons/DebugToggleButton")
-@onready var status_label: Label = get_node_or_null("Margin/Scroll/Root/StatusLabel")
-@onready var quest_map_panel: QuestMapPanel = get_node_or_null("Margin/Scroll/Root/QuestMapPanel")
-@onready var note_label: Label = get_node_or_null("Margin/Scroll/Root/NotePanel/NoteMargin/NoteRoot/NoteText")
+@onready var start_bridge_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/StartBridgeButton")
+@onready var reset_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/ResetButton")
+@onready var advance_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/AdvanceButton")
+@onready var open_node_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/OpenNodeButton")
+@onready var debug_toggle_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/DebugToggleButton")
+@onready var status_label: Label = get_node_or_null("HudMargin/HudRoot/StatusLabel")
+@onready var quest_map_stage: QuestMapStage = get_node_or_null("StageFrame")
 @onready var stage_overlay: Control = get_node_or_null("StageOverlay")
 @onready var stage_title_label: Label = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn/StageTitle")
 @onready var stage_subtitle_label: Label = get_node_or_null("StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn/StageSubtitle")
@@ -34,9 +48,12 @@ signal stage_practice_requested(group_id: String)
 var _last_map_view: Dictionary = {}
 var _selected_group_id: String = ""
 var _overlay_group_view: Dictionary = {}
+var _group_cards: Dictionary = {}
 
 
 func _ready() -> void:
+	_collect_group_cards()
+
 	if start_bridge_button != null:
 		start_bridge_button.pressed.connect(func() -> void:
 			start_bridge_requested.emit()
@@ -59,9 +76,6 @@ func _ready() -> void:
 		debug_toggle_button.toggled.connect(func(button_pressed: bool) -> void:
 			debug_toggled.emit(button_pressed)
 		)
-	if quest_map_panel != null:
-		quest_map_panel.group_pressed.connect(_on_group_pressed)
-		quest_map_panel.node_pressed.connect(_on_node_pressed)
 	if stage_close_button != null:
 		stage_close_button.pressed.connect(hide_stage_overlay)
 	if stage_story_button != null:
@@ -71,13 +85,17 @@ func _ready() -> void:
 	if stage_practice_button != null:
 		stage_practice_button.pressed.connect(_on_stage_practice_pressed)
 	if stage_overlay != null:
+		stage_overlay.z_index = 100
 		stage_overlay.visible = false
+
+
 
 
 func show_map(map_view: Dictionary) -> void:
 	_last_map_view = map_view.duplicate(true)
-	if quest_map_panel != null:
-		quest_map_panel.show_map(map_view)
+	if quest_map_stage != null:
+		quest_map_stage.show_map(map_view)
+	_render_group_cards(map_view)
 	if stage_overlay != null and stage_overlay.visible and _selected_group_id != "":
 		var refreshed_group: Dictionary = _find_group_view(_selected_group_id)
 		if refreshed_group.is_empty():
@@ -92,8 +110,8 @@ func set_status(text: String) -> void:
 
 
 func set_note(text: String) -> void:
-	if note_label != null:
-		note_label.text = text
+	if quest_map_stage != null:
+		quest_map_stage.set_helper_text(text)
 
 
 func set_bridge_running(is_running: bool) -> void:
@@ -137,26 +155,133 @@ func hide_stage_overlay() -> void:
 	_selected_group_id = ""
 
 
-func _on_group_pressed(group_id: String) -> void:
-	if note_label == null:
+func _collect_group_cards() -> void:
+	_group_cards.clear()
+	for group_id in ["group-01", "group-02", "group-03", "group-04", "group-05"]:
+		var base_name: String = _scene_group_name(group_id)
+		var root: Button = get_node_or_null("StageFrame/HotspotLayer/%s" % base_name)
+		if root == null:
+			continue
+
+		var bound_group_id: String = group_id
+		root.mouse_filter = Control.MOUSE_FILTER_STOP
+		root.focus_mode = Control.FOCUS_NONE
+		root.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		root.pressed.connect(func() -> void:
+			_on_group_pressed(bound_group_id)
+		)
+
+		var lock_icon: TextureRect = get_node_or_null("StageFrame/HotspotLayer/%s/LockIcon" % base_name)
+		var art_rect: TextureRect = get_node_or_null("StageFrame/HotspotLayer/%s/Art" % base_name)
+		var art_placeholder: Label = get_node_or_null("StageFrame/HotspotLayer/%s/ArtPlaceholder" % base_name)
+		var nameplate: Node = get_node_or_null("StageFrame/NameplateLayer/%s" % _scene_nameplate_name(group_id))
+
+		for node in [lock_icon, art_rect, art_placeholder, nameplate]:
+			if node != null:
+				node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		_group_cards[group_id] = {
+			"group_id": group_id,
+			"root": root,
+			"lock_icon": lock_icon,
+			"art": art_rect,
+			"art_placeholder": art_placeholder,
+			"nameplate": nameplate,
+		}
+
+
+func _render_group_cards(map_view: Dictionary) -> void:
+	for card_view in _group_cards.values():
+		_apply_group_card(card_view, {})
+
+	var groups_variant: Variant = map_view.get("groups", [])
+	if not (groups_variant is Array):
 		return
 
+	for group_variant in groups_variant:
+		if not (group_variant is Dictionary):
+			continue
+		var group_view: Dictionary = group_variant
+		var group_id: String = str(group_view.get("group_id", ""))
+		if _group_cards.has(group_id):
+			_apply_group_card(_group_cards[group_id], group_view)
+
+
+func _apply_group_card(card_view: Dictionary, group_view: Dictionary) -> void:
+	var root: Button = card_view.get("root", null)
+	if root == null:
+		return
+	var card_group_id: String = str(card_view.get("group_id", ""))
+	var lock_icon: TextureRect = card_view.get("lock_icon", null)
+	var art_rect: TextureRect = card_view.get("art", null)
+	var art_placeholder: Label = card_view.get("art_placeholder", null)
+	var nameplate: Node = card_view.get("nameplate", null)
+
+	if group_view.is_empty():
+		root.visible = false
+		if nameplate != null:
+			nameplate.visible = false
+		return
+
+	root.visible = true
+	if nameplate != null:
+		nameplate.visible = true
+	var group_id: String = str(group_view.get("group_id", card_group_id))
+	var group_art: Texture2D = _load_group_art(group_id)
+	if art_rect != null:
+		art_rect.texture = group_art
+		art_rect.modulate = Color(1, 1, 1, 1) if bool(group_view.get("is_enterable", false)) else Color(0.72, 0.72, 0.72, 0.92)
+	if art_placeholder != null:
+		art_placeholder.visible = group_art == null
+		art_placeholder.text = "Drop art\n%s/%s.png" % [GROUP_ART_DIRECTORY, group_id]
+	var fallback_title: String = str(group_view.get("theme_title", group_view.get("title", "Stage")))
+	var stage_title: String = _display_title_for_group(group_id, fallback_title)
+	if nameplate != null:
+		if nameplate.has_method("set_stage_number_text"):
+			nameplate.call("set_stage_number_text", _stage_number_text(group_id))
+		if nameplate.has_method("set_stage_title_text"):
+			nameplate.call("set_stage_title_text", stage_title)
+	if lock_icon != null:
+		lock_icon.visible = str(group_view.get("status_key", "locked")) == "locked"
+	root.add_theme_stylebox_override("normal", _card_style())
+	root.add_theme_stylebox_override("hover", _card_hover_style())
+	root.add_theme_stylebox_override("pressed", _card_hover_style())
+	root.add_theme_stylebox_override("focus", _card_hover_style())
+	root.add_theme_stylebox_override("disabled", _card_style())
+
+
+func _load_group_art(group_id: String) -> Texture2D:
+	if group_id == "":
+		return null
+	var file_name: String = str(GROUP_ART_FILES.get(group_id, "%s.png" % group_id))
+	var path := "%s/%s" % [GROUP_ART_DIRECTORY, file_name]
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
+
+
+func _stage_number_text(group_id: String) -> String:
+	var parts := group_id.split("-")
+	if parts.size() < 2:
+		return group_id
+	return parts[1]
+
+func _display_title_for_group(group_id: String, fallback_title: String) -> String:
+	return str(GROUP_DISPLAY_TITLES.get(group_id, fallback_title))
+
+
+func _on_group_pressed(group_id: String) -> void:
 	var group_view: Dictionary = _find_group_view(group_id)
 	if group_view.is_empty():
-		note_label.text = "Selected level group: %s" % group_id
+		set_note("Selected level group: %s" % group_id)
 		return
 
 	if not bool(group_view.get("is_enterable", false)):
-		note_label.text = "This group is still locked."
+		set_note("This group is still locked.")
 		return
 
-	note_label.text = QuestMapSelectionPresenterScript.build_group_selection_note(group_view)
+	set_note(QuestMapSelectionPresenterScript.build_group_selection_note(group_view))
 	show_stage_overlay(group_view)
-
-
-func _on_node_pressed(node_id: String) -> void:
-	if note_label != null:
-		note_label.text = QuestMapSelectionPresenterScript.build_node_selection_note(node_id)
 
 
 func _on_stage_story_pressed() -> void:
@@ -277,3 +402,59 @@ func _find_group_view(group_id: String) -> Dictionary:
 			if str(group_view.get("group_id", "")) == group_id:
 				return group_view
 	return {}
+
+
+func _scene_group_name(group_id: String) -> String:
+	match group_id:
+		"group-01":
+			return "Group01Card"
+		"group-02":
+			return "Group02Card"
+		"group-03":
+			return "Group03Card"
+		"group-04":
+			return "Group04Card"
+		"group-05":
+			return "Group05Card"
+		_:
+			return group_id
+
+func _scene_nameplate_name(group_id: String) -> String:
+	match group_id:
+		"group-01":
+			return "Group01Nameplate"
+		"group-02":
+			return "Group02Nameplate"
+		"group-03":
+			return "Group03Nameplate"
+		"group-04":
+			return "Group04Nameplate"
+		"group-05":
+			return "Group05Nameplate"
+		_:
+			return group_id
+
+
+func _card_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.corner_radius_top_left = 24
+	style.corner_radius_top_right = 24
+	style.corner_radius_bottom_right = 24
+	style.corner_radius_bottom_left = 24
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.35)
+	style.shadow_size = 6
+	style.bg_color = Color(1, 1, 1, 0.02)
+	style.border_color = Color(1, 1, 1, 0.30)
+	return style
+
+
+func _card_hover_style() -> StyleBoxFlat:
+	var style := _card_style()
+	style.bg_color = Color(1, 1, 1, 0.08)
+	style.border_color = Color(1, 1, 1, 0.52)
+	style.shadow_size = 10
+	return style

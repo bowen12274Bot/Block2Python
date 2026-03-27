@@ -1,5 +1,5 @@
 level_id: group-01-practice-01
-title: Group 01 Practice 01 Hello
+title: Input Gate
 chapter_id: map-groups
 order_index: 1001
 prerequisite_level_ids:
@@ -7,14 +7,16 @@ prerequisite_level_ids:
 next_level_ids:
   - group-01-practice-02
 prompt: |
-  Read one name from standard input and print `Hello, <name>`.
+  請讀取一行文字 name，輸出：
+  Hello, <name>!
 learning_markdown: |
-  Practice reading a single value with `input()` and printing a greeting.
+  目標：練習最基本輸入與字串輸出格式。
+  你需要使用 input() 讀取資料，並組出固定格式的回應字串。
 testcase_dir: cases/group-01-practice-01
 judge_policy:
   time_limit_ms: 3000
   memory_limit_mb: 256
 metadata:
-  stage: group-01-foundation
+  stage: input-gate
   group_id: group-01
   slot: practice-01

@@ -10,5 +10,5 @@ level_ids:
 toolbox_policy_id: null
 battery_policy_id: null
 metadata:
-  stage: map-format-skeleton
+  stage: variable-base
   group_id: group-02

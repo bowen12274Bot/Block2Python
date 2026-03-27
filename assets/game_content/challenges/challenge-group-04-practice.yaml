@@ -1,0 +1,14 @@
+challenge_id: challenge-group-04-practice
+challenge_type: practice
+title: Group 04 Practice
+level_ids:
+  - group-04-practice-01
+  - group-04-practice-02
+  - group-04-practice-03
+  - group-04-practice-04
+  - group-04-practice-05
+toolbox_policy_id: null
+battery_policy_id: null
+metadata:
+  stage: loop-lab
+  group_id: group-04

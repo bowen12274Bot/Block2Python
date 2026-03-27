@@ -35,13 +35,27 @@ levels:
     file: group-03-practice-04.yaml
   - id: group-03-practice-05
     file: group-03-practice-05.yaml
-  - id: ai-track-input-gate
-    file: ai-track-input-gate.yaml
-  - id: ai-track-variable-base
-    file: ai-track-variable-base.yaml
-  - id: ai-track-if-canyon
-    file: ai-track-if-canyon.yaml
-  - id: ai-track-loop-lab
-    file: ai-track-loop-lab.yaml
-  - id: ai-track-bug-king-castle
-    file: ai-track-bug-king-castle.yaml
+  - id: group-04-demo
+    file: group-04-demo.yaml
+  - id: group-04-practice-01
+    file: group-04-practice-01.yaml
+  - id: group-04-practice-02
+    file: group-04-practice-02.yaml
+  - id: group-04-practice-03
+    file: group-04-practice-03.yaml
+  - id: group-04-practice-04
+    file: group-04-practice-04.yaml
+  - id: group-04-practice-05
+    file: group-04-practice-05.yaml
+  - id: group-05-demo
+    file: group-05-demo.yaml
+  - id: group-05-practice-01
+    file: group-05-practice-01.yaml
+  - id: group-05-practice-02
+    file: group-05-practice-02.yaml
+  - id: group-05-practice-03
+    file: group-05-practice-03.yaml
+  - id: group-05-practice-04
+    file: group-05-practice-04.yaml
+  - id: group-05-practice-05
+    file: group-05-practice-05.yaml

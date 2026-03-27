@@ -1,5 +1,5 @@
 level_id: group-02-practice-01
-title: Group 02 Practice 01 Placeholder
+title: Variable Base
 chapter_id: map-groups
 order_index: 2001
 prerequisite_level_ids:
@@ -7,15 +7,25 @@ prerequisite_level_ids:
 next_level_ids:
   - group-02-practice-02
 prompt: |
-  Placeholder practice level 01 for group-02.
+  Read two integers.
+  The first line is a.
+  The second line is b.
+
+  Print:
+  sum=<a+b>
+  diff=<a-b>
 learning_markdown: |
-  Placeholder practice scaffold.
+  You can solve this without f-string or split().
+  Example:
+  a = int(input())
+  b = int(input())
+  print("sum=" + str(a + b))
+  print("diff=" + str(a - b))
 testcase_dir: cases/group-02-practice-01
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: variable-base
   group_id: group-02
   slot: practice-01
-  placeholder_auto_ac: true
