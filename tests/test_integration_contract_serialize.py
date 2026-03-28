@@ -32,6 +32,9 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             scene_id="scene-practice-unlock",
             title="Practice Unlock",
             dialogue_blocks=(DialogueBlockState(speaker="Byte", text="Try it."),),
+            mission_statement_scene_id="scene-mission-statement-01",
+            mission_statement_title="???",
+            mission_statement_text="??????????????",
         ),
         practice=PracticeState(
             challenge_id="challenge-group-01-practice",
@@ -91,6 +94,8 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     }
     assert payload["intro_completed"] is True
     assert payload["scene"]["scene_id"] == "scene-practice-unlock"
+    assert payload["scene"]["mission_statement_scene_id"] == "scene-mission-statement-01"
+    assert payload["scene"]["mission_statement_title"] == "???"
     assert payload["practice"]["current_level_id"] == "group-01-practice-01"
     assert payload["practice"]["level_id"] == "group-01-practice-01"
     assert payload["practice"]["progress_total"] == 5

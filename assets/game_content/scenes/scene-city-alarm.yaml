@@ -5,15 +5,18 @@ dialogue_blocks:
     text: The city alarm is broken. We need basic input and output to repair it.
     portrait_id: byte-default
     expression: alert
+    background_id: scene-00-normal-city
     emphasis: normal
   - speaker: Player
     text: What should I fix first?
     portrait_id: player-default
     expression: thinking
+    background_id: scene-00-normal-city
     emphasis: normal
   - speaker: Byte
     text: Start with a short demo challenge so we can verify the signal path.
     portrait_id: byte-default
     expression: explain
+    background_id: scene-00-normal-city
     emphasis: normal
 next_action: goto_demo_basic_io

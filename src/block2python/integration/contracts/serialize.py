@@ -1,7 +1,21 @@
 from __future__ import annotations
 
 from .errors import IntegrationContractValidationError
-from .models import ActionType, GameState, PlayerAction
+from .models import ActionType, ActorCueState, GameState, PlayerAction
+
+
+def _serialize_actor_cue(actor: ActorCueState | None) -> dict[str, object] | None:
+    if actor is None:
+        return None
+    return {
+        "actor_id": actor.actor_id,
+        "display_name": actor.display_name,
+        "portrait_id": actor.portrait_id,
+        "expression_id": actor.expression_id,
+        "pose_id": actor.pose_id,
+        "visual_state": actor.visual_state,
+        "image_path": actor.image_path,
+    }
 
 
 def _serialize_practice_payload(practice) -> dict[str, object]:
@@ -42,10 +56,18 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
                     "text": block.text,
                     "portrait_id": block.portrait_id,
                     "expression": block.expression,
+                    "background_id": block.background_id,
                     "emphasis": block.emphasis,
+                    "speaker_side": block.speaker_side,
+                    "left_actor": _serialize_actor_cue(block.left_actor),
+                    "center_actor": _serialize_actor_cue(block.center_actor),
+                    "right_actor": _serialize_actor_cue(block.right_actor),
                 }
                 for block in state.scene.dialogue_blocks
             ],
+            "mission_statement_scene_id": state.scene.mission_statement_scene_id,
+            "mission_statement_title": state.scene.mission_statement_title,
+            "mission_statement_text": state.scene.mission_statement_text,
         }
 
     demo = None

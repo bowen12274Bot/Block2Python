@@ -2,8 +2,81 @@
 
 [ext_resource type="Script" uid="uid://e20g12utnyq3" path="res://scripts/game_flow/scene_flow_screen.gd" id="1_screen"]
 [ext_resource type="Script" uid="uid://beqmnxxe2x13n" path="res://scripts/game_flow/scene_panel.gd" id="2_scene"]
+[ext_resource type="Texture2D" uid="uid://rdia7fx0cq3x" path="res://art/story/backgrounds/scene_00/scene_00_normal_city.png" id="3_bg_scene_00"]
+[ext_resource type="Texture2D" uid="uid://dyyxyyhamwcup" path="res://art/story/backgrounds/scene_01/scene_01_broken_io.png" id="4_bg_scene_01"]
+[ext_resource type="Texture2D" uid="uid://gpplwhqpuuj8" path="res://art/story/backgrounds/scene_02/scene_02_memory_loss.png" id="5_bg_scene_02"]
+[ext_resource type="Texture2D" uid="uid://wlayi2w74036" path="res://art/story/backgrounds/scene_03/scene_03_logic_breakdown.png" id="6_bg_scene_03"]
+[ext_resource type="Texture2D" uid="uid://cmjyavlwm46c3" path="res://art/story/backgrounds/scene_04/scene_04_destruction_disaster.png" id="7_bg_scene_04"]
+[ext_resource type="Texture2D" uid="uid://cif3vhoob1vd" path="res://art/story/backgrounds/scene_05/scene_05_bug_king_castle.png" id="8_bg_scene_05"]
+[ext_resource type="Texture2D" uid="uid://boq4mv1xfk0x8" path="res://art/story/backgrounds/scene_05/scene_05_bug_king_castle_fixed.png" id="9_bg_scene_05_fixed"]
+[ext_resource type="Texture2D" uid="uid://dahr413es7ewe" path="res://art/story/characters/byte/byte_default.png" id="10_byte_default"]
+[ext_resource type="Texture2D" uid="uid://dq6tirir0u2em" path="res://art/story/characters/system/system_confused.png" id="11_system_confused"]
+[ext_resource type="Texture2D" uid="uid://t5s3w7x47hfg" path="res://art/story/characters/system/system_glitched.png" id="12_system_glitched"]
+[ext_resource type="Texture2D" uid="uid://c2612ude07r4q" path="res://art/story/characters/system/system_happy.png" id="13_system_happy"]
+[ext_resource type="Texture2D" uid="uid://da5omhvikf3qr" path="res://art/story/characters/player_female/player_female_default.png" id="14_player_female_default"]
+[ext_resource type="Texture2D" uid="uid://cquvhtky2auta" path="res://art/story/characters/player_male/player_male_default.png" id="15_player_male_default"]
+[ext_resource type="Texture2D" uid="uid://dvvq3m6hvtusq" path="res://art/story/nameplates/shared_nameplate.png" id="16_story_nameplate"]
+[ext_resource type="Texture2D" uid="uid://bpg0uy0lfemas" path="res://art/story/backgrounds/scene_gc/scene_gc_control_room.png" id="17_bg_scene_gc"]
+[ext_resource type="Texture2D" uid="uid://hs2g743jlhka" path="res://art/story/backgrounds/scene_gc/scene_gc_control_room_broken.png" id="18_bg_scene_gc_broken"]
+[ext_resource type="Texture2D" uid="uid://cp8gtn71hom3r" path="res://art/story/characters/bug_king/bug_king_default.png" id="19_bug_king_default"]
 
-[node name="SceneFlowScreen" type="Control" unique_id=860123727]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qxpdu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_isucm"]
+bg_color = Color(0.07, 0.13, 0.24, 0.86)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.86, 1, 0.82)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="SystemFont" id="SystemFont_ui_cjk"]
+font_names = PackedStringArray("Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans CJK TC", "PingFang TC", "Arial Unicode MS")
+subpixel_positioning = 0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52nq1"]
+bg_color = Color(0.07, 0.13, 0.24, 0.86)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.86, 1, 0.82)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1b34"]
+bg_color = Color(0.07, 0.13, 0.24, 0.86)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.86, 1, 0.82)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hfk5m"]
+bg_color = Color(0.1, 0.15, 0.28, 0.76)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.8, 1, 0.7)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0.01, 0.03, 0.08, 0.42)
+shadow_size = 18
+
+[node name="SceneFlowScreen" type="Control" unique_id=207003684]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,250 +86,741 @@ grow_vertical = 2
 mouse_filter = 1
 script = ExtResource("1_screen")
 
-[node name="BackgroundColor" type="ColorRect" parent="." unique_id=1001]
+[node name="BackgroundColor" type="ColorRect" parent="." unique_id=1215157931]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0627451, 0.0705882, 0.141176, 1)
+color = Color(0.0470588, 0.0588235, 0.129412, 1)
 
-[node name="BackgroundGlow" type="ColorRect" parent="." unique_id=1002]
+[node name="BackgroundGlow" type="ColorRect" parent="." unique_id=244569231]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -220.0
-offset_right = 240.0
-offset_bottom = 260.0
+offset_left = -360.0
+offset_top = -260.0
+offset_right = 360.0
+offset_bottom = 280.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.25098, 0.258824, 0.572549, 0.22)
+color = Color(0.211765, 0.239216, 0.576471, 0.22)
 
-[node name="ScenePanel" type="PanelContainer" parent="." unique_id=467850885]
+[node name="ScenePanel" type="PanelContainer" parent="." unique_id=1583460547]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -600.0
-offset_top = -360.0
-offset_right = 600.0
-offset_bottom = 360.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_qxpdu")
 script = ExtResource("2_scene")
+background_texture_paths = {
+"scene-00-normal-city": ExtResource("3_bg_scene_00"),
+"scene-01-broken-io": ExtResource("4_bg_scene_01"),
+"scene-02-memory-loss": ExtResource("5_bg_scene_02"),
+"scene-03-logic-breakdown": ExtResource("6_bg_scene_03"),
+"scene-04-destruction-disaster": ExtResource("7_bg_scene_04"),
+"scene-05-bug-king-castle": ExtResource("8_bg_scene_05"),
+"scene-05-bug-king-castle-fixed": ExtResource("9_bg_scene_05_fixed"),
+"scene-gc-control-room": ExtResource("17_bg_scene_gc"),
+"scene-gc-control-room-broken": ExtResource("18_bg_scene_gc_broken")
+}
+portrait_texture_paths = {
+"bug-king-default": ExtResource("19_bug_king_default"),
+"byte-default": ExtResource("10_byte_default"),
+"player-default": ExtResource("14_player_female_default"),
+"player-female-default": ExtResource("14_player_female_default"),
+"player-male-default": ExtResource("15_player_male_default"),
+"system-default": ExtResource("11_system_confused")
+}
+expression_texture_paths = {
+"system-default:confused": ExtResource("11_system_confused"),
+"system-default:glitched": ExtResource("12_system_glitched"),
+"system-default:happy": ExtResource("13_system_happy")
+}
+nameplate_frame_texture = ExtResource("16_story_nameplate")
+editor_preview_show_calibration_stack = false
+editor_preview_center_actor_enabled = true
+editor_preview_center_actor_name = "bug-king"
+editor_preview_center_actor_portrait_id = "bug-king-default"
+editor_preview_right_actor_enabled = true
+editor_preview_right_actor_name = "player"
+editor_preview_right_actor_portrait_id = "player-male-default"
+editor_preview_right_actor_visual_state = "focus"
+portrait_position_offsets = {
+"bug-king-default": Vector2(-92, -114),
+"byte-default": Vector2(106, 97),
+"player-female-default": Vector2(-78, 0),
+"player-male-default": Vector2(-96, -49),
+"system-default": Vector2(-43, -115)
+}
+portrait_scale_overrides = {
+"bug-king-default": Vector2(1.3, 1.3),
+"byte-default": Vector2(0.5, 0.5),
+"player-female-default": Vector2(1, 1),
+"player-male-default": Vector2(1.15, 1.15),
+"system-default": Vector2(1, 1)
+}
+expression_position_offsets = {
+"system-default:confused": Vector2(0, 0),
+"system-default:glitched": Vector2(0, 0),
+"system-default:happy": Vector2(0, 0)
+}
+expression_scale_overrides = {
+"system-default:confused": Vector2(1, 1),
+"system-default:glitched": Vector2(1, 1),
+"system-default:happy": Vector2(1, 1)
+}
 
-[node name="LayoutMargin" type="MarginContainer" parent="ScenePanel" unique_id=1003]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 44.0
-offset_top = 28.0
-offset_right = -44.0
-offset_bottom = -28.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="LayoutMargin" type="MarginContainer" parent="ScenePanel" unique_id=762433973]
+layout_mode = 2
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="SceneRoot" type="VBoxContainer" parent="ScenePanel/LayoutMargin" unique_id=1004]
+[node name="SceneRoot" type="Control" parent="ScenePanel/LayoutMargin" unique_id=2031015129]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="TopBar" type="HBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot" unique_id=1005]
-layout_mode = 2
+[node name="TopBar" type="HBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot" unique_id=2050799094]
+z_index = 1
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 32.0
+grow_horizontal = 2
 theme_override_constants/separation = 12
 
-[node name="SceneTitle" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/TopBar" unique_id=1625922280]
-modulate = Color(0.878431, 0.917647, 1, 0.86)
+[node name="SceneTitle" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/TopBar" unique_id=1155643117]
+modulate = Color(0.858824, 0.909804, 1, 0.72)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
-text = "Scene"
+theme_override_font_sizes/font_size = 16
+text = "Opening Mission"
 
-[node name="IndexLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/TopBar" unique_id=147268820]
-modulate = Color(0.768627, 0.819608, 0.956863, 0.9)
+[node name="IndexLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/TopBar" unique_id=1414450710]
+modulate = Color(0.717647, 0.8, 0.956863, 0.84)
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 text = "1 / 1"
 
-[node name="Stage" type="MarginContainer" parent="ScenePanel/LayoutMargin/SceneRoot" unique_id=1006]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 0
-theme_override_constants/margin_bottom = 12
+[node name="Stage" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot" unique_id=1243366797]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="CharacterRow" type="HBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage" unique_id=1007]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 36
-alignment = 1
+[node name="BackgroundLayer" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage" unique_id=1830014630]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="LeftActorSlot" type="VBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow" unique_id=1008]
-custom_minimum_size = Vector2(240, 300)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-alignment = 2
-
-[node name="LeftActorVisual" type="ColorRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow/LeftActorSlot" unique_id=1009]
-custom_minimum_size = Vector2(220, 250)
-layout_mode = 2
-size_flags_horizontal = 4
-color = Color(0.619608, 0.831373, 1, 0.18)
-
-[node name="LeftActorName" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow/LeftActorSlot" unique_id=1010]
-modulate = Color(0.878431, 0.917647, 1, 0.95)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Left"
-horizontal_alignment = 1
-
-[node name="LeftActorState" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow/LeftActorSlot" unique_id=1011]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.82)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "hidden"
-horizontal_alignment = 1
-
-[node name="Spacer" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow" unique_id=1012]
-custom_minimum_size = Vector2(72, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="RightActorSlot" type="VBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow" unique_id=1013]
-custom_minimum_size = Vector2(240, 300)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-alignment = 2
-
-[node name="RightActorVisual" type="ColorRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow/RightActorSlot" unique_id=1014]
-custom_minimum_size = Vector2(220, 250)
-layout_mode = 2
-size_flags_horizontal = 4
-color = Color(0.501961, 0.588235, 0.933333, 0.16)
-
-[node name="RightActorName" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow/RightActorSlot" unique_id=1015]
-modulate = Color(0.878431, 0.917647, 1, 0.95)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Right"
-horizontal_alignment = 1
-
-[node name="RightActorState" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterRow/RightActorSlot" unique_id=1016]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.82)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "hidden"
-horizontal_alignment = 1
-
-[node name="DialogueLayer" type="VBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot" unique_id=1017]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Nameplate" type="PanelContainer" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer" unique_id=1018]
-layout_mode = 2
-size_flags_horizontal = 0
-
-[node name="NameplateMargin" type="MarginContainer" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/Nameplate" unique_id=1019]
-layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 8
-
-[node name="SpeakerLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/Nameplate/NameplateMargin" unique_id=192247123]
-modulate = Color(0.807843, 0.972549, 1, 1)
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Narrator"
-
-[node name="DialoguePanel" type="PanelContainer" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer" unique_id=192247120]
-layout_mode = 2
-size_flags_vertical = 0
-
-[node name="DialogueMargin" type="MarginContainer" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/DialoguePanel" unique_id=192247121]
-layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 16
-
-[node name="DialogueRoot" type="VBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/DialoguePanel/DialogueMargin" unique_id=192247122]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="DialogueText" type="RichTextLabel" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/DialoguePanel/DialogueMargin/DialogueRoot" unique_id=192247125]
-custom_minimum_size = Vector2(0, 112)
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_font_sizes/normal_font_size = 24
-text = "No dialogue available."
-fit_content = true
-scroll_active = false
-
-[node name="DialogueMeta" type="HBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/DialoguePanel/DialogueMargin/DialogueRoot" unique_id=1020]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="SpeakerSideLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/DialoguePanel/DialogueMargin/DialogueRoot/DialogueMeta" unique_id=192247124]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 14
-text = "Speaker side: - | Emphasis: normal"
-
-[node name="ContinueHintLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/DialoguePanel/DialogueMargin/DialogueRoot/DialogueMeta" unique_id=192247126]
-modulate = Color(0.670588, 0.870588, 1, 0.92)
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "Click to continue"
-
-[node name="StatusOverlay" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/DialogueLayer/DialoguePanel/DialogueMargin/DialogueRoot" unique_id=1021]
+[node name="BackgroundTexture" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/BackgroundLayer" unique_id=874770007]
 visible = false
-modulate = Color(0.72549, 0.756863, 0.854902, 0.65)
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-text = "Status"
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Buttons" type="HBoxContainer" parent="." unique_id=806177381]
+[node name="BackgroundFallback" type="ColorRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/BackgroundLayer" unique_id=1555365495]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.09, 0.07, 0.17, 1)
+
+[node name="BackgroundOverlay" type="ColorRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/BackgroundLayer" unique_id=1744001803]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.1, 0.22)
+
+[node name="LeftDecor" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/BackgroundLayer" unique_id=623133850]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 34.0
+offset_right = 232.0
+offset_bottom = -210.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="RightDecor" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/BackgroundLayer" unique_id=1956580173]
+visible = false
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -244.0
+offset_top = 28.0
+offset_right = -24.0
+offset_bottom = -228.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CharacterLayer" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage" unique_id=1152466516]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LeftActorAnchor" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer" unique_id=898279]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -537.0
+offset_right = 296.0
+offset_bottom = -70.0
+grow_vertical = 0
+
+[node name="LeftActorRoot" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/LeftActorAnchor" unique_id=2044375628]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ActorTexture" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/LeftActorAnchor/LeftActorRoot" unique_id=1244516126]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("10_byte_default")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SilhouetteOverlay" type="ColorRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/LeftActorAnchor/LeftActorRoot" unique_id=1730169954]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03, 0.04, 0.08, 0.68)
+
+[node name="PlaceholderLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/LeftActorAnchor/LeftActorRoot" unique_id=1983105172]
+visible = false
+modulate = Color(0.31, 0.59, 0.96, 0.42)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 22
+text = "Byte"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CenterActorAnchor" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer" unique_id=1476586712]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -144.0
+offset_top = -570.0
+offset_right = 156.0
+offset_bottom = -70.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="CenterActorRoot" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/CenterActorAnchor" unique_id=698608479]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ActorTexture" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/CenterActorAnchor/CenterActorRoot" unique_id=1620843467]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("19_bug_king_default")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SilhouetteOverlay" type="ColorRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/CenterActorAnchor/CenterActorRoot" unique_id=1574965026]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03, 0.04, 0.08, 0.68)
+
+[node name="PlaceholderLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/CenterActorAnchor/CenterActorRoot" unique_id=1494160228]
+visible = false
+modulate = Color(0.9, 0.72, 0.34, 0.4)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 22
+text = "bug-king"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightActorAnchor" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer" unique_id=442679837]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -324.0
+offset_top = -520.0
+offset_right = -24.0
+offset_bottom = -70.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="RightActorRoot" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/RightActorAnchor" unique_id=213112330]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ActorTexture" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/RightActorAnchor/RightActorRoot" unique_id=2123252009]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("14_player_female_default")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SilhouetteOverlay" type="ColorRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/RightActorAnchor/RightActorRoot" unique_id=601033683]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03, 0.04, 0.08, 0.68)
+
+[node name="PlaceholderLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/CharacterLayer/RightActorAnchor/RightActorRoot" unique_id=884849864]
+visible = false
+modulate = Color(0.4, 0.53, 0.96, 0.38)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 22
+text = "player"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DialogueLayer" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage" unique_id=1334062085]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LeftNameplateRoot" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer" unique_id=906114883]
+z_index = 1
+custom_minimum_size = Vector2(220, 64)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 95.0
+offset_top = 451.0
+offset_right = 315.0
+offset_bottom = 515.0
+mouse_filter = 2
+
+[node name="NameplateFrame" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/LeftNameplateRoot" unique_id=119026447]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 19.0
+offset_right = -11.875
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("16_story_nameplate")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="NameplateFallback" type="PanelContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/LeftNameplateRoot" unique_id=356084465]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_isucm")
+
+[node name="SpeakerLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/LeftNameplateRoot" unique_id=146135303]
+modulate = Color(0.898039, 0.976471, 1, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 43.0
+offset_top = 25.0
+offset_right = -53.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.89, 0.98, 1, 1)
+theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
+theme_override_font_sizes/font_size = 24
+text = "Byte"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CenterNameplateRoot" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer" unique_id=792170392]
+z_index = 1
+custom_minimum_size = Vector2(220, 64)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 463.0
+offset_top = 458.0
+offset_right = 683.0
+offset_bottom = 522.0
+mouse_filter = 2
+
+[node name="NameplateFrame" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/CenterNameplateRoot" unique_id=987654321]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -7.0
+offset_top = 14.0
+offset_right = -7.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("16_story_nameplate")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="NameplateFallback" type="PanelContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/CenterNameplateRoot" unique_id=197531246]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_52nq1")
+
+[node name="SpeakerLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/CenterNameplateRoot" unique_id=246813579]
+modulate = Color(0.898039, 0.976471, 1, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 19.0
+offset_right = -26.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.89, 0.98, 1, 1)
+theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
+theme_override_font_sizes/font_size = 24
+text = "bug-king"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightNameplateRoot" type="Control" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer" unique_id=155286862]
+z_index = 1
+custom_minimum_size = Vector2(220, 64)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 823.0
+offset_top = 478.0
+offset_right = 1043.0
+offset_bottom = 542.0
+mouse_filter = 2
+
+[node name="NameplateFrame" type="TextureRect" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/RightNameplateRoot" unique_id=135792468]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -19.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("16_story_nameplate")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="NameplateFallback" type="PanelContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/RightNameplateRoot" unique_id=864209753]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_y1b34")
+
+[node name="SpeakerLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/RightNameplateRoot" unique_id=975318642]
+modulate = Color(0.898039, 0.976471, 1, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 1.0
+offset_right = -17.0
+offset_bottom = -22.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.89, 0.98, 1, 1)
+theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
+theme_override_font_sizes/font_size = 24
+text = "player"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DialoguePanel" type="PanelContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer" unique_id=587232500]
+custom_minimum_size = Vector2(0, 170)
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 116.0
-offset_top = -56.0
-offset_right = -116.0
-offset_bottom = -22.0
+offset_left = 28.0
+offset_top = -224.0
+offset_right = -28.0
+offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 0
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_hfk5m")
+
+[node name="DialogueMargin" type="MarginContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/DialoguePanel" unique_id=1256068557]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 24
+
+[node name="DialogueRoot" type="VBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/DialoguePanel/DialogueMargin" unique_id=413245255]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DialogueText" type="RichTextLabel" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/DialoguePanel/DialogueMargin/DialogueRoot" unique_id=2003818847]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.95, 0.97, 1, 0.98)
+theme_override_constants/line_separation = 8
+theme_override_fonts/normal_font = SubResource("SystemFont_ui_cjk")
+theme_override_font_sizes/normal_font_size = 26
+text = "Welcome to Code Planet. The system core is unstable."
+fit_content = true
+scroll_active = false
+
+[node name="DialogueMeta" type="HBoxContainer" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/DialoguePanel/DialogueMargin/DialogueRoot" unique_id=1865119333]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SpeakerSideLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer/DialoguePanel/DialogueMargin/DialogueRoot/DialogueMeta" unique_id=1589506680]
+visible = false
+modulate = Color(0.7, 0.8, 0.96, 0.86)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
+theme_override_font_sizes/font_size = 13
+text = "Speaker: left"
+
+[node name="ContinueHintLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer" unique_id=760163097]
+modulate = Color(0.59, 0.91, 1, 0.3725791)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -229.0
+offset_top = -62.0
+offset_right = -55.0
+offset_bottom = -37.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
+theme_override_font_sizes/font_size = 16
+text = "Continue"
+horizontal_alignment = 2
+
+[node name="Buttons" type="HBoxContainer" parent="." unique_id=1453670488]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -364.0
+offset_top = 24.0
+offset_right = -36.0
+offset_bottom = 62.0
+grow_horizontal = 0
 theme_override_constants/separation = 12
 alignment = 2
 
-[node name="BackButton" type="Button" parent="Buttons" unique_id=329793691]
+[node name="BackButton" type="Button" parent="Buttons" unique_id=626408091]
 layout_mode = 2
 text = "Back to Map"
 
-[node name="SkipButton" type="Button" parent="Buttons" unique_id=289278210]
+[node name="SkipButton" type="Button" parent="Buttons" unique_id=923035656]
 layout_mode = 2
 text = "Skip Story"
 
-[node name="AdvanceButton" type="Button" parent="Buttons" unique_id=289278211]
+[node name="AdvanceButton" type="Button" parent="Buttons" unique_id=928905324]
 layout_mode = 2
 text = "Advance"
+
+[node name="MissionOverlay" type="Control" parent="." unique_id=1848061663]
+visible = false
+z_index = 10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dimmer" type="ColorRect" parent="MissionOverlay" unique_id=1723064816]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0156863, 0.0235294, 0.0588235, 0.72)
+
+[node name="Center" type="CenterContainer" parent="MissionOverlay" unique_id=478538916]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MissionPanel" type="PanelContainer" parent="MissionOverlay/Center" unique_id=1373026199]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+
+[node name="MissionMargin" type="MarginContainer" parent="MissionOverlay/Center/MissionPanel" unique_id=41953943]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="MissionRoot" type="VBoxContainer" parent="MissionOverlay/Center/MissionPanel/MissionMargin" unique_id=1874884774]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="MissionTitle" type="Label" parent="MissionOverlay/Center/MissionPanel/MissionMargin/MissionRoot" unique_id=1292008591]
+modulate = Color(0.92549, 0.94902, 1, 0.96)
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
+theme_override_font_sizes/font_size = 26
+text = "任務書"
+horizontal_alignment = 1
+
+[node name="MissionBody" type="RichTextLabel" parent="MissionOverlay/Center/MissionPanel/MissionMargin/MissionRoot" unique_id=235047973]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+theme_override_fonts/normal_font = SubResource("SystemFont_ui_cjk")
+theme_override_font_sizes/normal_font_size = 22
+text = "劇情已結束。點擊同意後前往 Demo 頁面。"
+fit_content = true
+scroll_active = false
+
+[node name="MissionAgreeButton" type="Button" parent="MissionOverlay/Center/MissionPanel/MissionMargin/MissionRoot" unique_id=58362598]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
+text = "同意"

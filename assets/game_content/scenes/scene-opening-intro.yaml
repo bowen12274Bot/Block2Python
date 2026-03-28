@@ -5,15 +5,18 @@ dialogue_blocks:
     text: Welcome to Code Planet. The system core is unstable.
     portrait_id: byte-default
     expression: alert
+    background_id: scene-00-normal-city
     emphasis: normal
   - speaker: Narrator
     text: Your explorer profile is registered. The first mission is about to begin.
     portrait_id: narrator-default
     expression: neutral
+    background_id: scene-00-normal-city
     emphasis: normal
   - speaker: Byte
     text: Finish this opening briefing, then head to the main map and begin repairs.
     portrait_id: byte-default
     expression: explain
+    background_id: scene-00-normal-city
     emphasis: normal
 next_action: complete_intro

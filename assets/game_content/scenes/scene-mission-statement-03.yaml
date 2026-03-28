@@ -1,0 +1,8 @@
+scene_id: scene-mission-statement-03
+title: 任務書
+dialogue_blocks:
+  - speaker: 任務書
+    text: 重新整理混亂的判斷條件，讓系統能夠做出正確邏輯分支。
+  - speaker: 任務書
+    text: 點擊同意後前往 Demo，處理第三關的邏輯異常。
+next_action: inline_overlay

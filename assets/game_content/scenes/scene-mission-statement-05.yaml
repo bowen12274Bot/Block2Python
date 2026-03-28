@@ -1,0 +1,8 @@
+scene_id: scene-mission-statement-05
+title: 任務書
+dialogue_blocks:
+  - speaker: 任務書
+    text: 進入最終戰前，整理所有關鍵指令鏈並準備對抗 Bug King。
+  - speaker: 任務書
+    text: 點擊同意後前往 Demo，開始第五關的最終修復行動。
+next_action: inline_overlay

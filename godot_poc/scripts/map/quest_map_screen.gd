@@ -1,5 +1,4 @@
 extends Control
-class_name QuestMapScreen
 
 const QuestMapSelectionPresenterScript = preload("res://scripts/map/quest_map_selection_presenter.gd")
 const GROUP_ART_DIRECTORY := "res://art/map/stages"

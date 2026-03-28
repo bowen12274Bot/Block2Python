@@ -1,0 +1,8 @@
+scene_id: scene-mission-statement-02
+title: 任務書
+dialogue_blocks:
+  - speaker: 任務書
+    text: 檢查失控系統留下的資料，找出正確的記憶與變數狀態。
+  - speaker: 任務書
+    text: 點擊同意後前往 Demo，開始第二關的修復任務。
+next_action: inline_overlay

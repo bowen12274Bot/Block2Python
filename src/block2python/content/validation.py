@@ -29,6 +29,10 @@ def validate_nodes(
                 raise GameContentAssemblyError(f"Node {node_id} references missing next_node_id: {ref}")
         if node.scene_id is not None and node.scene_id not in scenes:
             raise GameContentAssemblyError(f"Node {node_id} references missing scene_id: {node.scene_id}")
+        if node.mission_statement_scene_id is not None and node.mission_statement_scene_id not in scenes:
+            raise GameContentAssemblyError(
+                f"Node {node_id} references missing mission_statement_scene_id: {node.mission_statement_scene_id}"
+            )
         if node.challenge_group_id is not None and node.challenge_group_id not in challenges:
             raise GameContentAssemblyError(
                 f"Node {node_id} references missing challenge_group_id: {node.challenge_group_id}"
