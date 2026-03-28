@@ -1,7 +1,6 @@
 extends Control
-class_name QuestMapScreen
 
-const QuestMapPanelScript = preload("res://scripts/quest_map_panel.gd")
+const QuestMapPanelScript = preload("res://scripts/map/quest_map_panel.gd")
 
 signal start_bridge_requested()
 signal reset_requested()

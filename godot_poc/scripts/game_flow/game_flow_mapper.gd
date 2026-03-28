@@ -52,6 +52,10 @@ static func _build_scene_view(state: Dictionary, meta: Dictionary) -> Dictionary
     var mode_value: String = str(meta.get("mode", ""))
     var node_title: String = str(meta.get("node_title", ""))
     var dialogue_views: Array[Dictionary] = []
+    var player_gender: String = ""
+    var player_profile: Variant = state.get("player_profile", {})
+    if player_profile is Dictionary:
+        player_gender = str(player_profile.get("gender", ""))
 
     var scene: Variant = state.get("scene", null)
     if scene is Dictionary:
@@ -61,7 +65,7 @@ static func _build_scene_view(state: Dictionary, meta: Dictionary) -> Dictionary
         if dialogue_blocks is Array:
             for dialogue_block_variant in dialogue_blocks:
                 if dialogue_block_variant is Dictionary:
-                    var dialogue_view: Dictionary = _build_dialogue_view(dialogue_block_variant)
+                    var dialogue_view: Dictionary = _build_dialogue_view(dialogue_block_variant, player_gender)
                     var speaker: String = str(dialogue_view.get("speaker", ""))
                     var text: String = str(dialogue_view.get("text", ""))
                     lines.append("- %s: %s" % [speaker, text])
@@ -81,6 +85,7 @@ static func _build_scene_view(state: Dictionary, meta: Dictionary) -> Dictionary
 
     var background_view: Dictionary = _build_background_view(current_dialogue)
     var left_actor_view: Dictionary = _build_actor_slot_view(current_dialogue, "left")
+    var center_actor_view: Dictionary = _build_actor_slot_view(current_dialogue, "center")
     var right_actor_view: Dictionary = _build_actor_slot_view(current_dialogue, "right")
 
     return {
@@ -94,10 +99,14 @@ static func _build_scene_view(state: Dictionary, meta: Dictionary) -> Dictionary
         "can_advance": total_blocks > 0,
         "background": background_view,
         "left_actor": left_actor_view,
+        "center_actor": center_actor_view,
         "right_actor": right_actor_view,
         "dialogue": current_dialogue,
         "dialogue_blocks": dialogue_views,
         "continue_hint_text": "Click to continue",
+        "show_mission_brief_on_complete": _should_show_mission_brief(state, meta),
+        "mission_brief_title": _scene_mission_brief_title(scene),
+        "mission_brief_text": _scene_mission_brief_text(scene),
     }
 
 
@@ -250,6 +259,29 @@ static func build_action_view(state: Dictionary) -> Dictionary:
     }
 
 
+static func _scene_mission_brief_title(scene: Variant) -> String:
+    if scene is Dictionary:
+        return str(scene.get("mission_statement_title", "Mission"))
+    return "Mission"
+
+
+static func _scene_mission_brief_text(scene: Variant) -> String:
+    if scene is Dictionary:
+        return str(scene.get("mission_statement_text", ""))
+    return ""
+
+
+static func _should_show_mission_brief(state: Dictionary, meta: Dictionary) -> bool:
+    if not bool(state.get("intro_completed", false)):
+        return false
+    if str(meta.get("mode", "")) != "scene":
+        return false
+    var scene: Variant = state.get("scene", null)
+    if scene is Dictionary:
+        return str(scene.get("mission_statement_scene_id", "")) != ""
+    return false
+
+
 static func _gender_label(gender: String) -> String:
     if gender == "male":
         return "Male"
@@ -258,13 +290,11 @@ static func _gender_label(gender: String) -> String:
     return "Unselected"
 
 
-static func _build_dialogue_view(dialogue_block_variant: Dictionary) -> Dictionary:
-    var portrait_id: String = str(dialogue_block_variant.get("portrait_id", ""))
+static func _build_dialogue_view(dialogue_block_variant: Dictionary, player_gender: String) -> Dictionary:
+    var portrait_id: String = _resolve_portrait_id(str(dialogue_block_variant.get("portrait_id", "")), player_gender)
     var expression: String = str(dialogue_block_variant.get("expression", ""))
     var emphasis: String = str(dialogue_block_variant.get("emphasis", "normal"))
-    var speaker_side: String = str(dialogue_block_variant.get("speaker_side", ""))
-    if speaker_side == "":
-        speaker_side = _infer_speaker_side(dialogue_block_variant)
+    var speaker_side: String = _normalize_speaker_side(str(dialogue_block_variant.get("speaker_side", "")), dialogue_block_variant)
 
     return {
         "speaker": str(dialogue_block_variant.get("speaker", "")),
@@ -274,8 +304,9 @@ static func _build_dialogue_view(dialogue_block_variant: Dictionary) -> Dictiona
         "emphasis": emphasis,
         "speaker_side": speaker_side,
         "background_id": str(dialogue_block_variant.get("background_id", "")),
-        "left_actor": _build_actor_view(dialogue_block_variant, "left", speaker_side, portrait_id, expression),
-        "right_actor": _build_actor_view(dialogue_block_variant, "right", speaker_side, portrait_id, expression),
+        "left_actor": _build_actor_view(dialogue_block_variant, "left", speaker_side, portrait_id, expression, player_gender),
+        "center_actor": _build_actor_view(dialogue_block_variant, "center", speaker_side, portrait_id, expression, player_gender),
+        "right_actor": _build_actor_view(dialogue_block_variant, "right", speaker_side, portrait_id, expression, player_gender),
     }
 
 
@@ -293,16 +324,17 @@ static func _build_actor_slot_view(dialogue_view: Dictionary, side: String) -> D
     return _default_actor_view(side)
 
 
-static func _build_actor_view(dialogue_block_variant: Dictionary, side: String, speaker_side: String, portrait_id: String, expression: String) -> Dictionary:
+static func _build_actor_view(dialogue_block_variant: Dictionary, side: String, speaker_side: String, portrait_id: String, expression: String, player_gender: String) -> Dictionary:
     var actor_key: String = "%s_actor" % side
     var actor_value: Variant = dialogue_block_variant.get(actor_key, {})
     if actor_value is Dictionary:
         var actor_dict: Dictionary = actor_value
+        var actor_portrait_id := _resolve_portrait_id(str(actor_dict.get("portrait_id", portrait_id if side == speaker_side else "")), player_gender)
         return {
             "actor_id": str(actor_dict.get("actor_id", "")),
             "display_name": _display_name_from_actor(actor_dict, dialogue_block_variant, side, speaker_side),
-            "portrait_id": str(actor_dict.get("portrait_id", portrait_id if side == speaker_side else "")),
-            "image_path": "",
+            "portrait_id": actor_portrait_id,
+            "image_path": str(actor_dict.get("image_path", "")),
             "pose_id": str(actor_dict.get("pose_id", "default")),
             "expression_id": str(actor_dict.get("expression_id", expression if side == speaker_side else "")),
             "visual_state": str(actor_dict.get("visual_state", _default_visual_state(side, speaker_side))),
@@ -337,6 +369,16 @@ static func _default_actor_view(side: String) -> Dictionary:
     }
 
 
+static func _resolve_portrait_id(portrait_id: String, player_gender: String) -> String:
+    if portrait_id != "player-default":
+        return portrait_id
+    if player_gender == "male":
+        return "player-male-default"
+    if player_gender == "female":
+        return "player-female-default"
+    return "player-female-default"
+
+
 static func _display_name_from_actor(actor_dict: Dictionary, dialogue_block_variant: Dictionary, side: String, speaker_side: String) -> String:
     var display_name: String = str(actor_dict.get("display_name", ""))
     if display_name != "":
@@ -354,7 +396,16 @@ static func _default_visual_state(side: String, speaker_side: String) -> String:
     return "dim"
 
 
+static func _normalize_speaker_side(raw_side: String, dialogue_block_variant: Dictionary) -> String:
+    var normalized := raw_side.strip_edges().to_lower()
+    if normalized in ["left", "center", "right"]:
+        return normalized
+    return _infer_speaker_side(dialogue_block_variant)
+
+
 static func _infer_speaker_side(dialogue_block_variant: Dictionary) -> String:
+    if dialogue_block_variant.get("center_actor", null) is Dictionary:
+        return "center"
     var portrait_id: String = str(dialogue_block_variant.get("portrait_id", ""))
     if portrait_id.begins_with("byte"):
         return "left"
