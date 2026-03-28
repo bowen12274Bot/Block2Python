@@ -18,8 +18,8 @@ signal back_requested()
 @onready var battery_percent_label: Label = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryPercent
 @onready var battery_threshold_label: Label = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryThreshold
 @onready var battery_bar: ProgressBar = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryBar
-@onready var practice_panel: PracticePanel = $Margin/Root/Body/CenterColumn/PracticePanel
-@onready var feedback_panel: FeedbackPanel = $Margin/Root/Body/CenterColumn/OutputPanel
+@onready var practice_panel = $Margin/Root/Body/CenterColumn/PracticePanel
+@onready var feedback_panel = $Margin/Root/Body/CenterColumn/OutputPanel
 @onready var assistant_log: RichTextLabel = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantLog
 @onready var assistant_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantInput
 @onready var toolkit_hint: RichTextLabel = $Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolkitHint

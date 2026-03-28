@@ -39,6 +39,8 @@ var _toolbox_workspace_block_json: Dictionary = {}
 var _toolbox_context: String = ""
 var _demo_conversion_pending: bool = false
 var _demo_conversion_requested_at_msec: int = 0
+var _pending_profile_name: String = ""
+var _pending_profile_gender: String = ""
 
 func _ready() -> void:
 	_state_store = BridgeStateStoreScript.new()
@@ -111,8 +113,18 @@ func _on_reset_requested() -> void:
 	python_bridge_client.send_reset()
 
 func _on_create_profile_requested(name: String, gender: String) -> void:
-	entry_screen.set_status("Status: creating profile...")
-	python_bridge_client.send_create_player_profile(name, gender)
+	if not python_bridge_client.is_running():
+		_pending_profile_name = name
+		_pending_profile_gender = gender
+		entry_screen.set_status("Status: starting bridge...")
+		map_screen.set_status("Status: starting bridge...")
+		if not python_bridge_client.start_bridge():
+			_pending_profile_name = ""
+			_pending_profile_gender = ""
+			entry_screen.set_status("Status: bridge error")
+			return
+		return
+	_send_create_profile(name, gender)
 
 func _on_open_current_node_requested() -> void:
 	if not _state_store.has_state():
@@ -238,8 +250,16 @@ func _on_bridge_started() -> void:
 	map_screen.set_bridge_running(true)
 	map_screen.set_note("Bridge started. Press Reset to fetch current state.")
 	response_text.text = "Bridge started. Click Reset to fetch current state."
+	if _pending_profile_name != "" or _pending_profile_gender != "":
+		var pending_name: String = _pending_profile_name
+		var pending_gender: String = _pending_profile_gender
+		_pending_profile_name = ""
+		_pending_profile_gender = ""
+		_send_create_profile(pending_name, pending_gender)
 
 func _on_bridge_failed(message: String) -> void:
+	_pending_profile_name = ""
+	_pending_profile_gender = ""
 	response_text.text = message
 	_apply_error_ui(
 		"Status: bridge error",
@@ -328,6 +348,8 @@ func _show_page(page: String) -> void:
 			_stop_toolbox_helper(true)
 	GameFlowPageRouterScript.show_page(page, entry_screen, map_screen, scene_screen, demo_screen, practice_screen)
 	_apply_toolbox_lock_state()
+	if page == "entry":
+		entry_screen.focus_name_input()
 	if page == "demo":
 		_ensure_demo_toolbox_helper()
 
@@ -553,6 +575,11 @@ func _entry_status_text(profile_view: Dictionary) -> String:
 	if bool(profile_view.get("profile_created", false)):
 		return "Status: profile ready, opening briefing unlocked"
 	return "Status: create your profile to enter the opening briefing"
+
+
+func _send_create_profile(name: String, gender: String) -> void:
+	entry_screen.set_status("Status: creating profile...")
+	python_bridge_client.send_create_player_profile(name, gender)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:

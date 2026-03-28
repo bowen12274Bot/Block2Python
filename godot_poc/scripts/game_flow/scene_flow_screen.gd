@@ -6,11 +6,10 @@ const ScenePanelScript = preload("res://scripts/game_flow/scene_panel.gd")
 signal advance_requested()
 signal back_requested()
 
-@onready var status_label: Label = $Margin/Scroll/Root/StatusLabel
-@onready var scene_panel: ScenePanelScript = $Margin/Scroll/Root/ScenePanel
-@onready var advance_button: Button = $Margin/Scroll/Root/Buttons/AdvanceButton
-@onready var skip_button: Button = $Margin/Scroll/Root/Buttons/SkipButton
-@onready var back_button: Button = $Margin/Scroll/Root/Buttons/BackButton
+@onready var scene_panel = $ScenePanel
+@onready var advance_button: Button = $Buttons/AdvanceButton
+@onready var skip_button: Button = $Buttons/SkipButton
+@onready var back_button: Button = $Buttons/BackButton
 
 
 func _ready() -> void:
