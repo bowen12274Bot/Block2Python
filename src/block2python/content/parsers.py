@@ -5,6 +5,7 @@ from typing import Any
 
 from .errors import GameContentLoadError
 from .models import (
+    ActorCue,
     BatteryPolicySpec,
     ChallengeSpec,
     DialogueBlock,
@@ -131,7 +132,28 @@ def dialogue_block_from_raw(path: Path, raw: Any) -> DialogueBlock:
         text=require_str(data, "text", context=path.name),
         portrait_id=optional_str(data.get("portrait_id")),
         expression=optional_str(data.get("expression")),
+        background_id=optional_str(data.get("background_id")),
         emphasis=optional_str(data.get("emphasis")),
+        speaker_side=optional_str(data.get("speaker_side")),
+        left_actor=actor_cue_from_raw(data.get("left_actor")),
+        center_actor=actor_cue_from_raw(data.get("center_actor")),
+        right_actor=actor_cue_from_raw(data.get("right_actor")),
+    )
+
+
+def actor_cue_from_raw(raw: Any) -> ActorCue | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise GameContentLoadError(f"Dialogue actor cue must be an object, got: {raw!r}")
+    return ActorCue(
+        actor_id=optional_str(raw.get("actor_id")),
+        display_name=optional_str(raw.get("display_name")),
+        portrait_id=optional_str(raw.get("portrait_id")),
+        expression_id=optional_str(raw.get("expression_id")),
+        pose_id=optional_str(raw.get("pose_id")),
+        visual_state=optional_str(raw.get("visual_state")),
+        image_path=optional_str(raw.get("image_path")),
     )
 
 
@@ -146,6 +168,7 @@ def node_from_raw(path: Path, raw: Any) -> NodeSpec:
         ),
         next_node_ids=tuple(require_str_list(data.get("next_node_ids", []), field_name="next_node_ids", context=path.name)),
         scene_id=optional_str(data.get("scene_id")),
+        mission_statement_scene_id=optional_str(data.get("mission_statement_scene_id")),
         challenge_group_id=optional_str(data.get("challenge_group_id")),
         metadata=metadata_from_raw(data),
     )

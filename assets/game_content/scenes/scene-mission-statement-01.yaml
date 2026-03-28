@@ -1,0 +1,8 @@
+scene_id: scene-mission-statement-01
+title: 任務書
+dialogue_blocks:
+  - speaker: 任務書
+    text: 修復城市警報的基礎訊號流程，確認輸入與輸出可以正常傳遞。
+  - speaker: 任務書
+    text: 點擊同意後前往 Demo，先完成第一段基礎操作。
+next_action: inline_overlay

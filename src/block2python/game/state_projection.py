@@ -50,7 +50,7 @@ def build_game_state(session: GameSession) -> GameState:
             map_route=map_route,
         )
 
-    scene = session._scene_state(runtime_state.scene) if state.mode is session._session_mode_scene() else None
+    scene = session._scene_state(runtime_state.scene, runtime_state.node) if state.mode is session._session_mode_scene() else None
     current_challenge = runtime_state.challenge
     current_level = session._current_level_for_challenge(current_challenge) if current_challenge is not None else None
     group_id = _group_id_for_active_state(session, state, current_level)
@@ -227,4 +227,3 @@ def _assistant_messages(session: GameSession, level: LevelSpec, toolbox_allowed:
     if toolbox_allowed:
         messages.append("Byte: If you get stuck, open the Tool Kit to try a block-based run.")
     return tuple(messages)
-

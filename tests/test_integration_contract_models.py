@@ -29,6 +29,9 @@ def test_game_state_contract_supports_scene_payload() -> None:
                 DialogueBlockState(speaker="Byte", text="Wake up."),
                 DialogueBlockState(speaker="Nova", text="System check.", emphasis="alert"),
             ),
+            mission_statement_scene_id="scene-mission-statement-01",
+            mission_statement_title="???",
+            mission_statement_text="??????????????",
         ),
         progress=ProgressState(completed_node_ids=("main-map-entry",), cleared_level_ids=()),
         available_actions=AvailableActions(advance=True),
@@ -52,6 +55,8 @@ def test_game_state_contract_supports_scene_payload() -> None:
     assert state.player_profile.gender == "female"
     assert state.scene is not None
     assert state.scene.dialogue_blocks[1].emphasis == "alert"
+    assert state.scene.mission_statement_scene_id == "scene-mission-statement-01"
+    assert state.scene.mission_statement_title == "???"
     assert state.available_actions.advance is True
     assert state.available_actions.submit is False
     assert state.last_submission is not None
@@ -167,4 +172,3 @@ def test_player_action_contract_supports_create_profile_payload() -> None:
     assert action.action_type is ActionType.CREATE_PLAYER_PROFILE
     assert action.payload["name"] == "Nova"
     assert action.payload["gender"] == "female"
-

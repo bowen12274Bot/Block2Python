@@ -3,6 +3,7 @@ from .errors import GameContentAssemblyError, GameContentError, GameContentLoadE
 from .levels_loader import LevelsLoadError, load_levels
 from .loader import load_game_content
 from .models import (
+    ActorCue,
     AssembledGameSlice,
     BatteryPolicySpec,
     ChallengeSpec,
@@ -20,6 +21,7 @@ from .models import (
 from .runtime import GameNodeState, GameRuntime, GameRuntimeError
 
 __all__ = [
+    "ActorCue",
     "AssembledGameSlice",
     "BatteryPolicySpec",
     "ChallengeSpec",

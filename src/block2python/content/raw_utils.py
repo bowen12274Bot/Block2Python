@@ -66,6 +66,7 @@ def require_int_list(value: Any, *, field_name: str, context: str) -> list[int]:
 def metadata_from_raw(raw: dict[str, Any]) -> dict[str, Any]:
     reserved = {
         "scene_id",
+        "mission_statement_scene_id",
         "title",
         "dialogue_blocks",
         "next_action",

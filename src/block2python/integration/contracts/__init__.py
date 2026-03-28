@@ -1,6 +1,7 @@
 from .errors import IntegrationContractError, IntegrationContractValidationError
 from .models import (
     ActionType,
+    ActorCueState,
     AvailableActions,
     DemoState,
     DialogueBlockState,
@@ -21,6 +22,7 @@ from .serialize import deserialize_player_action, serialize_game_state, serializ
 
 __all__ = [
     "ActionType",
+    "ActorCueState",
     "AvailableActions",
     "DemoState",
     "DialogueBlockState",

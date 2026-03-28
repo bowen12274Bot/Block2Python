@@ -93,6 +93,19 @@ def test_missing_scene_reference_raises() -> None:
         shutil.rmtree(tmp_path, ignore_errors=True)
 
 
+
+def test_missing_mission_statement_scene_reference_raises() -> None:
+    tmp_path = _make_temp_test_dir()
+    try:
+        content_dir = tmp_path / "game_content"
+        _write_game_content_fixture(content_dir, mission_statement_scene_id="missing-mission-statement")
+
+        with pytest.raises(GameContentAssemblyError, match="mission_statement_scene_id"):
+            assemble_game_slice(game_content=load_game_content(content_dir), levels={})
+    finally:
+        shutil.rmtree(tmp_path, ignore_errors=True)
+
+
 def test_invalid_index_shape_raises() -> None:
     tmp_path = _make_temp_test_dir()
     try:
@@ -163,6 +176,7 @@ def _write_game_content_fixture(
     *,
     challenge_level_ids: list[str] | None = None,
     scene_id: str = "scene-1",
+    mission_statement_scene_id: str | None = None,
 ) -> None:
     (base_dir / "quests").mkdir(parents=True)
     (base_dir / "nodes").mkdir()
@@ -213,6 +227,7 @@ def _write_game_content_fixture(
                 "    prerequisite_node_ids: []",
                 "    next_node_ids: []",
                 f"    scene_id: {scene_id}",
+                f"    mission_statement_scene_id: {mission_statement_scene_id}" if mission_statement_scene_id is not None else "    mission_statement_scene_id: null",
                 "    challenge_group_id: challenge-1",
             ]
         )
@@ -254,4 +269,3 @@ def _make_temp_test_dir() -> Path:
     path = Path(".tmp") / f"test-game-content-{uuid.uuid4().hex}"
     path.mkdir(parents=True, exist_ok=False)
     return path
-

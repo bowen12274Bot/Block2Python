@@ -27,12 +27,28 @@ class ActionType(str, Enum):
 
 
 @dataclass(frozen=True, slots=True)
+class ActorCueState:
+    actor_id: str | None = None
+    display_name: str | None = None
+    portrait_id: str | None = None
+    expression_id: str | None = None
+    pose_id: str | None = None
+    visual_state: str | None = None
+    image_path: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class DialogueBlockState:
     speaker: str
     text: str
     portrait_id: str | None = None
     expression: str | None = None
+    background_id: str | None = None
     emphasis: str | None = None
+    speaker_side: str | None = None
+    left_actor: ActorCueState | None = None
+    center_actor: ActorCueState | None = None
+    right_actor: ActorCueState | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,6 +56,9 @@ class SceneState:
     scene_id: str
     title: str
     dialogue_blocks: tuple[DialogueBlockState, ...] = ()
+    mission_statement_scene_id: str | None = None
+    mission_statement_title: str = ""
+    mission_statement_text: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +75,7 @@ class DemoState:
     body: str = ""
     current_level_id: str | None = None
     unlock_blocks: tuple[dict[str, str], ...] = ()
+
 
 @dataclass(frozen=True, slots=True)
 class PracticeState:

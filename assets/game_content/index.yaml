@@ -5,6 +5,11 @@ nodes:
 scenes:
   - file: scenes/scene-opening-intro.yaml
   - file: scenes/scene-city-alarm.yaml
+  - file: scenes/scene-mission-statement-01.yaml
+  - file: scenes/scene-mission-statement-02.yaml
+  - file: scenes/scene-mission-statement-03.yaml
+  - file: scenes/scene-mission-statement-04.yaml
+  - file: scenes/scene-mission-statement-05.yaml
   - file: scenes/scene-practice-unlock.yaml
   - file: scenes/scene-result-success.yaml
   - file: scenes/scene-result-fail.yaml

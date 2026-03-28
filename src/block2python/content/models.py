@@ -7,12 +7,28 @@ from block2python.contracts import LevelSpec
 
 
 @dataclass(frozen=True, slots=True)
+class ActorCue:
+    actor_id: str | None = None
+    display_name: str | None = None
+    portrait_id: str | None = None
+    expression_id: str | None = None
+    pose_id: str | None = None
+    visual_state: str | None = None
+    image_path: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class DialogueBlock:
     speaker: str
     text: str
     portrait_id: str | None = None
     expression: str | None = None
+    background_id: str | None = None
     emphasis: str | None = None
+    speaker_side: str | None = None
+    left_actor: ActorCue | None = None
+    center_actor: ActorCue | None = None
+    right_actor: ActorCue | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,6 +48,7 @@ class NodeSpec:
     prerequisite_node_ids: tuple[str, ...] = ()
     next_node_ids: tuple[str, ...] = ()
     scene_id: str | None = None
+    mission_statement_scene_id: str | None = None
     challenge_group_id: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
