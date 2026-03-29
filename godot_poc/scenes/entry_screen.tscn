@@ -114,10 +114,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 48.0
-offset_top = 48.0
-offset_right = -48.0
-offset_bottom = -48.0
+offset_left = 28.0
+offset_top = 24.0
+offset_right = -28.0
+offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -127,10 +127,10 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="ContentStack" type="VBoxContainer" parent="ContentLayer/ContentCenter" unique_id=1069725222]
-custom_minimum_size = Vector2(760, 0)
+custom_minimum_size = Vector2(680, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 24
+theme_override_constants/separation = 16
 
 [node name="HeaderLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1204420168]
 layout_mode = 2
@@ -139,7 +139,7 @@ alignment = 1
 
 [node name="TitleLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/HeaderLayer" unique_id=710312950]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 32
 text = "Create Your Explorer"
 horizontal_alignment = 1
 
@@ -151,7 +151,7 @@ autowrap_mode = 3
 
 [node name="CharacterSelectLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=714671000]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="CharacterLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer" unique_id=1313737307]
 layout_mode = 2
@@ -160,31 +160,34 @@ horizontal_alignment = 1
 
 [node name="CharacterRow" type="HBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer" unique_id=418787987]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 16
 alignment = 1
 
 [node name="MaleCard" type="PanelContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow" unique_id=116648761]
-custom_minimum_size = Vector2(240, 300)
+custom_minimum_size = Vector2(232, 320)
 layout_mode = 2
 size_flags_horizontal = 4
+clip_contents = true
 
 [node name="MaleCardMargin" type="MarginContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard" unique_id=1853811559]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="MaleCardRoot" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin" unique_id=1652430979]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 4
 
 [node name="MaleArtSlot" type="TextureRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin/MaleCardRoot" unique_id=1347957922]
-custom_minimum_size = Vector2(0, 180)
+custom_minimum_size = Vector2(0, 272)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 mouse_filter = 2
 expand_mode = 1
-stretch_mode = 5
+stretch_mode = 6
 
 [node name="MaleSelectionGlow" type="ColorRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin/MaleCardRoot" unique_id=1134306853]
 visible = false
@@ -194,32 +197,36 @@ mouse_filter = 2
 color = Color(0.45098, 0.752941, 1, 1)
 
 [node name="MaleButton" type="CheckBox" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin/MaleCardRoot" unique_id=1557045659]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 button_group = SubResource("ButtonGroup_gender")
 text = "Male"
 
 [node name="FemaleCard" type="PanelContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow" unique_id=421620834]
-custom_minimum_size = Vector2(240, 300)
+custom_minimum_size = Vector2(232, 320)
 layout_mode = 2
 size_flags_horizontal = 4
+clip_contents = true
 
 [node name="FemaleCardMargin" type="MarginContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard" unique_id=1163610547]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="FemaleCardRoot" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin" unique_id=793226582]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 4
 
 [node name="FemaleArtSlot" type="TextureRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin/FemaleCardRoot" unique_id=1627057494]
-custom_minimum_size = Vector2(0, 180)
+custom_minimum_size = Vector2(0, 272)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 mouse_filter = 2
 expand_mode = 1
-stretch_mode = 5
+stretch_mode = 6
 
 [node name="FemaleSelectionGlow" type="ColorRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin/FemaleCardRoot" unique_id=1882168265]
 visible = false
@@ -229,6 +236,7 @@ mouse_filter = 2
 color = Color(1, 0.623529, 0.811765, 1)
 
 [node name="FemaleButton" type="CheckBox" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin/FemaleCardRoot" unique_id=139512072]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 button_group = SubResource("ButtonGroup_gender")
 text = "Female"
@@ -248,10 +256,10 @@ placeholder_text = "Enter your player name"
 
 [node name="ActionLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1405899763]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="CreateButton" type="Button" parent="ContentLayer/ContentCenter/ContentStack/ActionLayer" unique_id=1284610651]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Create Character"
 
@@ -260,10 +268,10 @@ layout_mode = 2
 
 [node name="StatusMargin" type="MarginContainer" parent="ContentLayer/ContentCenter/ContentStack/StatusLayer" unique_id=1105012674]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
 
 [node name="StatusStack" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/StatusLayer/StatusMargin" unique_id=1344280146]
 layout_mode = 2
