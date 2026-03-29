@@ -2,7 +2,7 @@ extends Control
 class_name EntryScreen
 
 const CHARACTER_BACKGROUND_PATH := "res://art/C_role/background.png"
-const MALE_AVATAR_PATH := "res://art/C_role/MALE.jpg"
+const MALE_AVATAR_PATH := "res://art/C_role/MALE.png"
 const FEMALE_AVATAR_PATH := "res://art/C_role/female.png"
 const CARD_BASE_BORDER := Color(0.72, 0.76, 0.92, 0.35)
 const CARD_BASE_FILL := Color(0.05, 0.07, 0.15, 0.72)

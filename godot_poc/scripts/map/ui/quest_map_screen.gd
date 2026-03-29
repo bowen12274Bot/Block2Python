@@ -21,8 +21,8 @@ signal stage_practice_requested(group_id: String)
 @onready var open_node_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/OpenNodeButton")
 @onready var debug_toggle_button: Button = get_node_or_null("HudMargin/HudRoot/TopBar/ActionRow/DebugToggleButton")
 @onready var status_label: Label = get_node_or_null("HudMargin/HudRoot/StatusLabel")
-@onready var quest_map_stage: QuestMapStage = get_node_or_null("StageFrame")
-@onready var stage_overlay: QuestMapStageOverlay = get_node_or_null("StageOverlay")
+@onready var quest_map_stage = get_node_or_null("StageFrame")
+@onready var stage_overlay = get_node_or_null("StageOverlay")
 
 var _last_map_view: Dictionary = {}
 var _group_lookup: Dictionary = {}
