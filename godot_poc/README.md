@@ -1,78 +1,62 @@
 # Godot POC
 
-?�個目?�放?�是?��???Godot �?client prototype??
+這個目錄是 Block2Python 的 Godot 端原型專案。
 
-## ?��?主�?
+它的角色不是完整遊戲本體，而是：
+- 啟動並連接 Python bridge
+- 接收 bridge 回傳的 `GameState`
+- 在 Godot 端呈現 `map / scene / demo / practice` 幾個主要流程畫面
+- 驗證 Godot UI、流程協調、後端狀態轉換是否能順利配合
 
-Godot 專�??�口??`godot_poc/project.godot` ?��?�?
+## 專案入口
 
-- `scenes/game_flow_root.tscn`
-- `scripts/flow/game_flow_coordinator.gd`
+Godot 專案入口：
+- `godot_poc/project.godot`
 
-?�是?��??��?保�??�主流�??��?負責�?
+主流程場景：
+- `godot_poc/scenes/game_flow_root.tscn`
 
-- ?��? Python stdio bridge
-- ?�收 bridge ?�傳??`GameState`
-- ??map / scene / practice 三個畫?��??��?
-- �?state 轉�? Godot ?�直??render ??view model
+主流程協調器：
+- `godot_poc/scripts/flow/coordinator.gd`
 
-## scripts ?��?
+## 目錄總覽
 
-如�??��???mapper / presenter ?��??�術�?詞�??�以??`scripts/` 簡單?�解?��?塊�?
+### `scenes/`
+放 Godot 場景檔。
 
-- `scripts/bridge/`
-  - 負責�?Python backend 溝通�?
-  - `python_bridge_client.gd` ?��???Python bridge process，透�? stdin/stdout ??JSON??
-  - `bridge_state_store.gd` ?�暫存�?後�?份�??��? bridge state??
-- `scripts/flow/`
-  - 負責主�?程控?��?
-  - `game_flow_coordinator.gd` ?�接 bridge ?��?，決定現?��??�在 map?��???scene，�??��???challenge??
-- `scripts/map/`
-  - 負責主地?�那一?��?
-  - `quest_map_screen.gd` / `quest_map_panel.gd` ?�地?�畫?�本身�?
-  - ?��?檔�??��?責�? bridge ??route state 轉�??��??�顯示�?資�??�說?��?字�?
-- `scripts/game_flow/`
-  - 負責?��??��??�戰?��?
-  - `scene_flow_screen.gd` / `scene_panel.gd` ?��??��???
-  - `practice_screen.gd` / `practice_panel.gd` / `feedback_panel.gd` ?��??��???
-  - ?��?檔�??��?責�? bridge state 轉�? scene / practice ?�顯示�?資�???feedback ?��???
+目前主要場景包含：
+- `game_flow_root.tscn`：整個 POC 的主場景
+- `quest_map_screen.tscn`：主地圖畫面
+- `scene_flow_screen.tscn`：劇情畫面
+- `demo_screen.tscn`：demo 畫面
+- `practice_screen.tscn`：practice 畫面
 
-如�??��?程�?序�?�???�以?��?�?
+### `scripts/`
+放 Godot 端執行邏輯。
 
-1. `bridge/` ?��?資�?�?Python ?��?�?
-2. `flow/` 決�??�在該顯示哪一??
-3. `map/` 負責主地?��?
-4. `game_flow/` 負責?��??��??�戰??
+目前主要可分成幾類：
+- `bridge/`：和 Python bridge 溝通
+- `entry/`：入口頁與角色建立
+- `flow/`：高層流程協調
+- `game_flow/`：scene / demo / practice / feedback
+- `map/`：quest map 模組
+- `shared/`：跨模組共用 helper
 
-## ?�面?�工
+更細的腳本分層請看：
+- `godot_poc/scripts/README.md`
 
-- `scenes/quest_map_screen.tscn`
-  - 主地?�畫?��?
-- `scenes/scene_flow_screen.tscn`
-  - ?��?節點畫?��?
-- `scenes/practice_screen.tscn`
-  - ?�戰節點畫?��?
+### `art/`
+放 Godot 端使用的 UI、美術與故事相關素材。
 
-?��???screen ??`game_flow_root.tscn` 組�?起�???
+### `.godot/`
+Godot 編輯器與匯入快取。
 
-## 已移?��???prototype
+這個目錄不是功能程式碼的一部分，但在大量 rename / move script 後，快取有時會殘留舊路徑資訊。
 
-以�??��??�已不�?作為主�?保�?�?
+## 目前專案意圖
 
-- `scenes/main.tscn`
-- `scripts/main_controller.gd`
-- `scenes/quest_map.tscn`
-- `scripts/quest_map_controller.gd`
-
-## 使用?��?
-
-1. ??Godot ?��? `godot_poc/project.godot`
-2. ?��?專�?
-3. ??`Start Bridge`
-4. ??`Reset` ?��??��? quest state
-
-## ?�註
-
-- ?�裡仍是 POC，�?�?��?�終正�?UI 結�???
-- `.godot/` ??Godot editor cache，�??��?要整?��?程�?碼主體�?
-
+這個 POC 目前重點在驗證以下幾件事：
+- Python bridge 是否能穩定推送 `GameState`
+- Godot 是否能依照 state 正確切換頁面與流程
+- map、scene、demo、practice 幾個核心畫面是否能用一致的資料流驅動
+- UI 層、流程層、state mapping 層是否能維持清楚分工
