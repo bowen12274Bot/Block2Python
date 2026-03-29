@@ -157,6 +157,21 @@ def test_dispatch_verify_toolbox_level_returns_feedback_without_clearing() -> No
     assert state.last_submission.kind == "toolbox_run"
 
 
+def test_dispatch_confirm_toolbox_open_marks_current_level() -> None:
+    session = build_demo_session()
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+    dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))
+
+    state = dispatch(session, PlayerAction(action_type=ActionType.CONFIRM_TOOLBOX_OPEN, payload={}))
+
+    assert state.mode is GameMode.CHALLENGE
+    assert state.practice is not None
+    assert state.practice.current_level_id == "group-01-practice-01"
+    assert state.practice.toolbox_opened is True
+    assert state.practice.toolbox_penalty_percent == 10
+
+
 def test_dispatch_rejects_submit_without_python_code() -> None:
     session = build_demo_session()
     dispatch(session, PlayerAction(action_type=ActionType.ADVANCE))

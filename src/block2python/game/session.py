@@ -392,17 +392,30 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
     def current_practice_toolbox_penalty_percent(self, group_id: str | None) -> int | None:
         if group_id is None:
             return None
+        challenge = self._practice_challenge_for_group_id(group_id)
+        if challenge is None or challenge.battery_policy is None:
+            return None
+        return challenge.battery_policy.toolbox_reward_percent
+
+    def confirm_toolbox_open_for_current_level(self) -> None:
+        state = self.current_state()
+        if state.mode is not SessionMode.CHALLENGE:
+            raise GameSessionError("Current node is not a challenge")
+        if state.current_level_id is None:
+            raise GameSessionError("Challenge node has no current level")
+
         runtime_state = self.runtime.current_state()
         if runtime_state is None or runtime_state.challenge is None:
-            return None
-        challenge = runtime_state.challenge
-        current_group_id = self._group_id_for_level_id(self.current_state().current_level_id or "")
-        if current_group_id != group_id:
-            return None
-        battery_policy = challenge.battery_policy
-        if battery_policy is None:
-            return None
-        return battery_policy.toolbox_reward_percent
+            raise GameSessionError("Current node is not a challenge")
+        if runtime_state.challenge.challenge_type != "practice":
+            raise GameSessionError("Toolbox is only available in practice challenges")
+
+        group_id = self._group_id_for_level_id(state.current_level_id)
+        penalty_percent = self.current_practice_toolbox_penalty_percent(group_id)
+        if penalty_percent is None:
+            raise GameSessionError("Toolbox penalty is not configured for this level")
+
+        self.mark_toolbox_opened_for_current_level()
 
     def mark_toolbox_opened_for_current_level(self) -> None:
         state = self.current_state()
@@ -433,8 +446,13 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         assert self.practice_battery_state is not None
         if level_id in self.practice_battery_state.awarded_level_ids:
             return
+        reward_percent = 20
+        if self.was_toolbox_opened_for_level(level_id):
+            penalty_reward_percent = self.current_practice_toolbox_penalty_percent(group_id)
+            if penalty_reward_percent is not None:
+                reward_percent = penalty_reward_percent
         self.practice_battery_state.awarded_level_ids.add(level_id)
-        self.practice_battery_state.battery_percent = min(100, self.practice_battery_state.battery_percent + 20)
+        self.practice_battery_state.battery_percent = min(100, self.practice_battery_state.battery_percent + reward_percent)
 
     def _next_uncleared_level_id(self, challenge, current_level_id: str) -> str | None:
         current_index = -1

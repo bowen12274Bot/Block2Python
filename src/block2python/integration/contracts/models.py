@@ -18,6 +18,7 @@ class ActionType(str, Enum):
     NEXT_LEVEL = "next_level"
     SUBMIT_LEVEL = "submit_level"
     VERIFY_TOOLBOX_LEVEL = "verify_toolbox_level"
+    CONFIRM_TOOLBOX_OPEN = "confirm_toolbox_open"
     START_GROUP_STORY = "start_group_story"
     START_GROUP_DEMO = "start_group_demo"
     START_GROUP_PRACTICE = "start_group_practice"
@@ -91,6 +92,8 @@ class PracticeState:
     is_review_mode: bool = False
     toolbox_allowed: bool = False
     toolbox_used: bool = False
+    toolbox_opened: bool = False
+    toolbox_penalty_percent: int | None = None
     toolbox_block_ids: tuple[str, ...] = ()
     can_run: bool = False
     can_submit: bool = False

@@ -48,6 +48,8 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             is_review_mode=False,
             toolbox_allowed=True,
             toolbox_used=True,
+            toolbox_opened=True,
+            toolbox_penalty_percent=10,
             toolbox_block_ids=("text_print", "b2p_input_text"),
             can_run=True,
             can_submit=True,
@@ -101,6 +103,8 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     assert payload["practice"]["level_id"] == "group-01-practice-01"
     assert payload["practice"]["progress_total"] == 5
     assert payload["practice"]["toolbox_allowed"] is True
+    assert payload["practice"]["toolbox_opened"] is True
+    assert payload["practice"]["toolbox_penalty_percent"] == 10
     assert payload["practice"]["toolbox_block_ids"] == ["text_print", "b2p_input_text"]
     assert payload["practice"]["can_run"] is True
     assert payload["practice"]["can_next"] is False
@@ -206,6 +210,18 @@ def test_create_profile_action_round_trip_serialize_and_deserialize() -> None:
 def test_complete_intro_action_round_trip_serialize_and_deserialize() -> None:
     action = PlayerAction(
         action_type=ActionType.COMPLETE_INTRO,
+        payload={},
+    )
+
+    serialized = serialize_player_action(action)
+    deserialized = deserialize_player_action(serialized)
+
+    assert deserialized == action
+
+
+def test_confirm_toolbox_open_action_round_trip_serialize_and_deserialize() -> None:
+    action = PlayerAction(
+        action_type=ActionType.CONFIRM_TOOLBOX_OPEN,
         payload={},
     )
 

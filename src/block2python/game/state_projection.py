@@ -179,6 +179,8 @@ def _build_practice_state(
         and challenge.challenge_type == "practice"
     )
     toolbox_block_ids = session.current_toolbox_block_ids() if toolbox_allowed else ()
+    toolbox_penalty_percent = session.current_practice_toolbox_penalty_percent(group_id) if toolbox_allowed else None
+    toolbox_opened = session.was_toolbox_opened_for_level(level.level_id) if toolbox_allowed else False
     return PracticeState(
         challenge_id=challenge.challenge_id,
         challenge_type=challenge.challenge_type,
@@ -191,6 +193,8 @@ def _build_practice_state(
         is_review_mode=bool(runtime_group.practice_reviewing) if runtime_group is not None else False,
         toolbox_allowed=toolbox_allowed,
         toolbox_used=level.level_id in session.toolbox_used_level_ids,
+        toolbox_opened=toolbox_opened,
+        toolbox_penalty_percent=toolbox_penalty_percent,
         toolbox_block_ids=toolbox_block_ids,
         can_run=can_run,
         can_submit=can_submit,

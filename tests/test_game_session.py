@@ -113,6 +113,8 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.practice.progress_total == 5
     assert contract_state.practice.toolbox_allowed is True
     assert contract_state.practice.toolbox_used is False
+    assert contract_state.practice.toolbox_opened is False
+    assert contract_state.practice.toolbox_penalty_percent == 10
     assert contract_state.practice.toolbox_block_ids == ("text_print", "b2p_input_text")
     assert contract_state.practice.can_submit is True
     assert contract_state.available_actions.submit is True
@@ -928,7 +930,7 @@ def test_practice_toolbox_penalty_interface_exposes_battery_policy_value() -> No
     assert session.current_practice_toolbox_penalty_percent(contract_state.practice.group_id) == 10
 
 
-def test_mark_toolbox_opened_interface_tracks_current_level_without_affecting_battery() -> None:
+def test_confirm_toolbox_open_marks_current_level_without_changing_battery() -> None:
     session = build_session()
     session.start_group_story("group-01")
     session.advance()
@@ -937,14 +939,42 @@ def test_mark_toolbox_opened_interface_tracks_current_level_without_affecting_ba
     contract_state = session.current_game_state()
     assert contract_state.practice is not None
     assert contract_state.practice.group_id == "group-01"
+    assert contract_state.practice.toolbox_opened is False
     assert session.was_toolbox_opened_for_level("group-01-practice-01") is False
 
-    session.mark_toolbox_opened_for_current_level()
+    session.confirm_toolbox_open_for_current_level()
 
     assert session.was_toolbox_opened_for_level("group-01-practice-01") is True
     contract_state = session.current_game_state()
     assert contract_state.practice is not None
+    assert contract_state.practice.toolbox_opened is True
+    assert contract_state.practice.toolbox_penalty_percent == 10
     assert contract_state.practice.battery_percent == 0
+
+
+def test_toolbox_opened_level_only_awards_ten_percent_battery() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    session.confirm_toolbox_open_for_current_level()
+
+    state, outcome = session.submit_current_level(python_code="name = input()\nprint(f\"Hello, {name}\")\n")
+    assert outcome.cleared is True
+    assert state.current_level_id == "group-01-practice-01"
+
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 10
+    assert contract_state.practice.toolbox_opened is True
+
+    state = session.next_practice_level()
+    assert state.current_level_id == "group-01-practice-02"
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.toolbox_opened is False
+    assert contract_state.practice.toolbox_penalty_percent == 10
 
 
 def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:

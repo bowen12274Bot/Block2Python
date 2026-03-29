@@ -50,6 +50,7 @@ func _ready() -> void:
 	practice_screen.submit_requested.connect(_on_submit_requested)
 	practice_screen.next_requested.connect(_on_next_requested)
 	practice_screen.open_toolbox_requested.connect(_on_open_toolbox_requested)
+	practice_screen.toolbox_confirmation_accepted.connect(_on_toolbox_confirmation_accepted)
 	practice_screen.back_requested.connect(_show_map_page)
 	python_bridge_client.bridge_started.connect(_on_bridge_started)
 	python_bridge_client.bridge_failed.connect(_on_bridge_failed)
@@ -192,7 +193,21 @@ func _on_demo_convert_requested() -> void:
 
 func _on_open_toolbox_requested() -> void:
 	var practice_view: Dictionary = _current_practice_view()
-	_toolbox_controller.toggle_challenge_helper(practice_view, _current_page)
+	if bool(practice_view.get("toolbox_opened", false)):
+		_toolbox_controller.toggle_challenge_helper(practice_view, _current_page)
+		return
+	var penalty_percent: Variant = practice_view.get("toolbox_penalty_percent", null)
+	if penalty_percent == null:
+		_toolbox_controller.toggle_challenge_helper(practice_view, _current_page)
+		return
+	practice_screen.prompt_toolbox_confirmation(int(penalty_percent))
+
+
+func _on_toolbox_confirmation_accepted() -> void:
+	python_bridge_client.send_confirm_toolbox_open()
+	var practice_view: Dictionary = _current_practice_view()
+	if bool(practice_view.get("toolbox_opened", false)):
+		_toolbox_controller.toggle_challenge_helper(practice_view, _current_page)
 
 
 func _on_debug_toggled(debug_visible: bool) -> void:

@@ -121,6 +121,8 @@ def test_game_state_contract_supports_practice_payload() -> None:
             is_review_mode=True,
             toolbox_allowed=True,
             toolbox_used=True,
+            toolbox_opened=True,
+            toolbox_penalty_percent=10,
             toolbox_block_ids=("text_print", "b2p_input_text"),
             can_run=True,
             can_submit=True,
@@ -142,6 +144,8 @@ def test_game_state_contract_supports_practice_payload() -> None:
     assert state.practice.is_review_mode is True
     assert state.practice.toolbox_allowed is True
     assert state.practice.toolbox_used is True
+    assert state.practice.toolbox_opened is True
+    assert state.practice.toolbox_penalty_percent == 10
     assert state.practice.toolbox_block_ids == ("text_print", "b2p_input_text")
     assert state.practice.can_run is True
     assert state.practice.can_submit is True

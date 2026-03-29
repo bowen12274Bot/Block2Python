@@ -31,6 +31,8 @@ def _serialize_practice_payload(practice) -> dict[str, object]:
         "is_review_mode": practice.is_review_mode,
         "toolbox_allowed": practice.toolbox_allowed,
         "toolbox_used": practice.toolbox_used,
+        "toolbox_opened": practice.toolbox_opened,
+        "toolbox_penalty_percent": practice.toolbox_penalty_percent,
         "toolbox_block_ids": list(practice.toolbox_block_ids),
         "can_run": practice.can_run,
         "can_submit": practice.can_submit,
