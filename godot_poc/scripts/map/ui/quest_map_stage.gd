@@ -1,19 +1,7 @@
 extends Control
 class_name QuestMapStage
 
-const ROUTE_SEGMENTS := [
-	{"id": "route-01", "to_group": "group-02", "start": "Route01Start", "control": "Route01Control", "end": "Route01End"},
-	{"id": "route-02", "to_group": "group-03", "start": "Route02Start", "control": "Route02Control", "end": "Route02End"},
-	{"id": "route-03", "to_group": "group-04", "start": "Route03Start", "control": "Route03Control", "end": "Route03End"},
-	{"id": "route-04", "to_group": "group-05", "start": "Route04Start", "control": "Route04Control", "end": "Route04End"},
-]
-const ROUTE_STATUS_BRIGHTNESS := {
-	"locked": 0.22,
-	"available": 0.7,
-	"current": 1.0,
-	"completed": 0.9,
-	"reviewing": 0.82,
-}
+const QuestMapRouteCatalogScript = preload("res://scripts/map/catalog/quest_map_route_catalog.gd")
 
 @onready var header_row: HBoxContainer = get_node_or_null("HudLayer/Header")
 @onready var header_title_column: VBoxContainer = get_node_or_null("HudLayer/Header/TitleColumn")
@@ -34,7 +22,7 @@ func _ready() -> void:
 		route_layer.z_index = 1
 	if header_row != null:
 		header_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		header_row.visible = false
+		header_row.visible = true
 	if header_title_column != null:
 		header_title_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if header_title != null:
@@ -51,19 +39,28 @@ func _ready() -> void:
 		foreground_hint.text = "Optional foreground VFX / clouds / frame art"
 	if route_anchor_layer != null and not Engine.is_editor_hint():
 		route_anchor_layer.visible = false
+	_refresh_header()
 
 
 func show_map(map_view: Dictionary) -> void:
 	_last_map_view = map_view.duplicate(true)
-	if header_title != null:
-		header_title.text = str(map_view.get("quest_title", "Quest Map"))
-	if header_subtitle != null:
-		header_subtitle.text = str(map_view.get("summary", "Main map is waiting for route data."))
+	_refresh_header()
 	_render_route_lines(map_view)
 
 
 func set_helper_text(text: String) -> void:
 	_helper_text_override = text
+	_refresh_header()
+
+
+func _refresh_header() -> void:
+	if header_title != null:
+		header_title.text = str(_last_map_view.get("quest_title", "Quest Map"))
+	if header_subtitle != null:
+		var subtitle_text: String = _helper_text_override.strip_edges()
+		if subtitle_text == "":
+			subtitle_text = str(_last_map_view.get("summary", "Main map is waiting for route data."))
+		header_subtitle.text = subtitle_text
 
 
 func _render_route_lines(map_view: Dictionary) -> void:
@@ -71,7 +68,7 @@ func _render_route_lines(map_view: Dictionary) -> void:
 	if route_layer == null or route_anchor_layer == null:
 		return
 	var group_lookup := _group_lookup(map_view)
-	for segment in ROUTE_SEGMENTS:
+	for segment in QuestMapRouteCatalogScript.route_segments():
 		var start_point := _anchor_center(str(segment.get("start", "")))
 		var control_point := _anchor_center(str(segment.get("control", "")))
 		var end_point := _anchor_center(str(segment.get("end", "")))
@@ -126,7 +123,7 @@ func _segment_status_key(group_view_variant: Variant) -> String:
 
 
 func _add_route_segment(points: PackedVector2Array, status_key: String) -> void:
-	var brightness: float = float(ROUTE_STATUS_BRIGHTNESS.get(status_key, 0.28))
+	var brightness: float = QuestMapRouteCatalogScript.brightness_for_status(status_key)
 	var glow := Line2D.new()
 	glow.points = points
 	glow.width = 16.0
@@ -160,3 +157,4 @@ func _add_route_segment(points: PackedVector2Array, status_key: String) -> void:
 	orb.z_index = 2
 	route_layer.add_child(orb)
 	_route_nodes.append(orb)
+
