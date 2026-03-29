@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cbm68g6w6ly5a"]
 
-[ext_resource type="Script" path="res://scripts/game_flow/demo_screen.gd" id="1_screen"]
+[ext_resource type="Script" path="res://scripts/game_flow/ui/demo_screen.gd" id="1_screen"]
 
 [node name="DemoScreen" type="Control"]
 custom_minimum_size = Vector2(1200, 720)

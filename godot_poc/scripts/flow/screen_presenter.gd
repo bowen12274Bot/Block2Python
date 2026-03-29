@@ -1,5 +1,5 @@
 extends RefCounted
-class_name GameFlowScreenPresenter
+class_name FlowScreenPresenter
 
 static func render_map_view(map_screen: Control, map_view: Dictionary, _state: Dictionary, view_model: Dictionary, current_node_enterable: bool) -> void:
 	map_screen.show_map(map_view)
@@ -65,3 +65,5 @@ static func _map_note_for_state(can_advance: bool, can_open: bool) -> String:
 	if can_advance:
 		return "Current route step has no standalone page yet. Use Advance to move forward."
 	return "Current route step cannot be opened as a separate page."
+
+
