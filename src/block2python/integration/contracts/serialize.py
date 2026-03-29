@@ -1,7 +1,14 @@
 from __future__ import annotations
 
 from .errors import IntegrationContractValidationError
-from .models import ActionType, ActorCueState, GameState, PlayerAction
+from .models import (
+    ActionType,
+    ActorCueState,
+    GameState,
+    PlayerAction,
+    TutorReplyPayload,
+    TutorReplyRequest,
+)
 
 
 def _serialize_actor_cue(actor: ActorCueState | None) -> dict[str, object] | None:
@@ -248,3 +255,139 @@ def deserialize_player_action(payload: object) -> PlayerAction:
         raise IntegrationContractValidationError("PlayerAction.payload.gender must be a string")
 
     return PlayerAction(action_type=parsed_action_type, payload=normalized_payload)
+
+
+def serialize_tutor_reply_request(request: TutorReplyRequest) -> dict[str, object]:
+    return {
+        "question": request.question,
+        "provider": request.provider,
+        "level_id": request.level_id,
+        "python_code": request.python_code,
+        "block_json": dict(request.block_json) if isinstance(request.block_json, dict) else None,
+        "conversation_id": request.conversation_id,
+        "conversation_history": [dict(item) for item in request.conversation_history],
+        "history_summary": request.history_summary,
+        "provider_options": dict(request.provider_options),
+    }
+
+
+def deserialize_tutor_reply_request(payload: object) -> TutorReplyRequest:
+    if not isinstance(payload, dict):
+        raise IntegrationContractValidationError("TutorReplyRequest payload must be a dict")
+
+    question = payload.get("question")
+    if not isinstance(question, str) or not question.strip():
+        raise IntegrationContractValidationError("TutorReplyRequest.question must be a non-empty string")
+
+    provider_raw = payload.get("provider", "template")
+    if not isinstance(provider_raw, str) or not provider_raw.strip():
+        raise IntegrationContractValidationError("TutorReplyRequest.provider must be a non-empty string")
+    provider = provider_raw.strip().lower()
+
+    level_id_raw = payload.get("level_id")
+    level_id: str | None = None
+    if level_id_raw is not None:
+        if not isinstance(level_id_raw, str):
+            raise IntegrationContractValidationError("TutorReplyRequest.level_id must be a string")
+        level_id = level_id_raw.strip() or None
+
+    python_code = payload.get("python_code")
+    if python_code is None and "current_code" in payload:
+        python_code = payload.get("current_code")
+    if python_code is None:
+        python_code = ""
+    if not isinstance(python_code, str):
+        raise IntegrationContractValidationError("TutorReplyRequest.python_code must be a string")
+
+    block_json = payload.get("block_json")
+    if block_json is None and "current_blocks" in payload:
+        block_json = payload.get("current_blocks")
+    if block_json is not None and not isinstance(block_json, dict):
+        raise IntegrationContractValidationError("TutorReplyRequest.block_json must be a dict or null")
+
+    conversation_id = payload.get("conversation_id")
+    if conversation_id is not None and not isinstance(conversation_id, str):
+        raise IntegrationContractValidationError("TutorReplyRequest.conversation_id must be a string")
+
+    history_summary = payload.get("history_summary")
+    if history_summary is not None and not isinstance(history_summary, str):
+        raise IntegrationContractValidationError("TutorReplyRequest.history_summary must be a string")
+
+    history_raw = payload.get("conversation_history", ())
+    if history_raw is None:
+        history_raw = ()
+    if not isinstance(history_raw, (list, tuple)):
+        raise IntegrationContractValidationError("TutorReplyRequest.conversation_history must be an array")
+
+    history: list[dict[str, object]] = []
+    for index, item in enumerate(history_raw):
+        if not isinstance(item, dict):
+            raise IntegrationContractValidationError(
+                f"TutorReplyRequest.conversation_history[{index}] must be an object"
+            )
+
+        role = item.get("role")
+        if role is not None and not isinstance(role, str):
+            raise IntegrationContractValidationError(
+                f"TutorReplyRequest.conversation_history[{index}].role must be a string"
+            )
+
+        content = item.get("content")
+        if content is not None and not isinstance(content, str):
+            raise IntegrationContractValidationError(
+                f"TutorReplyRequest.conversation_history[{index}].content must be a string"
+            )
+
+        history.append(dict(item))
+
+    provider_options_raw = payload.get("provider_options", {})
+    if provider_options_raw is None:
+        provider_options_raw = {}
+    if not isinstance(provider_options_raw, dict):
+        raise IntegrationContractValidationError("TutorReplyRequest.provider_options must be a dict")
+
+    provider_options = dict(provider_options_raw)
+    for field_name in ("endpoint_url", "model", "api_key", "system_prompt", "timeout_sec"):
+        if field_name in payload and field_name not in provider_options:
+            provider_options[field_name] = payload[field_name]
+
+    return TutorReplyRequest(
+        question=question.strip(),
+        provider=provider,
+        level_id=level_id,
+        python_code=python_code,
+        block_json=dict(block_json) if isinstance(block_json, dict) else None,
+        conversation_id=conversation_id,
+        conversation_history=tuple(history),
+        history_summary=history_summary,
+        provider_options=provider_options,
+    )
+
+
+def serialize_tutor_reply_payload(payload: TutorReplyPayload) -> dict[str, object]:
+    return {
+        "reply_type": payload.reply_type,
+        "content": payload.content,
+        "metadata": dict(payload.metadata),
+    }
+
+
+def deserialize_tutor_reply_payload(payload: object) -> TutorReplyPayload:
+    if not isinstance(payload, dict):
+        raise IntegrationContractValidationError("TutorReplyPayload must be a dict")
+
+    reply_type = payload.get("reply_type")
+    if not isinstance(reply_type, str) or not reply_type.strip():
+        raise IntegrationContractValidationError("TutorReplyPayload.reply_type must be a non-empty string")
+
+    content = payload.get("content")
+    if not isinstance(content, str):
+        raise IntegrationContractValidationError("TutorReplyPayload.content must be a string")
+
+    metadata = payload.get("metadata", {})
+    if metadata is None:
+        metadata = {}
+    if not isinstance(metadata, dict):
+        raise IntegrationContractValidationError("TutorReplyPayload.metadata must be a dict")
+
+    return TutorReplyPayload(reply_type=reply_type.strip(), content=content, metadata=dict(metadata))

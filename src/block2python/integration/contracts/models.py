@@ -244,3 +244,23 @@ class GameState:
 class PlayerAction:
     action_type: ActionType
     payload: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class TutorReplyRequest:
+    question: str
+    provider: str = "template"
+    level_id: str | None = None
+    python_code: str = ""
+    block_json: dict[str, Any] | None = None
+    conversation_id: str | None = None
+    conversation_history: tuple[dict[str, Any], ...] = ()
+    history_summary: str | None = None
+    provider_options: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class TutorReplyPayload:
+    reply_type: str
+    content: str
+    metadata: dict[str, Any] = field(default_factory=dict)

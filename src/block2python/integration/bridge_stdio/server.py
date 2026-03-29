@@ -10,6 +10,7 @@ from typing import TextIO
 
 from block2python.ai import (
     LocalTemplateSelector,
+    OpenAICompatibleProvider,
     StubTutorProvider,
     TeachingSkillLoader,
     TemplateTutorProvider,
@@ -25,7 +26,11 @@ from block2python.game import GameSession
 from block2python.integration.contracts import (
     IntegrationContractValidationError,
     deserialize_player_action,
+    deserialize_tutor_reply_request,
     serialize_game_state,
+    serialize_tutor_reply_payload,
+    TutorReplyPayload,
+    TutorReplyRequest,
 )
 from block2python.integration.service import IntegrationDispatchError, dispatch
 from block2python.judge import StubJudge
@@ -58,16 +63,13 @@ class BridgeServer:
             return self._ok_response()
 
         if request.get("command") == "tutor_reply":
-            payload = request.get("payload", {})
-            if not isinstance(payload, dict):
-                return self._error_response("tutor_reply payload must be an object")
-
             try:
-                tutor_payload = self._handle_tutor_reply(payload)
-            except ValueError as exc:
+                tutor_request = deserialize_tutor_reply_request(request.get("payload", {}))
+                tutor_payload = self._handle_tutor_reply(tutor_request)
+            except (IntegrationContractValidationError, ValueError) as exc:
                 return self._error_response(str(exc))
 
-            return self._ok_response(tutor=tutor_payload)
+            return self._ok_response(tutor=serialize_tutor_reply_payload(tutor_payload))
 
         action_payload = request.get("action")
         if action_payload is None:
@@ -153,84 +155,54 @@ class BridgeServer:
             "use_stub_judge": self._use_stub_judge,
         }
 
-    def _handle_tutor_reply(self, payload: Mapping[str, object]) -> dict[str, object]:
-        question_raw = payload.get("question")
-        if not isinstance(question_raw, str) or not question_raw.strip():
-            raise ValueError("tutor_reply requires payload.question")
-        question = question_raw.strip()
+    def _handle_tutor_reply(self, request: TutorReplyRequest) -> TutorReplyPayload:
+        provider_name = request.provider
 
-        provider_raw = payload.get("provider", "template")
-        if not isinstance(provider_raw, str) or not provider_raw.strip():
-            raise ValueError("tutor_reply payload.provider must be a string")
-        provider_name = provider_raw.strip().lower()
-
-        level_id_raw = payload.get("level_id")
-        level_id: str | None
-        if level_id_raw is None:
+        level_id = request.level_id
+        if level_id is None:
             level_id = self._ensure_session().current_state().current_level_id
-        elif isinstance(level_id_raw, str) and level_id_raw.strip():
-            level_id = level_id_raw.strip()
-        else:
-            raise ValueError("tutor_reply payload.level_id must be a string when provided")
 
         if not level_id:
             raise ValueError("tutor_reply requires payload.level_id when no active challenge level")
-
-        python_code_raw = payload.get("python_code", "")
-        if not isinstance(python_code_raw, str):
-            raise ValueError("tutor_reply payload.python_code must be a string")
-        python_code = python_code_raw
-
-        block_json_raw = payload.get("block_json")
-        if block_json_raw is not None and not isinstance(block_json_raw, dict):
-            raise ValueError("tutor_reply payload.block_json must be a dict or null")
-
-        conversation_id_raw = payload.get("conversation_id")
-        if conversation_id_raw is not None and not isinstance(conversation_id_raw, str):
-            raise ValueError("tutor_reply payload.conversation_id must be a string")
-        conversation_id = conversation_id_raw
-
-        conversation_history_raw = payload.get("conversation_history")
-        if conversation_history_raw is not None and not isinstance(conversation_history_raw, list):
-            raise ValueError("tutor_reply payload.conversation_history must be an array")
-
-        history_summary_raw = payload.get("history_summary")
-        if history_summary_raw is not None and not isinstance(history_summary_raw, str):
-            raise ValueError("tutor_reply payload.history_summary must be a string")
 
         session = self._ensure_session()
         level = session.app.get_level(level_id)
         if level is None:
             raise ValueError(f"Unknown level_id: {level_id}")
 
-        submission = Submission(level_id=level_id, python_code=python_code, block_json=block_json_raw)
+        submission = Submission(level_id=level_id, python_code=request.python_code, block_json=request.block_json)
         outcome = session.app.verify(submission)
 
-        tutor_service = self._build_tutor_service(provider_name)
+        tutor_service = self._build_tutor_service(provider_name, request.provider_options)
         tutor_response = asyncio.run(
             tutor_service.reply(
                 level=level,
                 submission=submission,
-                question=question,
+                question=request.question,
                 analysis_result=outcome.analysis,
                 judge_result=outcome.judge,
-                conversation_id=conversation_id,
-                conversation_history=conversation_history_raw,
-                history_summary=history_summary_raw,
+                conversation_id=request.conversation_id,
+                conversation_history=list(request.conversation_history),
+                history_summary=request.history_summary,
             )
         )
 
-        return {
-            "reply_type": tutor_response.reply_type,
-            "content": tutor_response.content,
-            "metadata": dict(tutor_response.metadata),
-        }
+        return TutorReplyPayload(
+            reply_type=tutor_response.reply_type,
+            content=tutor_response.content,
+            metadata=dict(tutor_response.metadata),
+        )
 
-    def _build_tutor_service(self, provider_name: str) -> TutorService:
+    def _build_tutor_service(
+        self,
+        provider_name: str,
+        provider_options: Mapping[str, object] | None = None,
+    ) -> TutorService:
         skills_dir = self._teaching_skills_dir or Path("assets/teaching_skills")
         skill_loader = TeachingSkillLoader(skills_dir=skills_dir)
         context_builder = TutorContextBuilder(skill_loader=skill_loader)
         policy = TutorPolicy()
+        options = dict(provider_options or {})
 
         if provider_name == "template":
             provider = TemplateTutorProvider()
@@ -238,6 +210,22 @@ class BridgeServer:
             provider = StubTutorProvider()
         elif provider_name == "local":
             provider = LocalTemplateSelector(template_provider=TemplateTutorProvider())
+        elif provider_name == "openai_compatible":
+            endpoint_url = _required_non_empty_str(options.get("endpoint_url"), field_name="provider_options.endpoint_url")
+            model = _required_non_empty_str(options.get("model"), field_name="provider_options.model")
+            api_key = _required_non_empty_str(options.get("api_key"), field_name="provider_options.api_key")
+            timeout_sec = _parse_timeout_sec(options.get("timeout_sec"), default=30.0)
+            system_prompt_raw = options.get("system_prompt")
+            if system_prompt_raw is not None and not isinstance(system_prompt_raw, str):
+                raise ValueError("provider_options.system_prompt must be a string")
+
+            provider = OpenAICompatibleProvider(
+                endpoint_url=endpoint_url,
+                model=model,
+                api_key=api_key,
+                timeout_sec=timeout_sec,
+                system_prompt=system_prompt_raw,
+            )
         else:
             raise ValueError(f"Unsupported tutor provider: {provider_name}")
 
@@ -247,6 +235,26 @@ class BridgeServer:
             policy=policy,
             provider=provider,
         )
+
+
+def _required_non_empty_str(value: object, *, field_name: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field_name} must be a non-empty string")
+    return value.strip()
+
+
+def _parse_timeout_sec(value: object, *, default: float) -> float:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        raise ValueError("provider_options.timeout_sec must be a positive number")
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("provider_options.timeout_sec must be a positive number") from exc
+    if parsed <= 0:
+        raise ValueError("provider_options.timeout_sec must be a positive number")
+    return parsed
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -186,4 +186,34 @@ def test_bridge_server_tutor_reply_rejects_missing_question() -> None:
     response = json.loads(outstream.getvalue().strip())
     assert response["ok"] is False
     assert response["state"] is None
-    assert "payload.question" in response["error"]
+    assert "TutorReplyRequest.question" in response["error"]
+
+
+def test_bridge_server_tutor_reply_accepts_current_code_alias() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        '{"command":"tutor_reply","payload":{"level_id":"group-01-demo","question":"Explain this","current_code":"print(1)\\n","current_blocks":{"kind":"workspace"},"provider":"stub"}}\n'
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is True
+    assert response["tutor"] is not None
+    assert response["tutor"]["metadata"]["provider"] == "stub"
+
+
+def test_bridge_server_tutor_reply_openai_requires_provider_options() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        '{"command":"tutor_reply","payload":{"level_id":"group-01-demo","question":"Explain this","provider":"openai_compatible"}}\n'
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is False
+    assert response["state"] is None
+    assert "provider_options.endpoint_url" in response["error"]
