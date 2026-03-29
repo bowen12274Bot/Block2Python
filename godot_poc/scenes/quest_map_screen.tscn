@@ -25,6 +25,7 @@
 [ext_resource type="Texture2D" uid="uid://d3317bd147cn6" path="res://art/map/decor/cloud_01.png" id="15_decor_cloud_01"]
 [ext_resource type="Texture2D" uid="uid://o5y5k2ud80vq" path="res://art/map/decor/cloud_02.png" id="16_decor_cloud_02"]
 [ext_resource type="Script" path="res://scripts/map/ui/quest_map_stage_overlay.gd" id="17_stage_overlay"]
+[ext_resource type="Texture2D" path="res://art/floating_pages/background.png" id="18_floating_page_bg"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nameplate_root"]
 
@@ -1201,7 +1202,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
-color = Color(0, 0, 0, 0.45)
+color = Color(0, 0, 0, 0.2)
 
 [node name="Center" type="CenterContainer" parent="StageOverlay" unique_id=1654780809]
 layout_mode = 1
@@ -1212,16 +1213,39 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Panel" type="PanelContainer" parent="StageOverlay/Center" unique_id=234152397]
-custom_minimum_size = Vector2(620, 0)
+[node name="Panel" type="Control" parent="StageOverlay/Center" unique_id=234152397]
+custom_minimum_size = Vector2(1080, 662)
 layout_mode = 2
+mouse_filter = 2
+
+[node name="FloatingPageBackground" type="TextureRect" parent="StageOverlay/Center/Panel" unique_id=1481042230]
+z_index = 0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("18_floating_page_bg")
+expand_mode = 1
+stretch_mode = 0
+region_enabled = true
+region_rect = Rect2(119, 101, 657, 402)
 
 [node name="OverlayMargin" type="MarginContainer" parent="StageOverlay/Center/Panel" unique_id=1821901589]
-layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 18
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -170.0
+offset_right = 360.0
+offset_bottom = 210.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="OverlayRoot" type="VBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin" unique_id=1901552274]
 layout_mode = 2
@@ -1245,7 +1269,12 @@ text = "Stage"
 layout_mode = 2
 text = "Demo + Practice"
 
-[node name="CloseButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header" unique_id=2055496867]
+[node name="CloseNudge" type="MarginContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header" unique_id=103456781]
+layout_mode = 2
+theme_override_constants/margin_top = -12
+theme_override_constants/margin_bottom = 12
+
+[node name="CloseButton" type="Button" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot/Header/CloseNudge" unique_id=2055496867]
 layout_mode = 2
 text = "Close"
 
@@ -1268,6 +1297,10 @@ theme_override_constants/v_separation = 12
 layout_mode = 2
 text = "Choose Demo or Practice."
 autowrap_mode = 3
+
+[node name="ButtonsNudge" type="Control" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot" unique_id=103456782]
+custom_minimum_size = Vector2(0, 68)
+layout_mode = 2
 
 [node name="Buttons" type="HBoxContainer" parent="StageOverlay/Center/Panel/OverlayMargin/OverlayRoot" unique_id=1236247583]
 layout_mode = 2
