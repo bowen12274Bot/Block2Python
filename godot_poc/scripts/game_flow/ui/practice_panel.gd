@@ -15,6 +15,8 @@ func get_python_code() -> String:
 	return code_input.text
 
 func focus_code_input() -> void:
+	if not is_inside_tree() or code_input == null or not code_input.is_inside_tree():
+		return
 	code_input.editable = true
 	code_input.grab_focus()
 

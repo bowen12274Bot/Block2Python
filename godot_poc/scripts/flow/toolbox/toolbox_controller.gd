@@ -25,7 +25,6 @@ var _workspace_block_json: Dictionary = {}
 var _context: String = ""
 var _current_page: String = ""
 var _toolbox_visible_requested: bool = false
-var _restore_toolbox_visibility_on_focus: bool = false
 var _workspace_reset_revision: int = 0
 var _demo_conversion_pending: bool = false
 var _demo_conversion_requested_at_msec: int = 0
@@ -148,28 +147,8 @@ func debug_state_lines() -> Array[String]:
 		"toolbox_helper_pid=%s" % str(_helper_pid),
 		"toolbox_context=%s" % _context,
 		"toolbox_visible=%s" % str(_toolbox_visible_requested),
-		"toolbox_restore_on_focus=%s" % str(_restore_toolbox_visibility_on_focus),
 		"toolbox_reset_revision=%s" % str(_workspace_reset_revision),
 	]
-
-
-func handle_owner_focus_exited() -> void:
-	if _helper_pid <= 0 or not _toolbox_visible_requested:
-		_restore_toolbox_visibility_on_focus = false
-		return
-	_restore_toolbox_visibility_on_focus = true
-	_hide_toolbox()
-
-
-func handle_owner_focus_entered() -> void:
-	if not _restore_toolbox_visibility_on_focus:
-		return
-	_restore_toolbox_visibility_on_focus = false
-	if _helper_pid <= 0:
-		return
-	if _current_page != "demo" and _current_page != "challenge":
-		return
-	_show_toolbox()
 
 
 func stop_helper(force_kill: bool, current_page: String) -> void:
@@ -186,7 +165,6 @@ func stop_helper(force_kill: bool, current_page: String) -> void:
 	_workspace_block_json = {}
 	_context = ""
 	_toolbox_visible_requested = false
-	_restore_toolbox_visibility_on_focus = false
 	_demo_conversion_pending = false
 	_demo_conversion_requested_at_msec = 0
 	_practice_screen.set_toolbox_lock(false)
