@@ -221,6 +221,7 @@ func _on_bridge_started() -> void:
 	map_screen.set_bridge_running(true)
 	map_screen.set_note("Bridge started. Press Reset to fetch current state.")
 	response_text.text = "Bridge started. Click Reset to fetch current state."
+	_toolbox_controller.prewarm_helper()
 
 
 func _on_bridge_failed(message: String) -> void:
@@ -344,6 +345,12 @@ func _entry_status_text(profile_view: Dictionary) -> String:
 
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_toolbox_controller.handle_owner_focus_exited()
+		return
+	if what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_toolbox_controller.handle_owner_focus_entered()
+		return
 	if what == NOTIFICATION_PREDELETE:
 		_toolbox_controller.stop_helper(true, _current_page)
 

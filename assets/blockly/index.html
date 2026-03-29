@@ -264,6 +264,17 @@
 
         window.block2pythonConfigureToolbox = configureToolbox;
 
+        window.block2pythonResetWorkspace = function () {
+          if (!workspace) {
+            return false;
+          }
+          workspace.clear();
+          generatedPython = "";
+          serializedWorkspace = {};
+          reportStatus("Blockly workspace reset.");
+          return true;
+        };
+
         function defineCustomBlocks() {
           Blockly.defineBlocksWithJsonArray([
             {
