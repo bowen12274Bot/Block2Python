@@ -5,6 +5,9 @@ class NullToolboxController extends RefCounted:
 	func setup(_owner: Control, _demo_screen: Control, _practice_screen: Control) -> void:
 		pass
 
+	func prewarm_helper() -> void:
+		pass
+
 	func process_tick() -> void:
 		pass
 
@@ -399,7 +402,7 @@ func _notification(what: int) -> void:
 func _ensure_toolbox_controller() -> bool:
 	if _toolbox_controller != null:
 		return true
-	if FlowToolboxControllerScript != null and "new" in FlowToolboxControllerScript:
+	if FlowToolboxControllerScript != null:
 		_toolbox_controller = FlowToolboxControllerScript.new()
 	else:
 		_toolbox_controller = NullToolboxController.new()
