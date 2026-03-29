@@ -11,8 +11,11 @@ class WasmJudge(Judge):
     def __init__(self, runner: WasmRunner, *, fail_fast: bool = True) -> None:
         self._runner = runner
         self._fail_fast = fail_fast
+        self._warmup_done = False
 
     def judge(self, submission: Submission, level: LevelSpec) -> JudgeResult:
+        self._ensure_warmup(level)
+
         if not level.testcases:
             return JudgeResult(
                 status=JudgeStatus.AC,
@@ -63,6 +66,21 @@ class WasmJudge(Judge):
                 "executed_testcases": len(case_results),
             },
         )
+
+    def _ensure_warmup(self, level: LevelSpec) -> None:
+        if self._warmup_done:
+            return
+
+        # Warm up runtime once without memory cap so first-run init/JIT overhead
+        # does not get reported as a testcase MLE.
+        warmup_tl = max(1000, level.judge_policy.time_limit_ms)
+        _ = self._safe_execute(
+            "print(0)\n",
+            "",
+            time_limit_ms=warmup_tl,
+            memory_limit_kb=None,
+        )
+        self._warmup_done = True
 
     def _safe_execute(
         self,

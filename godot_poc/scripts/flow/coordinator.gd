@@ -8,7 +8,6 @@ const GameFlowFeedbackPresenterScript = preload("res://scripts/game_flow/present
 const GameFlowMapperScript = preload("res://scripts/game_flow/mappers/mapper.gd")
 const FlowPageRouterScript = preload("res://scripts/flow/page_router.gd")
 const FlowScreenPresenterScript = preload("res://scripts/flow/screen_presenter.gd")
-const FlowToolboxControllerScript = preload("res://scripts/flow/toolbox/toolbox_controller.gd")
 
 @onready var python_bridge_client = $PythonBridgeClient
 @onready var entry_screen = $EntryScreen
@@ -23,12 +22,12 @@ const FlowToolboxControllerScript = preload("res://scripts/flow/toolbox/toolbox_
 var _state_store: RefCounted
 var _current_page: String = "entry"
 var _toolbox_controller: RefCounted
+var _toolbox_init_failed: bool = false
 
 
 func _ready() -> void:
 	_state_store = BridgeStateStoreScript.new()
-	_toolbox_controller = FlowToolboxControllerScript.new()
-	_toolbox_controller.setup(self, demo_screen, practice_screen)
+	_ensure_toolbox_controller()
 
 	entry_screen.start_bridge_requested.connect(_on_start_bridge_requested)
 	entry_screen.reset_requested.connect(_on_reset_requested)
@@ -86,7 +85,10 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	_toolbox_controller.process_tick()
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox == null:
+		return
+	toolbox.process_tick()
 
 
 func _on_start_bridge_requested() -> void:
@@ -161,9 +163,10 @@ func _on_advance_requested() -> void:
 
 
 func _on_run_requested(python_code: String) -> void:
-	if _toolbox_controller.is_challenge_workspace_active():
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox != null and toolbox.is_challenge_workspace_active():
 		practice_screen.set_status("Status: running toolkit...")
-		python_bridge_client.send_verify_toolbox_level(_toolbox_controller.workspace_python_code(), _toolbox_controller.workspace_block_json())
+		python_bridge_client.send_verify_toolbox_level(toolbox.workspace_python_code(), toolbox.workspace_block_json())
 		return
 	practice_screen.set_status("Status: running code...")
 	python_bridge_client.send_run_level(python_code)
@@ -185,14 +188,22 @@ func _on_demo_advance_requested() -> void:
 
 
 func _on_demo_convert_requested() -> void:
-	_toolbox_controller.request_demo_convert()
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox == null:
+		demo_screen.set_status("Toolbox helper unavailable. Please restart this scene.")
+		return
+	toolbox.request_demo_convert()
 	var demo_view: Dictionary = _current_demo_view()
-	_toolbox_controller.ensure_demo_helper(demo_view)
+	toolbox.ensure_demo_helper(demo_view)
 
 
 func _on_open_toolbox_requested() -> void:
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox == null:
+		practice_screen.set_status("Toolbox helper unavailable. Please restart this scene.")
+		return
 	var practice_view: Dictionary = _current_practice_view()
-	_toolbox_controller.toggle_challenge_helper(practice_view, _current_page)
+	toolbox.toggle_challenge_helper(practice_view, _current_page)
 
 
 func _on_debug_toggled(debug_visible: bool) -> void:
@@ -241,7 +252,9 @@ func _apply_success_state(state: Dictionary, response: Dictionary) -> void:
 	FlowScreenPresenterScript.render_map_view(map_screen, map_view, state, view_model, can_open)
 	FlowScreenPresenterScript.render_flow_views(scene_screen, demo_screen, practice_screen, view_model, feedback_view)
 	scene_screen.set_can_go_back(bool(state.get("intro_completed", false)))
-	_toolbox_controller.apply_lock_state()
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox != null:
+		toolbox.apply_lock_state()
 	_append_debug_state(view_model)
 	_route_after_response(state)
 
@@ -263,7 +276,11 @@ func _append_debug_state(view_model: Dictionary) -> void:
 		"action_view.can_next=%s" % str(action_view.get("can_next", false)),
 		"focus_owner=%s" % focus_name,
 	]
-	debug_lines.append_array(_toolbox_controller.debug_state_lines())
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox != null:
+		debug_lines.append_array(toolbox.debug_state_lines())
+	else:
+		debug_lines.append("toolbox_controller=unavailable")
 	response_text.text += "\n" + "\n".join(debug_lines)
 
 
@@ -288,7 +305,9 @@ func _apply_error_response(response: Dictionary) -> void:
 func _apply_error_ui(map_status: String, map_note: String, feedback_title: String, feedback_body: String) -> void:
 	entry_screen.set_status(map_status)
 	FlowScreenPresenterScript.apply_error_ui(map_screen, scene_screen, demo_screen, practice_screen, map_status, map_note, feedback_title, feedback_body)
-	_toolbox_controller.apply_lock_state()
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox != null:
+		toolbox.apply_lock_state()
 	_show_page("entry")
 
 
@@ -300,7 +319,9 @@ func _show_page(page: String) -> void:
 	_current_page = page
 	FlowPageRouterScript.show_page(page, entry_screen, map_screen, scene_screen, demo_screen, practice_screen)
 	var demo_view: Dictionary = _current_demo_view()
-	_toolbox_controller.handle_page_changed(page, demo_view)
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox != null:
+		toolbox.handle_page_changed(page, demo_view)
 
 
 func _current_view_model() -> Dictionary:
@@ -330,5 +351,22 @@ func _entry_status_text(profile_view: Dictionary) -> String:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
-		_toolbox_controller.stop_helper(true, _current_page)
+		if _toolbox_controller != null:
+			_toolbox_controller.stop_helper(true, _current_page)
+
+
+func _ensure_toolbox_controller() -> RefCounted:
+	if _toolbox_controller != null:
+		return _toolbox_controller
+	if _toolbox_init_failed:
+		return null
+	if demo_screen == null or practice_screen == null:
+		return null
+	_toolbox_controller = FlowToolboxController.new()
+	if _toolbox_controller == null:
+		push_warning("Failed to instantiate FlowToolboxController")
+		_toolbox_init_failed = true
+		return null
+	_toolbox_controller.setup(self, demo_screen, practice_screen)
+	return _toolbox_controller
 

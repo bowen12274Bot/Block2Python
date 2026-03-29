@@ -39,6 +39,23 @@ class FakeRunner:
         return ExecutionResult(internal_error="runner setup failed", elapsed_ms=1)
 
 
+@dataclass
+class SpyRunner:
+    calls: list[tuple[int, int | None]]
+
+    def execute(
+        self,
+        python_code: str,
+        stdin_text: str,
+        *,
+        time_limit_ms: int,
+        memory_limit_kb: int | None = None,
+    ) -> ExecutionResult:
+        _ = (python_code, stdin_text)
+        self.calls.append((time_limit_ms, memory_limit_kb))
+        return ExecutionResult(stdout="3\n", stderr="", exit_code=0, elapsed_ms=5)
+
+
 @pytest.fixture
 def basic_level() -> LevelSpec:
     """Basic level spec with one testcase."""
@@ -170,3 +187,20 @@ class TestWasmJudge:
         judge = WasmJudge(FakeRunner("ac"))
         result = judge.judge(basic_submission, basic_level)
         assert result.elapsed_ms == 12
+
+    def test_warmup_runs_once_without_memory_limit(self, basic_submission: Submission, basic_level: LevelSpec):
+        calls: list[tuple[int, int | None]] = []
+        judge = WasmJudge(SpyRunner(calls))
+
+        first_result = judge.judge(basic_submission, basic_level)
+        second_result = judge.judge(basic_submission, basic_level)
+
+        assert first_result.status == JudgeStatus.AC
+        assert second_result.status == JudgeStatus.AC
+
+        # First invocation: warmup + one testcase execution
+        # Second invocation: one testcase execution only (warmup already done)
+        assert len(calls) == 3
+        assert calls[0][1] is None
+        assert calls[1][1] == basic_level.judge_policy.memory_limit_kb
+        assert calls[2][1] == basic_level.judge_policy.memory_limit_kb

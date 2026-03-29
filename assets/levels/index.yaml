@@ -59,3 +59,5 @@ levels:
     file: group-05-practice-04.yaml
   - id: group-05-practice-05
     file: group-05-practice-05.yaml
+  - id: group-05-bonus-signal-scan-01
+    file: group-05-bonus-signal-scan-01.yaml

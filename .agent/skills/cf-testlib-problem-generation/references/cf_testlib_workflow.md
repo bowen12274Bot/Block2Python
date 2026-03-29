@@ -5,8 +5,9 @@
 ## 建議資料夾結構
 
 ```text
-problem-name/
+tools/level/problem-name/
   statement.md
+  README.md
   solutions/
     solution.cpp
     brute.cpp
@@ -18,7 +19,14 @@ problem-name/
     samples/
     pretests/
     system/
+
+assets/levels/
+  index.yaml
+  <level-id>.yaml
+  cases/<level-id>/*.in|*.out
 ```
+
+`scaffold_problem.py` 會同時建立 `tools/level/<problem-name>/` 與 `assets/levels/<level-id>.yaml`。
 
 ## 常見角色分工
 

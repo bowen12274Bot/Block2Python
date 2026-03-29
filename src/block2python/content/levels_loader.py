@@ -64,6 +64,12 @@ def _load_level_file(level_path: Path) -> LevelSpec:
     if isinstance(md_raw, dict):
         metadata.update(md_raw)
 
+    teaching_skill_ids = _parse_skill_ids(raw.get("teaching_skill_ids"))
+    tutor_policy = _parse_tutor_policy(raw.get("tutor_policy"))
+    if not tutor_policy:
+        # Backward compatibility: allow policy to live under metadata.
+        tutor_policy = _parse_tutor_policy(metadata.get("tutor_policy"))
+
     analysis_policy = _analysis_policy_from_metadata(metadata)
     judge_policy = _judge_policy_from_raw(raw.get("judge_policy"))
 
@@ -84,6 +90,8 @@ def _load_level_file(level_path: Path) -> LevelSpec:
         analysis_policy=analysis_policy,
         block_schema_version=_opt_str(raw.get("block_schema_version")),
         metadata=metadata,
+        teaching_skill_ids=teaching_skill_ids,
+        tutor_policy=tutor_policy,
     )
 
 
@@ -97,12 +105,54 @@ def _opt_str(v: object) -> str | None:
 def _opt_int(v: object) -> int | None:
     if v is None:
         return None
+    if isinstance(v, bool):
+        return None
     if isinstance(v, int):
         return v
     try:
         return int(str(v))
     except ValueError:
         return None
+
+
+def _parse_skill_ids(raw: object) -> tuple[str, ...]:
+    if not isinstance(raw, list):
+        return ()
+
+    normalized: list[str] = []
+    for value in raw:
+        if not isinstance(value, (str, int)):
+            continue
+        parsed = str(value).strip()
+        if parsed:
+            normalized.append(parsed)
+    return tuple(normalized)
+
+
+def _parse_tutor_policy(raw: object) -> dict[str, Any]:
+    if not isinstance(raw, dict):
+        return {}
+
+    parsed: dict[str, Any] = {}
+
+    allow_full_solution = raw.get("allow_full_solution")
+    if isinstance(allow_full_solution, bool):
+        parsed["allow_full_solution"] = allow_full_solution
+
+    max_hint_steps = _opt_positive_int(raw.get("max_hint_steps"))
+    if max_hint_steps is not None:
+        parsed["max_hint_steps"] = max_hint_steps
+
+    response_tone = _opt_str(raw.get("response_tone"))
+    if response_tone is not None:
+        parsed["response_tone"] = response_tone
+
+    # Keep unknown keys for forward compatibility with future tutor settings.
+    for key, value in raw.items():
+        if key not in parsed:
+            parsed[key] = value
+
+    return parsed
 
 
 def _analysis_policy_from_metadata(metadata: dict[str, Any]) -> AnalysisPolicy:

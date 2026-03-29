@@ -7,6 +7,7 @@ level_ids:
   - group-05-practice-03
   - group-05-practice-04
   - group-05-practice-05
+  - group-05-bonus-signal-scan-01
 toolbox_policy_id: null
 battery_policy_id: null
 metadata:
