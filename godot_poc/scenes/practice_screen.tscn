@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://coov7yx2cek4w"]
 
-[ext_resource type="Script" uid="uid://b6ifa4143whak" path="res://scripts/game_flow/practice_screen.gd" id="1_screen"]
-[ext_resource type="Script" uid="uid://c7kk7l42csuep" path="res://scripts/game_flow/practice_panel.gd" id="2_practice"]
-[ext_resource type="Script" uid="uid://dxq6acgmm6ha5" path="res://scripts/game_flow/feedback_panel.gd" id="3_feedback"]
+[ext_resource type="Script" uid="uid://b6ifa4143whak" path="res://scripts/game_flow/ui/practice_screen.gd" id="1_screen"]
+[ext_resource type="Script" uid="uid://c7kk7l42csuep" path="res://scripts/game_flow/ui/practice_panel.gd" id="2_practice"]
+[ext_resource type="Script" uid="uid://dxq6acgmm6ha5" path="res://scripts/game_flow/ui/feedback_panel.gd" id="3_feedback"]
 
 [node name="PracticeScreen" type="Control" unique_id=187145670]
 custom_minimum_size = Vector2(1200, 720)

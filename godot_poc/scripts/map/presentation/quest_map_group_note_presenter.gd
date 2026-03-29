@@ -1,5 +1,5 @@
 extends RefCounted
-class_name QuestMapSelectionPresenter
+class_name QuestMapGroupNotePresenter
 
 
 static func build_group_selection_note(group_view: Dictionary) -> String:
@@ -27,9 +27,6 @@ static func build_group_selection_note(group_view: Dictionary) -> String:
 
 	return "\n\n".join(lines)
 
-
-static func build_node_selection_note(node_id: String) -> String:
-	return "Selected quest node: %s\n\nLegacy node cards are being phased out. Route steps on the map are now driven by bridge map_route data." % node_id
 
 
 static func _append_slot_note(lines: Array[String], slot_variant: Variant) -> void:
@@ -59,3 +56,4 @@ static func _append_slot_note(lines: Array[String], slot_variant: Variant) -> vo
 			if level_variant is Dictionary:
 				practice_labels.append("%s[%s]" % [str(level_variant.get("title", "Level")), str(level_variant.get("status_label", "Unknown"))])
 		lines.append("Practice Levels: %s" % ", ".join(practice_labels))
+

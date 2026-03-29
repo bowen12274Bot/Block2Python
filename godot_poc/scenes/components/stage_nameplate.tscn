@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bcwmeao5smhjp"]
 
-[ext_resource type="Script" uid="uid://bj3abwe3wci04" path="res://scripts/map/stage_nameplate.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bj3abwe3wci04" path="res://scripts/map/ui/stage_nameplate.gd" id="1_script"]
 [ext_resource type="Shader" uid="uid://by3rh3xkue47j" path="res://art/shaders/stage_number_glow.gdshader" id="2_shader"]
 [ext_resource type="FontFile" uid="uid://chorfjnqa8soa" path="res://art/fonts/Orbitron-Bold.ttf" id="3_orbitron"]
 
@@ -64,3 +64,4 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "Class Cosmos"
 vertical_alignment = 1
+

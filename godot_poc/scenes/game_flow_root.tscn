@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dskg80y72mljl"]
 
-[ext_resource type="Script" uid="uid://eyltd6ulqlee" path="res://scripts/flow/game_flow_coordinator.gd" id="1_coordinator"]
+[ext_resource type="Script" uid="uid://eyltd6ulqlee" path="res://scripts/flow/coordinator.gd" id="1_coordinator"]
 [ext_resource type="Script" uid="uid://be4rumigoj50q" path="res://scripts/bridge/python_bridge_client.gd" id="2_bridge"]
 [ext_resource type="PackedScene" uid="uid://da3jf818oj6yx" path="res://scenes/entry_screen.tscn" id="3_entry"]
 [ext_resource type="PackedScene" path="res://scenes/quest_map_screen.tscn" id="4_map"]
@@ -77,3 +77,4 @@ text = "Debug Response"
 custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 text = "No response yet."
+

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://brmx56qw0wbp"]
 
-[ext_resource type="Script" uid="uid://e20g12utnyq3" path="res://scripts/game_flow/scene_flow_screen.gd" id="1_screen"]
-[ext_resource type="Script" uid="uid://beqmnxxe2x13n" path="res://scripts/game_flow/scene_panel.gd" id="2_scene"]
+[ext_resource type="Script" uid="uid://e20g12utnyq3" path="res://scripts/game_flow/ui/scene_flow_screen.gd" id="1_screen"]
+[ext_resource type="Script" uid="uid://beqmnxxe2x13n" path="res://scripts/game_flow/ui/scene_panel.gd" id="2_scene"]
 [ext_resource type="Texture2D" uid="uid://rdia7fx0cq3x" path="res://art/story/backgrounds/scene_00/scene_00_normal_city.png" id="3_bg_scene_00"]
 [ext_resource type="Texture2D" uid="uid://dyyxyyhamwcup" path="res://art/story/backgrounds/scene_01/scene_01_broken_io.png" id="4_bg_scene_01"]
 [ext_resource type="Texture2D" uid="uid://gpplwhqpuuj8" path="res://art/story/backgrounds/scene_02/scene_02_memory_loss.png" id="5_bg_scene_02"]

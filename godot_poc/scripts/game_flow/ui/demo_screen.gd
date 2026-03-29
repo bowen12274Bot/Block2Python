@@ -3,6 +3,7 @@ class_name DemoScreen
 
 const EMPTY_PREVIEW_TEXT := "No Python preview yet. Add blocks to the workspace, then click Convert Python."
 const EMPTY_WORKSPACE_TEXT := "Blockly workspace will attach here when the demo page is active."
+const UnlockBlockListRendererScript = preload("res://scripts/shared/unlock_block_list_renderer.gd")
 
 signal convert_requested()
 signal advance_requested()
@@ -110,45 +111,25 @@ func get_workspace_target_control() -> Control:
 	return workspace_surface
 
 func _populate_unlock_blocks(demo_view: Dictionary) -> void:
-	for child in unlock_blocks_container.get_children():
-		child.queue_free()
-
-	var unlock_blocks_variant: Variant = demo_view.get("unlock_blocks", [])
-	if not (unlock_blocks_variant is Array) or unlock_blocks_variant.is_empty():
-		var empty_label := Label.new()
-		empty_label.text = "No new blocks for this demo yet."
-		empty_label.modulate = Color(0.72, 0.76, 0.85, 0.84)
-		unlock_blocks_container.add_child(empty_label)
-		return
-
-	for block_variant in unlock_blocks_variant:
-		if not (block_variant is Dictionary):
-			continue
-		var block_dict: Dictionary = block_variant
-		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(0, 52)
-		card.modulate = Color(0.9, 0.96, 1.0, 0.92)
-		var margin := MarginContainer.new()
-		margin.add_theme_constant_override("margin_left", 12)
-		margin.add_theme_constant_override("margin_top", 8)
-		margin.add_theme_constant_override("margin_right", 12)
-		margin.add_theme_constant_override("margin_bottom", 8)
-		card.add_child(margin)
-		var root := VBoxContainer.new()
-		root.add_theme_constant_override("separation", 3)
-		margin.add_child(root)
-		var title := Label.new()
-		title.text = str(block_dict.get("title", "Block"))
-		title.add_theme_font_size_override("font_size", 15)
-		title.modulate = Color(0.88, 0.92, 1.0, 0.92)
-		root.add_child(title)
-		var description := Label.new()
-		description.text = str(block_dict.get("description", ""))
-		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		description.modulate = Color(0.72, 0.76, 0.85, 0.9)
-		description.add_theme_font_size_override("font_size", 13)
-		root.add_child(description)
-		unlock_blocks_container.add_child(card)
+	UnlockBlockListRendererScript.render(
+		unlock_blocks_container,
+		demo_view.get("unlock_blocks", []),
+		{
+			"empty_text": "No new blocks for this demo yet.",
+			"empty_modulate": Color(0.72, 0.76, 0.85, 0.84),
+			"card_minimum_size": Vector2(0, 52),
+			"card_modulate": Color(0.9, 0.96, 1.0, 0.92),
+			"margin_left": 12,
+			"margin_top": 8,
+			"margin_right": 12,
+			"margin_bottom": 8,
+			"column_separation": 3,
+			"title_font_size": 15,
+			"title_modulate": Color(0.88, 0.92, 1.0, 0.92),
+			"body_font_size": 13,
+			"body_modulate": Color(0.72, 0.76, 0.85, 0.9),
+		}
+	)
 
 func _on_convert_button_pressed() -> void:
 	status_label.text = "Status: converting blocks to Python..."

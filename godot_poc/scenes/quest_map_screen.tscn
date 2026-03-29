@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://dq7spdgo201ok"]
 
-[ext_resource type="Script" uid="uid://c8slj06v84bni" path="res://scripts/map/quest_map_screen.gd" id="1_screen"]
+[ext_resource type="Script" uid="uid://c8slj06v84bni" path="res://scripts/map/ui/quest_map_screen.gd" id="1_screen"]
 [ext_resource type="Texture2D" uid="uid://c4fad12ucxsqj" path="res://art/map/main_map_background.png" id="3_bfiii"]
-[ext_resource type="Script" uid="uid://kr3awo7su5ce" path="res://scripts/map/quest_map_stage.gd" id="3_stage"]
+[ext_resource type="Script" uid="uid://kr3awo7su5ce" path="res://scripts/map/ui/quest_map_stage.gd" id="3_stage"]
 [ext_resource type="Texture2D" uid="uid://b8u2m2uvdjjxk" path="res://art/map/stages/floating_islands1.png" id="4_i8k62"]
 [ext_resource type="Texture2D" uid="uid://duv8r0cnsnh7p" path="res://art/map/icons/lock.png" id="5_cnc8n"]
 [ext_resource type="Texture2D" uid="uid://dxjcvbsgt1erp" path="res://art/map/stages/floating_islands2.png" id="5_tq048"]
@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://c7b4ptflyqmvg" path="res://art/map/decor/floating_island_decor_03.png" id="8_ekp7g"]
 [ext_resource type="Texture2D" uid="uid://bwepxlws31x7k" path="res://art/map/stages/Final_Castle1.png" id="8_fqf2m"]
 [ext_resource type="Texture2D" uid="uid://b07grtrfr2md2" path="res://art/map/decor/cloud_04.png" id="9_j2spx"]
-[ext_resource type="Script" uid="uid://bj3abwe3wci04" path="res://scripts/map/stage_nameplate.gd" id="9_nameplate_script"]
+[ext_resource type="Script" uid="uid://bj3abwe3wci04" path="res://scripts/map/ui/stage_nameplate.gd" id="9_nameplate_script"]
 [ext_resource type="Shader" uid="uid://by3rh3xkue47j" path="res://art/shaders/stage_number_glow.gdshader" id="10_nameplate_shader"]
 [ext_resource type="Texture2D" uid="uid://btd4ucsbqila6" path="res://art/map/decor/cloud_06.png" id="11_ijtf8"]
 [ext_resource type="FontFile" uid="uid://chorfjnqa8soa" path="res://art/fonts/Orbitron-Bold.ttf" id="11_nameplate_font"]
@@ -24,6 +24,7 @@
 [ext_resource type="Texture2D" uid="uid://dli83vtb1v0ra" path="res://art/map/decor/floating_island_decor_02.png" id="14_decor_island_02"]
 [ext_resource type="Texture2D" uid="uid://d3317bd147cn6" path="res://art/map/decor/cloud_01.png" id="15_decor_cloud_01"]
 [ext_resource type="Texture2D" uid="uid://o5y5k2ud80vq" path="res://art/map/decor/cloud_02.png" id="16_decor_cloud_02"]
+[ext_resource type="Script" path="res://scripts/map/ui/quest_map_stage_overlay.gd" id="17_stage_overlay"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nameplate_root"]
 
@@ -1182,6 +1183,7 @@ layout_mode = 2
 text = "Status: idle"
 
 [node name="StageOverlay" type="Control" parent="." unique_id=2120929880]
+script = ExtResource("17_stage_overlay")
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -1285,3 +1287,4 @@ text = "Start Demo"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Practice"
+

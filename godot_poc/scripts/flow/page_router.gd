@@ -1,5 +1,5 @@
 extends RefCounted
-class_name GameFlowPageRouter
+class_name FlowPageRouter
 
 static func resolved_page_for_state(state: Dictionary) -> String:
 	if not has_created_profile(state):
@@ -54,3 +54,5 @@ static func has_practice_payload(state: Dictionary) -> bool:
 		var practice_dict: Dictionary = practice_value
 		return not practice_dict.is_empty()
 	return false
+
+
