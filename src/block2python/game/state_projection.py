@@ -191,7 +191,7 @@ def _build_practice_state(
         can_submit=can_submit,
         can_next=can_next,
         mission_text=level.prompt,
-        battery_percent=_battery_percent(session, level.level_id),
+        battery_percent=session.current_practice_battery_percent(group_id),
         battery_threshold_percent=80,
         assistant_messages=_assistant_messages(session, level, toolbox_allowed, can_next),
         current_level_id=level.level_id,
@@ -206,14 +206,6 @@ def _practice_progress(challenge: ResolvedChallengeSpec, level: LevelSpec) -> tu
         if challenge_level.level_id == level.level_id:
             return index, total
     return 0, total
-
-
-def _battery_percent(session: GameSession, level_id: str) -> int:
-    if session.app.is_cleared(level_id):
-        return 100
-    if level_id in session.toolbox_used_level_ids:
-        return 80
-    return 60
 
 
 def _assistant_messages(session: GameSession, level: LevelSpec, toolbox_allowed: bool, can_next: bool) -> tuple[str, ...]:

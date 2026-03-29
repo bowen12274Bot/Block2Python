@@ -8,7 +8,13 @@ from .challenge_selection import ChallengeSelectionMixin
 from .map_route_projection import MapRouteProjectionMixin
 from .practice_review import PracticeReviewMixin
 from .scene_progress_projection import SceneProgressProjectionMixin
-from .session_models import GameSessionError, GameSessionState, GroupRuntimeState, SessionMode
+from .session_models import (
+    GameSessionError,
+    GameSessionState,
+    GroupRuntimeState,
+    PracticeBatteryState,
+    SessionMode,
+)
 from .session_state_resolution import SessionStateResolutionMixin
 from .state_projection import build_game_state
 
@@ -36,6 +42,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
     intro_completed: bool = False
     active_practice_level_id_override: str | None = None
     next_enabled_level_id: str | None = None
+    practice_battery_state: PracticeBatteryState | None = None
 
     @classmethod
     def start(cls, *, app: AppCore, game_slice: AssembledGameSlice, quest_id: str) -> GameSession:
@@ -190,6 +197,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             raise GameSessionError(f"Group {group_id} has no practice entry node")
 
         self._jump_to_node(target_node_id)
+        self._start_practice_battery_run(group_id)
         return self.current_state()
 
     def run_current_level(self, *, python_code: str, block_json: dict | None = None) -> tuple[GameSessionState, SubmitOutcome]:
@@ -245,6 +253,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         if outcome.cleared:
             self.active_practice_level_id_override = state.current_level_id
             self.next_enabled_level_id = state.current_level_id
+            self._award_practice_battery_for_level(state.current_level_id)
         else:
             self.next_enabled_level_id = None
         self.last_submission = self._build_feedback(
@@ -316,7 +325,36 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
 
         next_level_id = self._next_uncleared_level_id(runtime_state.challenge, state.current_level_id)
         self.active_practice_level_id_override = next_level_id
+        if next_level_id is None:
+            self._reset_practice_battery_run()
         return self.current_state()
+
+    def _start_practice_battery_run(self, group_id: str) -> None:
+        self.practice_battery_state = PracticeBatteryState(group_id=group_id)
+
+    def _reset_practice_battery_run(self) -> None:
+        self.practice_battery_state = None
+
+    def current_practice_battery_percent(self, group_id: str | None) -> int:
+        if group_id is None:
+            return 0
+        if self.practice_battery_state is None:
+            return 0
+        if self.practice_battery_state.group_id != group_id:
+            return 0
+        return self.practice_battery_state.battery_percent
+
+    def _award_practice_battery_for_level(self, level_id: str) -> None:
+        group_id = self._group_id_for_level_id(level_id)
+        if group_id is None:
+            return
+        if self.practice_battery_state is None or self.practice_battery_state.group_id != group_id:
+            self._start_practice_battery_run(group_id)
+        assert self.practice_battery_state is not None
+        if level_id in self.practice_battery_state.awarded_level_ids:
+            return
+        self.practice_battery_state.awarded_level_ids.add(level_id)
+        self.practice_battery_state.battery_percent = min(100, self.practice_battery_state.battery_percent + 20)
 
     def _next_uncleared_level_id(self, challenge, current_level_id: str) -> str | None:
         current_index = -1
@@ -440,6 +478,9 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             raise GameSessionError("opening intro must be completed before entering main flow")
 
     def _jump_to_node(self, node_id: str) -> None:
+        state = self.current_state()
+        if state.mode is SessionMode.CHALLENGE:
+            self._reset_practice_battery_run()
         if node_id not in self.runtime.quest.node_ids:
             raise GameSessionError(f"Node {node_id} is not part of quest {self.runtime.quest.quest_id}")
         self.runtime.current_node_id = node_id

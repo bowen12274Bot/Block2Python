@@ -107,6 +107,7 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.practice is not None
     assert contract_state.practice.challenge_id == "challenge-group-01-practice"
     assert contract_state.practice.current_level_id == "group-01-practice-01"
+    assert contract_state.practice.battery_percent == 0
     assert contract_state.practice.progress_current == 1
     assert contract_state.practice.progress_total == 5
     assert contract_state.practice.toolbox_allowed is True
@@ -130,6 +131,7 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.practice is not None
     assert contract_state.practice.challenge_id == "challenge-group-01-practice"
     assert contract_state.practice.current_level_id == "group-01-practice-01"
+    assert contract_state.practice.battery_percent == 20
     assert contract_state.practice.progress_current == 1
     assert contract_state.practice.toolbox_used is False
     assert contract_state.practice.can_next is True
@@ -286,6 +288,7 @@ def test_game_session_start_group_practice_jumps_to_challenge() -> None:
     assert contract_state.practice is not None
     assert contract_state.practice.challenge_id == "challenge-group-01-practice"
     assert contract_state.practice.current_level_id == "group-01-practice-01"
+    assert contract_state.practice.battery_percent == 0
 
 
 
@@ -700,6 +703,139 @@ def test_python_run_with_empty_output_keeps_output_text_empty() -> None:
     assert contract_state.last_submission is not None
     assert contract_state.last_submission.kind == "run_result"
     assert contract_state.last_submission.output_text == ""
+
+
+def test_practice_battery_starts_at_zero_and_accumulates_per_submit() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 0
+
+    expected = (
+        ("group-01-practice-01", 20),
+        ("group-01-practice-02", 40),
+        ("group-01-practice-03", 60),
+        ("group-01-practice-04", 80),
+        ("group-01-practice-05", 100),
+    )
+    for level_id, battery_percent in expected:
+        state, outcome = session.submit_current_level(python_code="print(1)")
+        assert outcome.cleared is True
+        assert state.current_level_id == level_id
+
+        contract_state = session.current_game_state()
+        assert contract_state.practice is not None
+        assert contract_state.practice.battery_percent == battery_percent
+
+        if level_id != "group-01-practice-05":
+            state = session.next_practice_level()
+            assert state.current_level_id is not None
+            contract_state = session.current_game_state()
+            assert contract_state.practice is not None
+            assert contract_state.practice.battery_percent == battery_percent
+
+
+def test_practice_battery_does_not_double_count_repeated_successful_submit() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    state, outcome = session.submit_current_level(python_code="print(1)")
+    assert outcome.cleared is True
+    assert state.current_level_id == "group-01-practice-01"
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 20
+
+    state, outcome = session.submit_current_level(python_code="print(1)")
+    assert outcome.cleared is True
+    assert state.current_level_id == "group-01-practice-01"
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 20
+
+
+def test_practice_battery_failed_submit_does_not_change_battery() -> None:
+    levels = load_levels(load_levels_dir())
+    levels["group-01-practice-01"].metadata["stub_judge"] = {"status": "WA"}
+    app = AppCore(levels, judge=StubJudge())
+    assembled = assemble_game_slice(game_content=load_game_content(game_content_dir()), levels=levels)
+    session = GameSession.start(app=app, game_slice=assembled, quest_id="quest-main-map")
+    session.create_player_profile(name="Test Player", gender="male")
+    session.complete_intro()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    state, outcome = session.submit_current_level(python_code="print(1)")
+    assert outcome.cleared is False
+    assert state.current_level_id == "group-01-practice-01"
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 0
+
+
+def test_toolbox_verification_does_not_change_practice_battery() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    session.verify_current_level_with_toolbox(
+        python_code="name = input()\nprint(f\"Hello, {name}\")\n",
+        block_json={"kind": "toolbox_workspace", "blocks": [{"type": "print_expr", "expr": "Hello"}]},
+    )
+
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 0
+
+    state, outcome = session.submit_current_level(python_code="name = input()\nprint(f\"Hello, {name}\")\n")
+    assert outcome.cleared is True
+    assert state.current_level_id == "group-01-practice-01"
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 20
+
+
+def test_practice_battery_resets_after_leaving_incomplete_practice() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    session.submit_current_level(python_code="print(1)")
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 20
+
+    session.start_group_story("group-01")
+    state = session.start_group_practice("group-01")
+    assert state.current_level_id == "group-01-practice-02"
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 0
+
+
+def test_practice_battery_resets_when_restarting_completed_group_practice() -> None:
+    session = build_session()
+
+    _progress_until(session, lambda state: state.node_id == "group-01-result")
+    contract_state = session.current_game_state()
+    assert contract_state.mode is GameMode.SCENE
+    assert contract_state.node_id == "group-01-result"
+
+    session.advance()
+    state = session.start_group_practice("group-01")
+    assert state.current_level_id == "group-01-practice-01"
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 0
 
 
 def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
