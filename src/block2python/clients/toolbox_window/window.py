@@ -15,6 +15,11 @@ try:
 except ModuleNotFoundError as e:  # pragma: no cover
     raise RuntimeError("PySide6 is required to use the toolbox window.") from e
 
+try:
+    _user32 = ctypes.windll.user32
+except AttributeError:  # pragma: no cover
+    _user32 = None
+
 
 class ToolboxWindow(QWidget):
     def __init__(self, level_id: str, result_file: Path, html_path: Path, layout_file: Path) -> None:
@@ -94,6 +99,10 @@ class ToolboxWindow(QWidget):
             self.hide()
             self._last_layout_signature = None
             return
+        if not self._should_show_for_foreground(raw):
+            self.hide()
+            self._last_layout_signature = None
+            return
 
         target_rect = compute_target_rect(raw)
         if target_rect is None:
@@ -133,6 +142,22 @@ class ToolboxWindow(QWidget):
             return
         self._last_reset_token = reset_token
         self._blockly.clear_workspace()
+
+    def _should_show_for_foreground(self, raw: dict) -> bool:
+        if _user32 is None:
+            return True
+        foreground_hwnd = int(_user32.GetForegroundWindow())
+        if foreground_hwnd <= 0:
+            return True
+        owner_hwnd = int(raw.get("owner_hwnd", 0))
+        self_hwnd = int(self.winId())
+        if foreground_hwnd in {owner_hwnd, self_hwnd}:
+            return True
+        if owner_hwnd and bool(_user32.IsChild(owner_hwnd, foreground_hwnd)):
+            return True
+        if self_hwnd and bool(_user32.IsChild(self_hwnd, foreground_hwnd)):
+            return True
+        return False
 
     def _on_blockly_output(self, output: BlocklyOutput) -> None:
         self._write_result(

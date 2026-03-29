@@ -107,6 +107,8 @@ func set_toolbox_lock(active: bool, status_message: String = "") -> void:
 func focus_code_editor() -> void:
 	if _toolbox_locked:
 		return
+	if not is_inside_tree():
+		return
 	practice_panel.focus_code_input()
 
 func _apply_toolbox_lock_state() -> void:
