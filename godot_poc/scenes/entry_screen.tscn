@@ -30,7 +30,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.0784314, 0.0941176, 0.188235, 1)
+color = Color(0.0784314, 0.0941176, 0.188235, 0.18)
 
 [node name="BackgroundTexture" type="TextureRect" parent="BackgroundLayer" unique_id=894842859]
 layout_mode = 1
@@ -44,6 +44,7 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="BackgroundAccent" type="ColorRect" parent="BackgroundLayer" unique_id=404932197]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -114,9 +115,9 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 28.0
+offset_left = 40.0
 offset_top = 24.0
-offset_right = -28.0
+offset_right = -40.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -130,11 +131,11 @@ size_flags_vertical = 4
 custom_minimum_size = Vector2(680, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="HeaderLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1204420168]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 alignment = 1
 
 [node name="TitleLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/HeaderLayer" unique_id=710312950]
@@ -145,13 +146,14 @@ horizontal_alignment = 1
 
 [node name="SubtitleLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/HeaderLayer" unique_id=533115205]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Build the entry-page art here. This layout is a placeholder shell for your future visuals."
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="CharacterSelectLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=714671000]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="CharacterLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer" unique_id=1313737307]
 layout_mode = 2
@@ -164,7 +166,7 @@ theme_override_constants/separation = 16
 alignment = 1
 
 [node name="MaleCard" type="PanelContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow" unique_id=116648761]
-custom_minimum_size = Vector2(232, 320)
+custom_minimum_size = Vector2(252, 320)
 layout_mode = 2
 size_flags_horizontal = 4
 clip_contents = true
@@ -181,7 +183,7 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="MaleArtSlot" type="TextureRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/MaleCard/MaleCardMargin/MaleCardRoot" unique_id=1347957922]
-custom_minimum_size = Vector2(0, 272)
+custom_minimum_size = Vector2(0, 250)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -203,7 +205,7 @@ button_group = SubResource("ButtonGroup_gender")
 text = "Male"
 
 [node name="FemaleCard" type="PanelContainer" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow" unique_id=421620834]
-custom_minimum_size = Vector2(232, 320)
+custom_minimum_size = Vector2(252, 320)
 layout_mode = 2
 size_flags_horizontal = 4
 clip_contents = true
@@ -220,7 +222,7 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="FemaleArtSlot" type="TextureRect" parent="ContentLayer/ContentCenter/ContentStack/CharacterSelectLayer/CharacterRow/FemaleCard/FemaleCardMargin/FemaleCardRoot" unique_id=1627057494]
-custom_minimum_size = Vector2(0, 272)
+custom_minimum_size = Vector2(0, 250)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -243,7 +245,7 @@ text = "Female"
 
 [node name="NameInputLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1424255274]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 4
 
 [node name="NameLabel" type="Label" parent="ContentLayer/ContentCenter/ContentStack/NameInputLayer" unique_id=1731397882]
 layout_mode = 2
@@ -256,7 +258,7 @@ placeholder_text = "Enter your player name"
 
 [node name="ActionLayer" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack" unique_id=1405899763]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="CreateButton" type="Button" parent="ContentLayer/ContentCenter/ContentStack/ActionLayer" unique_id=1284610651]
 custom_minimum_size = Vector2(0, 44)
@@ -268,10 +270,10 @@ layout_mode = 2
 
 [node name="StatusMargin" type="MarginContainer" parent="ContentLayer/ContentCenter/ContentStack/StatusLayer" unique_id=1105012674]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
 
 [node name="StatusStack" type="VBoxContainer" parent="ContentLayer/ContentCenter/ContentStack/StatusLayer/StatusMargin" unique_id=1344280146]
 layout_mode = 2
