@@ -211,6 +211,7 @@ def test_dispatch_start_group_demo_opens_demo_mode() -> None:
     assert state.demo is not None
     assert state.demo.demo_id == "challenge-group-01-demo"
     assert state.demo.current_level_id == "group-01-demo"
+    assert state.demo.toolbox_block_ids == ("text_print", "b2p_input_text")
     assert state.practice is None
     assert state.progress.demo_seen_group_ids == ("group-01",)
 

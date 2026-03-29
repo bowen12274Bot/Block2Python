@@ -31,6 +31,7 @@ def _serialize_practice_payload(practice) -> dict[str, object]:
         "is_review_mode": practice.is_review_mode,
         "toolbox_allowed": practice.toolbox_allowed,
         "toolbox_used": practice.toolbox_used,
+        "toolbox_block_ids": list(practice.toolbox_block_ids),
         "can_run": practice.can_run,
         "can_submit": practice.can_submit,
         "can_next": practice.can_next,
@@ -85,6 +86,7 @@ def serialize_game_state(state: GameState) -> dict[str, object]:
             "body": state.demo.body,
             "current_level_id": state.demo.current_level_id,
             "unlock_blocks": [dict(block) for block in state.demo.unlock_blocks],
+            "toolbox_block_ids": list(state.demo.toolbox_block_ids),
         }
 
     practice = None

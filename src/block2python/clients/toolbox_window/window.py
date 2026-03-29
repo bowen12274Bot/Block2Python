@@ -25,6 +25,7 @@ class ToolboxWindow(QWidget):
         self._layout_file = layout_file
         self._closed_written = False
         self._last_layout_signature: tuple[int, int, int, int, bool] | None = None
+        self._last_toolbox_block_ids: tuple[str, ...] | None = None
 
         self.setWindowTitle("Logic Toolbox")
         self.setWindowFlag(Qt.WindowType.Tool, True)
@@ -85,6 +86,7 @@ class ToolboxWindow(QWidget):
             return
         if str(raw.get("level_id", "")) not in {"", self._level_id}:
             return
+        self._sync_toolbox_block_ids(raw)
         if not bool(raw.get("visible", False)):
             self.hide()
             self._last_layout_signature = None
@@ -109,6 +111,16 @@ class ToolboxWindow(QWidget):
         else:
             self.setFixedSize(move_width, move_height)
             self.move(x, y)
+
+    def _sync_toolbox_block_ids(self, raw: dict) -> None:
+        raw_block_ids = raw.get("toolbox_block_ids", None)
+        if not isinstance(raw_block_ids, list):
+            return
+        block_ids = tuple(str(block_id) for block_id in raw_block_ids)
+        if block_ids == self._last_toolbox_block_ids:
+            return
+        self._last_toolbox_block_ids = block_ids
+        self._blockly.set_toolbox_block_ids(block_ids)
 
     def _on_blockly_output(self, output: BlocklyOutput) -> None:
         self._write_result(

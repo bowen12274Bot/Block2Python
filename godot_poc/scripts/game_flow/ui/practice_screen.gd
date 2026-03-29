@@ -31,6 +31,7 @@ var _base_can_next: bool = false
 var _base_can_open_toolbox: bool = false
 var _base_code_editable: bool = false
 var _toolbox_locked: bool = false
+var _current_view: Dictionary = {}
 var _toolbox_status_message: String = ""
 
 func _ready() -> void:
@@ -45,6 +46,7 @@ func initialize(default_code: String) -> void:
 	practice_panel.initialize(default_code)
 
 func show_practice(practice_view: Dictionary) -> void:
+	_current_view = practice_view.duplicate(true)
 	_base_code_editable = bool(practice_view.get("code_editable", false))
 	_base_can_open_toolbox = bool(practice_view.get("toolbox_allowed", false))
 	_base_can_run = bool(practice_view.get("can_run", false))
@@ -60,6 +62,9 @@ func show_practice(practice_view: Dictionary) -> void:
 	toolkit_hint.text = str(practice_view.get("toolkit_hint", "Open the toolkit when you need help exploring a block-based solution."))
 	practice_panel.show_practice(practice_view)
 	_apply_toolbox_lock_state()
+
+func current_view() -> Dictionary:
+	return _current_view.duplicate(true)
 
 func show_feedback(feedback_view: Dictionary) -> void:
 	feedback_panel.show_feedback(feedback_view)

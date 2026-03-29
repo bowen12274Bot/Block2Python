@@ -7,7 +7,7 @@ level_ids:
   - group-03-practice-03
   - group-03-practice-04
   - group-03-practice-05
-toolbox_policy_id: null
+toolbox_policy_id: toolbox-group-03
 battery_policy_id: null
 metadata:
   stage: if-canyon

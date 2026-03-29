@@ -344,6 +344,51 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             return 0
         return self.practice_battery_state.battery_percent
 
+    def current_toolbox_block_ids(self) -> tuple[str, ...]:
+        return self._toolbox_block_ids_for_group(self.current_highest_toolbox_group_id())
+
+    def current_highest_toolbox_group_id(self) -> str:
+        route_spec = self._route_spec_for_current_quest()
+        if route_spec is None or not route_spec.groups:
+            return "group-01"
+
+        current_group_id = self._current_mainline_group_id()
+        if current_group_id is not None:
+            return current_group_id
+
+        highest_completed_group_id: str | None = None
+        for group in route_spec.groups:
+            runtime_group = self.group_runtime_states.get(group.group_id)
+            if runtime_group is None:
+                continue
+            if runtime_group.completed or runtime_group.practice_reviewing:
+                highest_completed_group_id = group.group_id
+        if highest_completed_group_id is not None:
+            return highest_completed_group_id
+
+        return route_spec.groups[0].group_id
+
+    def _toolbox_block_ids_for_group(self, group_id: str | None) -> tuple[str, ...]:
+        resolved_group_id = group_id or "group-01"
+        challenge = self._practice_challenge_for_group_id(resolved_group_id)
+        if challenge is not None and challenge.toolbox_policy is not None:
+            return challenge.toolbox_policy.unlocked_block_ids
+        if resolved_group_id != "group-01":
+            fallback_challenge = self._practice_challenge_for_group_id("group-01")
+            if fallback_challenge is not None and fallback_challenge.toolbox_policy is not None:
+                return fallback_challenge.toolbox_policy.unlocked_block_ids
+        return ()
+
+    def _practice_challenge_for_group_id(self, group_id: str):
+        group = self._route_group(group_id)
+        if group is None:
+            return None
+        for step in group.practice_route:
+            if step.challenge_id is None:
+                continue
+            return self.runtime.game_slice.challenges.get(step.challenge_id)
+        return None
+
     def current_practice_toolbox_penalty_percent(self, group_id: str | None) -> int | None:
         if group_id is None:
             return None

@@ -75,6 +75,7 @@ class DemoState:
     body: str = ""
     current_level_id: str | None = None
     unlock_blocks: tuple[dict[str, str], ...] = ()
+    toolbox_block_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,6 +91,7 @@ class PracticeState:
     is_review_mode: bool = False
     toolbox_allowed: bool = False
     toolbox_used: bool = False
+    toolbox_block_ids: tuple[str, ...] = ()
     can_run: bool = False
     can_submit: bool = False
     can_next: bool = False

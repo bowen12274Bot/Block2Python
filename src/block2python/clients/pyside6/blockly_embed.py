@@ -40,10 +40,12 @@ class BlocklyEmbed(QWebEngineView):
         self._bridge = BlocklyBridge()
         self._bridge.output_received.connect(self._on_output_received)
         self._bridge.message_received.connect(self._on_message_received)
+        self._pending_toolbox_block_ids: tuple[str, ...] | None = None
 
         channel = QWebChannel(self.page())
         channel.registerObject("bridge", self._bridge)
         self.page().setWebChannel(channel)
+        self.loadFinished.connect(self._on_load_finished)
 
     def load_placeholder(self, html_path: Path) -> None:
         self.setUrl(QUrl.fromLocalFile(str(html_path.resolve())))
@@ -52,6 +54,10 @@ class BlocklyEmbed(QWebEngineView):
         self.page().runJavaScript(
             "window.block2pythonSendOutputToBridge && window.block2pythonSendOutputToBridge();"
         )
+
+    def set_toolbox_block_ids(self, block_ids: tuple[str, ...] | list[str]) -> None:
+        self._pending_toolbox_block_ids = tuple(str(block_id) for block_id in block_ids)
+        self._apply_toolbox_block_ids()
 
     def _on_output_received(self, python_code: str, block_json_str: str) -> None:
         try:
@@ -65,3 +71,15 @@ class BlocklyEmbed(QWebEngineView):
 
     def _on_message_received(self, kind: str, message: str) -> None:
         self.message_received.emit(kind, message)
+
+    def _on_load_finished(self, ok: bool) -> None:
+        if ok:
+            self._apply_toolbox_block_ids()
+
+    def _apply_toolbox_block_ids(self) -> None:
+        if self._pending_toolbox_block_ids is None:
+            return
+        payload = json.dumps(list(self._pending_toolbox_block_ids), ensure_ascii=True)
+        self.page().runJavaScript(
+            f"window.block2pythonConfigureToolbox && window.block2pythonConfigureToolbox({payload});"
+        )

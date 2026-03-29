@@ -21,6 +21,8 @@ signal back_requested()
 @onready var workspace_surface: PanelContainer = $Margin/Root/Body/RightColumn/WorkspacePanel/WorkspaceMargin/WorkspaceRoot/WorkspaceSurface
 @onready var python_preview: CodeEdit = $Margin/Root/Body/RightColumn/PreviewPanel/PreviewMargin/PreviewRoot/PythonPreview
 
+var _current_view: Dictionary = {}
+
 func _ready() -> void:
 	convert_button.pressed.connect(_on_convert_button_pressed)
 	continue_button.pressed.connect(_on_continue_button_pressed)
@@ -32,6 +34,7 @@ func _ready() -> void:
 	workspace_hint.text = EMPTY_WORKSPACE_TEXT
 
 func show_demo(demo_view: Dictionary) -> void:
+	_current_view = demo_view.duplicate(true)
 	title_label.text = str(demo_view.get("title", "Demo Console"))
 	prompt_text.text = str(demo_view.get("prompt", "No prompt loaded yet."))
 	learning_text.text = str(demo_view.get("learning_markdown", "No learning notes available yet."))
@@ -40,6 +43,7 @@ func show_demo(demo_view: Dictionary) -> void:
 	set_workspace_ready(str(demo_view.get("current_level_id", "")) != "")
 
 func show_placeholder(message: String) -> void:
+	_current_view = {}
 	title_label.text = "Demo Console"
 	prompt_text.text = message
 	learning_text.text = "Learning notes will appear here."
@@ -106,6 +110,9 @@ func _is_none_initializer_line(line: String) -> bool:
 	var identifier_regex := RegEx.new()
 	identifier_regex.compile("^[A-Za-z_][A-Za-z0-9_]*$")
 	return identifier_regex.search(variable_name) != null
+
+func current_view() -> Dictionary:
+	return _current_view.duplicate(true)
 
 func get_workspace_target_control() -> Control:
 	return workspace_surface

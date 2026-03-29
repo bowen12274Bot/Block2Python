@@ -73,6 +73,7 @@ def build_game_state(session: GameSession) -> GameState:
     if current_challenge is not None and current_level is not None:
         if state.mode is session._session_mode_demo():
             demo = _build_demo_state(
+                session=session,
                 challenge=current_challenge,
                 level=current_level,
                 group_id=group_id,
@@ -120,6 +121,7 @@ def _group_id_for_active_state(session: GameSession, state, current_level: Level
 
 def _build_demo_state(
     *,
+    session: GameSession,
     challenge: ResolvedChallengeSpec,
     level: LevelSpec,
     group_id: str | None,
@@ -144,6 +146,7 @@ def _build_demo_state(
         body="\n\n".join(body_parts),
         current_level_id=level.level_id,
         unlock_blocks=_demo_unlock_blocks(group_id),
+        toolbox_block_ids=session.current_toolbox_block_ids(),
     )
 
 
@@ -175,6 +178,7 @@ def _build_practice_state(
         and challenge.toolbox_policy.allow_toolbox_in_practice
         and challenge.challenge_type == "practice"
     )
+    toolbox_block_ids = session.current_toolbox_block_ids() if toolbox_allowed else ()
     return PracticeState(
         challenge_id=challenge.challenge_id,
         challenge_type=challenge.challenge_type,
@@ -187,6 +191,7 @@ def _build_practice_state(
         is_review_mode=bool(runtime_group.practice_reviewing) if runtime_group is not None else False,
         toolbox_allowed=toolbox_allowed,
         toolbox_used=level.level_id in session.toolbox_used_level_ids,
+        toolbox_block_ids=toolbox_block_ids,
         can_run=can_run,
         can_submit=can_submit,
         can_next=can_next,

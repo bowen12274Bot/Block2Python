@@ -271,16 +271,48 @@ func _build_layout_payload() -> Dictionary:
 	var owner_title: String = _owner.get_window().title if _owner.get_window() != null else str(ProjectSettings.get_setting("application/config/name", "Block2Python Godot POC"))
 	var target_control: Control = _practice_screen.practice_panel.get_toolbox_target_control()
 	var is_visible: bool = _practice_screen.visible and _practice_screen.is_visible_in_tree()
+	var payload: Dictionary
 	if _context == "demo":
 		target_control = _demo_screen.get_workspace_target_control()
 		is_visible = _demo_screen.visible and _demo_screen.is_visible_in_tree()
-	return WindowAlignmentHelperScript.build_layout_payload(
-		_active_level_id,
-		owner_title,
-		int(DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE)),
-		target_control,
-		is_visible
-	)
+		payload = WindowAlignmentHelperScript.build_layout_payload(
+			_active_level_id,
+			owner_title,
+			int(DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE)),
+			target_control,
+			is_visible
+		)
+		payload["toolbox_block_ids"] = _current_demo_toolbox_block_ids()
+	else:
+		payload = WindowAlignmentHelperScript.build_layout_payload(
+			_active_level_id,
+			owner_title,
+			int(DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE)),
+			target_control,
+			is_visible
+		)
+		payload["toolbox_block_ids"] = _current_practice_toolbox_block_ids()
+	return payload
+
+
+func _current_demo_toolbox_block_ids() -> Array[String]:
+	var demo_view: Dictionary = _demo_screen.current_view()
+	var block_ids: Array[String] = []
+	var raw_block_ids: Variant = demo_view.get("toolbox_block_ids", [])
+	if raw_block_ids is Array:
+		for block_id_variant in raw_block_ids:
+			block_ids.append(str(block_id_variant))
+	return block_ids
+
+
+func _current_practice_toolbox_block_ids() -> Array[String]:
+	var practice_view: Dictionary = _practice_screen.current_view()
+	var block_ids: Array[String] = []
+	var raw_block_ids: Variant = practice_view.get("toolbox_block_ids", [])
+	if raw_block_ids is Array:
+		for block_id_variant in raw_block_ids:
+			block_ids.append(str(block_id_variant))
+	return block_ids
 
 
 func _handle_result(payload: Dictionary) -> void:

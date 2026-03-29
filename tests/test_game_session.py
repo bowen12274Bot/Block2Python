@@ -92,6 +92,7 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.demo.level_id == "group-01-demo"
     assert contract_state.demo.learning_markdown != ""
     assert contract_state.demo.current_level_id == "group-01-demo"
+    assert contract_state.demo.toolbox_block_ids == ("text_print", "b2p_input_text")
     assert contract_state.progress.demo_seen_group_ids == ("group-01",)
     assert contract_state.practice is None
 
@@ -112,6 +113,7 @@ def test_game_session_walks_scene_and_challenge_flow() -> None:
     assert contract_state.practice.progress_total == 5
     assert contract_state.practice.toolbox_allowed is True
     assert contract_state.practice.toolbox_used is False
+    assert contract_state.practice.toolbox_block_ids == ("text_print", "b2p_input_text")
     assert contract_state.practice.can_submit is True
     assert contract_state.available_actions.submit is True
     assert contract_state.progress.completed_node_ids == ("main-map-entry", "group-01-story", "group-01-demo")
@@ -240,6 +242,7 @@ def test_game_session_start_group_demo_jumps_to_demo_mode() -> None:
     assert contract_state.demo.level_id == "group-01-demo"
     assert contract_state.demo.learning_markdown != ""
     assert contract_state.demo.current_level_id == "group-01-demo"
+    assert contract_state.demo.toolbox_block_ids == ("text_print", "b2p_input_text")
     assert contract_state.practice is None
 
 def test_start_group_demo_replay_stays_in_demo_mode_after_first_clear() -> None:
@@ -705,6 +708,82 @@ def test_python_run_with_empty_output_keeps_output_text_empty() -> None:
     assert contract_state.last_submission.output_text == ""
 
 
+def test_toolbox_blocks_follow_player_highest_unlocked_group() -> None:
+    session = build_session()
+
+    group_01_blocks = ("text_print", "b2p_input_text")
+    group_02_blocks = (
+        "text_print",
+        "b2p_input_text",
+        "b2p_to_int",
+        "variables_set",
+        "variables_get",
+        "math_number",
+        "math_arithmetic",
+    )
+    group_05_blocks = (
+        "text_print",
+        "b2p_input_text",
+        "b2p_to_int",
+        "variables_set",
+        "variables_get",
+        "math_number",
+        "math_arithmetic",
+        "logic_compare",
+        "b2p_if",
+        "b2p_for_range",
+        "text",
+    )
+
+    session.start_group_story("group-01")
+    session.advance()
+    session.start_group_demo("group-01")
+
+    contract_state = session.current_game_state()
+    assert contract_state.demo is not None
+    assert contract_state.demo.toolbox_block_ids == group_01_blocks
+    assert "b2p_if_else" not in contract_state.demo.toolbox_block_ids
+
+    session.start_group_practice("group-01")
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.toolbox_block_ids == group_01_blocks
+
+    _progress_until(session, lambda state: state.node_id == "group-02-story")
+
+    contract_state = session.current_game_state()
+    assert contract_state.map_route is not None
+    status_by_group = {group.group_id: group.status_key for group in contract_state.map_route.groups}
+    assert status_by_group["group-02"] == "current"
+
+    session.start_group_demo("group-01")
+    contract_state = session.current_game_state()
+    assert contract_state.demo is not None
+    assert contract_state.demo.group_id == "group-01"
+    assert contract_state.demo.toolbox_block_ids == group_02_blocks
+    assert contract_state.demo.unlock_blocks[0]["title"] == "print"
+
+    session.start_group_practice("group-01")
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.group_id == "group-01"
+    assert contract_state.practice.is_review_mode is True
+    assert contract_state.practice.toolbox_allowed is True
+    assert contract_state.practice.toolbox_block_ids == group_02_blocks
+    assert "b2p_if_else" not in contract_state.practice.toolbox_block_ids
+
+    _progress_until(session, lambda state: state.node_id == "group-05-result")
+    session.advance()
+
+    session.start_group_demo("group-01")
+    contract_state = session.current_game_state()
+    assert contract_state.demo is not None
+    assert contract_state.demo.toolbox_block_ids == group_05_blocks
+
+    session.start_group_practice("group-01")
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.toolbox_block_ids == group_05_blocks
 def test_practice_battery_starts_at_zero_and_accumulates_per_submit() -> None:
     session = build_session()
     session.start_group_story("group-01")
@@ -933,7 +1012,3 @@ def game_content_dir():
     from pathlib import Path
 
     return Path("assets/game_content")
-
-
-
-

@@ -20,6 +20,7 @@ static func build_demo_view(state: Dictionary) -> Dictionary:
 		"body": default_body,
 		"current_level_id": "",
 		"unlock_blocks": [],
+		"toolbox_block_ids": [],
 	}
 
 	var demo: Variant = state.get("demo", null)
@@ -36,6 +37,12 @@ static func build_demo_view(state: Dictionary) -> Dictionary:
 		demo_view["body"] = str(demo.get("body", default_body))
 		demo_view["current_level_id"] = str(demo.get("current_level_id", demo_view["level_id"]))
 		demo_view["unlock_blocks"] = normalize_unlock_blocks(demo.get("unlock_blocks", QuestMapGroupCatalogScript.unlock_blocks_for_group(str(demo_view.get("group_id", "")))))
+		var toolbox_block_ids: Array[String] = []
+		var raw_toolbox_block_ids: Variant = demo.get("toolbox_block_ids", [])
+		if raw_toolbox_block_ids is Array:
+			for block_id_variant in raw_toolbox_block_ids:
+				toolbox_block_ids.append(str(block_id_variant))
+		demo_view["toolbox_block_ids"] = toolbox_block_ids
 
 	return demo_view
 

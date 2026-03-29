@@ -48,6 +48,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
             is_review_mode=False,
             toolbox_allowed=True,
             toolbox_used=True,
+            toolbox_block_ids=("text_print", "b2p_input_text"),
             can_run=True,
             can_submit=True,
             can_next=False,
@@ -100,6 +101,7 @@ def test_serialize_game_state_emits_json_ready_payload() -> None:
     assert payload["practice"]["level_id"] == "group-01-practice-01"
     assert payload["practice"]["progress_total"] == 5
     assert payload["practice"]["toolbox_allowed"] is True
+    assert payload["practice"]["toolbox_block_ids"] == ["text_print", "b2p_input_text"]
     assert payload["practice"]["can_run"] is True
     assert payload["practice"]["can_next"] is False
     assert payload["practice"]["mission_text"] == "Print a greeting."
@@ -147,6 +149,7 @@ def test_serialize_demo_mode_emits_demo_payload() -> None:
                 {"title": "print", "description": "Output text to the screen."},
                 {"title": "input", "description": "Read user input into your program."},
             ),
+            toolbox_block_ids=("text_print", "b2p_input_text"),
         ),
         available_actions=AvailableActions(advance=True),
     )
@@ -170,6 +173,7 @@ def test_serialize_demo_mode_emits_demo_payload() -> None:
             {"title": "print", "description": "Output text to the screen."},
             {"title": "input", "description": "Read user input into your program."},
         ],
+        "toolbox_block_ids": ["text_print", "b2p_input_text"],
     }
     assert payload["practice"] is None
     assert "challenge" not in payload
