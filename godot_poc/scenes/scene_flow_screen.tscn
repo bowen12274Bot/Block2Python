@@ -22,6 +22,8 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qxpdu"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_agree_button"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_isucm"]
 bg_color = Color(0.07, 0.13, 0.24, 0.86)
 border_width_left = 2
@@ -788,39 +790,72 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="MissionPanel" type="PanelContainer" parent="MissionOverlay/Center" unique_id=1373026199]
-custom_minimum_size = Vector2(520, 0)
+custom_minimum_size = Vector2(760, 460)
 layout_mode = 2
+clip_contents = true
+
+[node name="MissionBackground" type="TextureRect" parent="MissionOverlay/Center/MissionPanel" unique_id=1251900211]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
 
 [node name="MissionMargin" type="MarginContainer" parent="MissionOverlay/Center/MissionPanel" unique_id=41953943]
 layout_mode = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_left = 176
+theme_override_constants/margin_top = 136
+theme_override_constants/margin_right = 174
+theme_override_constants/margin_bottom = 78
 
 [node name="MissionRoot" type="VBoxContainer" parent="MissionOverlay/Center/MissionPanel/MissionMargin" unique_id=1874884774]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="MissionTitle" type="Label" parent="MissionOverlay/Center/MissionPanel/MissionMargin/MissionRoot" unique_id=1292008591]
+visible = false
 modulate = Color(0.92549, 0.94902, 1, 0.96)
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 30
 text = "任務書"
 horizontal_alignment = 1
 
 [node name="MissionBody" type="RichTextLabel" parent="MissionOverlay/Center/MissionPanel/MissionMargin/MissionRoot" unique_id=235047973]
-custom_minimum_size = Vector2(0, 160)
+custom_minimum_size = Vector2(0, 190)
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_fonts/normal_font = SubResource("SystemFont_ui_cjk")
-theme_override_font_sizes/normal_font_size = 22
+theme_override_font_sizes/normal_font_size = 20
+theme_override_constants/line_separation = 12
 text = "劇情已結束。點擊同意後前往 Demo 頁面。"
-fit_content = true
+fit_content = false
 scroll_active = false
 
 [node name="MissionAgreeButton" type="Button" parent="MissionOverlay/Center/MissionPanel/MissionMargin/MissionRoot" unique_id=58362598]
+custom_minimum_size = Vector2(300, 96)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = SubResource("SystemFont_ui_cjk")
-text = "同意"
+theme_override_styles/normal = SubResource("StyleBoxEmpty_agree_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_agree_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_agree_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_agree_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_agree_button")
+text = ""
+flat = true
+
+[node name="AgreeButtonArt" type="TextureRect" parent="MissionOverlay/Center/MissionPanel/MissionMargin/MissionRoot/MissionAgreeButton" unique_id=203845991]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
