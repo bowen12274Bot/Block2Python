@@ -15,6 +15,7 @@ const QuestMapRouteCatalogScript = preload("res://scripts/map/catalog/quest_map_
 var _last_map_view: Dictionary = {}
 var _helper_text_override: String = ""
 var _route_nodes: Array[Node] = []
+var _overlay_active: bool = false
 
 
 func _ready() -> void:
@@ -22,7 +23,7 @@ func _ready() -> void:
 		route_layer.z_index = 1
 	if header_row != null:
 		header_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		header_row.visible = true
+		header_row.visible = not _overlay_active
 	if header_title_column != null:
 		header_title_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if header_title != null:
@@ -51,6 +52,12 @@ func show_map(map_view: Dictionary) -> void:
 func set_helper_text(text: String) -> void:
 	_helper_text_override = text
 	_refresh_header()
+
+
+func set_overlay_active(is_active: bool) -> void:
+	_overlay_active = is_active
+	if header_row != null:
+		header_row.visible = not _overlay_active
 
 
 func _refresh_header() -> void:
