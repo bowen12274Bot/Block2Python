@@ -23,8 +23,9 @@ class ToolboxWindow(QWidget):
         self._result_file = result_file
         self._html_path = html_path
         self._layout_file = layout_file
-        self._closed_written = False
         self._last_layout_signature: tuple[int, int, int, int, bool] | None = None
+        self._last_toolbox_block_ids: tuple[str, ...] | None = None
+        self._last_reset_token: int | str | None = None
 
         self.setWindowTitle("Logic Toolbox")
         self.setWindowFlag(Qt.WindowType.Tool, True)
@@ -64,14 +65,13 @@ class ToolboxWindow(QWidget):
         )
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        if not self._closed_written:
-            self._write_result({
-                "status": "toolbox_closed",
-                "level_id": self._level_id,
-                "request_id": uuid.uuid4().hex,
-            })
-            self._closed_written = True
-        super().closeEvent(event)
+        self._write_result({
+            "status": "toolbox_closed",
+            "level_id": self._level_id,
+            "request_id": uuid.uuid4().hex,
+        })
+        self.hide()
+        event.ignore()
 
     def _request_workspace_sync(self) -> None:
         self._blockly.request_output()
@@ -83,8 +83,13 @@ class ToolboxWindow(QWidget):
             return
         if not isinstance(raw, dict):
             return
-        if str(raw.get("level_id", "")) not in {"", self._level_id}:
-            return
+
+        new_level_id = str(raw.get("level_id", "")).strip()
+        if new_level_id:
+            self._level_id = new_level_id
+
+        self._sync_toolbox_block_ids(raw)
+        self._sync_workspace_reset(raw)
         if not bool(raw.get("visible", False)):
             self.hide()
             self._last_layout_signature = None
@@ -109,6 +114,25 @@ class ToolboxWindow(QWidget):
         else:
             self.setFixedSize(move_width, move_height)
             self.move(x, y)
+
+    def _sync_toolbox_block_ids(self, raw: dict) -> None:
+        raw_block_ids = raw.get("toolbox_block_ids", None)
+        if not isinstance(raw_block_ids, list):
+            return
+        block_ids = tuple(str(block_id) for block_id in raw_block_ids)
+        if block_ids == self._last_toolbox_block_ids:
+            return
+        self._last_toolbox_block_ids = block_ids
+        self._blockly.set_toolbox_block_ids(block_ids)
+
+    def _sync_workspace_reset(self, raw: dict) -> None:
+        reset_token = raw.get("reset_token", None)
+        if reset_token is None:
+            return
+        if reset_token == self._last_reset_token:
+            return
+        self._last_reset_token = reset_token
+        self._blockly.clear_workspace()
 
     def _on_blockly_output(self, output: BlocklyOutput) -> None:
         self._write_result(

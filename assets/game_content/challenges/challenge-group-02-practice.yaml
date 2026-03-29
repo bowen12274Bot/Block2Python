@@ -7,7 +7,7 @@ level_ids:
   - group-02-practice-03
   - group-02-practice-04
   - group-02-practice-05
-toolbox_policy_id: null
+toolbox_policy_id: toolbox-group-02
 battery_policy_id: null
 metadata:
   stage: variable-base

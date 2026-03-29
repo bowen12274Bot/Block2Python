@@ -8,7 +8,13 @@ from .challenge_selection import ChallengeSelectionMixin
 from .map_route_projection import MapRouteProjectionMixin
 from .practice_review import PracticeReviewMixin
 from .scene_progress_projection import SceneProgressProjectionMixin
-from .session_models import GameSessionError, GameSessionState, GroupRuntimeState, SessionMode
+from .session_models import (
+    GameSessionError,
+    GameSessionState,
+    GroupRuntimeState,
+    PracticeBatteryState,
+    SessionMode,
+)
 from .session_state_resolution import SessionStateResolutionMixin
 from .state_projection import build_game_state
 
@@ -36,6 +42,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
     intro_completed: bool = False
     active_practice_level_id_override: str | None = None
     next_enabled_level_id: str | None = None
+    practice_battery_state: PracticeBatteryState | None = None
 
     @classmethod
     def start(cls, *, app: AppCore, game_slice: AssembledGameSlice, quest_id: str) -> GameSession:
@@ -190,6 +197,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             raise GameSessionError(f"Group {group_id} has no practice entry node")
 
         self._jump_to_node(target_node_id)
+        self._start_practice_battery_run(group_id)
         return self.current_state()
 
     def run_current_level(self, *, python_code: str, block_json: dict | None = None) -> tuple[GameSessionState, SubmitOutcome]:
@@ -245,6 +253,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         if outcome.cleared:
             self.active_practice_level_id_override = state.current_level_id
             self.next_enabled_level_id = state.current_level_id
+            self._award_practice_battery_for_level(state.current_level_id)
         else:
             self.next_enabled_level_id = None
         self.last_submission = self._build_feedback(
@@ -316,7 +325,134 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
 
         next_level_id = self._next_uncleared_level_id(runtime_state.challenge, state.current_level_id)
         self.active_practice_level_id_override = next_level_id
+        if next_level_id is None:
+            self._reset_practice_battery_run()
         return self.current_state()
+
+    def _start_practice_battery_run(self, group_id: str) -> None:
+        self.practice_battery_state = PracticeBatteryState(group_id=group_id)
+
+    def _reset_practice_battery_run(self) -> None:
+        self.practice_battery_state = None
+
+    def current_practice_battery_percent(self, group_id: str | None) -> int:
+        if group_id is None:
+            return 0
+        if self.practice_battery_state is None:
+            return 0
+        if self.practice_battery_state.group_id != group_id:
+            return 0
+        return self.practice_battery_state.battery_percent
+
+    def current_toolbox_block_ids(self) -> tuple[str, ...]:
+        return self._toolbox_block_ids_for_group(self.current_highest_toolbox_group_id())
+
+    def current_highest_toolbox_group_id(self) -> str:
+        route_spec = self._route_spec_for_current_quest()
+        if route_spec is None or not route_spec.groups:
+            return "group-01"
+
+        current_group_id = self._current_mainline_group_id()
+        if current_group_id is not None:
+            return current_group_id
+
+        highest_completed_group_id: str | None = None
+        for group in route_spec.groups:
+            runtime_group = self.group_runtime_states.get(group.group_id)
+            if runtime_group is None:
+                continue
+            if runtime_group.completed or runtime_group.practice_reviewing:
+                highest_completed_group_id = group.group_id
+        if highest_completed_group_id is not None:
+            return highest_completed_group_id
+
+        return route_spec.groups[0].group_id
+
+    def _toolbox_block_ids_for_group(self, group_id: str | None) -> tuple[str, ...]:
+        resolved_group_id = group_id or "group-01"
+        challenge = self._practice_challenge_for_group_id(resolved_group_id)
+        if challenge is not None and challenge.toolbox_policy is not None:
+            return challenge.toolbox_policy.unlocked_block_ids
+        if resolved_group_id != "group-01":
+            fallback_challenge = self._practice_challenge_for_group_id("group-01")
+            if fallback_challenge is not None and fallback_challenge.toolbox_policy is not None:
+                return fallback_challenge.toolbox_policy.unlocked_block_ids
+        return ()
+
+    def _practice_challenge_for_group_id(self, group_id: str):
+        group = self._route_group(group_id)
+        if group is None:
+            return None
+        for step in group.practice_route:
+            if step.challenge_id is None:
+                continue
+            return self.runtime.game_slice.challenges.get(step.challenge_id)
+        return None
+
+    def current_practice_toolbox_penalty_percent(self, group_id: str | None) -> int | None:
+        if group_id is None:
+            return None
+        challenge = self._practice_challenge_for_group_id(group_id)
+        if challenge is None or challenge.battery_policy is None:
+            return None
+        return challenge.battery_policy.toolbox_reward_percent
+
+    def confirm_toolbox_open_for_current_level(self) -> None:
+        state = self.current_state()
+        if state.mode is not SessionMode.CHALLENGE:
+            raise GameSessionError("Current node is not a challenge")
+        if state.current_level_id is None:
+            raise GameSessionError("Challenge node has no current level")
+
+        runtime_state = self.runtime.current_state()
+        if runtime_state is None or runtime_state.challenge is None:
+            raise GameSessionError("Current node is not a challenge")
+        if runtime_state.challenge.challenge_type != "practice":
+            raise GameSessionError("Toolbox is only available in practice challenges")
+
+        group_id = self._group_id_for_level_id(state.current_level_id)
+        penalty_percent = self.current_practice_toolbox_penalty_percent(group_id)
+        if penalty_percent is None:
+            raise GameSessionError("Toolbox penalty is not configured for this level")
+
+        self.mark_toolbox_opened_for_current_level()
+
+    def mark_toolbox_opened_for_current_level(self) -> None:
+        state = self.current_state()
+        if state.mode is not SessionMode.CHALLENGE or state.current_level_id is None:
+            return
+        group_id = self._group_id_for_level_id(state.current_level_id)
+        if group_id is None:
+            return
+        if self.practice_battery_state is None or self.practice_battery_state.group_id != group_id:
+            self._start_practice_battery_run(group_id)
+        assert self.practice_battery_state is not None
+        self.practice_battery_state.toolbox_opened_level_ids.add(state.current_level_id)
+
+    def was_toolbox_opened_for_level(self, level_id: str) -> bool:
+        group_id = self._group_id_for_level_id(level_id)
+        if group_id is None:
+            return False
+        if self.practice_battery_state is None or self.practice_battery_state.group_id != group_id:
+            return False
+        return level_id in self.practice_battery_state.toolbox_opened_level_ids
+
+    def _award_practice_battery_for_level(self, level_id: str) -> None:
+        group_id = self._group_id_for_level_id(level_id)
+        if group_id is None:
+            return
+        if self.practice_battery_state is None or self.practice_battery_state.group_id != group_id:
+            self._start_practice_battery_run(group_id)
+        assert self.practice_battery_state is not None
+        if level_id in self.practice_battery_state.awarded_level_ids:
+            return
+        reward_percent = 20
+        if self.was_toolbox_opened_for_level(level_id):
+            penalty_reward_percent = self.current_practice_toolbox_penalty_percent(group_id)
+            if penalty_reward_percent is not None:
+                reward_percent = penalty_reward_percent
+        self.practice_battery_state.awarded_level_ids.add(level_id)
+        self.practice_battery_state.battery_percent = min(100, self.practice_battery_state.battery_percent + reward_percent)
 
     def _next_uncleared_level_id(self, challenge, current_level_id: str) -> str | None:
         current_index = -1
@@ -440,6 +576,9 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             raise GameSessionError("opening intro must be completed before entering main flow")
 
     def _jump_to_node(self, node_id: str) -> None:
+        state = self.current_state()
+        if state.mode is SessionMode.CHALLENGE:
+            self._reset_practice_battery_run()
         if node_id not in self.runtime.quest.node_ids:
             raise GameSessionError(f"Node {node_id} is not part of quest {self.runtime.quest.quest_id}")
         self.runtime.current_node_id = node_id

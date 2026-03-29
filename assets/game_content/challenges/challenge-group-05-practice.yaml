@@ -7,7 +7,7 @@ level_ids:
   - group-05-practice-03
   - group-05-practice-04
   - group-05-practice-05
-toolbox_policy_id: null
+toolbox_policy_id: toolbox-group-05
 battery_policy_id: null
 metadata:
   stage: bug-king-castle

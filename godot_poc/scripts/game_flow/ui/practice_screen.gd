@@ -5,6 +5,7 @@ signal run_requested(python_code: String)
 signal submit_requested(python_code: String)
 signal next_requested()
 signal open_toolbox_requested()
+signal toolbox_confirmation_accepted()
 signal back_requested()
 
 @onready var status_label: Label = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/StatusLabel
@@ -25,12 +26,14 @@ signal back_requested()
 @onready var toolkit_hint: RichTextLabel = $Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolkitHint
 @onready var toolbox_button: Button = $Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolboxButton
 
+var _toolbox_confirmation_dialog: ConfirmationDialog
 var _base_can_run: bool = false
 var _base_can_submit: bool = false
 var _base_can_next: bool = false
 var _base_can_open_toolbox: bool = false
 var _base_code_editable: bool = false
 var _toolbox_locked: bool = false
+var _current_view: Dictionary = {}
 var _toolbox_status_message: String = ""
 
 func _ready() -> void:
@@ -40,11 +43,16 @@ func _ready() -> void:
 	toolbox_button.pressed.connect(_on_toolbox_button_pressed)
 	back_button.pressed.connect(_on_back_button_pressed)
 	assistant_input.editable = false
+	_toolbox_confirmation_dialog = ConfirmationDialog.new()
+	_toolbox_confirmation_dialog.title = "Tool Kit Warning"
+	_toolbox_confirmation_dialog.confirmed.connect(_on_toolbox_confirmation_confirmed)
+	add_child(_toolbox_confirmation_dialog)
 
 func initialize(default_code: String) -> void:
 	practice_panel.initialize(default_code)
 
 func show_practice(practice_view: Dictionary) -> void:
+	_current_view = practice_view.duplicate(true)
 	_base_code_editable = bool(practice_view.get("code_editable", false))
 	_base_can_open_toolbox = bool(practice_view.get("toolbox_allowed", false))
 	_base_can_run = bool(practice_view.get("can_run", false))
@@ -60,6 +68,9 @@ func show_practice(practice_view: Dictionary) -> void:
 	toolkit_hint.text = str(practice_view.get("toolkit_hint", "Open the toolkit when you need help exploring a block-based solution."))
 	practice_panel.show_practice(practice_view)
 	_apply_toolbox_lock_state()
+
+func current_view() -> Dictionary:
+	return _current_view.duplicate(true)
 
 func show_feedback(feedback_view: Dictionary) -> void:
 	feedback_panel.show_feedback(feedback_view)
@@ -78,6 +89,10 @@ func set_can_submit(can_submit: bool) -> void:
 func set_can_next(can_next: bool) -> void:
 	_base_can_next = can_next
 	_apply_toolbox_lock_state()
+
+func prompt_toolbox_confirmation(penalty_percent: int) -> void:
+	_toolbox_confirmation_dialog.dialog_text = "Opening Tool Kit for this level will reduce the battery reward to %d%%. Continue?" % penalty_percent
+	_toolbox_confirmation_dialog.popup_centered()
 
 func set_toolbox_lock(active: bool, status_message: String = "") -> void:
 	_toolbox_locked = active
@@ -120,6 +135,10 @@ func _on_next_button_pressed() -> void:
 func _on_toolbox_button_pressed() -> void:
 	status_label.text = "Status: closing toolkit..." if _toolbox_locked else "Status: opening toolkit..."
 	open_toolbox_requested.emit()
+
+func _on_toolbox_confirmation_confirmed() -> void:
+	status_label.text = "Status: confirming toolbox penalty..."
+	toolbox_confirmation_accepted.emit()
 
 func _on_back_button_pressed() -> void:
 	status_label.text = "Status: returning to map..."

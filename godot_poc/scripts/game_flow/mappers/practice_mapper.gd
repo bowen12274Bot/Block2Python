@@ -16,6 +16,9 @@ static func build_practice_view(state: Dictionary) -> Dictionary:
 		"is_review_mode": false,
 		"toolbox_allowed": false,
 		"toolbox_used": false,
+		"toolbox_opened": false,
+		"toolbox_penalty_percent": null,
+		"toolbox_block_ids": [],
 		"can_run": false,
 		"can_submit": false,
 		"can_next": false,
@@ -43,6 +46,14 @@ static func build_practice_view(state: Dictionary) -> Dictionary:
 		practice_view["is_review_mode"] = bool(practice.get("is_review_mode", false))
 		practice_view["toolbox_allowed"] = bool(practice.get("toolbox_allowed", false))
 		practice_view["toolbox_used"] = bool(practice.get("toolbox_used", false))
+		practice_view["toolbox_opened"] = bool(practice.get("toolbox_opened", false))
+		practice_view["toolbox_penalty_percent"] = practice.get("toolbox_penalty_percent", null)
+		var toolbox_block_ids: Array[String] = []
+		var raw_toolbox_block_ids: Variant = practice.get("toolbox_block_ids", [])
+		if raw_toolbox_block_ids is Array:
+			for block_id_variant in raw_toolbox_block_ids:
+				toolbox_block_ids.append(str(block_id_variant))
+		practice_view["toolbox_block_ids"] = toolbox_block_ids
 		practice_view["can_run"] = bool(practice.get("can_run", false))
 		practice_view["can_submit"] = bool(practice.get("can_submit", false))
 		practice_view["can_next"] = bool(practice.get("can_next", false))

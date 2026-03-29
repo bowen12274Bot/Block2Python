@@ -1,0 +1,15 @@
+toolbox_id: toolbox-group-05
+unlocked_block_ids:
+  - text_print
+  - b2p_input_text
+  - b2p_to_int
+  - variables_set
+  - variables_get
+  - math_number
+  - math_arithmetic
+  - logic_compare
+  - b2p_if
+  - b2p_for_range
+  - text
+allow_toolbox_in_practice: true
+toolbox_reward_percent: 10

@@ -54,6 +54,10 @@ def dispatch(session: GameSession, action: PlayerAction) -> GameState:
             session.verify_current_level_with_toolbox(python_code=python_code, block_json=block_json)
             return session.current_game_state()
 
+        if action.action_type is ActionType.CONFIRM_TOOLBOX_OPEN:
+            session.confirm_toolbox_open_for_current_level()
+            return session.current_game_state()
+
         if action.action_type is ActionType.START_GROUP_STORY:
             group_id = action.payload.get("group_id")
             if not isinstance(group_id, str) or not group_id:

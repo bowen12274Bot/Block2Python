@@ -23,6 +23,10 @@ var _active_level_id: String = ""
 var _workspace_python_code: String = ""
 var _workspace_block_json: Dictionary = {}
 var _context: String = ""
+var _current_page: String = ""
+var _toolbox_visible_requested: bool = false
+var _restore_toolbox_visibility_on_focus: bool = false
+var _workspace_reset_revision: int = 0
 var _demo_conversion_pending: bool = false
 var _demo_conversion_requested_at_msec: int = 0
 
@@ -38,13 +42,26 @@ func process_tick() -> void:
 	_poll_demo_conversion_timeout()
 
 
+func prewarm_helper() -> void:
+	if not _ensure_helper_running("toolbox", ""):
+		return
+	_toolbox_visible_requested = false
+	_sync_layout_file()
+
+
 func request_demo_convert() -> void:
-	_demo_conversion_pending = true
-	_demo_conversion_requested_at_msec = Time.get_ticks_msec()
-	if _helper_pid <= 0 or _context != "demo":
-		_demo_screen.set_status("Status: connecting Blockly workspace...")
+	var demo_view: Dictionary = _demo_screen.current_view()
+	var current_level_id: String = str(demo_view.get("current_level_id", ""))
+	if current_level_id == "":
+		_demo_screen.set_status("Demo workspace is unavailable until a demo level is active.")
 		_demo_screen.set_workspace_ready(false)
 		return
+	if not _ensure_helper_running(current_level_id, "demo"):
+		_demo_screen.set_workspace_ready(false)
+		return
+	_sync_demo_context(demo_view, false, true)
+	_demo_conversion_pending = true
+	_demo_conversion_requested_at_msec = Time.get_ticks_msec()
 	_demo_screen.set_workspace_ready(true)
 	_demo_screen.set_status("Status: requesting latest block conversion...")
 	if _workspace_python_code.strip_edges() != "":
@@ -58,36 +75,17 @@ func ensure_demo_helper(demo_view: Dictionary) -> void:
 		_demo_screen.set_can_convert(false)
 		_demo_screen.set_status("Demo workspace is unavailable until a demo level is active.")
 		return
-	if _helper_pid > 0 and _context == "demo" and _active_level_id == current_level_id:
-		_demo_screen.set_workspace_ready(true)
-		_demo_screen.set_can_convert(true)
-		_sync_layout_file()
-		return
-	if _helper_pid > 0:
-		stop_helper(true, "")
-	var launch_request: Dictionary = _build_launch_request(current_level_id, "demo")
-	if launch_request.is_empty():
+	if not _ensure_helper_running(current_level_id, "demo"):
 		_demo_screen.set_workspace_ready(false)
 		_demo_screen.set_can_convert(false)
 		return
-	var pid: int = OS.create_process(str(launch_request.get("python_path", "")), launch_request.get("args", PackedStringArray()), false)
-	if pid <= 0:
-		_demo_screen.set_workspace_ready(false)
-		_demo_screen.set_status("Failed to launch Blockly workspace.")
-		return
-	_apply_launch_request(pid, launch_request, current_level_id, "demo")
-	_workspace_python_code = ""
-	_workspace_block_json = {}
 	_demo_screen.set_workspace_ready(true)
 	_demo_screen.set_can_convert(true)
-	_demo_screen.set_status("Blockly workspace ready. Build blocks, then convert to Python.")
+	if _workspace_python_code.strip_edges() == "":
+		_demo_screen.set_status("Blockly workspace ready. Build blocks, then convert to Python.")
 
 
 func toggle_challenge_helper(practice_view: Dictionary, current_page: String) -> void:
-	if _helper_pid > 0 and _context == "challenge":
-		stop_helper(true, current_page)
-		_practice_screen.set_status("Toolbox closed.")
-		return
 	var current_level_id: String = str(practice_view.get("current_level_id", ""))
 	if current_level_id == "":
 		_practice_screen.set_status("Toolbox is only available when a practice level is active.")
@@ -95,33 +93,41 @@ func toggle_challenge_helper(practice_view: Dictionary, current_page: String) ->
 	if not bool(practice_view.get("toolbox_allowed", false)):
 		_practice_screen.set_status("Toolbox is only available in practice challenges.")
 		return
-	if _helper_pid > 0:
-		stop_helper(true, current_page)
-	var launch_request: Dictionary = _build_launch_request(current_level_id, "challenge")
-	if launch_request.is_empty():
+	if _toolbox_visible_requested and _context == "challenge":
+		_hide_toolbox()
+		_practice_screen.set_status("Toolbox closed.")
+		_practice_screen.focus_code_editor()
 		return
-	var pid: int = OS.create_process(str(launch_request.get("python_path", "")), launch_request.get("args", PackedStringArray()), false)
-	if pid <= 0:
+	if not _ensure_helper_running(current_level_id, "challenge"):
 		_practice_screen.set_status("Failed to launch toolbox window.")
 		return
-	_apply_launch_request(pid, launch_request, current_level_id, "challenge")
-	_sync_layout_file()
+	var needs_reset: bool = _should_reset_for_transition("challenge", current_level_id)
+	_context = "challenge"
+	_active_level_id = current_level_id
+	if needs_reset:
+		_request_workspace_reset()
+	_show_toolbox()
 	_practice_screen.set_toolbox_lock(true, TOOLBOX_LOCK_MESSAGE)
 
 
 func handle_page_changed(page: String, demo_view: Dictionary) -> void:
-	if _helper_pid > 0:
-		var keep_demo_helper: bool = page == "demo" and _context == "demo"
-		var keep_practice_helper: bool = page == "challenge" and _context == "challenge"
-		if not keep_demo_helper and not keep_practice_helper:
-			stop_helper(true, page)
-	apply_lock_state()
+	var previous_page: String = _current_page
+	_current_page = page
 	if page == "demo":
-		ensure_demo_helper(demo_view)
+		_sync_demo_context(demo_view, previous_page != "demo", false)
+	elif page == "challenge":
+		_sync_practice_context(_practice_screen.current_view(), previous_page != "challenge")
+	else:
+		if previous_page == "demo" or previous_page == "challenge":
+			_request_workspace_reset()
+			_hide_toolbox()
+			_context = ""
+			_active_level_id = ""
+	apply_lock_state()
 
 
 func apply_lock_state() -> void:
-	var practice_locked: bool = _helper_pid > 0 and _context == "challenge"
+	var practice_locked: bool = _helper_pid > 0 and _context == "challenge" and _toolbox_visible_requested
 	_practice_screen.set_toolbox_lock(practice_locked, TOOLBOX_LOCK_MESSAGE if practice_locked else "")
 
 
@@ -141,7 +147,29 @@ func debug_state_lines() -> Array[String]:
 	return [
 		"toolbox_helper_pid=%s" % str(_helper_pid),
 		"toolbox_context=%s" % _context,
+		"toolbox_visible=%s" % str(_toolbox_visible_requested),
+		"toolbox_restore_on_focus=%s" % str(_restore_toolbox_visibility_on_focus),
+		"toolbox_reset_revision=%s" % str(_workspace_reset_revision),
 	]
+
+
+func handle_owner_focus_exited() -> void:
+	if _helper_pid <= 0 or not _toolbox_visible_requested:
+		_restore_toolbox_visibility_on_focus = false
+		return
+	_restore_toolbox_visibility_on_focus = true
+	_hide_toolbox()
+
+
+func handle_owner_focus_entered() -> void:
+	if not _restore_toolbox_visibility_on_focus:
+		return
+	_restore_toolbox_visibility_on_focus = false
+	if _helper_pid <= 0:
+		return
+	if _current_page != "demo" and _current_page != "challenge":
+		return
+	_show_toolbox()
 
 
 func stop_helper(force_kill: bool, current_page: String) -> void:
@@ -157,6 +185,8 @@ func stop_helper(force_kill: bool, current_page: String) -> void:
 	_workspace_python_code = ""
 	_workspace_block_json = {}
 	_context = ""
+	_toolbox_visible_requested = false
+	_restore_toolbox_visibility_on_focus = false
 	_demo_conversion_pending = false
 	_demo_conversion_requested_at_msec = 0
 	_practice_screen.set_toolbox_lock(false)
@@ -166,6 +196,98 @@ func stop_helper(force_kill: bool, current_page: String) -> void:
 		_practice_screen.focus_code_editor()
 	elif previous_context == "demo" and current_page == "demo":
 		_demo_screen.set_status("Blockly workspace closed.")
+
+
+func _ensure_helper_running(level_id: String, context: String) -> bool:
+	if _helper_pid > 0:
+		return true
+	var launch_request: Dictionary = _build_launch_request(level_id if level_id != "" else "toolbox", context)
+	if launch_request.is_empty():
+		return false
+	var pid: int = OS.create_process(str(launch_request.get("python_path", "")), launch_request.get("args", PackedStringArray()), false)
+	if pid <= 0:
+		return false
+	_apply_launch_request(pid, launch_request, level_id, context)
+	_workspace_python_code = ""
+	_workspace_block_json = {}
+	return true
+
+
+func _show_toolbox() -> void:
+	_toolbox_visible_requested = true
+	_sync_layout_file()
+	apply_lock_state()
+
+
+func _hide_toolbox() -> void:
+	_toolbox_visible_requested = false
+	_sync_layout_file()
+	apply_lock_state()
+
+
+func _request_workspace_reset() -> void:
+	_workspace_reset_revision += 1
+	_workspace_python_code = ""
+	_workspace_block_json = {}
+	_demo_conversion_pending = false
+	_demo_conversion_requested_at_msec = 0
+	_demo_screen.clear_python_preview()
+	_sync_layout_file()
+
+
+func _should_reset_for_transition(context: String, level_id: String) -> bool:
+	if _helper_pid <= 0:
+		return false
+	if _context == "":
+		return false
+	if _context != context:
+		return true
+	return _active_level_id != level_id
+
+
+func _sync_demo_context(demo_view: Dictionary, entering_page: bool, force_show: bool) -> void:
+	var current_level_id: String = str(demo_view.get("current_level_id", ""))
+	if current_level_id == "":
+		_demo_screen.set_workspace_ready(false)
+		_demo_screen.set_can_convert(false)
+		if _context == "demo":
+			_request_workspace_reset()
+			_hide_toolbox()
+			_context = ""
+			_active_level_id = ""
+		return
+	ensure_demo_helper(demo_view)
+	var needs_reset: bool = _should_reset_for_transition("demo", current_level_id)
+	_context = "demo"
+	_active_level_id = current_level_id
+	if needs_reset:
+		_request_workspace_reset()
+	if entering_page or force_show:
+		_toolbox_visible_requested = true
+	_sync_layout_file()
+
+
+func _sync_practice_context(practice_view: Dictionary, entering_page: bool) -> void:
+	var current_level_id: String = str(practice_view.get("current_level_id", ""))
+	if current_level_id == "":
+		if _context == "challenge":
+			_request_workspace_reset()
+			_hide_toolbox()
+			_context = ""
+			_active_level_id = ""
+		return
+	if _helper_pid > 0:
+		var needs_reset: bool = _should_reset_for_transition("challenge", current_level_id)
+		_context = "challenge"
+		_active_level_id = current_level_id
+		if needs_reset:
+			_request_workspace_reset()
+		_sync_layout_file()
+	else:
+		_context = "challenge"
+		_active_level_id = current_level_id
+	if entering_page:
+		_toolbox_visible_requested = false
 
 
 func _apply_launch_request(pid: int, launch_request: Dictionary, current_level_id: String, context: String) -> void:
@@ -190,11 +312,11 @@ func _build_launch_request(level_id: String, context: String) -> Dictionary:
 
 	var runtime_dir: String = ProjectSettings.globalize_path(TOOLBOX_RESULT_DIR)
 	DirAccess.make_dir_recursive_absolute(runtime_dir)
-	var safe_level_id: String = level_id.replace("/", "_") if level_id != "" else "level"
-	var result_file: String = runtime_dir.path_join("toolbox_%s_%s.json" % [safe_level_id, str(Time.get_ticks_msec())])
+	var helper_token: String = str(Time.get_ticks_msec())
+	var result_file: String = runtime_dir.path_join("toolbox_shared_%s.json" % helper_token)
 	if FileAccess.file_exists(result_file):
 		DirAccess.remove_absolute(result_file)
-	var layout_file: String = runtime_dir.path_join("toolbox_layout_%s_%s.json" % [safe_level_id, str(Time.get_ticks_msec())])
+	var layout_file: String = runtime_dir.path_join("toolbox_layout_shared_%s.json" % helper_token)
 
 	var args := PackedStringArray([
 		"-m",
@@ -261,7 +383,7 @@ func _poll_result_file() -> void:
 
 
 func _sync_layout_file() -> void:
-	if _layout_file == "" or _active_level_id == "":
+	if _layout_file == "":
 		return
 	var payload: Dictionary = _build_layout_payload()
 	_last_layout_payload = WindowLayoutSyncScript.sync_layout_file(_layout_file, payload, _last_layout_payload)
@@ -270,17 +392,48 @@ func _sync_layout_file() -> void:
 func _build_layout_payload() -> Dictionary:
 	var owner_title: String = _owner.get_window().title if _owner.get_window() != null else str(ProjectSettings.get_setting("application/config/name", "Block2Python Godot POC"))
 	var target_control: Control = _practice_screen.practice_panel.get_toolbox_target_control()
-	var is_visible: bool = _practice_screen.visible and _practice_screen.is_visible_in_tree()
 	if _context == "demo":
 		target_control = _demo_screen.get_workspace_target_control()
-		is_visible = _demo_screen.visible and _demo_screen.is_visible_in_tree()
-	return WindowAlignmentHelperScript.build_layout_payload(
+	var screen_visible: bool = target_control.is_visible_in_tree() and target_control.visible
+	var payload: Dictionary = WindowAlignmentHelperScript.build_layout_payload(
 		_active_level_id,
 		owner_title,
 		int(DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE)),
 		target_control,
-		is_visible
+		screen_visible and _toolbox_visible_requested
 	)
+	payload["toolbox_block_ids"] = _current_toolbox_block_ids()
+	payload["reset_token"] = _workspace_reset_revision
+	payload["context"] = _context
+	return payload
+
+
+func _current_toolbox_block_ids() -> Array[String]:
+	if _context == "demo":
+		return _current_demo_toolbox_block_ids()
+	if _context == "challenge":
+		return _current_practice_toolbox_block_ids()
+	return []
+
+
+func _current_demo_toolbox_block_ids() -> Array[String]:
+	var demo_view: Dictionary = _demo_screen.current_view()
+	var block_ids: Array[String] = []
+	var raw_block_ids: Variant = demo_view.get("toolbox_block_ids", [])
+	if raw_block_ids is Array:
+		for block_id_variant in raw_block_ids:
+			block_ids.append(str(block_id_variant))
+	return block_ids
+
+
+func _current_practice_toolbox_block_ids() -> Array[String]:
+	var practice_view: Dictionary = _practice_screen.current_view()
+	var block_ids: Array[String] = []
+	var raw_block_ids: Variant = practice_view.get("toolbox_block_ids", [])
+	if raw_block_ids is Array:
+		for block_id_variant in raw_block_ids:
+			block_ids.append(str(block_id_variant))
+	return block_ids
 
 
 func _handle_result(payload: Dictionary) -> void:
@@ -318,7 +471,12 @@ func _handle_result(payload: Dictionary) -> void:
 		_demo_conversion_requested_at_msec = 0
 		return
 	if status == "toolbox_closed":
-		stop_helper(false, "")
+		_hide_toolbox()
+		if _current_page == "challenge":
+			_practice_screen.set_status("Toolbox closed.")
+			_practice_screen.focus_code_editor()
+		elif _current_page == "demo":
+			_demo_screen.set_status("Blockly workspace hidden.")
 
 
 func _set_workspace_status(context: String, message: String) -> void:

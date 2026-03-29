@@ -102,23 +102,28 @@
         const verifyButton = document.getElementById("verifyButton");
         const blocklyHost = document.getElementById("blocklyHost");
         const pythonGenerator = Blockly.Python || Blockly.pythonGenerator;
-        const PHASE1_BLOCK_FLAGS = {
-          b2p_input_text: true,
-          b2p_to_int: true,
-          text_print: true,
-          variables_set: true,
-          variables_get: true,
-          math_number: true,
-          math_arithmetic: true,
-          logic_compare: true,
-          b2p_if: true,
-          b2p_if_else: false,
-          b2p_for_range: true,
-          text: true,
-        };
+        const PUBLIC_BLOCK_IDS = [
+          "b2p_input_text",
+          "b2p_to_int",
+          "text_print",
+          "variables_set",
+          "variables_get",
+          "math_number",
+          "math_arithmetic",
+          "logic_compare",
+          "b2p_if",
+          "b2p_for_range",
+          "text",
+        ];
+        const CONFIGURABLE_BLOCK_IDS = new Set([
+          ...PUBLIC_BLOCK_IDS,
+          "b2p_if_else",
+        ]);
+        const DEFAULT_TOOLBOX_BLOCK_IDS = [...PUBLIC_BLOCK_IDS];
         const DISABLED_REASON = {
-          b2p_if_else: "`if / else` still needs a dedicated validation pass, so it is locked in phase 1.",
+          b2p_if_else: "`if / else` is not part of the current staged toolbox rollout.",
         };
+        let unlockedBlockIds = new Set(DEFAULT_TOOLBOX_BLOCK_IDS);
         let workspace = null;
         let generatedPython = "";
         let serializedWorkspace = {};
@@ -166,6 +171,10 @@
           });
         }
 
+        function currentAllowlist() {
+          return Array.from(unlockedBlockIds);
+        }
+
         function buildOutputPayload() {
           const ok = updateGeneratedArtifacts();
           if (!ok) {
@@ -181,8 +190,8 @@
               kind: "toolbox_workspace",
               schema_version: "phase1",
               blockly_version: Blockly.VERSION || "unknown",
-              allowlist: PHASE1_BLOCK_FLAGS,
-              workspace: serializedWorkspace
+              allowlist: currentAllowlist(),
+              workspace: serializedWorkspace,
             }
           };
         }
@@ -232,8 +241,39 @@
         }
 
         function isBlockEnabled(blockType) {
-          return PHASE1_BLOCK_FLAGS[blockType] === true;
+          return unlockedBlockIds.has(blockType);
         }
+
+        function normalizeToolboxBlockIds(blockIds) {
+          if (!Array.isArray(blockIds)) {
+            return [...DEFAULT_TOOLBOX_BLOCK_IDS];
+          }
+          const normalized = blockIds
+            .filter((blockId) => typeof blockId === "string" && CONFIGURABLE_BLOCK_IDS.has(blockId));
+          const unique = [...new Set(normalized)];
+          if (unique.includes("variables_set") && !unique.includes("variables_get")) {
+            unique.push("variables_get");
+          }
+          return unique;
+        }
+
+        function configureToolbox(blockIds) {
+          unlockedBlockIds = new Set(normalizeToolboxBlockIds(blockIds));
+          refreshToolbox();
+        }
+
+        window.block2pythonConfigureToolbox = configureToolbox;
+
+        window.block2pythonResetWorkspace = function () {
+          if (!workspace) {
+            return false;
+          }
+          workspace.clear();
+          generatedPython = "";
+          serializedWorkspace = {};
+          reportStatus("Blockly workspace reset.");
+          return true;
+        };
 
         function defineCustomBlocks() {
           Blockly.defineBlocksWithJsonArray([
@@ -276,7 +316,7 @@
               previousStatement: null,
               nextStatement: null,
               colour: 210,
-              tooltip: "Phase 1 controlled if block.",
+              tooltip: "Phase-controlled if block.",
               helpUrl: ""
             },
             {
@@ -300,7 +340,7 @@
               previousStatement: null,
               nextStatement: null,
               colour: 210,
-              tooltip: "Phase 1 controlled if / else block.",
+              tooltip: "Phase-controlled if / else block.",
               helpUrl: ""
             },
             {
@@ -411,7 +451,7 @@
             .filter((blockType) => !isBlockEnabled(blockType));
         }
 
-        function validateWorkspaceAgainstPhase1() {
+        function validateWorkspaceAgainstAllowlist() {
           const disallowedBlocks = collectDisallowedBlocks();
           if (disallowedBlocks.length === 0) {
             return { ok: true, message: "" };
@@ -419,7 +459,7 @@
 
           const uniqueBlocks = [...new Set(disallowedBlocks)];
           const details = uniqueBlocks
-            .map((blockType) => `${blockType}: ${DISABLED_REASON[blockType] || "This block is locked by the current phase allowlist."}`)
+            .map((blockType) => `${blockType}: ${DISABLED_REASON[blockType] || "This block is locked by the current toolbox allowlist."}`)
             .join("\n");
           return {
             ok: false,
@@ -428,7 +468,7 @@
         }
 
         function updateGeneratedArtifacts() {
-          const validation = validateWorkspaceAgainstPhase1();
+          const validation = validateWorkspaceAgainstAllowlist();
           if (!validation.ok) {
             generatedPython = "";
             serializedWorkspace = {};
@@ -458,6 +498,17 @@
           }
 
           return true;
+        }
+
+        function refreshToolbox() {
+          if (!workspace) {
+            return;
+          }
+          workspace.updateToolbox(createToolbox());
+          const ok = updateGeneratedArtifacts();
+          if (ok) {
+            reportStatus("Blockly workspace ready.");
+          }
         }
 
         function initializeBlockly() {
