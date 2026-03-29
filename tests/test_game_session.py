@@ -838,6 +838,36 @@ def test_practice_battery_resets_when_restarting_completed_group_practice() -> N
     assert contract_state.practice.battery_percent == 0
 
 
+def test_practice_toolbox_penalty_interface_exposes_battery_policy_value() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert session.current_practice_toolbox_penalty_percent(contract_state.practice.group_id) == 10
+
+
+def test_mark_toolbox_opened_interface_tracks_current_level_without_affecting_battery() -> None:
+    session = build_session()
+    session.start_group_story("group-01")
+    session.advance()
+    session.advance()
+
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.group_id == "group-01"
+    assert session.was_toolbox_opened_for_level("group-01-practice-01") is False
+
+    session.mark_toolbox_opened_for_current_level()
+
+    assert session.was_toolbox_opened_for_level("group-01-practice-01") is True
+    contract_state = session.current_game_state()
+    assert contract_state.practice is not None
+    assert contract_state.practice.battery_percent == 0
+
+
 def test_toolbox_verification_tracks_usage_without_clearing_level() -> None:
     session = build_session()
     session.start_group_story("group-01")

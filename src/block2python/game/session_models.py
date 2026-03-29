@@ -50,3 +50,4 @@ class PracticeBatteryState:
     group_id: str
     battery_percent: int = 0
     awarded_level_ids: set[str] = field(default_factory=set)
+    toolbox_opened_level_ids: set[str] = field(default_factory=set)

@@ -344,6 +344,41 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
             return 0
         return self.practice_battery_state.battery_percent
 
+    def current_practice_toolbox_penalty_percent(self, group_id: str | None) -> int | None:
+        if group_id is None:
+            return None
+        runtime_state = self.runtime.current_state()
+        if runtime_state is None or runtime_state.challenge is None:
+            return None
+        challenge = runtime_state.challenge
+        current_group_id = self._group_id_for_level_id(self.current_state().current_level_id or "")
+        if current_group_id != group_id:
+            return None
+        battery_policy = challenge.battery_policy
+        if battery_policy is None:
+            return None
+        return battery_policy.toolbox_reward_percent
+
+    def mark_toolbox_opened_for_current_level(self) -> None:
+        state = self.current_state()
+        if state.mode is not SessionMode.CHALLENGE or state.current_level_id is None:
+            return
+        group_id = self._group_id_for_level_id(state.current_level_id)
+        if group_id is None:
+            return
+        if self.practice_battery_state is None or self.practice_battery_state.group_id != group_id:
+            self._start_practice_battery_run(group_id)
+        assert self.practice_battery_state is not None
+        self.practice_battery_state.toolbox_opened_level_ids.add(state.current_level_id)
+
+    def was_toolbox_opened_for_level(self, level_id: str) -> bool:
+        group_id = self._group_id_for_level_id(level_id)
+        if group_id is None:
+            return False
+        if self.practice_battery_state is None or self.practice_battery_state.group_id != group_id:
+            return False
+        return level_id in self.practice_battery_state.toolbox_opened_level_ids
+
     def _award_practice_battery_for_level(self, level_id: str) -> None:
         group_id = self._group_id_for_level_id(level_id)
         if group_id is None:
