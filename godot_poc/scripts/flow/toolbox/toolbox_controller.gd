@@ -11,8 +11,8 @@ const WindowAlignmentHelperScript = preload("res://scripts/bridge/window_alignme
 const WindowLayoutSyncScript = preload("res://scripts/bridge/window_layout_sync.gd")
 
 var _owner: Control
-var _demo_screen: DemoScreen
-var _practice_screen: PracticeScreen
+var _demo_screen: Control
+var _practice_screen: Control
 
 var _helper_pid: int = -1
 var _result_file: String = ""
@@ -30,7 +30,7 @@ var _demo_conversion_pending: bool = false
 var _demo_conversion_requested_at_msec: int = 0
 
 
-func setup(owner: Control, demo_screen: DemoScreen, practice_screen: PracticeScreen) -> void:
+func setup(owner: Control, demo_screen: Control, practice_screen: Control) -> void:
 	_owner = owner
 	_demo_screen = demo_screen
 	_practice_screen = practice_screen
