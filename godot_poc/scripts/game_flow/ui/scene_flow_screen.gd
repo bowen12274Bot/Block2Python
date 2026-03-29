@@ -1,7 +1,7 @@
 extends Control
 class_name SceneFlowScreen
 
-const ScenePanelScript = preload("res://scripts/game_flow/scene_panel.gd")
+const ScenePanelScript = preload("res://scripts/game_flow/ui/scene_panel.gd")
 
 signal advance_requested()
 signal back_requested()
