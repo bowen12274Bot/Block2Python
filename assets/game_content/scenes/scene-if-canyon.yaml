@@ -1,0 +1,53 @@
+﻿scene_id: scene-if-canyon
+title: If Canyon
+dialogue_blocks:
+  - speaker: 系統
+    text: 等等等等…有人在改寫這個星球的規則，會引來大災難。
+    portrait_id: system-default
+    expression: glitched
+    speaker_side: center
+    background_id: scene-03-logic-breakdown
+    emphasis: alert
+  - speaker: 玩家
+    text: 到底是誰？
+    portrait_id: player-default
+    expression: thinking
+    speaker_side: right
+    background_id: scene-03-logic-breakdown
+    emphasis: normal
+  - speaker: 系統
+    text: 是程式星球的大魔王 Bug King。
+    portrait_id: system-default
+    expression: glitched
+    speaker_side: center
+    background_id: scene-03-logic-breakdown
+    emphasis: alert
+  - speaker: Byte
+    text: 這個星球的邏輯開始崩壞了，事情越來越不對勁。
+    portrait_id: byte-default
+    expression: alert
+    speaker_side: left
+    background_id: scene-03-logic-breakdown
+    emphasis: alert
+  - speaker: 系統
+    text: 條件判斷錯誤…邏輯分支異常…
+    portrait_id: system-default
+    expression: glitched
+    speaker_side: center
+    background_id: scene-03-logic-breakdown
+    emphasis: alert
+  - speaker: 玩家
+    text: 所以現在整個世界都在亂判斷？
+    portrait_id: player-default
+    expression: thinking
+    speaker_side: right
+    background_id: scene-03-logic-breakdown
+    emphasis: normal
+  - speaker: Byte
+    text: 對，我們要用 if 把判斷邏輯修回來。
+    portrait_id: byte-default
+    expression: explain
+    speaker_side: left
+    background_id: scene-03-logic-breakdown
+    emphasis: normal
+next_action: goto_demo_if_canyon

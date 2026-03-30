@@ -1,0 +1,50 @@
+﻿scene_id: scene-bug-king-castle
+title: Bug King Castle
+dialogue_blocks:
+  - speaker: Bug King
+    text: 聽說你把我破壞的程式都恢復了？
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: 玩家
+    text: 是又怎樣？
+    portrait_id: player-default
+    expression: alert
+    speaker_side: right
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: Bug King
+    text: 你身邊還跟著一個害蟲。
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: 玩家
+    text: 你說什麼？你才是害蟲。
+    portrait_id: player-default
+    expression: alert
+    speaker_side: right
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: Bug King
+    text: 人類沒了 AI 就什麼也做不了，我先毀掉 Byte。
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: Byte
+    text: 想要恢復我，必須用你之前學會的程式技巧。
+    portrait_id: byte-default
+    expression: alert
+    speaker_side: left
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: 玩家
+    text: 我一定會救你，也會在這裡打倒 Bug King。
+    portrait_id: player-default
+    expression: alert
+    speaker_side: right
+    background_id: scene-05-bug-king-castle
+    emphasis: success
+next_action: goto_demo_bug_king_castle
