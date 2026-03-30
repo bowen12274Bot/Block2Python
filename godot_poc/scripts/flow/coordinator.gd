@@ -50,6 +50,9 @@ const TutorUserConfigScript = preload("res://scripts/game_flow/tutor/tutor_user_
 const FlowPageRouterScript = preload("res://scripts/flow/page_router.gd")
 const FlowScreenPresenterScript = preload("res://scripts/flow/screen_presenter.gd")
 const FlowToolboxControllerScript = preload("res://scripts/flow/toolbox/toolbox_controller.gd")
+const DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC := 30.0
+const TUTOR_REQUEST_TIMEOUT_GRACE_SEC := 5.0
+const MAX_TUTOR_CONVERSATION_MESSAGES := 12
 
 @onready var python_bridge_client = $PythonBridgeClient
 @onready var entry_screen = $EntryScreen
@@ -67,11 +70,20 @@ var _toolbox_controller: RefCounted
 var _awaiting_tutor_reply: bool = false
 var _active_tutor_request_tag: String = ""
 var _tutor_request_seq: int = 0
+var _active_tutor_timeout_sec: float = DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC
+var _tutor_timeout_timer: Timer
+var _tutor_conversation_id: String = ""
+var _tutor_conversation_level_id: String = ""
+var _tutor_conversation_history: Array[Dictionary] = []
 
 
 func _ready() -> void:
 	_state_store = BridgeStateStoreScript.new()
 	_ensure_toolbox_controller()
+	_tutor_timeout_timer = Timer.new()
+	_tutor_timeout_timer.one_shot = true
+	_tutor_timeout_timer.timeout.connect(_on_tutor_request_timeout)
+	add_child(_tutor_timeout_timer)
 
 	entry_screen.start_bridge_requested.connect(_on_start_bridge_requested)
 	entry_screen.reset_requested.connect(_on_reset_requested)
@@ -269,6 +281,8 @@ func _on_tutor_requested(question: String, provider: String, provider_options: D
 	if level_id == "":
 		practice_screen.show_tutor_error("Tutor is available only when a level is active.")
 		return
+	if _tutor_conversation_level_id != level_id:
+		_reset_tutor_conversation(level_id)
 
 	var payload: Dictionary = {
 		"question": question,
@@ -277,6 +291,10 @@ func _on_tutor_requested(question: String, provider: String, provider_options: D
 		"python_code": practice_screen.current_python_code(),
 		"block_json": null,
 	}
+	if _tutor_conversation_id != "":
+		payload["conversation_id"] = _tutor_conversation_id
+	if not _tutor_conversation_history.is_empty():
+		payload["conversation_history"] = _copy_tutor_conversation_history()
 	if not provider_options.is_empty():
 		payload["provider_options"] = provider_options
 
@@ -286,6 +304,9 @@ func _on_tutor_requested(question: String, provider: String, provider_options: D
 	_tutor_request_seq += 1
 	_active_tutor_request_tag = "tutor_%d" % _tutor_request_seq
 	_awaiting_tutor_reply = true
+	_active_tutor_timeout_sec = _resolve_tutor_timeout_sec(provider_options)
+	_start_tutor_timeout(_active_tutor_timeout_sec + TUTOR_REQUEST_TIMEOUT_GRACE_SEC)
+	_append_tutor_conversation("user", question)
 	practice_screen.set_status("Status: requesting tutor reply...")
 	python_bridge_client.send_tutor_reply_async(payload, _active_tutor_request_tag)
 
@@ -293,6 +314,7 @@ func _on_tutor_requested(question: String, provider: String, provider_options: D
 func _on_tutor_cancel_requested() -> void:
 	if _active_tutor_request_tag != "":
 		python_bridge_client.cancel_tutor_request(_active_tutor_request_tag)
+	_stop_tutor_timeout()
 	_active_tutor_request_tag = ""
 	_awaiting_tutor_reply = false
 	practice_screen.set_status("Status: tutor request cancelled locally.")
@@ -332,6 +354,7 @@ func _on_bridge_started() -> void:
 
 func _on_bridge_failed(message: String) -> void:
 	if _awaiting_tutor_reply:
+		_stop_tutor_timeout()
 		_awaiting_tutor_reply = false
 		_active_tutor_request_tag = ""
 		practice_screen.show_tutor_error(message)
@@ -482,6 +505,7 @@ func _on_tutor_response_received(response: Dictionary, request_tag: String) -> v
 	if request_tag != _active_tutor_request_tag:
 		return
 
+	_stop_tutor_timeout()
 	response_text.text = JSON.stringify(response, "  ")
 	_active_tutor_request_tag = ""
 	_awaiting_tutor_reply = false
@@ -502,6 +526,7 @@ func _on_tutor_response_received(response: Dictionary, request_tag: String) -> v
 	var metadata: Dictionary = {}
 	if metadata_variant is Dictionary:
 		metadata = metadata_variant
+	_append_tutor_conversation("assistant", content)
 	practice_screen.show_tutor_reply(reply_type, content, metadata)
 
 
@@ -509,10 +534,72 @@ func _on_tutor_request_failed(message: String, request_tag: String) -> void:
 	if request_tag != _active_tutor_request_tag:
 		return
 
+	_stop_tutor_timeout()
 	response_text.text = "Tutor async request failed: %s" % message
 	_active_tutor_request_tag = ""
 	_awaiting_tutor_reply = false
 	practice_screen.show_tutor_error(message)
+
+
+func _on_tutor_request_timeout() -> void:
+	if not _awaiting_tutor_reply:
+		return
+
+	var timed_out_tag: String = _active_tutor_request_tag
+	if timed_out_tag != "":
+		python_bridge_client.cancel_tutor_request(timed_out_tag)
+
+	response_text.text = "Tutor request timed out after %.1fs (%s)." % [_active_tutor_timeout_sec, timed_out_tag]
+	_active_tutor_request_tag = ""
+	_awaiting_tutor_reply = false
+	practice_screen.show_tutor_error("Tutor request timed out. Please try again.")
+
+
+func _resolve_tutor_timeout_sec(provider_options: Dictionary) -> float:
+	var timeout_raw: Variant = provider_options.get("timeout_sec", DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC)
+	if timeout_raw is float or timeout_raw is int:
+		var timeout_value: float = float(timeout_raw)
+		if timeout_value > 0:
+			return timeout_value
+	return DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC
+
+
+func _start_tutor_timeout(timeout_sec: float) -> void:
+	if _tutor_timeout_timer == null:
+		return
+	_tutor_timeout_timer.wait_time = max(1.0, timeout_sec)
+	_tutor_timeout_timer.start()
+
+
+func _stop_tutor_timeout() -> void:
+	if _tutor_timeout_timer == null:
+		return
+	_tutor_timeout_timer.stop()
+
+
+func _reset_tutor_conversation(level_id: String) -> void:
+	_tutor_conversation_level_id = level_id
+	_tutor_conversation_id = "tutor_%s_%d" % [level_id, Time.get_ticks_msec()]
+	_tutor_conversation_history.clear()
+
+
+func _append_tutor_conversation(role: String, content: String) -> void:
+	var trimmed: String = content.strip_edges()
+	if trimmed == "":
+		return
+	_tutor_conversation_history.append({
+		"role": role,
+		"content": trimmed,
+	})
+	while _tutor_conversation_history.size() > MAX_TUTOR_CONVERSATION_MESSAGES:
+		_tutor_conversation_history.remove_at(0)
+
+
+func _copy_tutor_conversation_history() -> Array[Dictionary]:
+	var copied: Array[Dictionary] = []
+	for item in _tutor_conversation_history:
+		copied.append(item.duplicate(true))
+	return copied
 
 
 func _resolve_current_level_id(state: Dictionary) -> String:
