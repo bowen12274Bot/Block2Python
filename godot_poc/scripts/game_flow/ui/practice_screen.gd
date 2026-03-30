@@ -70,9 +70,9 @@ var _toolbox_status_message: String = ""
 var _assistant_enabled: bool = false
 var _tutor_request_pending: bool = false
 var _total_tutor_cost: float = 0.0
-var _provider_endpoint_url: String = DEFAULT_OPENAI_ENDPOINT
-var _provider_model: String = DEFAULT_OPENAI_MODEL
-var _provider_timeout_sec: float = DEFAULT_OPENAI_TIMEOUT_SEC
+var _provider_endpoint_url: String = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+var _provider_model: String = DEFAULT_LOCAL_OLLAMA_MODEL
+var _provider_timeout_sec: float = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
 var _provider_system_prompt: String = ""
 var _api_key_visible: bool = false
 var _tutor_reply_stream_timer: Timer
@@ -188,12 +188,12 @@ func current_python_code() -> String:
 	return practice_panel.get_python_code()
 
 func set_tutor_config(config: Dictionary) -> void:
-	_select_provider(str(config.get("provider", "template")))
+	_select_provider(str(config.get("provider", "local")))
 	assistant_api_key_input.text = str(config.get("api_key", ""))
-	_provider_endpoint_url = str(config.get("endpoint_url", DEFAULT_OPENAI_ENDPOINT))
-	_provider_model = str(config.get("model", DEFAULT_OPENAI_MODEL))
+	_provider_endpoint_url = str(config.get("endpoint_url", DEFAULT_LOCAL_OLLAMA_ENDPOINT))
+	_provider_model = str(config.get("model", DEFAULT_LOCAL_OLLAMA_MODEL))
 	_provider_system_prompt = str(config.get("system_prompt", ""))
-	var timeout_raw: Variant = config.get("timeout_sec", DEFAULT_OPENAI_TIMEOUT_SEC)
+	var timeout_raw: Variant = config.get("timeout_sec", DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC)
 	if timeout_raw is float or timeout_raw is int:
 		var timeout_value: float = float(timeout_raw)
 		if timeout_value > 0:
@@ -325,12 +325,12 @@ func _on_back_button_pressed() -> void:
 
 func _setup_provider_options() -> void:
 	provider_option.clear()
-	provider_option.add_item("Template")
-	provider_option.set_item_metadata(0, "template")
 	provider_option.add_item("Local Ollama Selector")
-	provider_option.set_item_metadata(1, "local")
+	provider_option.set_item_metadata(0, "local")
 	provider_option.add_item("OpenAI Compatible")
-	provider_option.set_item_metadata(2, "openai_compatible")
+	provider_option.set_item_metadata(1, "openai_compatible")
+	provider_option.add_item("Template")
+	provider_option.set_item_metadata(2, "template")
 	provider_option.add_item("Stub")
 	provider_option.set_item_metadata(3, "stub")
 	provider_option.select(0)
@@ -346,11 +346,11 @@ func _select_provider(provider: String) -> void:
 func _selected_provider() -> String:
 	var index: int = provider_option.selected
 	if index < 0:
-		return "template"
+		return "local"
 	var metadata: Variant = provider_option.get_item_metadata(index)
 	if metadata is String:
 		return String(metadata)
-	return "template"
+	return "local"
 
 func _build_provider_options(provider: String) -> Dictionary:
 	_read_provider_form_values()
@@ -394,7 +394,10 @@ func _refresh_tutor_controls() -> void:
 func _refresh_provider_form() -> void:
 	var provider: String = _selected_provider()
 	var needs_provider_form: bool = provider == "openai_compatible" or provider == "local"
+	var show_api_key_controls: bool = provider == "openai_compatible" or provider == "local"
 	provider_form.visible = needs_provider_form
+	assistant_api_key_input.visible = show_api_key_controls
+	api_key_visibility_button.visible = show_api_key_controls
 
 	if provider == "local":
 		if _provider_endpoint_url.strip_edges() == "" or _provider_endpoint_url == DEFAULT_OPENAI_ENDPOINT:
@@ -416,7 +419,7 @@ func _refresh_provider_form() -> void:
 		provider_form_hint_label.text = "Remote provider requires API key and endpoint credentials."
 	else:
 		assistant_api_key_input.placeholder_text = "API key"
-		provider_form_hint_label.text = ""
+		provider_form_hint_label.text = "Template/Stub use built-in reply flow and do not require provider credentials."
 
 	_sync_provider_form_inputs()
 

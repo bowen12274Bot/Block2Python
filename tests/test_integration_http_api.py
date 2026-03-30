@@ -17,9 +17,9 @@ def test_load_tutor_user_config_returns_defaults_when_file_missing(tmp_path: Pat
 
     config = load_tutor_user_config(config_path=config_path)
 
-    assert config.provider == "template"
-    assert config.endpoint_url == "https://api.openai.com/v1/chat/completions"
-    assert config.model == "gpt-4o-mini"
+    assert config.provider == "local"
+    assert config.endpoint_url == "http://127.0.0.1:11434/v1/chat/completions"
+    assert config.model == "qwen3.5:0.8b"
     assert config.api_key == ""
 
 

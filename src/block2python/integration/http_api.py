@@ -12,15 +12,21 @@ from block2python.integration.bridge_stdio import BridgeServer
 
 DEFAULT_TUTOR_CONFIG_PATH = Path(".block2python") / "tutor_config.json"
 SUPPORTED_TUTOR_PROVIDERS = frozenset({"template", "stub", "local", "openai_compatible"})
+DEFAULT_OPENAI_ENDPOINT_URL = "https://api.openai.com/v1/chat/completions"
+DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+DEFAULT_OPENAI_TIMEOUT_SEC = 30.0
+DEFAULT_LOCAL_OLLAMA_ENDPOINT = "http://127.0.0.1:11434/v1/chat/completions"
+DEFAULT_LOCAL_OLLAMA_MODEL = "qwen3.5:0.8b"
+DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC = 20.0
 
 
 @dataclass(frozen=True, slots=True)
 class TutorUserConfig:
-    provider: str = "template"
-    endpoint_url: str = "https://api.openai.com/v1/chat/completions"
-    model: str = "gpt-4o-mini"
+    provider: str = "local"
+    endpoint_url: str = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+    model: str = DEFAULT_LOCAL_OLLAMA_MODEL
     api_key: str = ""
-    timeout_sec: float = 30.0
+    timeout_sec: float = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
     system_prompt: str | None = None
 
     def to_dict(self) -> dict[str, object]:

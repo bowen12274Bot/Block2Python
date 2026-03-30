@@ -2,13 +2,16 @@ extends RefCounted
 class_name TutorUserConfig
 
 const CONFIG_PATH := "user://tutor_config.json"
-const DEFAULT_PROVIDER := "template"
-const DEFAULT_ENDPOINT_URL := "https://api.openai.com/v1/chat/completions"
-const DEFAULT_MODEL := "gpt-4o-mini"
-const DEFAULT_TIMEOUT_SEC := 30.0
+const DEFAULT_PROVIDER := "local"
+const DEFAULT_OPENAI_ENDPOINT_URL := "https://api.openai.com/v1/chat/completions"
+const DEFAULT_OPENAI_MODEL := "gpt-4o-mini"
+const DEFAULT_OPENAI_TIMEOUT_SEC := 30.0
 const DEFAULT_LOCAL_OLLAMA_ENDPOINT := "http://127.0.0.1:11434/v1/chat/completions"
 const DEFAULT_LOCAL_OLLAMA_MODEL := "qwen3.5:0.8b"
 const DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC := 20.0
+const DEFAULT_ENDPOINT_URL := DEFAULT_LOCAL_OLLAMA_ENDPOINT
+const DEFAULT_MODEL := DEFAULT_LOCAL_OLLAMA_MODEL
+const DEFAULT_TIMEOUT_SEC := DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
 
 
 static func default_config() -> Dictionary:
@@ -96,11 +99,19 @@ static func _normalize_config(raw: Dictionary, defaults: Dictionary) -> Dictiona
 		merged["system_prompt"] = String(system_prompt_raw).strip_edges()
 
 	if merged.get("provider", DEFAULT_PROVIDER) == "local":
-		if String(merged.get("endpoint_url", "")).strip_edges() == "" or String(merged.get("endpoint_url", "")).strip_edges() == DEFAULT_ENDPOINT_URL:
+		if String(merged.get("endpoint_url", "")).strip_edges() == "" or String(merged.get("endpoint_url", "")).strip_edges() == DEFAULT_OPENAI_ENDPOINT_URL:
 			merged["endpoint_url"] = DEFAULT_LOCAL_OLLAMA_ENDPOINT
-		if String(merged.get("model", "")).strip_edges() == "" or String(merged.get("model", "")).strip_edges() == DEFAULT_MODEL:
+		if String(merged.get("model", "")).strip_edges() == "" or String(merged.get("model", "")).strip_edges() == DEFAULT_OPENAI_MODEL:
 			merged["model"] = DEFAULT_LOCAL_OLLAMA_MODEL
 		if float(merged.get("timeout_sec", DEFAULT_TIMEOUT_SEC)) <= 0.0:
 			merged["timeout_sec"] = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
+
+	if merged.get("provider", DEFAULT_PROVIDER) == "openai_compatible":
+		if String(merged.get("endpoint_url", "")).strip_edges() == "":
+			merged["endpoint_url"] = DEFAULT_OPENAI_ENDPOINT_URL
+		if String(merged.get("model", "")).strip_edges() == "":
+			merged["model"] = DEFAULT_OPENAI_MODEL
+		if float(merged.get("timeout_sec", DEFAULT_TIMEOUT_SEC)) <= 0.0:
+			merged["timeout_sec"] = DEFAULT_OPENAI_TIMEOUT_SEC
 
 	return merged
