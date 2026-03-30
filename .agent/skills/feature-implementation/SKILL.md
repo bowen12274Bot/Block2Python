@@ -13,6 +13,7 @@ description: 用於 Block2Python 的功能實作、重構與維護工作。當�
 - 修正應用程式、UI、Blockly 整合或工具腳本中的問題
 - 在維持專案架構一致的前提下進行重構
 - 當行為變更影響既有流程時，補上或更新測試
+- 關卡出題與測資生成整合（Block2Python level + testlib）
 
 ## 開發前必讀
 
@@ -33,6 +34,8 @@ description: 用於 Block2Python 的功能實作、重構與維護工作。當�
 - 先在 AI 對話中整理簡短計畫
 - 先產出完整開發計畫文件
 
+如果需求包含「開新題」、「重寫題目」、「生成測資」、「generator/validator/checker」、「testlib」等關鍵字，必須先讀並套用 `cf-testlib-problem-generation` skill，再回到本 skill 執行整合與收尾。
+
 ## 工作原則
 
 - 所有變更都應與 `docs/project_architecture.md` 的分層原則一致。
@@ -50,6 +53,26 @@ description: 用於 Block2Python 的功能實作、重構與維護工作。當�
 5. 以最小修改集完成目標，避免把多個不相干問題綁在同一個變更裡。
 6. 針對實際改動範圍執行最窄但足夠的驗證。
 7. 回報結果時要清楚說明做了什麼、為什麼這樣做、以及有哪些尚未驗證的風險。
+
+## 關卡出題一條龍（一次完成）
+
+當任務是題目生成或題目重製時，禁止只做到 scaffold 或只改 statement；應一次完成到可交付狀態。
+
+### 必做交付
+
+- `tools/level/<problem_name>/`：`statement.md`、`solutions/solution.cpp`、`solutions/brute.cpp`、`testlib/generator.cpp`、`testlib/validator.cpp`、`testlib/checker.cpp`
+- `assets/levels/<level_id>.yaml`：題面、教學/劇情欄位、`testcase_dir`、`judge_policy` 一致
+- `assets/levels/cases/<level_id>/`：正式 `NN.in` / `NN.out` 測資（不可只留 placeholder）
+- 驗證腳本：`tools/level/<problem_name>/scripts/verify_testlib.ps1`（可重跑）
+- 最小測試：`tests/test_levels_loader.py`（至少確認 level 資產可載入）
+
+### 強制驗收（DoD）
+
+- generator 產生的輸入全部可通過 validator
+- `solution` 與 `brute` 對拍通過（至少一輪批次）
+- checker 能接受正確輸出、拒絕錯誤輸出
+- 目標 level 的正式 case 目錄已由生成器/解答回灌為最終版本
+- 回報中包含：產生了幾組 case、用了哪些 seed/參數、跑了哪些驗證
 
 ## 驗證
 

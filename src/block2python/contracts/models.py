@@ -57,6 +57,8 @@ class LevelSpec:
     concept_policy: ConceptPolicy = field(default_factory=ConceptPolicy)
     block_schema_version: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    teaching_skill_ids: tuple[str, ...] = ()
+    tutor_policy: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)

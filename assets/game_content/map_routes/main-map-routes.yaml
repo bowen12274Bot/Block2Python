@@ -311,6 +311,7 @@ map_routes:
               - group-05-practice-03
               - group-05-practice-04
               - group-05-practice-05
+              - group-05-bonus-signal-scan-01
             tracked_node_ids:
               - group-05-practice
             is_repeatable: true

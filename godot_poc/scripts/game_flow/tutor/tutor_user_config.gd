@@ -1,0 +1,89 @@
+extends RefCounted
+class_name TutorUserConfig
+
+const CONFIG_PATH := "user://tutor_config.json"
+const DEFAULT_PROVIDER := "template"
+const DEFAULT_ENDPOINT_URL := "https://api.openai.com/v1/chat/completions"
+const DEFAULT_MODEL := "gpt-4o-mini"
+const DEFAULT_TIMEOUT_SEC := 30.0
+
+
+static func default_config() -> Dictionary:
+	return {
+		"provider": DEFAULT_PROVIDER,
+		"endpoint_url": DEFAULT_ENDPOINT_URL,
+		"model": DEFAULT_MODEL,
+		"api_key": "",
+		"timeout_sec": DEFAULT_TIMEOUT_SEC,
+	}
+
+
+static func load_config() -> Dictionary:
+	var defaults: Dictionary = default_config()
+	if not FileAccess.file_exists(CONFIG_PATH):
+		return defaults
+
+	var file: FileAccess = FileAccess.open(CONFIG_PATH, FileAccess.READ)
+	if file == null:
+		return defaults
+
+	var raw_text: String = file.get_as_text()
+	file.close()
+	if raw_text.strip_edges() == "":
+		return defaults
+
+	var parsed: Variant = JSON.parse_string(raw_text)
+	if not (parsed is Dictionary):
+		return defaults
+
+	return _normalize_config(parsed, defaults)
+
+
+static func save_config(config: Dictionary) -> bool:
+	var normalized: Dictionary = _normalize_config(config, default_config())
+	var file: FileAccess = FileAccess.open(CONFIG_PATH, FileAccess.WRITE)
+	if file == null:
+		return false
+
+	file.store_string(JSON.stringify(normalized, "\t"))
+	file.flush()
+	file.close()
+	return true
+
+
+static func provider_options(config: Dictionary) -> Dictionary:
+	var normalized: Dictionary = _normalize_config(config, default_config())
+	return {
+		"endpoint_url": normalized.get("endpoint_url", DEFAULT_ENDPOINT_URL),
+		"model": normalized.get("model", DEFAULT_MODEL),
+		"api_key": normalized.get("api_key", ""),
+		"timeout_sec": float(normalized.get("timeout_sec", DEFAULT_TIMEOUT_SEC)),
+	}
+
+
+static func _normalize_config(raw: Dictionary, defaults: Dictionary) -> Dictionary:
+	var merged: Dictionary = defaults.duplicate(true)
+
+	var provider_raw: Variant = raw.get("provider", merged.get("provider", DEFAULT_PROVIDER))
+	if provider_raw is String and String(provider_raw).strip_edges() != "":
+		merged["provider"] = String(provider_raw).strip_edges().to_lower()
+
+	var endpoint_raw: Variant = raw.get("endpoint_url", merged.get("endpoint_url", DEFAULT_ENDPOINT_URL))
+	if endpoint_raw is String:
+		merged["endpoint_url"] = String(endpoint_raw).strip_edges()
+
+	var model_raw: Variant = raw.get("model", merged.get("model", DEFAULT_MODEL))
+	if model_raw is String:
+		merged["model"] = String(model_raw).strip_edges()
+
+	var api_key_raw: Variant = raw.get("api_key", merged.get("api_key", ""))
+	if api_key_raw is String:
+		merged["api_key"] = String(api_key_raw).strip_edges()
+
+	var timeout_raw: Variant = raw.get("timeout_sec", merged.get("timeout_sec", DEFAULT_TIMEOUT_SEC))
+	if timeout_raw is float or timeout_raw is int:
+		var timeout_value: float = float(timeout_raw)
+		if timeout_value > 0:
+			merged["timeout_sec"] = timeout_value
+
+	return merged

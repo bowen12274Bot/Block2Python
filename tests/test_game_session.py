@@ -319,6 +319,7 @@ def test_game_session_can_complete_all_five_groups() -> None:
     for group_number in range(1, 6):
         for level_number in range(1, 6):
             expected_cleared_levels.append("group-%02d-practice-%02d" % (group_number, level_number))
+    expected_cleared_levels.append("group-05-bonus-signal-scan-01")
     assert contract_state.progress.cleared_level_ids == tuple(expected_cleared_levels)
 
     assert contract_state.map_route is not None

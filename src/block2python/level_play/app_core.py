@@ -51,6 +51,9 @@ class AppCore:
             views.append(LevelView(level_id=level.level_id, title=level.title, state=self._state_of(level)))
         return tuple(views)
 
+    def get_level(self, level_id: str) -> LevelSpec | None:
+        return self._levels.get(level_id)
+
     def submit(self, submission: Submission) -> SubmitOutcome:
         return self._evaluate_submission(submission, require_block_passed=True, persist_clear=True)
 
