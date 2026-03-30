@@ -159,6 +159,8 @@ func _on_start_bridge_requested() -> void:
 
 
 func _on_reset_requested() -> void:
+	_cancel_active_tutor_request()
+	_clear_tutor_conversation()
 	entry_screen.set_status("Status: requesting reset...")
 	map_screen.set_status("Status: requesting reset...")
 	python_bridge_client.send_reset()
@@ -458,6 +460,9 @@ func _show_page(page: String) -> void:
 	var demo_view: Dictionary = _current_demo_view()
 	if _ensure_toolbox_controller():
 		_toolbox_controller.handle_page_changed(page, demo_view)
+	if page != "challenge":
+		_cancel_active_tutor_request()
+		_clear_tutor_conversation()
 
 
 func _current_view_model() -> Dictionary:
@@ -575,6 +580,20 @@ func _stop_tutor_timeout() -> void:
 	if _tutor_timeout_timer == null:
 		return
 	_tutor_timeout_timer.stop()
+
+
+func _cancel_active_tutor_request() -> void:
+	if _active_tutor_request_tag != "":
+		python_bridge_client.cancel_tutor_request(_active_tutor_request_tag)
+	_stop_tutor_timeout()
+	_active_tutor_request_tag = ""
+	_awaiting_tutor_reply = false
+
+
+func _clear_tutor_conversation() -> void:
+	_tutor_conversation_id = ""
+	_tutor_conversation_level_id = ""
+	_tutor_conversation_history.clear()
 
 
 func _reset_tutor_conversation(level_id: String) -> void:
