@@ -88,6 +88,7 @@ def test_game_state_contract_supports_demo_payload() -> None:
                 {"title": "print", "description": "Output text to the screen."},
                 {"title": "input", "description": "Read user input into your program."},
             ),
+            toolbox_block_ids=("text_print", "b2p_input_text"),
         ),
         available_actions=AvailableActions(advance=True),
     )
@@ -99,6 +100,7 @@ def test_game_state_contract_supports_demo_payload() -> None:
     assert state.demo.level_id == "group-01-demo"
     assert state.demo.learning_markdown == "Learn print()."
     assert state.demo.unlock_blocks[0]["title"] == "print"
+    assert state.demo.toolbox_block_ids == ("text_print", "b2p_input_text")
     assert state.demo.can_advance is True
     assert state.available_actions.advance is True
     assert state.practice is None
@@ -121,6 +123,9 @@ def test_game_state_contract_supports_practice_payload() -> None:
             is_review_mode=True,
             toolbox_allowed=True,
             toolbox_used=True,
+            toolbox_opened=True,
+            toolbox_penalty_percent=10,
+            toolbox_block_ids=("text_print", "b2p_input_text"),
             can_run=True,
             can_submit=True,
             can_next=False,
@@ -141,6 +146,9 @@ def test_game_state_contract_supports_practice_payload() -> None:
     assert state.practice.is_review_mode is True
     assert state.practice.toolbox_allowed is True
     assert state.practice.toolbox_used is True
+    assert state.practice.toolbox_opened is True
+    assert state.practice.toolbox_penalty_percent == 10
+    assert state.practice.toolbox_block_ids == ("text_print", "b2p_input_text")
     assert state.practice.can_run is True
     assert state.practice.can_submit is True
     assert state.practice.can_next is False
