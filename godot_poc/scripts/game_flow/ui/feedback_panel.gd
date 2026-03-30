@@ -5,8 +5,8 @@ const SUCCESS_COLOR := Color(0.462745, 0.870588, 0.611765, 0.95)
 const ERROR_COLOR := Color(1, 0.486275, 0.486275, 0.95)
 const IDLE_COLOR := Color(0.72549, 0.756863, 0.854902, 0.92)
 
-@onready var feedback_title: Label = $FeedbackMargin/FeedbackRoot/HeaderRow/FeedbackTitle
-@onready var status_badge: Label = $FeedbackMargin/FeedbackRoot/HeaderRow/StatusBadge/StatusBadgeMargin/StatusBadgeLabel
+@onready var feedback_title: Label = $FeedbackMargin/FeedbackRoot/FeedbackTitle
+@onready var status_badge: Label = $FeedbackMargin/FeedbackRoot/StatusBadge/StatusBadgeMargin/StatusBadgeLabel
 @onready var feedback_text: RichTextLabel = $FeedbackMargin/FeedbackRoot/FeedbackText
 
 

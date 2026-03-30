@@ -6,14 +6,14 @@ dialogue_blocks:
     portrait_id: system-default
     expression: glitched
     speaker_side: center
-    background_id: scene-gc-control-room-broken
+    background_id: scene-00-normal-city
     emphasis: alert
   - speaker: 玩家
     text: 這裡是…哪裡？
     portrait_id: player-default
     expression: thinking
     speaker_side: right
-    background_id: scene-gc-control-room-broken
+    background_id: scene-00-normal-city
     emphasis: normal
   - speaker: Byte
     text: 歡迎來到 Code Planet。

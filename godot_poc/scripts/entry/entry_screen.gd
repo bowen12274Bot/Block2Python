@@ -185,32 +185,20 @@ func _entry_hint_text() -> String:
 
 
 func _apply_background_texture() -> void:
-	if ResourceLoader.exists(CHARACTER_BACKGROUND_PATH):
-		background_texture.texture = load(CHARACTER_BACKGROUND_PATH)
-		return
-
-	var absolute_path: String = ProjectSettings.globalize_path(CHARACTER_BACKGROUND_PATH)
-	if not FileAccess.file_exists(absolute_path):
-		return
-
-	var image: Image = Image.load_from_file(absolute_path)
+	var image: Image = _load_image_with_header_fallback(ProjectSettings.globalize_path(CHARACTER_BACKGROUND_PATH))
 	if image == null or image.is_empty():
+		if ResourceLoader.exists(CHARACTER_BACKGROUND_PATH):
+			background_texture.texture = load(CHARACTER_BACKGROUND_PATH)
 		return
 
 	background_texture.texture = ImageTexture.create_from_image(image)
 
 
 func _apply_avatar_texture(target: TextureRect, resource_path: String) -> void:
-	if ResourceLoader.exists(resource_path):
-		target.texture = load(resource_path)
-		return
-
-	var absolute_path: String = ProjectSettings.globalize_path(resource_path)
-	if not FileAccess.file_exists(absolute_path):
-		return
-
-	var image: Image = _load_image_with_header_fallback(absolute_path)
+	var image: Image = _load_image_with_header_fallback(ProjectSettings.globalize_path(resource_path))
 	if image == null or image.is_empty():
+		if ResourceLoader.exists(resource_path):
+			target.texture = load(resource_path)
 		return
 
 	target.texture = ImageTexture.create_from_image(image)
@@ -256,6 +244,9 @@ func _update_card_highlight(card: PanelContainer, glow_bar: ColorRect, is_select
 
 
 func _load_image_with_header_fallback(absolute_path: String) -> Image:
+	if not FileAccess.file_exists(absolute_path):
+		return null
+
 	var image: Image = Image.load_from_file(absolute_path)
 	if image != null and not image.is_empty():
 		return image
