@@ -6,6 +6,9 @@ const DEFAULT_PROVIDER := "template"
 const DEFAULT_ENDPOINT_URL := "https://api.openai.com/v1/chat/completions"
 const DEFAULT_MODEL := "gpt-4o-mini"
 const DEFAULT_TIMEOUT_SEC := 30.0
+const DEFAULT_LOCAL_OLLAMA_ENDPOINT := "http://127.0.0.1:11434/v1/chat/completions"
+const DEFAULT_LOCAL_OLLAMA_MODEL := "qwen3.5:0.8b"
+const DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC := 20.0
 
 
 static func default_config() -> Dictionary:
@@ -15,6 +18,7 @@ static func default_config() -> Dictionary:
 		"model": DEFAULT_MODEL,
 		"api_key": "",
 		"timeout_sec": DEFAULT_TIMEOUT_SEC,
+		"system_prompt": "",
 	}
 
 
@@ -58,6 +62,7 @@ static func provider_options(config: Dictionary) -> Dictionary:
 		"model": normalized.get("model", DEFAULT_MODEL),
 		"api_key": normalized.get("api_key", ""),
 		"timeout_sec": float(normalized.get("timeout_sec", DEFAULT_TIMEOUT_SEC)),
+		"system_prompt": normalized.get("system_prompt", ""),
 	}
 
 
@@ -85,5 +90,17 @@ static func _normalize_config(raw: Dictionary, defaults: Dictionary) -> Dictiona
 		var timeout_value: float = float(timeout_raw)
 		if timeout_value > 0:
 			merged["timeout_sec"] = timeout_value
+
+	var system_prompt_raw: Variant = raw.get("system_prompt", merged.get("system_prompt", ""))
+	if system_prompt_raw is String:
+		merged["system_prompt"] = String(system_prompt_raw).strip_edges()
+
+	if merged.get("provider", DEFAULT_PROVIDER) == "local":
+		if String(merged.get("endpoint_url", "")).strip_edges() == "" or String(merged.get("endpoint_url", "")).strip_edges() == DEFAULT_ENDPOINT_URL:
+			merged["endpoint_url"] = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+		if String(merged.get("model", "")).strip_edges() == "" or String(merged.get("model", "")).strip_edges() == DEFAULT_MODEL:
+			merged["model"] = DEFAULT_LOCAL_OLLAMA_MODEL
+		if float(merged.get("timeout_sec", DEFAULT_TIMEOUT_SEC)) <= 0.0:
+			merged["timeout_sec"] = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
 
 	return merged

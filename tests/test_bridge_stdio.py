@@ -232,3 +232,19 @@ def test_bridge_server_tutor_reply_openai_requires_provider_options() -> None:
     assert response["ok"] is False
     assert response["state"] is None
     assert "provider_options.endpoint_url" in response["error"]
+
+
+def test_bridge_server_tutor_reply_local_accepts_provider_options() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        '{"command":"tutor_reply","payload":{"level_id":"group-01-demo","question":"Explain this","provider":"local","provider_options":{"model":"qwen3.5:0.8b"}}}\n'
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is True
+    assert response["tutor"] is not None
+    assert response["tutor"]["metadata"]["provider"] == "local_template_selector"
+    assert response["tutor"]["metadata"]["selector_model"] == "qwen3.5:0.8b"

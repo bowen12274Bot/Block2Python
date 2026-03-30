@@ -216,7 +216,7 @@ def prepare_tutor_reply_payload(
 
     source["provider"] = provider
 
-    if provider == "openai_compatible":
+    if provider == "openai_compatible" or provider == "local":
         options_raw = source.get("provider_options")
         if options_raw is None:
             options_raw = {}

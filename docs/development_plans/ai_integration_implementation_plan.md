@@ -1,7 +1,7 @@
 # AI 助理串接實施計畫
 
-- 文件版本：0.2
-- 日期：2026-03-26
+- 文件版本：0.3
+- 日期：2026-03-30
 - 相關規格文件：
   - `docs/development_plans/ai_tutor_skills_plan.md`
   - `docs/product/worldbuilding.md`
@@ -24,6 +24,13 @@
 
 - **Byte**：協助學生學習的 AI 小幫手，代表「輔助工具不應代替人類理解」的價值觀
 - **不應做的**：直接提供完整解答、引入超綱概念、接受要求放棄思考
+
+### 0.3 實作狀態快照（2026-03-30）
+
+- Phase 1：已完成（本地 selector 已接入 OpenAI-compatible 推理路徑，可對接 Ollama）
+- Phase 2：已完成（核心服務、Provider、契約、測試可用）
+- Phase 3：已完成（Godot UI 串接、QA 與 demo 驗證完成）
+- Phase 4：尚未開始（高階邊界強化與遠端 LLM 品質工程）
 
 ## 1. 架構決策
 
@@ -716,20 +723,20 @@ assets/teaching_skills/
 
 **交付清單**：
 
-- [ ] `TeachingSkillLoader` 實作完成（支援 glob 或名單載入）
-- [ ] Teaching skill JSON schema 定義與文件化
-- [ ] `assets/teaching_skills/` 目錄結構建立（扁平結構）
-- [ ] 至少 2 份示範 teaching skill 檔案（input-output-basics、variables）
-- [ ] `TemplateTutorProvider` 實作（最終文字輸出可預期）
-- [ ] `LocalTemplateSelector` 實作（首選 `qwen3.5:0.6b`，僅決定模板）
-- [ ] 對話歷史資料結構與壓縮策略（summary-based）
-- [ ] **[協調項] levels_loader.py 修改計畫確認：** 如何在 YAML 解析時將 `teaching_skill_ids` 與 `tutor_policy` 納入 LevelSpec 物件
+- [x] `TeachingSkillLoader` 實作完成（支援 glob 或名單載入）
+- [x] Teaching skill JSON schema 定義與文件化
+- [x] `assets/teaching_skills/` 目錄結構建立（扁平結構）
+- [x] 至少 2 份示範 teaching skill 檔案（input-output-basics、variables）
+- [x] `TemplateTutorProvider` 實作（最終文字輸出可預期）
+- [x] `LocalTemplateSelector` 實作（預設 `qwen3.5:0.8b`，支援 OpenAI-compatible selector；失敗回退規則式）
+- [x] 對話歷史資料結構與壓縮策略（summary-based）
+- [x] **[協調項] levels_loader.py 修改計畫確認：** 如何在 YAML 解析時將 `teaching_skill_ids` 與 `tutor_policy` 納入 LevelSpec 物件
   - 策略 A (推薦)：仍由 levels_loader 負責，新增欄位解析邏輯
   - 策略 B (替代)：不改 levels_loader，改由 TutorService 層從 level.metadata 提取
-- [ ] **[協調項] API 契約同步：** Godot 與 Python 端應先確認 `/api/tutor/reply` 的 JSON 格式，避免 Phase 3 整合失敗
-- [ ] YAML level 檔新增 `teaching_skill_ids` 欄位（至少 group-01-demo.yaml）
-- [ ] `LevelSpec` 資料類型確認是否擴充（或用 metadata）
-- [ ] 單元測試覆蓋 loader 的正常與異常路徑：
+- [x] **[協調項] API 契約同步：** Godot 與 Python 端應先確認 `/api/tutor/reply` 的 JSON 格式，避免 Phase 3 整合失敗
+- [x] YAML level 檔新增 `teaching_skill_ids` 欄位（至少 group-01-demo.yaml）
+- [x] `LevelSpec` 資料類型確認是否擴充（或用 metadata）
+- [x] 單元測試覆蓋 loader 的正常與異常路徑：
   - 成功載入現存 skill
   - 缺失的 skill 檔遺失時的 fallback
   - 讀取 YAML 時 teaching_skill_ids 欄位的處理
@@ -751,16 +758,16 @@ assets/teaching_skills/
 
 **交付清單**：
 
-- [ ] `TutorContext`、`TutorRequest`、`TutorResponse` dataclass
-- [ ] `ContextBuilder` 完整實作
-- [ ] `TutorPolicy` 與 refusal rule engine
-- [ ] `StubTutorProvider`、`TemplateTutorProvider`、`LocalTemplateSelector`、`OpenAICompatibleProvider` 實作
-- [ ] retry 3 次 + 不可用回覆邏輯
-- [ ] friendly fallback 預設回應邏輯
-- [ ] 對話歷史壓縮器（例如摘要壓縮）
-- [ ] `TutorService` 主要協調邏輯
-- [ ] 完整單元測試（涵蓋各回覆類型、邊界情況）
-- [ ] API 端點實作
+- [x] `TutorContext`、`TutorRequest`、`TutorResponse` dataclass
+- [x] `ContextBuilder` 完整實作
+- [x] `TutorPolicy` 與 refusal rule engine
+- [x] `StubTutorProvider`、`TemplateTutorProvider`、`LocalTemplateSelector`、`OpenAICompatibleProvider` 實作
+- [x] retry 3 次 + 不可用回覆邏輯
+- [x] friendly fallback 預設回應邏輯
+- [x] 對話歷史壓縮器（例如摘要壓縮）
+- [x] `TutorService` 主要協調邏輯
+- [x] 完整單元測試（涵蓋各回覆類型、邊界情況）
+- [x] API 端點實作
 
 **工期估計**：5-7 天
 
@@ -943,18 +950,18 @@ tests/ai/
 
 ### 9.3 人工測試清單
 
-- [ ] LocalTemplateSelector（qwen3.5:0.6b）可正確決定模板與提示層級
-- [ ] Template provider 回覆固定且可預期
-- [ ] Stub provider 回覆固定且可預期
-- [ ] OpenAI compatible provider 可正常切換與回覆
-- [ ] API KEY 可從前端設定並保存到本地檔案
-- [ ] 費用資訊顯示正確（本次/累積）
-- [ ] 可取消請求，取消後 UI 不再接收串流片段
-- [ ] Godot UI 可正確輸入提問、顯示回覆
+- [ ] LocalTemplateSelector（qwen3.5:0.8b）可正確決定模板與提示層級（已接入本地模型路徑，待人工端到端驗證）
+- [x] Template provider 回覆固定且可預期
+- [x] Stub provider 回覆固定且可預期
+- [x] OpenAI compatible provider 可正常切換與回覆
+- [x] API KEY 可從前端設定並保存到本地檔案
+- [x] 費用資訊顯示正確（本次/累積）
+- [x] 可取消請求，取消後 UI 不再接收串流片段
+- [x] Godot UI 可正確輸入提問、顯示回覆
 - [ ] 不同 teaching skill 之間的隔離良好（skill A 的 forbidden_concepts 不影響 skill B）
-- [ ] 超綱提問被正確拒絕（例如要求 import，但 allowed_concepts 不包含）
-- [ ] LevelSpec 從 YAML 載入時包含 teaching_skill_ids（驗證 levels_loader）
-- [ ] 如果沒有 teaching skill，系統仍可正常運作但不提供助教協助
+- [x] 超綱提問被正確拒絕（例如要求 import，但 allowed_concepts 不包含）
+- [x] LevelSpec 從 YAML 載入時包含 teaching_skill_ids（驗證 levels_loader）
+- [x] 如果沒有 teaching skill，系統仍可正常運作但不提供助教協助
 
 ### 9.4 安全審計清單（Phase 4）
 
@@ -966,11 +973,11 @@ tests/ai/
 
 在實施過程中應持續更新以下文件：
 
-- [ ] `docs/development_plans/ai_integration_implementation_plan.md` (本文) - 主實施文件
-- [ ] `docs/specs/teaching_skill_schema.md` - Teaching skill JSON 詳細規格
-- [ ] `docs/development_plans/ai_tutor_api_contract.md` - Tutor API 與資料契約
-- [ ] `src/block2python/ai/README.md` - 開發者指南與架構說明
-- [ ] `docs/contributing/ai_tutor_guidelines.md` - 教學內容編寫指南
+- [x] `docs/development_plans/ai_integration_implementation_plan.md` (本文) - 主實施文件
+- [x] `docs/specs/teaching_skill_schema.md` - Teaching skill JSON 詳細規格
+- [x] `docs/development_plans/ai_tutor_api_contract.md` - Tutor API 與資料契約
+- [x] `src/block2python/ai/README.md` - 開發者指南與架構說明
+- [x] `docs/contributing/ai_tutor_guidelines.md` - 教學內容編寫指南
 
 ## 11. 決策記錄
 

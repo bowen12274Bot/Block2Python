@@ -210,7 +210,22 @@ class BridgeServer:
         elif provider_name == "stub":
             provider = StubTutorProvider()
         elif provider_name == "local":
-            provider = LocalTemplateSelector(template_provider=TemplateTutorProvider())
+            endpoint_url = _optional_str(options.get("endpoint_url"), default="")
+            model = _optional_str(options.get("model"), default="qwen3.5:0.8b")
+            api_key = _optional_str(options.get("api_key"), default="")
+            timeout_sec = _parse_timeout_sec(options.get("timeout_sec"), default=20.0)
+            system_prompt_raw = options.get("system_prompt")
+            if system_prompt_raw is not None and not isinstance(system_prompt_raw, str):
+                raise ValueError("provider_options.system_prompt must be a string")
+
+            provider = LocalTemplateSelector(
+                template_provider=TemplateTutorProvider(),
+                model_name=model,
+                endpoint_url=endpoint_url,
+                api_key=api_key,
+                timeout_sec=timeout_sec,
+                system_prompt=system_prompt_raw,
+            )
         elif provider_name == "openai_compatible":
             endpoint_url = _required_non_empty_str(options.get("endpoint_url"), field_name="provider_options.endpoint_url")
             model = _required_non_empty_str(options.get("model"), field_name="provider_options.model")
@@ -242,6 +257,17 @@ def _required_non_empty_str(value: object, *, field_name: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field_name} must be a non-empty string")
     return value.strip()
+
+
+def _optional_str(value: object, *, default: str) -> str:
+    if value is None:
+        return default
+    if not isinstance(value, str):
+        raise ValueError("provider_options fields must be strings")
+    text = value.strip()
+    if text == "":
+        return default
+    return text
 
 
 def _parse_timeout_sec(value: object, *, default: float) -> float:

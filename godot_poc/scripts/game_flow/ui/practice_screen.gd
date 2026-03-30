@@ -14,6 +14,9 @@ signal back_requested()
 const DEFAULT_OPENAI_ENDPOINT := "https://api.openai.com/v1/chat/completions"
 const DEFAULT_OPENAI_MODEL := "gpt-4o-mini"
 const DEFAULT_OPENAI_TIMEOUT_SEC := 30.0
+const DEFAULT_LOCAL_OLLAMA_ENDPOINT := "http://127.0.0.1:11434/v1/chat/completions"
+const DEFAULT_LOCAL_OLLAMA_MODEL := "qwen3.5:0.8b"
+const DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC := 20.0
 const TUTOR_STREAM_INTERVAL_SEC := 0.03
 const TUTOR_REPLY_TYPE_COLOR_DEFAULT := Color(0.72549, 0.756863, 0.854902, 0.84)
 const TUTOR_REPLY_TYPE_COLOR_HINT := Color(0.572549, 0.862745, 0.705882, 0.96)
@@ -39,7 +42,14 @@ const TUTOR_REPLY_TYPE_COLOR_ERROR := Color(0.972549, 0.501961, 0.501961, 0.96)
 @onready var assistant_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantInput
 @onready var provider_option: OptionButton = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow/ProviderOption
 @onready var assistant_api_key_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow/ApiKeyInput
+@onready var api_key_visibility_button: Button = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow/ApiKeyVisibilityButton
 @onready var save_tutor_config_button: Button = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow/SaveTutorConfigButton
+@onready var provider_form: VBoxContainer = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm
+@onready var endpoint_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm/EndpointInput
+@onready var model_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm/ModelInput
+@onready var timeout_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm/TimeoutInput
+@onready var system_prompt_input: TextEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm/SystemPromptInput
+@onready var provider_form_hint_label: Label = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm/ProviderFormHint
 @onready var ask_tutor_button: Button = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ActionRow/AskTutorButton
 @onready var cancel_tutor_button: Button = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ActionRow/CancelTutorButton
 @onready var tutor_reply_type_label: Label = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/TutorStats/ReplyTypeLabel
@@ -60,9 +70,11 @@ var _toolbox_status_message: String = ""
 var _assistant_enabled: bool = false
 var _tutor_request_pending: bool = false
 var _total_tutor_cost: float = 0.0
-var _openai_endpoint_url: String = DEFAULT_OPENAI_ENDPOINT
-var _openai_model: String = DEFAULT_OPENAI_MODEL
-var _openai_timeout_sec: float = DEFAULT_OPENAI_TIMEOUT_SEC
+var _provider_endpoint_url: String = DEFAULT_OPENAI_ENDPOINT
+var _provider_model: String = DEFAULT_OPENAI_MODEL
+var _provider_timeout_sec: float = DEFAULT_OPENAI_TIMEOUT_SEC
+var _provider_system_prompt: String = ""
+var _api_key_visible: bool = false
 var _tutor_reply_stream_timer: Timer
 var _tutor_reply_streaming: bool = false
 var _tutor_reply_stream_source_log: String = ""
@@ -79,11 +91,20 @@ func _ready() -> void:
 	back_button.pressed.connect(_on_back_button_pressed)
 	assistant_input.text_submitted.connect(_on_assistant_input_submitted)
 	assistant_input.text_changed.connect(_on_assistant_input_changed)
+	assistant_api_key_input.text_changed.connect(_on_provider_line_input_changed)
+	endpoint_input.text_changed.connect(_on_provider_line_input_changed)
+	model_input.text_changed.connect(_on_provider_line_input_changed)
+	timeout_input.text_changed.connect(_on_provider_line_input_changed)
+	system_prompt_input.text_changed.connect(_on_provider_text_input_changed)
 	ask_tutor_button.pressed.connect(_on_ask_tutor_button_pressed)
 	cancel_tutor_button.pressed.connect(_on_cancel_tutor_button_pressed)
 	save_tutor_config_button.pressed.connect(_on_save_tutor_config_button_pressed)
+	api_key_visibility_button.pressed.connect(_on_api_key_visibility_button_pressed)
 	provider_option.item_selected.connect(_on_provider_option_selected)
 	_setup_provider_options()
+	_apply_api_key_visibility()
+	_sync_provider_form_inputs()
+	_refresh_provider_form()
 	_reset_tutor_stats()
 	assistant_input.editable = false
 	_tutor_reply_stream_timer = Timer.new()
@@ -169,22 +190,27 @@ func current_python_code() -> String:
 func set_tutor_config(config: Dictionary) -> void:
 	_select_provider(str(config.get("provider", "template")))
 	assistant_api_key_input.text = str(config.get("api_key", ""))
-	_openai_endpoint_url = str(config.get("endpoint_url", DEFAULT_OPENAI_ENDPOINT))
-	_openai_model = str(config.get("model", DEFAULT_OPENAI_MODEL))
+	_provider_endpoint_url = str(config.get("endpoint_url", DEFAULT_OPENAI_ENDPOINT))
+	_provider_model = str(config.get("model", DEFAULT_OPENAI_MODEL))
+	_provider_system_prompt = str(config.get("system_prompt", ""))
 	var timeout_raw: Variant = config.get("timeout_sec", DEFAULT_OPENAI_TIMEOUT_SEC)
 	if timeout_raw is float or timeout_raw is int:
 		var timeout_value: float = float(timeout_raw)
 		if timeout_value > 0:
-			_openai_timeout_sec = timeout_value
+			_provider_timeout_sec = timeout_value
+	_sync_provider_form_inputs()
+	_refresh_provider_form()
 	_refresh_tutor_controls()
 
 func tutor_config() -> Dictionary:
+	_read_provider_form_values()
 	return {
 		"provider": _selected_provider(),
 		"api_key": assistant_api_key_input.text.strip_edges(),
-		"endpoint_url": _openai_endpoint_url,
-		"model": _openai_model,
-		"timeout_sec": _openai_timeout_sec,
+		"endpoint_url": _provider_endpoint_url,
+		"model": _provider_model,
+		"timeout_sec": _provider_timeout_sec,
+		"system_prompt": _provider_system_prompt,
 	}
 
 func show_tutor_reply(reply_type: String, content: String, metadata: Dictionary = {}) -> void:
@@ -245,6 +271,12 @@ func _on_ask_tutor_button_pressed() -> void:
 		return
 
 	var provider: String = _selected_provider()
+	_read_provider_form_values()
+	if provider == "openai_compatible" or provider == "local":
+		if _provider_endpoint_url == "" or _provider_model == "":
+			status_label.text = "Status: endpoint and model are required for this provider."
+			_refresh_tutor_controls()
+			return
 	if provider == "openai_compatible" and assistant_api_key_input.text.strip_edges() == "":
 		status_label.text = "Status: API key is required for OpenAI-compatible provider."
 		_refresh_tutor_controls()
@@ -265,11 +297,23 @@ func _on_cancel_tutor_button_pressed() -> void:
 	tutor_cancel_requested.emit()
 
 func _on_save_tutor_config_button_pressed() -> void:
+	_read_provider_form_values()
 	tutor_config_saved.emit(tutor_config())
-	status_label.text = "Status: tutor settings saved locally."
+	status_label.text = "Status: tutor settings saved (%s)." % _selected_provider()
 
 func _on_provider_option_selected(_index: int) -> void:
+	_refresh_provider_form()
 	_refresh_tutor_controls()
+
+func _on_provider_line_input_changed(_value: String) -> void:
+	_refresh_tutor_controls()
+
+func _on_provider_text_input_changed() -> void:
+	_refresh_tutor_controls()
+
+func _on_api_key_visibility_button_pressed() -> void:
+	_api_key_visible = not _api_key_visible
+	_apply_api_key_visibility()
 
 func _on_toolbox_confirmation_confirmed() -> void:
 	status_label.text = "Status: confirming toolbox penalty..."
@@ -283,7 +327,7 @@ func _setup_provider_options() -> void:
 	provider_option.clear()
 	provider_option.add_item("Template")
 	provider_option.set_item_metadata(0, "template")
-	provider_option.add_item("Local Selector")
+	provider_option.add_item("Local Ollama Selector")
 	provider_option.set_item_metadata(1, "local")
 	provider_option.add_item("OpenAI Compatible")
 	provider_option.set_item_metadata(2, "openai_compatible")
@@ -309,21 +353,31 @@ func _selected_provider() -> String:
 	return "template"
 
 func _build_provider_options(provider: String) -> Dictionary:
-	if provider != "openai_compatible":
+	_read_provider_form_values()
+	if provider != "openai_compatible" and provider != "local":
 		return {}
 
-	return {
-		"endpoint_url": _openai_endpoint_url,
-		"model": _openai_model,
-		"api_key": assistant_api_key_input.text.strip_edges(),
-		"timeout_sec": _openai_timeout_sec,
+	var options: Dictionary = {
+		"endpoint_url": _provider_endpoint_url,
+		"model": _provider_model,
+		"timeout_sec": _provider_timeout_sec,
 	}
+	var api_key: String = assistant_api_key_input.text.strip_edges()
+	if api_key != "":
+		options["api_key"] = api_key
+	if _provider_system_prompt != "":
+		options["system_prompt"] = _provider_system_prompt
+	return options
 
 func _refresh_tutor_controls() -> void:
 	var provider: String = _selected_provider()
 	var has_question: bool = assistant_input.text.strip_edges() != ""
 	var requires_api_key: bool = provider == "openai_compatible"
+	var requires_provider_form: bool = provider == "openai_compatible" or provider == "local"
 	var has_api_key: bool = assistant_api_key_input.text.strip_edges() != ""
+	var has_endpoint_model: bool = true
+	if requires_provider_form:
+		has_endpoint_model = endpoint_input.text.strip_edges() != "" and model_input.text.strip_edges() != ""
 
 	assistant_input.editable = _assistant_enabled and not _tutor_request_pending
 	ask_tutor_button.disabled = (
@@ -331,9 +385,66 @@ func _refresh_tutor_controls() -> void:
 		or _tutor_request_pending
 		or _tutor_reply_streaming
 		or not has_question
+		or not has_endpoint_model
 		or (requires_api_key and not has_api_key)
 	)
 	cancel_tutor_button.disabled = not _tutor_request_pending
+
+
+func _refresh_provider_form() -> void:
+	var provider: String = _selected_provider()
+	var needs_provider_form: bool = provider == "openai_compatible" or provider == "local"
+	provider_form.visible = needs_provider_form
+
+	if provider == "local":
+		if _provider_endpoint_url.strip_edges() == "" or _provider_endpoint_url == DEFAULT_OPENAI_ENDPOINT:
+			_provider_endpoint_url = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+		if _provider_model.strip_edges() == "" or _provider_model == DEFAULT_OPENAI_MODEL:
+			_provider_model = DEFAULT_LOCAL_OLLAMA_MODEL
+		if _provider_timeout_sec <= 0:
+			_provider_timeout_sec = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
+		assistant_api_key_input.placeholder_text = "Ollama API key (optional)"
+		provider_form_hint_label.text = "Local selector uses Ollama (OpenAI-compatible endpoint)."
+	elif provider == "openai_compatible":
+		if _provider_endpoint_url.strip_edges() == "":
+			_provider_endpoint_url = DEFAULT_OPENAI_ENDPOINT
+		if _provider_model.strip_edges() == "":
+			_provider_model = DEFAULT_OPENAI_MODEL
+		if _provider_timeout_sec <= 0:
+			_provider_timeout_sec = DEFAULT_OPENAI_TIMEOUT_SEC
+		assistant_api_key_input.placeholder_text = "API key (required)"
+		provider_form_hint_label.text = "Remote provider requires API key and endpoint credentials."
+	else:
+		assistant_api_key_input.placeholder_text = "API key"
+		provider_form_hint_label.text = ""
+
+	_sync_provider_form_inputs()
+
+
+func _sync_provider_form_inputs() -> void:
+	endpoint_input.text = _provider_endpoint_url
+	model_input.text = _provider_model
+	timeout_input.text = "%.1f" % _provider_timeout_sec
+	system_prompt_input.text = _provider_system_prompt
+
+
+func _read_provider_form_values() -> void:
+	_provider_endpoint_url = endpoint_input.text.strip_edges()
+	_provider_model = model_input.text.strip_edges()
+	_provider_system_prompt = system_prompt_input.text.strip_edges()
+
+	var timeout_text: String = timeout_input.text.strip_edges()
+	if timeout_text == "":
+		return
+	if timeout_text.is_valid_float():
+		var parsed_timeout: float = float(timeout_text)
+		if parsed_timeout > 0:
+			_provider_timeout_sec = parsed_timeout
+
+
+func _apply_api_key_visibility() -> void:
+	assistant_api_key_input.secret = not _api_key_visible
+	api_key_visibility_button.text = "Hide" if _api_key_visible else "Show"
 
 func _start_tutor_reply_stream(reply_type: String, content: String, metadata: Dictionary) -> void:
 	_stop_tutor_reply_stream(false)

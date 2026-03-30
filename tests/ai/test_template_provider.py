@@ -69,6 +69,43 @@ def test_local_selector_switches_to_concept_explanation() -> None:
     assert reply.metadata["selected_reply_type"] == "concept_explanation"
 
 
+def test_local_selector_uses_model_selection_when_endpoint_configured() -> None:
+    class FakeLocalSelector(LocalTemplateSelector):
+        def _call_selector_api(self, context: TutorContext, reply_type: str) -> dict[str, object]:
+            return {
+                "choices": [
+                    {
+                        "message": {
+                            "content": '{"reply_type": "debug_hint"}',
+                        }
+                    }
+                ]
+            }
+
+    selector = FakeLocalSelector(endpoint_url="http://127.0.0.1:11434/v1/chat/completions")
+    context = _context(student_question="I need the next step")
+
+    reply = asyncio.run(selector.reply(context, "next_step_hint"))
+
+    assert reply.reply_type == "debug_hint"
+    assert reply.metadata["selected_reply_type"] == "debug_hint"
+    assert reply.metadata["selector_source"] == "model"
+
+
+def test_local_selector_falls_back_to_heuristic_when_model_call_fails() -> None:
+    class FailingLocalSelector(LocalTemplateSelector):
+        def _call_selector_api(self, context: TutorContext, reply_type: str) -> dict[str, object]:
+            raise RuntimeError("selector failed")
+
+    selector = FailingLocalSelector(endpoint_url="http://127.0.0.1:11434/v1/chat/completions")
+    context = _context(student_question="What is a variable?")
+
+    reply = asyncio.run(selector.reply(context, "next_step_hint"))
+
+    assert reply.reply_type == "concept_explanation"
+    assert reply.metadata["selector_source"] == "heuristic_fallback"
+
+
 def test_openai_compatible_provider_parses_payload_without_network() -> None:
     class FakeOpenAIProvider(OpenAICompatibleProvider):
         def _call_api(self, context: TutorContext, reply_type: str) -> dict[str, object]:

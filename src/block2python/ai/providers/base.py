@@ -93,13 +93,21 @@ class LocalTemplateSelector(TutorProvider):
         self,
         *,
         template_provider: TemplateTutorProvider | None = None,
-        model_name: str = "qwen3.5:0.6b",
+        model_name: str = "qwen3.5:0.8b",
+        endpoint_url: str = "",
+        api_key: str = "",
+        timeout_sec: float = 12.0,
+        system_prompt: str | None = None,
     ) -> None:
         self.template_provider = template_provider or TemplateTutorProvider()
         self.model_name = model_name
+        self.endpoint_url = endpoint_url
+        self.api_key = api_key
+        self.timeout_sec = timeout_sec
+        self.system_prompt = system_prompt
 
     async def reply(self, context: TutorContext, reply_type: TutorReplyType) -> TutorResponse:
-        selected = self._select_reply_type(context, reply_type)
+        selected, source = await self._resolve_reply_type(context, reply_type)
         base = await self.template_provider.reply(context, selected)
         metadata = dict(base.metadata)
         metadata.update(
@@ -107,9 +115,124 @@ class LocalTemplateSelector(TutorProvider):
                 "provider": "local_template_selector",
                 "selector_model": self.model_name,
                 "selected_reply_type": selected,
+                "selector_source": source,
             }
         )
+        if self.endpoint_url.strip():
+            metadata["selector_endpoint"] = self.endpoint_url
         return TutorResponse(reply_type=base.reply_type, content=base.content, metadata=metadata)
+
+    async def _resolve_reply_type(
+        self,
+        context: TutorContext,
+        reply_type: TutorReplyType,
+    ) -> tuple[TutorReplyType, str]:
+        if not self.endpoint_url.strip():
+            return self._select_reply_type(context, reply_type), "heuristic"
+
+        try:
+            selected = await asyncio.to_thread(self._select_reply_type_with_model, context, reply_type)
+            return selected, "model"
+        except Exception:  # noqa: BLE001
+            return self._select_reply_type(context, reply_type), "heuristic_fallback"
+
+    def _select_reply_type_with_model(
+        self,
+        context: TutorContext,
+        reply_type: TutorReplyType,
+    ) -> TutorReplyType:
+        if reply_type in {"scope_refusal", "solution_refusal", "debug_hint"}:
+            return reply_type
+
+        response_json = self._call_selector_api(context, reply_type)
+        selected = self._extract_reply_type(response_json)
+        if selected is None:
+            return self._select_reply_type(context, reply_type)
+        return selected
+
+    def _call_selector_api(self, context: TutorContext, reply_type: TutorReplyType) -> dict[str, object]:
+        selector_system_prompt = self.system_prompt or (
+            "You classify a tutoring reply type. "
+            "Return JSON only, like {\"reply_type\": \"next_step_hint\"}."
+        )
+        selector_user_prompt = (
+            "Choose one reply type from: concept_explanation, next_step_hint, debug_hint.\n"
+            f"Requested default type: {reply_type}\n"
+            f"Question: {context.student_question}\n"
+            f"Analysis status: {context.analysis_status}\n"
+            f"Failed case: {context.failed_cases_summary or '(none)'}\n"
+            f"Recent feedback: {', '.join(context.submission_history) if context.submission_history else '(none)'}"
+        )
+
+        payload = {
+            "model": self.model_name,
+            "messages": [
+                {"role": "system", "content": selector_system_prompt},
+                {"role": "user", "content": selector_user_prompt},
+            ],
+            "temperature": 0,
+        }
+
+        body = json.dumps(payload).encode("utf-8")
+        headers = {
+            "Content-Type": "application/json",
+        }
+        if self.api_key.strip():
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        req = request.Request(
+            self.endpoint_url,
+            data=body,
+            headers=headers,
+            method="POST",
+        )
+
+        with request.urlopen(req, timeout=self.timeout_sec) as resp:  # noqa: S310
+            raw = resp.read().decode("utf-8")
+
+        decoded = json.loads(raw)
+        if not isinstance(decoded, dict):
+            raise RuntimeError("Local selector returned non-object payload")
+        return decoded
+
+    @staticmethod
+    def _extract_reply_type(payload: dict[str, object]) -> TutorReplyType | None:
+        message_content = (
+            (((payload.get("choices") or [{}])[0]).get("message") or {}).get("content") or ""
+        )
+        content = str(message_content).strip()
+        if not content:
+            return None
+
+        candidates = {
+            "concept_explanation",
+            "next_step_hint",
+            "debug_hint",
+            "scope_refusal",
+            "solution_refusal",
+        }
+
+        normalized = content.strip().lower()
+        if normalized in candidates:
+            return normalized  # type: ignore[return-value]
+
+        try:
+            decoded = json.loads(content)
+        except json.JSONDecodeError:
+            decoded = None
+
+        if isinstance(decoded, dict):
+            reply_type_raw = decoded.get("reply_type")
+            if isinstance(reply_type_raw, str):
+                reply_type_text = reply_type_raw.strip().lower()
+                if reply_type_text in candidates:
+                    return reply_type_text  # type: ignore[return-value]
+
+        for candidate in candidates:
+            if candidate in normalized:
+                return candidate  # type: ignore[return-value]
+
+        return None
 
     @staticmethod
     def _select_reply_type(context: TutorContext, reply_type: TutorReplyType) -> TutorReplyType:

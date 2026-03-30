@@ -387,10 +387,42 @@ size_flags_horizontal = 3
 secret = true
 placeholder_text = "API key"
 
+[node name="ApiKeyVisibilityButton" type="Button" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow"]
+custom_minimum_size = Vector2(54, 30)
+layout_mode = 2
+text = "Show"
+
 [node name="SaveTutorConfigButton" type="Button" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow"]
 custom_minimum_size = Vector2(64, 30)
 layout_mode = 2
 text = "Save"
+
+[node name="ConfigForm" type="VBoxContainer" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="EndpointInput" type="LineEdit" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm"]
+layout_mode = 2
+placeholder_text = "Endpoint URL"
+
+[node name="ModelInput" type="LineEdit" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm"]
+layout_mode = 2
+placeholder_text = "Model (e.g. qwen3.5:0.8b)"
+
+[node name="TimeoutInput" type="LineEdit" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm"]
+layout_mode = 2
+placeholder_text = "Timeout seconds"
+
+[node name="SystemPromptInput" type="TextEdit" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Optional system prompt"
+
+[node name="ProviderFormHint" type="Label" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigForm"]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = ""
 
 [node name="AssistantLog" type="RichTextLabel" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1739294769]
 custom_minimum_size = Vector2(0, 108)

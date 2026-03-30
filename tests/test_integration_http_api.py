@@ -113,6 +113,27 @@ def test_prepare_tutor_reply_payload_injects_openai_defaults_from_user_config() 
     assert options["system_prompt"] == "You are Byte"
 
 
+def test_prepare_tutor_reply_payload_injects_local_defaults_from_user_config() -> None:
+    config = TutorUserConfig(
+        provider="local",
+        endpoint_url="http://127.0.0.1:11434/v1/chat/completions",
+        model="qwen3.5:0.8b",
+        api_key="",
+        timeout_sec=18.0,
+        system_prompt="Select the best tutoring style",
+    )
+
+    payload = prepare_tutor_reply_payload({"question": "Explain this"}, config=config)
+
+    assert payload["provider"] == "local"
+    options = payload["provider_options"]
+    assert isinstance(options, dict)
+    assert options["endpoint_url"] == "http://127.0.0.1:11434/v1/chat/completions"
+    assert options["model"] == "qwen3.5:0.8b"
+    assert options["timeout_sec"] == 18.0
+    assert options["system_prompt"] == "Select the best tutoring style"
+
+
 def test_tutor_api_router_reply_rejects_invalid_request_shape(tmp_path: Path) -> None:
     router = TutorApiRouter(
         bridge_server=BridgeServer(use_stub_judge=True),
