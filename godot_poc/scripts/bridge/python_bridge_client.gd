@@ -121,6 +121,13 @@ func send_verify_toolbox_level(python_code: String, block_json: Dictionary) -> v
 	})
 
 
+func send_tutor_reply(payload: Dictionary) -> void:
+	send_request({
+		"command": "tutor_reply",
+		"payload": payload,
+	})
+
+
 func send_start_group_story(group_id: String) -> void:
 	send_request({
 		"action": {

@@ -371,10 +371,29 @@ text = "AI ASSISTANT"
 modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
-text = "Static guidance for the current mission"
+text = "Tutor controls and guided hints"
+
+[node name="ConfigRow" type="HBoxContainer" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ProviderOption" type="OptionButton" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow"]
+custom_minimum_size = Vector2(118, 30)
+layout_mode = 2
+
+[node name="ApiKeyInput" type="LineEdit" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+secret = true
+placeholder_text = "API key"
+
+[node name="SaveTutorConfigButton" type="Button" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow"]
+custom_minimum_size = Vector2(64, 30)
+layout_mode = 2
+text = "Save"
 
 [node name="AssistantLog" type="RichTextLabel" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1739294769]
-custom_minimum_size = Vector2(0, 120)
+custom_minimum_size = Vector2(0, 108)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 15
@@ -382,8 +401,43 @@ text = "Byte: Practice assistant is standing by."
 
 [node name="AssistantInput" type="LineEdit" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1606346966]
 layout_mode = 2
-placeholder_text = "Chat input is coming in a later iteration."
-editable = false
+placeholder_text = "Ask Byte about this level..."
+
+[node name="ActionRow" type="HBoxContainer" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="AskTutorButton" type="Button" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ActionRow"]
+custom_minimum_size = Vector2(96, 32)
+layout_mode = 2
+text = "Ask Tutor"
+
+[node name="CancelTutorButton" type="Button" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ActionRow"]
+custom_minimum_size = Vector2(96, 32)
+layout_mode = 2
+text = "Cancel"
+
+[node name="TutorStats" type="VBoxContainer" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="ReplyTypeLabel" type="Label" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/TutorStats"]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Reply type: -"
+
+[node name="RequestCostLabel" type="Label" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/TutorStats"]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Request cost: N/A"
+
+[node name="TotalCostLabel" type="Label" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/TutorStats"]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Total cost: $0.000000"
 
 [node name="ToolkitPanel" type="PanelContainer" parent="Margin/Root/Body/RightColumn" unique_id=1019384351]
 modulate = Color(0.9, 0.96, 1, 0.9)

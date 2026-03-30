@@ -6,6 +6,7 @@ const BridgeStateStoreScript = preload("res://scripts/bridge/bridge_state_store.
 const QuestMapMapperScript = preload("res://scripts/map/mappers/quest_map_mapper.gd")
 const GameFlowFeedbackPresenterScript = preload("res://scripts/game_flow/presentation/feedback_presenter.gd")
 const GameFlowMapperScript = preload("res://scripts/game_flow/mappers/mapper.gd")
+const TutorUserConfigScript = preload("res://scripts/game_flow/tutor/tutor_user_config.gd")
 const FlowPageRouterScript = preload("res://scripts/flow/page_router.gd")
 const FlowScreenPresenterScript = preload("res://scripts/flow/screen_presenter.gd")
 
@@ -23,6 +24,7 @@ var _state_store: RefCounted
 var _current_page: String = "entry"
 var _toolbox_controller: RefCounted
 var _toolbox_init_failed: bool = false
+var _awaiting_tutor_reply: bool = false
 
 
 func _ready() -> void:
@@ -49,6 +51,9 @@ func _ready() -> void:
 	practice_screen.submit_requested.connect(_on_submit_requested)
 	practice_screen.next_requested.connect(_on_next_requested)
 	practice_screen.open_toolbox_requested.connect(_on_open_toolbox_requested)
+	practice_screen.tutor_requested.connect(_on_tutor_requested)
+	practice_screen.tutor_cancel_requested.connect(_on_tutor_cancel_requested)
+	practice_screen.tutor_config_saved.connect(_on_tutor_config_saved)
 	practice_screen.back_requested.connect(_show_map_page)
 	python_bridge_client.bridge_started.connect(_on_bridge_started)
 	python_bridge_client.bridge_failed.connect(_on_bridge_failed)
@@ -79,6 +84,7 @@ func _ready() -> void:
 	practice_screen.set_can_run(false)
 	practice_screen.set_can_submit(false)
 	practice_screen.set_can_next(false)
+	practice_screen.set_tutor_config(TutorUserConfigScript.load_config())
 	_set_debug_visible(false)
 	_show_page("entry")
 	set_process(true)
@@ -206,6 +212,49 @@ func _on_open_toolbox_requested() -> void:
 	toolbox.toggle_challenge_helper(practice_view, _current_page)
 
 
+func _on_tutor_requested(question: String, provider: String, provider_options: Dictionary) -> void:
+	if not _state_store.has_state():
+		practice_screen.show_tutor_error("No GameState loaded yet. Start the bridge and press Reset first.")
+		return
+
+	var state: Dictionary = _state_store.get_state()
+	var level_id: String = _resolve_current_level_id(state)
+	if level_id == "":
+		practice_screen.show_tutor_error("Tutor is available only when a level is active.")
+		return
+
+	var payload: Dictionary = {
+		"question": question,
+		"provider": provider,
+		"level_id": level_id,
+		"python_code": practice_screen.current_python_code(),
+		"block_json": null,
+	}
+	if not provider_options.is_empty():
+		payload["provider_options"] = provider_options
+
+	var toolbox := _ensure_toolbox_controller()
+	if toolbox != null and toolbox.is_challenge_workspace_active():
+		payload["block_json"] = toolbox.workspace_block_json()
+
+	_awaiting_tutor_reply = true
+	practice_screen.set_status("Status: requesting tutor reply...")
+	python_bridge_client.send_tutor_reply(payload)
+
+
+func _on_tutor_cancel_requested() -> void:
+	_awaiting_tutor_reply = false
+	practice_screen.set_status("Status: tutor request cancelled locally.")
+
+
+func _on_tutor_config_saved(config: Dictionary) -> void:
+	var saved: bool = TutorUserConfigScript.save_config(config)
+	if not saved:
+		practice_screen.set_status("Status: failed to save tutor settings.")
+		return
+	practice_screen.set_status("Status: tutor settings saved locally.")
+
+
 func _on_debug_toggled(debug_visible: bool) -> void:
 	_set_debug_visible(debug_visible)
 
@@ -255,6 +304,7 @@ func _apply_success_state(state: Dictionary, response: Dictionary) -> void:
 	var toolbox := _ensure_toolbox_controller()
 	if toolbox != null:
 		toolbox.apply_lock_state()
+	_apply_tutor_response(response)
 	_append_debug_state(view_model)
 	_route_after_response(state)
 
@@ -294,6 +344,10 @@ func _route_after_response(state: Dictionary) -> void:
 
 func _apply_error_response(response: Dictionary) -> void:
 	var error_text: String = str(response.get("error", "Unknown error"))
+	if _awaiting_tutor_reply:
+		_awaiting_tutor_reply = false
+		practice_screen.show_tutor_error(error_text)
+		return
 	_apply_error_ui(
 		"Status: request failed",
 		"Request failed:\n%s" % error_text,
@@ -369,4 +423,42 @@ func _ensure_toolbox_controller() -> RefCounted:
 		return null
 	_toolbox_controller.setup(self, demo_screen, practice_screen)
 	return _toolbox_controller
+
+
+func _apply_tutor_response(response: Dictionary) -> void:
+	if not _awaiting_tutor_reply:
+		return
+
+	_awaiting_tutor_reply = false
+	var tutor_variant: Variant = response.get("tutor", null)
+	if not (tutor_variant is Dictionary):
+		practice_screen.show_tutor_error("Tutor response payload is missing.")
+		return
+
+	var tutor_payload: Dictionary = tutor_variant
+	var reply_type: String = str(tutor_payload.get("reply_type", "next_step_hint"))
+	var content: String = str(tutor_payload.get("content", ""))
+	var metadata_variant: Variant = tutor_payload.get("metadata", {})
+	var metadata: Dictionary = {}
+	if metadata_variant is Dictionary:
+		metadata = metadata_variant
+	practice_screen.show_tutor_reply(reply_type, content, metadata)
+
+
+func _resolve_current_level_id(state: Dictionary) -> String:
+	var practice_variant: Variant = state.get("practice", null)
+	if practice_variant is Dictionary:
+		var practice: Dictionary = practice_variant
+		var from_practice: String = str(practice.get("current_level_id", practice.get("level_id", "")))
+		if from_practice != "":
+			return from_practice
+
+	var demo_variant: Variant = state.get("demo", null)
+	if demo_variant is Dictionary:
+		var demo: Dictionary = demo_variant
+		var from_demo: String = str(demo.get("current_level_id", demo.get("level_id", "")))
+		if from_demo != "":
+			return from_demo
+
+	return ""
 
