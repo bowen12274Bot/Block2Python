@@ -4,6 +4,8 @@ class_name PythonBridgeClient
 signal bridge_started()
 signal bridge_failed(message: String)
 signal response_received(response: Dictionary)
+signal tutor_response_received(response: Dictionary, request_tag: String)
+signal tutor_request_failed(message: String, request_tag: String)
 
 const BridgeLaunchConfigScript = preload("res://scripts/bridge/python_bridge_launch_config.gd")
 const DEFAULT_PYTHON_REL_PATH := "../.venv/Scripts/python.exe"
@@ -30,6 +32,9 @@ var _pipe: Dictionary = {}
 var _stdio: FileAccess
 var _stderr: FileAccess
 var _pid: int = -1
+var _request_mutex: Mutex = Mutex.new()
+var _async_threads: Array[Thread] = []
+var _cancelled_tutor_tags: Dictionary = {}
 
 
 func is_running() -> bool:
@@ -125,7 +130,7 @@ func send_tutor_reply(payload: Dictionary) -> void:
 	send_request({
 		"command": "tutor_reply",
 		"payload": payload,
-})
+	})
 
 
 func send_confirm_toolbox_open() -> void:
@@ -135,6 +140,23 @@ func send_confirm_toolbox_open() -> void:
 			"payload": {},
 		},
 	})
+
+
+func send_tutor_reply_async(payload: Dictionary, request_tag: String = "") -> void:
+	_send_tutor_request_async(
+		{
+			"command": "tutor_reply",
+			"payload": payload,
+		},
+		request_tag
+	)
+
+
+func cancel_tutor_request(request_tag: String) -> void:
+	var normalized_tag: String = request_tag.strip_edges()
+	if normalized_tag == "":
+		return
+	_cancelled_tutor_tags[normalized_tag] = true
 
 
 func send_start_group_story(group_id: String) -> void:
@@ -197,12 +219,25 @@ func send_request(payload: Dictionary) -> void:
 		return
 
 	var request_json: String = JSON.stringify(payload)
+	var response_line: String = ""
+	var stderr_text: String = ""
+	var read_error: int = OK
+
+	_request_mutex.lock()
+	if _stdio == null:
+		_request_mutex.unlock()
+		_fail_bridge("Bridge is not running")
+		return
 	_stdio.store_line(request_json)
 	_stdio.flush()
 
-	var response_line: String = _stdio.get_line()
-	if _stdio.get_error() != OK:
-		var stderr_text: String = _read_stderr_text()
+	response_line = _stdio.get_line()
+	read_error = _stdio.get_error()
+	if read_error != OK:
+		stderr_text = _read_stderr_text_locked()
+	_request_mutex.unlock()
+
+	if read_error != OK:
 		_fail_bridge("Failed to read bridge response. %s" % stderr_text.strip_edges())
 		return
 
@@ -217,6 +252,7 @@ func send_request(payload: Dictionary) -> void:
 func stop_bridge() -> void:
 	if _pid > 0:
 		OS.kill(_pid)
+	_wait_async_threads()
 	_clear_process_state()
 
 
@@ -246,6 +282,108 @@ func _read_stderr_text() -> String:
 	if _stderr == null or _stderr.eof_reached():
 		return ""
 	return _stderr.get_as_text()
+
+
+func _read_stderr_text_locked() -> String:
+	if _stderr == null or _stderr.eof_reached():
+		return ""
+	return _stderr.get_as_text()
+
+
+func _send_tutor_request_async(payload: Dictionary, request_tag: String) -> void:
+	if not is_running():
+		_emit_tutor_failure("Bridge is not running", request_tag.strip_edges())
+		return
+
+	var request_json: String = JSON.stringify(payload)
+	var normalized_tag: String = request_tag.strip_edges()
+	var worker: Thread = Thread.new()
+	var start_error: int = worker.start(
+		Callable(self, "_thread_send_tutor_request").bind(request_json, normalized_tag)
+	)
+	if start_error != OK:
+		_emit_tutor_failure("Failed to start tutor request thread", normalized_tag)
+		return
+
+	_async_threads.append(worker)
+
+
+func _thread_send_tutor_request(request_json: String, request_tag: String) -> void:
+	var response_line: String = ""
+	var stderr_text: String = ""
+	var read_error: int = OK
+
+	_request_mutex.lock()
+	if _stdio == null:
+		_request_mutex.unlock()
+		call_deferred("_emit_tutor_failure", "Bridge is not running", request_tag)
+		call_deferred("_cleanup_async_threads")
+		return
+
+	_stdio.store_line(request_json)
+	_stdio.flush()
+
+	response_line = _stdio.get_line()
+	read_error = _stdio.get_error()
+	if read_error != OK:
+		stderr_text = _read_stderr_text_locked()
+	_request_mutex.unlock()
+
+	if read_error != OK:
+		call_deferred("_emit_tutor_failure", "Failed to read tutor response. %s" % stderr_text.strip_edges(), request_tag)
+		call_deferred("_cleanup_async_threads")
+		return
+
+	var parsed: Variant = JSON.parse_string(response_line)
+	if not (parsed is Dictionary):
+		call_deferred("_emit_tutor_failure", "Bridge returned non-object JSON: %s" % response_line, request_tag)
+		call_deferred("_cleanup_async_threads")
+		return
+
+	call_deferred("_emit_tutor_response", parsed, request_tag)
+	call_deferred("_cleanup_async_threads")
+
+
+func _emit_tutor_response(response: Dictionary, request_tag: String) -> void:
+	if _is_tutor_request_cancelled(request_tag):
+		return
+	tutor_response_received.emit(response, request_tag)
+
+
+func _emit_tutor_failure(message: String, request_tag: String) -> void:
+	if _is_tutor_request_cancelled(request_tag):
+		return
+	tutor_request_failed.emit(message, request_tag)
+
+
+func _is_tutor_request_cancelled(request_tag: String) -> bool:
+	if request_tag == "":
+		return false
+	if not _cancelled_tutor_tags.has(request_tag):
+		return false
+	_cancelled_tutor_tags.erase(request_tag)
+	return true
+
+
+func _cleanup_async_threads() -> void:
+	var still_running: Array[Thread] = []
+	for worker in _async_threads:
+		if worker == null:
+			continue
+		if worker.is_alive():
+			still_running.append(worker)
+			continue
+		worker.wait_to_finish()
+	_async_threads = still_running
+
+
+func _wait_async_threads() -> void:
+	for worker in _async_threads:
+		if worker == null:
+			continue
+		worker.wait_to_finish()
+	_async_threads.clear()
+	_cancelled_tutor_tags.clear()
 
 
 func _clear_process_state() -> void:

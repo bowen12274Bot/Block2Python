@@ -65,6 +65,8 @@ var _state_store: RefCounted
 var _current_page: String = "entry"
 var _toolbox_controller: RefCounted
 var _awaiting_tutor_reply: bool = false
+var _active_tutor_request_tag: String = ""
+var _tutor_request_seq: int = 0
 
 
 func _ready() -> void:
@@ -99,6 +101,8 @@ func _ready() -> void:
 	python_bridge_client.bridge_started.connect(_on_bridge_started)
 	python_bridge_client.bridge_failed.connect(_on_bridge_failed)
 	python_bridge_client.response_received.connect(_on_response_received)
+	python_bridge_client.tutor_response_received.connect(_on_tutor_response_received)
+	python_bridge_client.tutor_request_failed.connect(_on_tutor_request_failed)
 
 	entry_screen.show_profile({})
 	entry_screen.set_status("Status: start bridge, then create your profile.")
@@ -279,12 +283,17 @@ func _on_tutor_requested(question: String, provider: String, provider_options: D
 	if _ensure_toolbox_controller() and _toolbox_controller.is_challenge_workspace_active():
 		payload["block_json"] = _toolbox_controller.workspace_block_json()
 
+	_tutor_request_seq += 1
+	_active_tutor_request_tag = "tutor_%d" % _tutor_request_seq
 	_awaiting_tutor_reply = true
 	practice_screen.set_status("Status: requesting tutor reply...")
-	python_bridge_client.send_tutor_reply(payload)
+	python_bridge_client.send_tutor_reply_async(payload, _active_tutor_request_tag)
 
 
 func _on_tutor_cancel_requested() -> void:
+	if _active_tutor_request_tag != "":
+		python_bridge_client.cancel_tutor_request(_active_tutor_request_tag)
+	_active_tutor_request_tag = ""
 	_awaiting_tutor_reply = false
 	practice_screen.set_status("Status: tutor request cancelled locally.")
 
@@ -322,6 +331,12 @@ func _on_bridge_started() -> void:
 
 
 func _on_bridge_failed(message: String) -> void:
+	if _awaiting_tutor_reply:
+		_awaiting_tutor_reply = false
+		_active_tutor_request_tag = ""
+		practice_screen.show_tutor_error(message)
+		return
+
 	response_text.text = message
 	_apply_error_ui(
 		"Status: bridge error",
@@ -356,7 +371,6 @@ func _apply_success_state(state: Dictionary, response: Dictionary) -> void:
 	scene_screen.set_can_go_back(bool(state.get("intro_completed", false)))
 	if _ensure_toolbox_controller():
 		_toolbox_controller.apply_lock_state()
-	_apply_tutor_response(response)
 	_append_debug_state(view_model)
 	_route_after_response(state)
 
@@ -395,10 +409,6 @@ func _route_after_response(state: Dictionary) -> void:
 
 func _apply_error_response(response: Dictionary) -> void:
 	var error_text: String = str(response.get("error", "Unknown error"))
-	if _awaiting_tutor_reply:
-		_awaiting_tutor_reply = false
-		practice_screen.show_tutor_error(error_text)
-		return
 	_apply_error_ui(
 		"Status: request failed",
 		"Request failed:\n%s" % error_text,
@@ -468,11 +478,18 @@ func _ensure_toolbox_controller() -> bool:
 	return true
 
 
-func _apply_tutor_response(response: Dictionary) -> void:
-	if not _awaiting_tutor_reply:
+func _on_tutor_response_received(response: Dictionary, request_tag: String) -> void:
+	if request_tag != _active_tutor_request_tag:
 		return
 
+	response_text.text = JSON.stringify(response, "  ")
+	_active_tutor_request_tag = ""
 	_awaiting_tutor_reply = false
+
+	if not bool(response.get("ok", false)):
+		practice_screen.show_tutor_error(str(response.get("error", "Unknown tutor error")))
+		return
+
 	var tutor_variant: Variant = response.get("tutor", null)
 	if not (tutor_variant is Dictionary):
 		practice_screen.show_tutor_error("Tutor response payload is missing.")
@@ -486,6 +503,16 @@ func _apply_tutor_response(response: Dictionary) -> void:
 	if metadata_variant is Dictionary:
 		metadata = metadata_variant
 	practice_screen.show_tutor_reply(reply_type, content, metadata)
+
+
+func _on_tutor_request_failed(message: String, request_tag: String) -> void:
+	if request_tag != _active_tutor_request_tag:
+		return
+
+	response_text.text = "Tutor async request failed: %s" % message
+	_active_tutor_request_tag = ""
+	_awaiting_tutor_reply = false
+	practice_screen.show_tutor_error(message)
 
 
 func _resolve_current_level_id(state: Dictionary) -> String:
