@@ -4,7 +4,7 @@ class_name PracticePanel
 const TOOLBOX_ATTACH_PADDING := Rect2i(0, 0, 0, 0)
 const WindowAlignmentHelperScript = preload("res://scripts/bridge/window_alignment.gd")
 
-@onready var editor_title: Label = $Margin/Root/Header/EditorTitle
+@onready var editor_title: Label = $Margin/Root/EditorTitle
 @onready var code_input: TextEdit = $Margin/Root/CodeInput
 
 func initialize(default_code: String) -> void:
@@ -32,6 +32,5 @@ func get_editor_screen_rect() -> Dictionary:
 	return WindowAlignmentHelperScript.build_control_client_rect(get_toolbox_target_control(), TOOLBOX_ATTACH_PADDING)
 
 func show_practice(practice_view: Dictionary) -> void:
-	var current_level_id: String = str(practice_view.get("current_level_id", "level"))
-	editor_title.text = "EDITOR: %s.py" % current_level_id.replace("-", "_")
+	editor_title.text = "Editor"
 	set_code_editable(bool(practice_view.get("code_editable", false)))
