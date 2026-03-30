@@ -28,5 +28,9 @@ map_routes:
   - file: map_routes/main-map-routes.yaml
 toolbox:
   - file: toolbox/toolbox-group-01.yaml
+  - file: toolbox/toolbox-group-02.yaml
+  - file: toolbox/toolbox-group-03.yaml
+  - file: toolbox/toolbox-group-04.yaml
+  - file: toolbox/toolbox-group-05.yaml
 battery:
   - file: battery/battery-group-01.yaml

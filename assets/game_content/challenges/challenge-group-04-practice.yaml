@@ -7,7 +7,7 @@ level_ids:
   - group-04-practice-03
   - group-04-practice-04
   - group-04-practice-05
-toolbox_policy_id: null
+toolbox_policy_id: toolbox-group-04
 battery_policy_id: null
 metadata:
   stage: loop-lab

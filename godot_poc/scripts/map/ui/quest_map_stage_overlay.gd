@@ -16,7 +16,7 @@ signal practice_requested()
 @onready var stage_story_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartStoryButton")
 @onready var stage_demo_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartDemoButton")
 @onready var stage_practice_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartPracticeButton")
-@onready var stage_close_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Header/CloseButton")
+@onready var stage_close_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Header/CloseNudge/CloseButton")
 
 
 func _ready() -> void:

@@ -40,18 +40,33 @@ class BlocklyEmbed(QWebEngineView):
         self._bridge = BlocklyBridge()
         self._bridge.output_received.connect(self._on_output_received)
         self._bridge.message_received.connect(self._on_message_received)
+        self._pending_toolbox_block_ids: tuple[str, ...] | None = None
+        self._pending_workspace_reset = False
+        self._page_loaded = False
 
         channel = QWebChannel(self.page())
         channel.registerObject("bridge", self._bridge)
         self.page().setWebChannel(channel)
+        self.loadFinished.connect(self._on_load_finished)
 
     def load_placeholder(self, html_path: Path) -> None:
+        self._page_loaded = False
         self.setUrl(QUrl.fromLocalFile(str(html_path.resolve())))
 
     def request_output(self) -> None:
+        if not self._page_loaded:
+            return
         self.page().runJavaScript(
             "window.block2pythonSendOutputToBridge && window.block2pythonSendOutputToBridge();"
         )
+
+    def set_toolbox_block_ids(self, block_ids: tuple[str, ...] | list[str]) -> None:
+        self._pending_toolbox_block_ids = tuple(str(block_id) for block_id in block_ids)
+        self._apply_toolbox_block_ids()
+
+    def clear_workspace(self) -> None:
+        self._pending_workspace_reset = True
+        self._apply_workspace_reset()
 
     def _on_output_received(self, python_code: str, block_json_str: str) -> None:
         try:
@@ -65,3 +80,25 @@ class BlocklyEmbed(QWebEngineView):
 
     def _on_message_received(self, kind: str, message: str) -> None:
         self.message_received.emit(kind, message)
+
+    def _on_load_finished(self, ok: bool) -> None:
+        self._page_loaded = ok
+        if ok:
+            self._apply_toolbox_block_ids()
+            self._apply_workspace_reset()
+
+    def _apply_toolbox_block_ids(self) -> None:
+        if not self._page_loaded or self._pending_toolbox_block_ids is None:
+            return
+        payload = json.dumps(list(self._pending_toolbox_block_ids), ensure_ascii=True)
+        self.page().runJavaScript(
+            f"window.block2pythonConfigureToolbox && window.block2pythonConfigureToolbox({payload});"
+        )
+
+    def _apply_workspace_reset(self) -> None:
+        if not self._page_loaded or not self._pending_workspace_reset:
+            return
+        self._pending_workspace_reset = False
+        self.page().runJavaScript(
+            "window.block2pythonResetWorkspace && window.block2pythonResetWorkspace();"
+        )

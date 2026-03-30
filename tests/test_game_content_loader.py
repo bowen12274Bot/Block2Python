@@ -28,6 +28,7 @@ def test_load_runtime_game_content_assets() -> None:
     assert "challenge-group-01-practice" in bundle.challenges
     assert "challenge-group-05-practice" in bundle.challenges
     assert "toolbox-group-01" in bundle.toolbox
+    assert "toolbox-group-05" in bundle.toolbox
     assert "battery-group-01" in bundle.battery_policies
 
 
@@ -43,18 +44,32 @@ def test_assemble_runtime_game_slice_against_levels_assets() -> None:
     assert practice.toolbox_policy is not None
     assert practice.toolbox_policy.toolbox_id == "toolbox-group-01"
     assert practice.toolbox_policy.allow_toolbox_in_practice is True
+    assert practice.toolbox_policy.unlocked_block_ids == ("text_print", "b2p_input_text")
     assert practice.battery_policy is not None
     assert practice.battery_policy.battery_policy_id == "battery-group-01"
 
     group_02_practice = assembled.challenges["challenge-group-02-practice"]
     assert [level.level_id for level in group_02_practice.levels] == ["group-02-practice-01", "group-02-practice-02", "group-02-practice-03", "group-02-practice-04", "group-02-practice-05"]
     assert group_02_practice.levels[0].title == "Variable Base"
-    assert group_02_practice.toolbox_policy is None
+    assert group_02_practice.toolbox_policy is not None
+    assert group_02_practice.toolbox_policy.toolbox_id == "toolbox-group-02"
+    assert group_02_practice.toolbox_policy.unlocked_block_ids == (
+        "text_print",
+        "b2p_input_text",
+        "b2p_to_int",
+        "variables_set",
+        "variables_get",
+        "math_number",
+        "math_arithmetic",
+    )
     assert group_02_practice.battery_policy is None
 
     group_05_practice = assembled.challenges["challenge-group-05-practice"]
     assert [level.level_id for level in group_05_practice.levels] == ["group-05-practice-01", "group-05-practice-02", "group-05-practice-03", "group-05-practice-04", "group-05-practice-05"]
     assert group_05_practice.levels[0].title == "Bug King Castle"
+    assert group_05_practice.toolbox_policy is not None
+    assert group_05_practice.toolbox_policy.toolbox_id == "toolbox-group-05"
+    assert "b2p_if_else" not in group_05_practice.toolbox_policy.unlocked_block_ids
 
 
 def test_missing_level_reference_raises() -> None:

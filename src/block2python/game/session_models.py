@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 
@@ -43,3 +43,11 @@ class GroupRuntimeState:
     practice_last_level_id: str | None = None
     practice_reviewing: bool = False
     completed: bool = False
+
+
+@dataclass(slots=True)
+class PracticeBatteryState:
+    group_id: str
+    battery_percent: int = 0
+    awarded_level_ids: set[str] = field(default_factory=set)
+    toolbox_opened_level_ids: set[str] = field(default_factory=set)
