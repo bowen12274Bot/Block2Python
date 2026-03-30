@@ -14,6 +14,7 @@ signal back_requested()
 const DEFAULT_OPENAI_ENDPOINT := "https://api.openai.com/v1/chat/completions"
 const DEFAULT_OPENAI_MODEL := "gpt-4o-mini"
 const DEFAULT_OPENAI_TIMEOUT_SEC := 30.0
+const TUTOR_STREAM_INTERVAL_SEC := 0.03
 
 @onready var status_label: Label = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/StatusLabel
 @onready var mission_title_label: Label = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/TitleRow/MissionTitle
@@ -56,6 +57,13 @@ var _total_tutor_cost: float = 0.0
 var _openai_endpoint_url: String = DEFAULT_OPENAI_ENDPOINT
 var _openai_model: String = DEFAULT_OPENAI_MODEL
 var _openai_timeout_sec: float = DEFAULT_OPENAI_TIMEOUT_SEC
+var _tutor_reply_stream_timer: Timer
+var _tutor_reply_streaming: bool = false
+var _tutor_reply_stream_source_log: String = ""
+var _tutor_reply_stream_content: String = ""
+var _tutor_reply_stream_visible_chars: int = 0
+var _tutor_reply_stream_reply_type: String = ""
+var _tutor_reply_stream_metadata: Dictionary = {}
 
 func _ready() -> void:
 	run_button.pressed.connect(_on_run_button_pressed)
@@ -72,6 +80,11 @@ func _ready() -> void:
 	_setup_provider_options()
 	_reset_tutor_stats()
 	assistant_input.editable = false
+	_tutor_reply_stream_timer = Timer.new()
+	_tutor_reply_stream_timer.wait_time = TUTOR_STREAM_INTERVAL_SEC
+	_tutor_reply_stream_timer.one_shot = false
+	_tutor_reply_stream_timer.timeout.connect(_on_tutor_reply_stream_tick)
+	add_child(_tutor_reply_stream_timer)
 	_toolbox_confirmation_dialog = ConfirmationDialog.new()
 	_toolbox_confirmation_dialog.title = "Tool Kit Warning"
 	_toolbox_confirmation_dialog.confirmed.connect(_on_toolbox_confirmation_confirmed)
@@ -169,13 +182,10 @@ func tutor_config() -> Dictionary:
 	}
 
 func show_tutor_reply(reply_type: String, content: String, metadata: Dictionary = {}) -> void:
-	_append_assistant_entry("Byte", content)
-	tutor_reply_type_label.text = "Reply type: %s" % reply_type
-	_update_cost_labels(metadata)
-	status_label.text = "Status: tutor reply received"
-	set_tutor_pending(false)
+	_start_tutor_reply_stream(reply_type, content, metadata)
 
 func show_tutor_error(message: String) -> void:
+	_stop_tutor_reply_stream(false)
 	_append_assistant_entry("System", message)
 	status_label.text = "Status: tutor request failed"
 	tutor_reply_type_label.text = "Reply type: error"
@@ -243,6 +253,7 @@ func _on_ask_tutor_button_pressed() -> void:
 func _on_cancel_tutor_button_pressed() -> void:
 	if not _tutor_request_pending:
 		return
+	_stop_tutor_reply_stream(true)
 	status_label.text = "Status: cancelling tutor request..."
 	set_tutor_pending(false)
 	tutor_cancel_requested.emit()
@@ -312,10 +323,84 @@ func _refresh_tutor_controls() -> void:
 	ask_tutor_button.disabled = (
 		not _assistant_enabled
 		or _tutor_request_pending
+		or _tutor_reply_streaming
 		or not has_question
 		or (requires_api_key and not has_api_key)
 	)
 	cancel_tutor_button.disabled = not _tutor_request_pending
+
+func _start_tutor_reply_stream(reply_type: String, content: String, metadata: Dictionary) -> void:
+	_stop_tutor_reply_stream(false)
+	_tutor_reply_streaming = true
+	_tutor_reply_stream_source_log = assistant_log.text
+	_tutor_reply_stream_content = content
+	_tutor_reply_stream_visible_chars = 0
+	_tutor_reply_stream_reply_type = reply_type
+	_tutor_reply_stream_metadata = metadata.duplicate(true)
+
+	if _tutor_reply_stream_content == "":
+		_append_assistant_entry("Byte", "")
+		_finish_tutor_reply_stream()
+		return
+
+	status_label.text = "Status: streaming tutor reply..."
+	_refresh_tutor_controls()
+	_update_tutor_reply_stream_preview()
+	_tutor_reply_stream_timer.start()
+
+
+func _on_tutor_reply_stream_tick() -> void:
+	if not _tutor_reply_streaming:
+		return
+
+	var total_length: int = _tutor_reply_stream_content.length()
+	if total_length <= 0:
+		_finish_tutor_reply_stream()
+		return
+
+	var step: int = 12
+	if total_length >= 240:
+		step = 20
+	if total_length >= 480:
+		step = 32
+
+	_tutor_reply_stream_visible_chars = min(total_length, _tutor_reply_stream_visible_chars + step)
+	_update_tutor_reply_stream_preview()
+	if _tutor_reply_stream_visible_chars >= total_length:
+		_finish_tutor_reply_stream()
+
+
+func _update_tutor_reply_stream_preview() -> void:
+	var visible_text: String = _tutor_reply_stream_content.substr(0, _tutor_reply_stream_visible_chars)
+	_set_tutor_stream_log(visible_text)
+
+
+func _set_tutor_stream_log(message: String) -> void:
+	if _tutor_reply_stream_source_log.strip_edges() == "":
+		assistant_log.text = "Byte: %s" % message
+		return
+	assistant_log.text = "%s\n\nByte: %s" % [_tutor_reply_stream_source_log, message]
+
+
+func _finish_tutor_reply_stream() -> void:
+	if _tutor_reply_stream_timer != null:
+		_tutor_reply_stream_timer.stop()
+	if _tutor_reply_streaming:
+		_set_tutor_stream_log(_tutor_reply_stream_content)
+	_tutor_reply_streaming = false
+	tutor_reply_type_label.text = "Reply type: %s" % _tutor_reply_stream_reply_type
+	_update_cost_labels(_tutor_reply_stream_metadata)
+	status_label.text = "Status: tutor reply received"
+	_refresh_tutor_controls()
+	set_tutor_pending(false)
+
+
+func _stop_tutor_reply_stream(restore_source_log: bool) -> void:
+	if _tutor_reply_stream_timer != null:
+		_tutor_reply_stream_timer.stop()
+	if restore_source_log and _tutor_reply_streaming:
+		assistant_log.text = _tutor_reply_stream_source_log
+	_tutor_reply_streaming = false
 
 func _append_assistant_entry(speaker: String, message: String) -> void:
 	var trimmed: String = message.strip_edges()
