@@ -81,7 +81,7 @@ map_routes:
             title: Story Scene
             target_page: scene
             node_id: group-02-story
-            scene_id: scene-city-alarm
+            scene_id: scene-variable-base
             tracked_node_ids:
               - group-02-story
           - step_id: group-02-demo-level
@@ -145,7 +145,7 @@ map_routes:
             title: Story Scene
             target_page: scene
             node_id: group-03-story
-            scene_id: scene-city-alarm
+            scene_id: scene-if-canyon
             tracked_node_ids:
               - group-03-story
           - step_id: group-03-demo-level
@@ -209,7 +209,7 @@ map_routes:
             title: Story Scene
             target_page: scene
             node_id: group-04-story
-            scene_id: scene-city-alarm
+            scene_id: scene-loop-lab
             tracked_node_ids:
               - group-04-story
           - step_id: group-04-demo-level
@@ -273,7 +273,7 @@ map_routes:
             title: Story Scene
             target_page: scene
             node_id: group-05-story
-            scene_id: scene-city-alarm
+            scene_id: scene-bug-king-castle
             tracked_node_ids:
               - group-05-story
           - step_id: group-05-demo-level

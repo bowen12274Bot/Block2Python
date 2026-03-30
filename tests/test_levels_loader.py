@@ -28,6 +28,12 @@ def temp_levels_dir(tmp_path: Path) -> Path:
         "level_id": "test-1",
         "title": "Test Level",
         "prompt": "Test prompt",
+        "teaching_skill_ids": ["input-output-basics"],
+        "tutor_policy": {
+            "allow_full_solution": False,
+            "max_hint_steps": 3,
+            "response_tone": "clear",
+        },
         "testcases": [{"stdin": "1\n", "expected_stdout": "2\n"}],
         "judge_policy": {
             "time_limit_ms": 3000,
@@ -53,6 +59,12 @@ class TestLevelsLoader:
         assert level.judge_policy.memory_limit_kb is None
         assert level.judge_policy.output_normalization.normalize_newlines_to_lf is True
         assert level.judge_policy.output_normalization.strip_trailing_whitespace is False
+        assert level.teaching_skill_ids == ("input-output-basics",)
+        assert level.tutor_policy == {
+            "allow_full_solution": False,
+            "max_hint_steps": 3,
+            "response_tone": "clear",
+        }
 
     def test_default_judge_policy_when_missing(self, tmp_path: Path):
         levels_dir = tmp_path / "levels2"
@@ -66,6 +78,8 @@ class TestLevelsLoader:
         assert "minimal" in levels
         # Should use default JudgePolicy
         assert levels["minimal"].judge_policy.time_limit_ms == JudgePolicy().time_limit_ms
+        assert levels["minimal"].teaching_skill_ids == ()
+        assert levels["minimal"].tutor_policy == {}
 
     def test_testcases_loaded(self, temp_levels_dir: Path):
         levels = load_levels(temp_levels_dir)
@@ -92,6 +106,12 @@ class TestLevelsLoader:
             "level_id: yaml-level\n"
             "title: YAML Level\n"
             "prompt: add numbers\n"
+            "teaching_skill_ids:\n"
+            "  - input-output-basics\n"
+            "tutor_policy:\n"
+            "  allow_full_solution: false\n"
+            "  max_hint_steps: 2\n"
+            "  response_tone: friendly\n"
             "testcase_dir: cases\n"
             "judge_policy:\n"
             "  time_limit_ms: 1200\n"
@@ -107,6 +127,12 @@ class TestLevelsLoader:
         assert level.testcases[0].expected_stdout == "9\n"
         assert level.judge_policy.time_limit_ms == 1200
         assert level.judge_policy.memory_limit_kb == 64 * 1024
+        assert level.teaching_skill_ids == ("input-output-basics",)
+        assert level.tutor_policy == {
+            "allow_full_solution": False,
+            "max_hint_steps": 2,
+            "response_tone": "friendly",
+        }
 
     def test_load_explicit_file_backed_testcases(self, tmp_path: Path):
         levels_dir = tmp_path / "levels-file-ref"
@@ -142,6 +168,33 @@ class TestLevelsLoader:
         assert level.testcases[0].expected_stdout == "11\n"
         assert level.judge_policy.memory_limit_kb == 2048
 
+    def test_tutor_policy_falls_back_to_metadata(self, tmp_path: Path):
+        levels_dir = tmp_path / "levels-metadata-policy"
+        levels_dir.mkdir()
+
+        (levels_dir / "index.yaml").write_text(
+            "levels:\n"
+            "  - id: metadata-policy\n"
+            "    file: metadata-policy.yaml\n",
+            encoding="utf-8",
+        )
+        (levels_dir / "metadata-policy.yaml").write_text(
+            "level_id: metadata-policy\n"
+            "title: Metadata Policy\n"
+            "teaching_skill_ids: not-a-list\n"
+            "tutor_policy: bad-policy\n"
+            "metadata:\n"
+            "  tutor_policy:\n"
+            "    max_hint_steps: 4\n"
+            "    response_tone: clear\n",
+            encoding="utf-8",
+        )
+
+        levels = load_levels(levels_dir)
+        level = levels["metadata-policy"]
+        assert level.teaching_skill_ids == ()
+        assert level.tutor_policy == {"max_hint_steps": 4, "response_tone": "clear"}
+
 
 def test_assets_levels_include_five_group_scaffolds() -> None:
     levels = load_levels(Path("assets/levels"))
@@ -158,4 +211,5 @@ def test_assets_levels_include_five_group_scaffolds() -> None:
 
     assert levels["group-02-practice-01"].prerequisite_level_ids == ("group-02-demo",)
     assert len(levels["group-03-demo"].testcases) == 1
-
+    assert levels["group-01-demo"].teaching_skill_ids == ("input-output-basics",)
+    assert levels["group-01-practice-01"].teaching_skill_ids == ("variables",)

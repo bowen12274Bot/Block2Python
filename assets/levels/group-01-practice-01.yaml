@@ -6,12 +6,34 @@ prerequisite_level_ids:
   - group-01-demo
 next_level_ids:
   - group-01-practice-02
+teaching_skill_ids:
+  - variables
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 prompt: |
-  請讀取一行文字 name，輸出：
+  劇情：
+  你抵達了「輸入之門」，門禁終端要求一句正確格式的問候，才會開門。
+
+  任務：
+  讀取一行字串 name（可能包含空白），並輸出：
   Hello, <name>!
+
+  例如輸入為 Ada Lovelace，輸出必須是：
+  Hello, Ada Lovelace!
 learning_markdown: |
-  目標：練習最基本輸入與字串輸出格式。
-  你需要使用 input() 讀取資料，並組出固定格式的回應字串。
+  目標：練習最基本的字串輸入與格式化輸出。
+  重點是「完整讀入一整行」並保留原字串內容（包含空白）。
+  建議流程：
+  1. 用 input() 讀取 name。
+  2. 依照指定格式輸出 Hello, <name>!。
+story_intro_markdown: |
+  終端亮起紅字：
+  「識別語未輸入。請以標準問候格式驗證通行權限。」
+story_outro_markdown: |
+  門鎖解除，走廊燈光逐格亮起。
+  你成功完成第一道輸入協定，前往下一個節點。
 testcase_dir: cases/group-01-practice-01
 judge_policy:
   time_limit_ms: 3000

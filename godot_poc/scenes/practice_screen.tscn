@@ -206,10 +206,10 @@ offset_bottom = 56.0
 
 [node name="RunButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=567014198]
 layout_mode = 0
-offset_left = 65.93799
-offset_top = 16.0
-offset_right = 122.93799
-offset_bottom = 52.0
+offset_left = 48.93799
+offset_top = 15.0
+offset_right = 105.93799
+offset_bottom = 51.0
 theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
 theme_override_fonts/font = ExtResource("4_orbitron")
 theme_override_font_sizes/font_size = 13
@@ -233,10 +233,10 @@ stretch_mode = 5
 
 [node name="SubmitButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1723222838]
 layout_mode = 0
-offset_left = 125.93799
-offset_top = 16.0
-offset_right = 207.93799
-offset_bottom = 52.0
+offset_left = 110.93799
+offset_top = 15.0
+offset_right = 192.93799
+offset_bottom = 51.0
 theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
 theme_override_fonts/font = ExtResource("4_orbitron")
 theme_override_font_sizes/font_size = 13
@@ -260,7 +260,7 @@ stretch_mode = 5
 
 [node name="NextButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1268451318]
 layout_mode = 0
-offset_left = 213.93799
+offset_left = 197.93799
 offset_top = 15.0
 offset_right = 263.938
 offset_bottom = 51.0
@@ -270,7 +270,6 @@ theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-disabled = true
 text = "NEXT"
 
 [node name="NextIconArt" type="TextureRect" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/NextButton" unique_id=1219025579]
@@ -527,24 +526,115 @@ theme_override_fonts/font = ExtResource("4_orbitron")
 theme_override_font_sizes/font_size = 18
 text = "COMMS LOG"
 
+[node name="AssistantSubhead" type="Label" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1030008]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 46.0
+offset_right = 210.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 13
+text = "Tutor controls and guided hints"
+
+[node name="ConfigRow" type="Control" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1210101]
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 72.0
+offset_right = 214.0
+offset_bottom = 104.0
+
+[node name="ProviderOption" type="OptionButton" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow" unique_id=1210102]
+custom_minimum_size = Vector2(98, 30)
+layout_mode = 0
+offset_right = 98.0
+offset_bottom = 30.0
+
+[node name="ApiKeyInput" type="LineEdit" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow" unique_id=1210103]
+layout_mode = 0
+offset_left = 104.0
+offset_right = 160.0
+offset_bottom = 30.0
+placeholder_text = "API key"
+secret = true
+
+[node name="SaveTutorConfigButton" type="Button" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow" unique_id=1210104]
+layout_mode = 0
+offset_left = 166.0
+offset_right = 214.0
+offset_bottom = 30.0
+text = "Save"
+
 [node name="AssistantLog" type="RichTextLabel" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=865983397]
 layout_mode = 0
 offset_left = 6.0
-offset_top = 50.0
+offset_top = 114.0
 offset_right = 207.0
-offset_bottom = 376.0
+offset_bottom = 304.0
 theme_override_colors/default_color = Color(0.89, 0.96, 1, 0.92)
 theme_override_font_sizes/normal_font_size = 15
 text = "Byte: Practice assistant is standing by."
 
 [node name="AssistantInput" type="LineEdit" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=130366098]
-visible = false
 layout_mode = 0
-offset_top = 372.0
+offset_left = 6.0
+offset_top = 312.0
 offset_right = 220.0
-offset_bottom = 403.0
-placeholder_text = "Chat input is coming later."
+offset_bottom = 343.0
+placeholder_text = "Ask Byte about this level..."
 editable = false
+
+[node name="ActionRow" type="Control" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1210105]
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 350.0
+offset_right = 214.0
+offset_bottom = 382.0
+
+[node name="AskTutorButton" type="Button" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot/ActionRow" unique_id=1210106]
+layout_mode = 0
+offset_right = 98.0
+offset_bottom = 32.0
+text = "Ask Tutor"
+
+[node name="CancelTutorButton" type="Button" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot/ActionRow" unique_id=1210107]
+layout_mode = 0
+offset_left = 110.0
+offset_right = 208.0
+offset_bottom = 32.0
+text = "Cancel"
+
+[node name="TutorStats" type="Control" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1210108]
+anchors_preset = 0
+offset_left = -7.0
+offset_top = 414.0
+offset_right = 201.0
+offset_bottom = 472.0
+
+[node name="ReplyTypeLabel" type="Label" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot/TutorStats" unique_id=1210109]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+layout_mode = 0
+offset_right = 208.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 12
+text = "Reply type: -"
+
+[node name="RequestCostLabel" type="Label" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot/TutorStats" unique_id=1210110]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+layout_mode = 0
+offset_top = 20.0
+offset_right = 208.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 12
+text = "Request cost: N/A"
+
+[node name="TotalCostLabel" type="Label" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot/TutorStats" unique_id=1210111]
+modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+layout_mode = 0
+offset_top = 40.0
+offset_right = 208.0
+offset_bottom = 58.0
+theme_override_font_sizes/font_size = 12
+text = "Total cost: $0.000000"
 
 [node name="BatteryPanel" type="PanelContainer" parent="Overlay" unique_id=996236317]
 layout_mode = 0

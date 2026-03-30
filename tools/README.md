@@ -32,6 +32,15 @@
 - `tools/reset_progress.ps1`
   清除本機 progress 檔案 `.block2python/progress.json`。
 
+## 題目產生（Level Authoring）
+
+- `tools/level/`
+  放每一題的題目生成腳本與 testlib 工作區（由 skill scaffold 產生）。
+  建議一題一個資料夾：`tools/level/<problem_name>/`。
+  對應的 Block2Python 關卡檔位於：
+  - `assets/levels/<level_id>.yaml`
+  - `assets/levels/cases/<level_id>/`
+
 ## 驗證與 Smoke Test
 
 - `tools/smoke_bridge.ps1`

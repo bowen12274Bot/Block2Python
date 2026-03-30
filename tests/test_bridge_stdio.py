@@ -31,8 +31,7 @@ def test_bridge_server_persists_session_across_requests() -> None:
                 '{"action":{"action_type":"advance","payload":{}}}',
                 '{"action":{"action_type":"submit_level","payload":{"python_code":"print(3)\\n","block_json":{"kind":"workspace"}}}}',
             ]
-        )
-        + "\n"
+        ) + "\n"
     )
     outstream = io.StringIO()
 
@@ -68,8 +67,7 @@ def test_bridge_server_accepts_unicode_python_code_payload() -> None:
                     ensure_ascii=False,
                 ),
             ]
-        )
-        + "\n"
+        ) + "\n"
     )
     outstream = io.StringIO()
 
@@ -116,8 +114,7 @@ def test_bridge_server_supports_reset_command() -> None:
                 '{"action":{"action_type":"advance","payload":{}}}',
                 '{"command":"reset"}',
             ]
-        )
-        + "\n"
+        ) + "\n"
     )
     outstream = io.StringIO()
 
@@ -129,3 +126,109 @@ def test_bridge_server_supports_reset_command() -> None:
     assert reset_response["state"]["mode"] == "scene"
     assert reset_response["state"]["node_id"] == "main-map-entry"
     assert reset_response["state"]["last_submission"] is None
+
+
+def test_bridge_server_supports_tutor_reply_for_active_level() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        "\n".join(
+            [
+                '{"action":{"action_type":"advance","payload":{}}}',
+                '{"action":{"action_type":"advance","payload":{}}}',
+                '{"action":{"action_type":"advance","payload":{}}}',
+                '{"command":"tutor_reply","payload":{"question":"How should I start?","python_code":"print(1)\\n","provider":"template"}}',
+            ]
+        ) + "\n"
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    responses = [json.loads(line) for line in outstream.getvalue().splitlines() if line.strip()]
+    tutor_response = responses[-1]
+    assert tutor_response["ok"] is True
+    assert tutor_response["state"]["mode"] == "challenge"
+    assert tutor_response["tutor"] is not None
+    assert tutor_response["tutor"]["reply_type"] in {
+        "concept_explanation",
+        "next_step_hint",
+        "debug_hint",
+        "scope_refusal",
+        "solution_refusal",
+    }
+    assert isinstance(tutor_response["tutor"]["content"], str)
+    assert tutor_response["tutor"]["content"].strip() != ""
+
+
+def test_bridge_server_supports_tutor_reply_with_explicit_level_id() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        '{"command":"tutor_reply","payload":{"level_id":"group-01-demo","question":"What is input output?","python_code":"print(1)\\n","provider":"stub"}}\n'
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is True
+    assert response["state"]["mode"] == "scene"
+    assert response["tutor"] is not None
+    assert response["tutor"]["metadata"]["provider"] == "stub"
+
+
+def test_bridge_server_tutor_reply_rejects_missing_question() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO('{"command":"tutor_reply","payload":{"level_id":"group-01-demo"}}\n')
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is False
+    assert response["state"] is None
+    assert "TutorReplyRequest.question" in response["error"]
+
+
+def test_bridge_server_tutor_reply_accepts_current_code_alias() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        '{"command":"tutor_reply","payload":{"level_id":"group-01-demo","question":"Explain this","current_code":"print(1)\\n","current_blocks":{"kind":"workspace"},"provider":"stub"}}\n'
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is True
+    assert response["tutor"] is not None
+    assert response["tutor"]["metadata"]["provider"] == "stub"
+
+
+def test_bridge_server_tutor_reply_accepts_recent_feedback() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        '{"command":"tutor_reply","payload":{"level_id":"group-01-demo","question":"How do I fix this?","python_code":"print(1)\\n","provider":"stub","recent_feedback":["analysis: syntax error","judge: WA on case 2"]}}\n'
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is True
+    assert response["tutor"] is not None
+    assert response["tutor"]["metadata"]["provider"] == "stub"
+
+
+def test_bridge_server_tutor_reply_openai_requires_provider_options() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        '{"command":"tutor_reply","payload":{"level_id":"group-01-demo","question":"Explain this","provider":"openai_compatible"}}\n'
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is False
+    assert response["state"] is None
+    assert "provider_options.endpoint_url" in response["error"]

@@ -42,6 +42,34 @@ function Resolve-GodotExecutable {
   return $null
 }
 
+function Ensure-GodotImports {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$GodotExecutable,
+    [Parameter(Mandatory = $true)]
+    [string]$ProjectPath
+  )
+
+  $importDir = Join-Path $ProjectPath ".godot\imported"
+  $needsImport = $false
+  if (-not (Test-Path $importDir)) {
+    $needsImport = $true
+  }
+  else {
+    $ctexCount = @(Get-ChildItem -Path $importDir -Filter "*.ctex" -File -ErrorAction SilentlyContinue).Count
+    if ($ctexCount -eq 0) {
+      $needsImport = $true
+    }
+  }
+
+  if (-not $needsImport) {
+    return
+  }
+
+  Write-Host "Import cache missing. Regenerating Godot imports..."
+  & $GodotExecutable --path $ProjectPath --editor --quit
+}
+
 try {
   $godotExe = Resolve-GodotExecutable -Version $GodotVersion -UseConsole:$Console
   if (-not $godotExe) {
@@ -57,6 +85,8 @@ try {
   Write-Host "Launching Godot project..."
   Write-Host "Executable: $godotExe"
   Write-Host "Project: $projectPath"
+
+  Ensure-GodotImports -GodotExecutable $godotExe -ProjectPath $projectPath
 
   & $godotExe --path $projectPath
 }

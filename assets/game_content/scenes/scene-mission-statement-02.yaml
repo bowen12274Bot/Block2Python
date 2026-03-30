@@ -1,8 +1,8 @@
-scene_id: scene-mission-statement-02
-title: 任務書
+﻿scene_id: scene-mission-statement-02
+title: 任務書：Variable Base
 dialogue_blocks:
   - speaker: 任務書
-    text: 檢查失控系統留下的資料，找出正確的記憶與變數狀態。
+    text: 學習目標：int、str、運算子
   - speaker: 任務書
-    text: 點擊同意後前往 Demo，開始第二關的修復任務。
+    text: 建立變數並正確運算，讓系統重新記住資料。
 next_action: inline_overlay

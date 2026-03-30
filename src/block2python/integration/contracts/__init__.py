@@ -17,8 +17,18 @@ from .models import (
     ProgressState,
     SceneState,
     SubmissionFeedback,
+    TutorReplyPayload,
+    TutorReplyRequest,
 )
-from .serialize import deserialize_player_action, serialize_game_state, serialize_player_action
+from .serialize import (
+    deserialize_player_action,
+    deserialize_tutor_reply_payload,
+    deserialize_tutor_reply_request,
+    serialize_game_state,
+    serialize_player_action,
+    serialize_tutor_reply_payload,
+    serialize_tutor_reply_request,
+)
 
 __all__ = [
     "ActionType",
@@ -40,7 +50,13 @@ __all__ = [
     "ProgressState",
     "SceneState",
     "SubmissionFeedback",
+    "TutorReplyPayload",
+    "TutorReplyRequest",
     "deserialize_player_action",
+    "deserialize_tutor_reply_payload",
+    "deserialize_tutor_reply_request",
     "serialize_game_state",
     "serialize_player_action",
+    "serialize_tutor_reply_payload",
+    "serialize_tutor_reply_request",
 ]

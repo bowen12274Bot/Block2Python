@@ -1,5 +1,5 @@
 level_id: group-01-practice-02
-title: Group 01 Practice 02 Sum
+title: Input Gate
 chapter_id: map-groups
 order_index: 1002
 prerequisite_level_ids:
@@ -7,9 +7,22 @@ prerequisite_level_ids:
 next_level_ids:
   - group-01-practice-03
 prompt: |
-  Read two integers from standard input and print their sum.
+  任務：
+  從標準輸入讀入兩個整數 a、b，輸出它們的總和。
+
+  你只需要輸出一個整數：a + b。
 learning_markdown: |
-  Practice converting input into integers and printing the computed result.
+  目標：練習最基本的數值輸入與算術輸出。
+  建議流程：
+  1. 連續讀入兩個整數。
+  2. 計算 a + b。
+  3. 輸出結果。
+story_intro_markdown: |
+  第二道終端啟動，螢幕只顯示一行訊息：
+  「同步兩個數值訊號，回報合成結果。」
+story_outro_markdown: |
+  合成數值驗證成功。
+  你已掌握最基礎的數值運算節奏，前往下一個節點。
 testcase_dir: cases/group-01-practice-02
 judge_policy:
   time_limit_ms: 3000

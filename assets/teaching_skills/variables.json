@@ -1,0 +1,58 @@
+{
+  "skill_id": "variables",
+  "version": "1.0",
+  "title": "Variables Basics",
+  "description": "Help students use variables to store and reuse values.",
+  "applies_to": {
+    "level_ids": [
+      "group-01-practice-01"
+    ],
+    "concepts": [
+      "variables",
+      "assignment",
+      "input"
+    ]
+  },
+  "student_level": "beginner",
+  "learning_goals": [
+    "Store input in a named variable",
+    "Reuse the same variable in output"
+  ],
+  "allowed_concepts": [
+    "variable assignment",
+    "input()",
+    "print()",
+    "f-string"
+  ],
+  "forbidden_concepts": [
+    "import",
+    "list comprehensions",
+    "function definition"
+  ],
+  "hint_ladder": [
+    "Pick a clear variable name for the input value.",
+    "After assignment, reuse the same variable when printing.",
+    "Example flow: read input into `name`, then print a greeting with that variable."
+  ],
+  "common_mistakes": [
+    {
+      "pattern": "Reads input but never stores it",
+      "diagnosis": "The value cannot be reused without a variable.",
+      "hint": "Assign the result of input to one variable before printing."
+    },
+    {
+      "pattern": "Uses a different variable name when printing",
+      "diagnosis": "Printing another name causes a NameError or wrong value.",
+      "hint": "Use the same variable consistently in assignment and output."
+    }
+  ],
+  "refusal_rules": [
+    "Do not output a full final answer code block.",
+    "Keep explanations inside beginner-level variable concepts."
+  ],
+  "answer_style": {
+    "tone": "clear",
+    "max_steps": 3,
+    "max_response_length": 450
+  }
+}

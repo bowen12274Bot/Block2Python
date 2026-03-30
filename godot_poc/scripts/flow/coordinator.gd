@@ -46,9 +46,14 @@ const BridgeStateStoreScript = preload("res://scripts/bridge/bridge_state_store.
 const QuestMapMapperScript = preload("res://scripts/map/mappers/quest_map_mapper.gd")
 const GameFlowFeedbackPresenterScript = preload("res://scripts/game_flow/presentation/feedback_presenter.gd")
 const GameFlowMapperScript = preload("res://scripts/game_flow/mappers/mapper.gd")
+const TutorUserConfigScript = preload("res://scripts/game_flow/tutor/tutor_user_config.gd")
 const FlowPageRouterScript = preload("res://scripts/flow/page_router.gd")
 const FlowScreenPresenterScript = preload("res://scripts/flow/screen_presenter.gd")
 const FlowToolboxControllerScript = preload("res://scripts/flow/toolbox/toolbox_controller.gd")
+const DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC := 30.0
+const TUTOR_REQUEST_TIMEOUT_GRACE_SEC := 5.0
+const MAX_TUTOR_CONVERSATION_MESSAGES := 12
+const MAX_RECENT_TUTOR_FEEDBACK_ITEMS := 4
 
 @onready var python_bridge_client = $PythonBridgeClient
 @onready var entry_screen = $EntryScreen
@@ -63,11 +68,23 @@ const FlowToolboxControllerScript = preload("res://scripts/flow/toolbox/toolbox_
 var _state_store: RefCounted
 var _current_page: String = "entry"
 var _toolbox_controller: RefCounted
+var _awaiting_tutor_reply: bool = false
+var _active_tutor_request_tag: String = ""
+var _tutor_request_seq: int = 0
+var _active_tutor_timeout_sec: float = DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC
+var _tutor_timeout_timer: Timer
+var _tutor_conversation_id: String = ""
+var _tutor_conversation_level_id: String = ""
+var _tutor_conversation_history: Array[Dictionary] = []
 
 
 func _ready() -> void:
 	_state_store = BridgeStateStoreScript.new()
 	_ensure_toolbox_controller()
+	_tutor_timeout_timer = Timer.new()
+	_tutor_timeout_timer.one_shot = true
+	_tutor_timeout_timer.timeout.connect(_on_tutor_request_timeout)
+	add_child(_tutor_timeout_timer)
 
 	entry_screen.start_bridge_requested.connect(_on_start_bridge_requested)
 	entry_screen.reset_requested.connect(_on_reset_requested)
@@ -89,11 +106,16 @@ func _ready() -> void:
 	practice_screen.submit_requested.connect(_on_submit_requested)
 	practice_screen.next_requested.connect(_on_next_requested)
 	practice_screen.open_toolbox_requested.connect(_on_open_toolbox_requested)
+	practice_screen.tutor_requested.connect(_on_tutor_requested)
+	practice_screen.tutor_cancel_requested.connect(_on_tutor_cancel_requested)
+	practice_screen.tutor_config_saved.connect(_on_tutor_config_saved)
 	practice_screen.toolbox_confirmation_accepted.connect(_on_toolbox_confirmation_accepted)
 	practice_screen.back_requested.connect(_show_map_page)
 	python_bridge_client.bridge_started.connect(_on_bridge_started)
 	python_bridge_client.bridge_failed.connect(_on_bridge_failed)
 	python_bridge_client.response_received.connect(_on_response_received)
+	python_bridge_client.tutor_response_received.connect(_on_tutor_response_received)
+	python_bridge_client.tutor_request_failed.connect(_on_tutor_request_failed)
 
 	entry_screen.show_profile({})
 	entry_screen.set_status("Status: start bridge, then create your profile.")
@@ -120,6 +142,7 @@ func _ready() -> void:
 	practice_screen.set_can_run(false)
 	practice_screen.set_can_submit(false)
 	practice_screen.set_can_next(false)
+	practice_screen.set_tutor_config(TutorUserConfigScript.load_config())
 	_set_debug_visible(false)
 	_show_page("entry")
 	set_process(true)
@@ -137,6 +160,8 @@ func _on_start_bridge_requested() -> void:
 
 
 func _on_reset_requested() -> void:
+	_cancel_active_tutor_request()
+	_clear_tutor_conversation()
 	entry_screen.set_status("Status: requesting reset...")
 	map_screen.set_status("Status: requesting reset...")
 	python_bridge_client.send_reset()
@@ -249,7 +274,69 @@ func _on_open_toolbox_requested() -> void:
 	practice_screen.prompt_toolbox_confirmation(int(penalty_percent))
 
 
+func _on_tutor_requested(question: String, provider: String, provider_options: Dictionary) -> void:
+	if not _state_store.has_state():
+		practice_screen.show_tutor_error("No GameState loaded yet. Start the bridge and press Reset first.")
+		return
+
+	var state: Dictionary = _state_store.get_state()
+	var level_id: String = _resolve_current_level_id(state)
+	if level_id == "":
+		practice_screen.show_tutor_error("Tutor is available only when a level is active.")
+		return
+	if _tutor_conversation_level_id != level_id:
+		_reset_tutor_conversation(level_id)
+
+	var payload: Dictionary = {
+		"question": question,
+		"provider": provider,
+		"level_id": level_id,
+		"python_code": practice_screen.current_python_code(),
+		"block_json": null,
+	}
+	if _tutor_conversation_id != "":
+		payload["conversation_id"] = _tutor_conversation_id
+	if not _tutor_conversation_history.is_empty():
+		payload["conversation_history"] = _copy_tutor_conversation_history()
+	var recent_feedback: Array[String] = _build_recent_tutor_feedback(state, level_id)
+	if not recent_feedback.is_empty():
+		payload["recent_feedback"] = recent_feedback
+	if not provider_options.is_empty():
+		payload["provider_options"] = provider_options
+
+	if _ensure_toolbox_controller() and _toolbox_controller.is_challenge_workspace_active():
+		payload["block_json"] = _toolbox_controller.workspace_block_json()
+
+	_tutor_request_seq += 1
+	_active_tutor_request_tag = "tutor_%d" % _tutor_request_seq
+	_awaiting_tutor_reply = true
+	_active_tutor_timeout_sec = _resolve_tutor_timeout_sec(provider_options)
+	_start_tutor_timeout(_active_tutor_timeout_sec + TUTOR_REQUEST_TIMEOUT_GRACE_SEC)
+	_append_tutor_conversation("user", question)
+	practice_screen.set_status("Status: requesting tutor reply...")
+	python_bridge_client.send_tutor_reply_async(payload, _active_tutor_request_tag)
+
+
+func _on_tutor_cancel_requested() -> void:
+	if _active_tutor_request_tag != "":
+		python_bridge_client.cancel_tutor_request(_active_tutor_request_tag)
+	_stop_tutor_timeout()
+	_active_tutor_request_tag = ""
+	_awaiting_tutor_reply = false
+	practice_screen.set_status("Status: tutor request cancelled locally.")
+
+
+func _on_tutor_config_saved(config: Dictionary) -> void:
+	var saved: bool = TutorUserConfigScript.save_config(config)
+	if not saved:
+		practice_screen.set_status("Status: failed to save tutor settings.")
+		return
+	practice_screen.set_status("Status: tutor settings saved locally.")
+
+
 func _on_toolbox_confirmation_accepted() -> void:
+	if not _ensure_toolbox_controller():
+		return
 	python_bridge_client.send_confirm_toolbox_open()
 	var practice_view: Dictionary = _current_practice_view()
 	if bool(practice_view.get("toolbox_opened", false)):
@@ -267,10 +354,18 @@ func _on_bridge_started() -> void:
 	map_screen.set_bridge_running(true)
 	map_screen.set_note("Bridge started. Press Reset to fetch current state.")
 	response_text.text = "Bridge started. Click Reset to fetch current state."
-	_toolbox_controller.prewarm_helper()
+	if _ensure_toolbox_controller():
+		_toolbox_controller.prewarm_helper()
 
 
 func _on_bridge_failed(message: String) -> void:
+	if _awaiting_tutor_reply:
+		_stop_tutor_timeout()
+		_awaiting_tutor_reply = false
+		_active_tutor_request_tag = ""
+		practice_screen.show_tutor_error(message)
+		return
+
 	response_text.text = message
 	_apply_error_ui(
 		"Status: bridge error",
@@ -328,6 +423,8 @@ func _append_debug_state(view_model: Dictionary) -> void:
 	]
 	if _ensure_toolbox_controller():
 		debug_lines.append_array(_toolbox_controller.debug_state_lines())
+	else:
+		debug_lines.append("toolbox_controller=unavailable")
 	response_text.text += "\n" + "\n".join(debug_lines)
 
 
@@ -367,6 +464,9 @@ func _show_page(page: String) -> void:
 	var demo_view: Dictionary = _current_demo_view()
 	if _ensure_toolbox_controller():
 		_toolbox_controller.handle_page_changed(page, demo_view)
+	if page != "challenge":
+		_cancel_active_tutor_request()
+		_clear_tutor_conversation()
 
 
 func _current_view_model() -> Dictionary:
@@ -408,4 +508,178 @@ func _ensure_toolbox_controller() -> bool:
 		_toolbox_controller = NullToolboxController.new()
 	_toolbox_controller.setup(self, demo_screen, practice_screen)
 	return true
+
+
+func _on_tutor_response_received(response: Dictionary, request_tag: String) -> void:
+	if request_tag != _active_tutor_request_tag:
+		return
+
+	_stop_tutor_timeout()
+	response_text.text = JSON.stringify(response, "  ")
+	_active_tutor_request_tag = ""
+	_awaiting_tutor_reply = false
+
+	if not bool(response.get("ok", false)):
+		practice_screen.show_tutor_error(str(response.get("error", "Unknown tutor error")))
+		return
+
+	var tutor_variant: Variant = response.get("tutor", null)
+	if not (tutor_variant is Dictionary):
+		practice_screen.show_tutor_error("Tutor response payload is missing.")
+		return
+
+	var tutor_payload: Dictionary = tutor_variant
+	var reply_type: String = str(tutor_payload.get("reply_type", "next_step_hint"))
+	var content: String = str(tutor_payload.get("content", ""))
+	var metadata_variant: Variant = tutor_payload.get("metadata", {})
+	var metadata: Dictionary = {}
+	if metadata_variant is Dictionary:
+		metadata = metadata_variant
+	_append_tutor_conversation("assistant", content)
+	practice_screen.show_tutor_reply(reply_type, content, metadata)
+
+
+func _on_tutor_request_failed(message: String, request_tag: String) -> void:
+	if request_tag != _active_tutor_request_tag:
+		return
+
+	_stop_tutor_timeout()
+	response_text.text = "Tutor async request failed: %s" % message
+	_active_tutor_request_tag = ""
+	_awaiting_tutor_reply = false
+	practice_screen.show_tutor_error(message)
+
+
+func _on_tutor_request_timeout() -> void:
+	if not _awaiting_tutor_reply:
+		return
+
+	var timed_out_tag: String = _active_tutor_request_tag
+	if timed_out_tag != "":
+		python_bridge_client.cancel_tutor_request(timed_out_tag)
+
+	response_text.text = "Tutor request timed out after %.1fs (%s)." % [_active_tutor_timeout_sec, timed_out_tag]
+	_active_tutor_request_tag = ""
+	_awaiting_tutor_reply = false
+	practice_screen.show_tutor_error("Tutor request timed out. Please try again.")
+
+
+func _resolve_tutor_timeout_sec(provider_options: Dictionary) -> float:
+	var timeout_raw: Variant = provider_options.get("timeout_sec", DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC)
+	if timeout_raw is float or timeout_raw is int:
+		var timeout_value: float = float(timeout_raw)
+		if timeout_value > 0:
+			return timeout_value
+	return DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC
+
+
+func _start_tutor_timeout(timeout_sec: float) -> void:
+	if _tutor_timeout_timer == null:
+		return
+	_tutor_timeout_timer.wait_time = max(1.0, timeout_sec)
+	_tutor_timeout_timer.start()
+
+
+func _stop_tutor_timeout() -> void:
+	if _tutor_timeout_timer == null:
+		return
+	_tutor_timeout_timer.stop()
+
+
+func _cancel_active_tutor_request() -> void:
+	if _active_tutor_request_tag != "":
+		python_bridge_client.cancel_tutor_request(_active_tutor_request_tag)
+	_stop_tutor_timeout()
+	_active_tutor_request_tag = ""
+	_awaiting_tutor_reply = false
+
+
+func _clear_tutor_conversation() -> void:
+	_tutor_conversation_id = ""
+	_tutor_conversation_level_id = ""
+	_tutor_conversation_history.clear()
+
+
+func _reset_tutor_conversation(level_id: String) -> void:
+	_tutor_conversation_level_id = level_id
+	_tutor_conversation_id = "tutor_%s_%d" % [level_id, Time.get_ticks_msec()]
+	_tutor_conversation_history.clear()
+
+
+func _append_tutor_conversation(role: String, content: String) -> void:
+	var trimmed: String = content.strip_edges()
+	if trimmed == "":
+		return
+	_tutor_conversation_history.append({
+		"role": role,
+		"content": trimmed,
+	})
+	while _tutor_conversation_history.size() > MAX_TUTOR_CONVERSATION_MESSAGES:
+		_tutor_conversation_history.remove_at(0)
+
+
+func _copy_tutor_conversation_history() -> Array[Dictionary]:
+	var copied: Array[Dictionary] = []
+	for item in _tutor_conversation_history:
+		copied.append(item.duplicate(true))
+	return copied
+
+
+func _build_recent_tutor_feedback(state: Dictionary, level_id: String) -> Array[String]:
+	var last_submission_variant: Variant = state.get("last_submission", null)
+	if not (last_submission_variant is Dictionary):
+		return []
+
+	var last_submission: Dictionary = last_submission_variant
+	if str(last_submission.get("level_id", "")) != level_id:
+		return []
+
+	var summary_lines: Array[String] = []
+	var status_label: String = str(last_submission.get("status_label", "")).strip_edges()
+	if status_label != "":
+		summary_lines.append("status: %s" % status_label)
+
+	var analysis_summary: String = str(last_submission.get("analysis_summary", "")).strip_edges()
+	if analysis_summary != "":
+		summary_lines.append("analysis: %s" % _truncate_tutor_feedback_line(analysis_summary, 180))
+
+	var judge_summary: String = str(last_submission.get("judge_summary", "")).strip_edges()
+	if judge_summary != "":
+		summary_lines.append("judge: %s" % _truncate_tutor_feedback_line(judge_summary, 180))
+
+	var output_text: String = str(last_submission.get("output_text", "")).strip_edges()
+	if output_text != "":
+		var single_line_output: String = output_text.replace("\n", " | ")
+		summary_lines.append("output: %s" % _truncate_tutor_feedback_line(single_line_output, 140))
+
+	if summary_lines.size() > MAX_RECENT_TUTOR_FEEDBACK_ITEMS:
+		summary_lines.resize(MAX_RECENT_TUTOR_FEEDBACK_ITEMS)
+	return summary_lines
+
+
+func _truncate_tutor_feedback_line(text: String, max_length: int) -> String:
+	var trimmed: String = text.strip_edges()
+	if trimmed.length() <= max_length:
+		return trimmed
+	if max_length <= 3:
+		return trimmed.substr(0, max_length)
+	return "%s..." % trimmed.substr(0, max_length - 3)
+
+
+func _resolve_current_level_id(state: Dictionary) -> String:
+	var practice_variant: Variant = state.get("practice", null)
+	if practice_variant is Dictionary:
+		var practice: Dictionary = practice_variant
+		var from_practice: String = str(practice.get("current_level_id", practice.get("level_id", "")))
+		if from_practice != "":
+			return from_practice
+
+	var demo_variant: Variant = state.get("demo", null)
+	if demo_variant is Dictionary:
+		var demo: Dictionary = demo_variant
+		var from_demo: String = str(demo.get("current_level_id", demo.get("level_id", "")))
+		if from_demo != "":
+			return from_demo
+
+	return ""
 

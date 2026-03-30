@@ -728,7 +728,7 @@ theme_override_font_sizes/font_size = 13
 text = "Speaker: left"
 
 [node name="ContinueHintLabel" type="Label" parent="ScenePanel/LayoutMargin/SceneRoot/Stage/DialogueLayer" unique_id=760163097]
-modulate = Color(0.59, 0.91, 1, 0.95984226)
+modulate = Color(0.59, 0.91, 1, 0.35118696)
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -867,7 +867,6 @@ theme_override_fonts/normal_font = SubResource("SystemFont_ui_cjk")
 theme_override_font_sizes/normal_font_size = 20
 text = "劇情已結束。點擊同意後前往 Demo 頁面。"
 scroll_active = false
-horizontal_alignment = 3
 
 [node name="MissionAgreeButton" type="Button" parent="MissionOverlay/Center/MissionPanel/MissionContent/MissionRoot" unique_id=58362598]
 z_index = 1

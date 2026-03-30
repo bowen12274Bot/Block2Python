@@ -5,6 +5,10 @@ nodes:
 scenes:
   - file: scenes/scene-opening-intro.yaml
   - file: scenes/scene-city-alarm.yaml
+  - file: scenes/scene-variable-base.yaml
+  - file: scenes/scene-if-canyon.yaml
+  - file: scenes/scene-loop-lab.yaml
+  - file: scenes/scene-bug-king-castle.yaml
   - file: scenes/scene-mission-statement-01.yaml
   - file: scenes/scene-mission-statement-02.yaml
   - file: scenes/scene-mission-statement-03.yaml

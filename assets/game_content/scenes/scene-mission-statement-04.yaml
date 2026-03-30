@@ -1,8 +1,8 @@
-scene_id: scene-mission-statement-04
-title: 任務書
+﻿scene_id: scene-mission-statement-04
+title: 任務書：Loop Lab
 dialogue_blocks:
   - speaker: 任務書
-    text: 修正錯誤累積造成的連鎖失控，穩定關鍵模組的運作順序。
+    text: 學習目標：for
   - speaker: 任務書
-    text: 點擊同意後前往 Demo，完成第四關的系統穩定任務。
+    text: 用迴圈快速修復多處故障，穩定星球。
 next_action: inline_overlay

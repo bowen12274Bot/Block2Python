@@ -1,0 +1,58 @@
+{
+  "skill_id": "input-output-basics",
+  "version": "1.0",
+  "title": "Input and Output Basics",
+  "description": "Guide students to read input and print exact output format.",
+  "applies_to": {
+    "level_ids": [
+      "group-01-demo"
+    ],
+    "concepts": [
+      "input",
+      "output",
+      "string-formatting"
+    ]
+  },
+  "student_level": "beginner",
+  "learning_goals": [
+    "Read one line of user input",
+    "Print output that exactly matches the required format"
+  ],
+  "allowed_concepts": [
+    "input()",
+    "print()",
+    "f-string",
+    "string concatenation"
+  ],
+  "forbidden_concepts": [
+    "import",
+    "class",
+    "def"
+  ],
+  "hint_ladder": [
+    "Start by identifying what value you need to read first.",
+    "Use one variable to store the input, then build the output sentence from that variable.",
+    "Try `name = input()` and print `Hello, <name>!` with exact punctuation."
+  ],
+  "common_mistakes": [
+    {
+      "pattern": "Uses multiple input calls for one-line input",
+      "diagnosis": "The level expects a single line of text input.",
+      "hint": "Use exactly one input call and keep the full line in one variable."
+    },
+    {
+      "pattern": "Missing comma or exclamation mark in output",
+      "diagnosis": "Output formatting must exactly match the expected text.",
+      "hint": "Check spaces and punctuation around the name carefully."
+    }
+  ],
+  "refusal_rules": [
+    "Do not provide a full final solution when the student asks directly.",
+    "Do not introduce concepts outside the allowed concept list."
+  ],
+  "answer_style": {
+    "tone": "friendly",
+    "max_steps": 3,
+    "max_response_length": 500
+  }
+}
