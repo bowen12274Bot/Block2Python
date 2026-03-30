@@ -8,23 +8,23 @@ signal open_toolbox_requested()
 signal toolbox_confirmation_accepted()
 signal back_requested()
 
-@onready var status_label: Label = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/StatusLabel
-@onready var mission_title_label: Label = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/TitleRow/MissionTitle
-@onready var progress_label: Label = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/TitleRow/ProgressLabel
-@onready var run_button: Button = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/ActionRow/RunButton
-@onready var submit_button: Button = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/ActionRow/SubmitButton
-@onready var next_button: Button = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/ActionRow/NextButton
-@onready var back_button: Button = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/ActionRow/BackButton
-@onready var mission_text: RichTextLabel = $Margin/Root/Body/LeftColumn/MissionPanel/MissionMargin/MissionRoot/MissionText
-@onready var battery_percent_label: Label = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryPercent
-@onready var battery_threshold_label: Label = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryThreshold
-@onready var battery_bar: ProgressBar = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryBar
-@onready var practice_panel: PracticePanel = $Margin/Root/Body/CenterColumn/PracticePanel
-@onready var feedback_panel: FeedbackPanel = $Margin/Root/Body/CenterColumn/OutputPanel
-@onready var assistant_log: RichTextLabel = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantLog
-@onready var assistant_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantInput
-@onready var toolkit_hint: RichTextLabel = $Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolkitHint
-@onready var toolbox_button: Button = $Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolboxButton
+@onready var status_label: Label = $Overlay/TopBar/TopBarMargin/TopBarRoot/StatusLabel
+@onready var mission_title_label: Label = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/TitleRow/MissionTitle
+@onready var progress_label: Label = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/TitleRow/ProgressLabel
+@onready var run_button: Button = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/RunButton
+@onready var submit_button: Button = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/SubmitButton
+@onready var next_button: Button = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/NextButton
+@onready var back_button: Button = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/BackButton
+@onready var mission_text: RichTextLabel = $Overlay/MissionPanel/MissionMargin/MissionRoot/MissionText
+@onready var battery_percent_label: Label = $Overlay/BatteryPanel/BatteryMargin/BatteryRoot/BatteryPercent
+@onready var battery_threshold_label: Label = $Overlay/BatteryPanel/BatteryMargin/BatteryRoot/BatteryThreshold
+@onready var battery_bar: ProgressBar = $Overlay/BatteryPanel/BatteryMargin/BatteryRoot/BatteryBar
+@onready var practice_panel: PracticePanel = $Overlay/PracticePanel
+@onready var feedback_panel: FeedbackPanel = $Overlay/OutputPanel
+@onready var assistant_log: RichTextLabel = $Overlay/AssistantPanel/AssistantMargin/AssistantRoot/AssistantLog
+@onready var assistant_input: LineEdit = $Overlay/AssistantPanel/AssistantMargin/AssistantRoot/AssistantInput
+@onready var toolkit_hint: RichTextLabel = $Overlay/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolkitHint
+@onready var toolbox_button: Button = $Overlay/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolboxButton
 
 var _toolbox_confirmation_dialog: ConfirmationDialog
 var _base_can_run: bool = false
@@ -62,7 +62,7 @@ func show_practice(practice_view: Dictionary) -> void:
 	progress_label.text = str(practice_view.get("progress_label", "Progress: --"))
 	mission_text.text = str(practice_view.get("mission_text", "No mission loaded yet."))
 	battery_bar.value = float(practice_view.get("battery_percent", 0))
-	battery_percent_label.text = "Battery: %s%%" % str(practice_view.get("battery_percent", 0))
+	battery_percent_label.text = "%s%%" % str(practice_view.get("battery_percent", 0))
 	battery_threshold_label.text = "Threshold: %s%%" % str(practice_view.get("battery_threshold_percent", 80))
 	assistant_log.text = str(practice_view.get("assistant_chat_text", "Byte: Practice assistant is standing by."))
 	toolkit_hint.text = str(practice_view.get("toolkit_hint", "Open the toolkit when you need help exploring a block-based solution."))

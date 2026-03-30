@@ -3,8 +3,82 @@
 [ext_resource type="Script" uid="uid://b6ifa4143whak" path="res://scripts/game_flow/ui/practice_screen.gd" id="1_screen"]
 [ext_resource type="Script" uid="uid://c7kk7l42csuep" path="res://scripts/game_flow/ui/practice_panel.gd" id="2_practice"]
 [ext_resource type="Script" uid="uid://dxq6acgmm6ha5" path="res://scripts/game_flow/ui/feedback_panel.gd" id="3_feedback"]
+[ext_resource type="FontFile" uid="uid://chorfjnqa8soa" path="res://art/fonts/Orbitron-Bold.ttf" id="4_orbitron"]
+[ext_resource type="Texture2D" uid="uid://bttn14kfe7pm1" path="res://art/practice/practice_layout_mock.png" id="5_mockup"]
 
-[node name="PracticeScreen" type="Control" unique_id=187145670]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.0313726, 0.0862745, 0.172549, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.235294, 0.831373, 0.988235, 0.7)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.054902, 0.180392, 0.286275, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.501961, 0.968627, 1, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0.14902, 0.658824, 0.956863, 0.25)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.0509804, 0.14902, 0.25098, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.423529, 0.929412, 1, 0.95)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0.14902, 0.658824, 0.956863, 0.25)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_editor"]
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+bg_color = Color(0.0117647, 0.0352941, 0.0823529, 0.86)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.211765, 0.72549, 0.917647, 0.55)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="PracticeScreen" type="Control" unique_id=1816694972]
 custom_minimum_size = Vector2(1200, 720)
 layout_mode = 3
 anchors_preset = 15
@@ -14,32 +88,17 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_screen")
 
-[node name="BackgroundColor" type="ColorRect" parent="." unique_id=1030001]
+[node name="BackgroundColor" type="ColorRect" parent="." unique_id=2003967843]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0627451, 0.0705882, 0.141176, 1)
+color = Color(0.0117647, 0.0235294, 0.0705882, 1)
 
-[node name="BackgroundGlow" type="ColorRect" parent="." unique_id=1030002]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -240.0
-offset_right = 300.0
-offset_bottom = 280.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.25098, 0.258824, 0.572549, 0.22)
-
-[node name="MainFrame" type="PanelContainer" parent="." unique_id=1030003]
-modulate = Color(0.92, 0.97, 1, 0.98)
+[node name="BackgroundArt" type="TextureRect" parent="." unique_id=2040634013]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -52,375 +111,521 @@ offset_right = 600.0
 offset_bottom = 360.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("5_mockup")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Margin" type="MarginContainer" parent="." unique_id=987708837]
+[node name="Overlay" type="Control" parent="." unique_id=1219025567]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -600.0
+offset_left = -562.5
 offset_top = -360.0
-offset_right = 600.0
+offset_right = 562.5
 offset_bottom = 360.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 22
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 22
 
-[node name="Root" type="VBoxContainer" parent="Margin" unique_id=214777348]
+[node name="ArtSlots" type="Control" parent="Overlay" unique_id=1219025568]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopBarArt" type="TextureRect" parent="Overlay/ArtSlots" unique_id=1219025569]
+layout_mode = 0
+offset_left = 314.062
+offset_top = 24.0
+offset_right = 877.5
+offset_bottom = 101.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MissionPanelArt" type="TextureRect" parent="Overlay/ArtSlots" unique_id=1219025570]
+layout_mode = 0
+offset_left = 31.875
+offset_top = 50.0
+offset_right = 276.562
+offset_bottom = 415.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EditorPanelArt" type="TextureRect" parent="Overlay/ArtSlots" unique_id=1219025571]
+layout_mode = 0
+offset_left = 315.0
+offset_top = 141.0
+offset_right = 866.25
+offset_bottom = 441.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="OutputPanelArt" type="TextureRect" parent="Overlay/ArtSlots" unique_id=1219025572]
+layout_mode = 0
+offset_left = 315.0
+offset_top = 480.0
+offset_right = 868.125
+offset_bottom = 691.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AssistantPanelArt" type="TextureRect" parent="Overlay/ArtSlots" unique_id=1219025573]
+layout_mode = 0
+offset_left = 896.25
+offset_top = 48.0
+offset_right = 1160.625
+offset_bottom = 503.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BatteryPanelArt" type="TextureRect" parent="Overlay/ArtSlots" unique_id=1219025574]
+layout_mode = 0
+offset_left = 38.438
+offset_top = 431.0
+offset_right = 236.25
+offset_bottom = 691.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ToolboxPanelArt" type="TextureRect" parent="Overlay/ArtSlots" unique_id=1219025575]
+layout_mode = 0
+offset_left = 945.0
+offset_top = 531.0
+offset_right = 1140.938
+offset_bottom = 691.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ActionIconSlots" type="Control" parent="Overlay/ArtSlots" unique_id=1219025576]
+layout_mode = 0
+offset_left = 646.875
+offset_top = 38.0
+offset_right = 866.25
+offset_bottom = 78.0
+mouse_filter = 2
+
+[node name="RunIconArt" type="TextureRect" parent="Overlay/ArtSlots/ActionIconSlots" unique_id=1219025577]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 48.75
+offset_bottom = 38.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SubmitIconArt" type="TextureRect" parent="Overlay/ArtSlots/ActionIconSlots" unique_id=1219025578]
+layout_mode = 0
+offset_left = 69.375
+offset_top = 0.0
+offset_right = 138.75
+offset_bottom = 38.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NextIconArt" type="TextureRect" parent="Overlay/ArtSlots/ActionIconSlots" unique_id=1219025579]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 0.0
+offset_right = 204.375
+offset_bottom = 38.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MapIconArt" type="TextureRect" parent="Overlay/ArtSlots/ActionIconSlots" unique_id=1219025580]
+layout_mode = 0
+offset_left = 165.0
+offset_top = 0.0
+offset_right = 219.375
+offset_bottom = 38.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TopBar" type="PanelContainer" parent="Overlay" unique_id=1655769997]
+layout_mode = 0
+offset_left = 314.062
+offset_top = 24.0
+offset_right = 877.5
+offset_bottom = 101.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
+
+[node name="TopBarMargin" type="MarginContainer" parent="Overlay/TopBar" unique_id=1781514646]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="TopBarRoot" type="VBoxContainer" parent="Overlay/TopBar/TopBarMargin" unique_id=2117904979]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 14
+theme_override_constants/separation = 4
 
-[node name="TopBar" type="PanelContainer" parent="Margin/Root" unique_id=827992744]
-modulate = Color(0.9, 0.96, 1, 0.92)
-custom_minimum_size = Vector2(0, 68)
-layout_mode = 2
-
-[node name="TopBarMargin" type="MarginContainer" parent="Margin/Root/TopBar" unique_id=1440076081]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 10
-
-[node name="TopBarRoot" type="HBoxContainer" parent="Margin/Root/TopBar/TopBarMargin" unique_id=1965670877]
-layout_mode = 2
-theme_override_constants/separation = 14
-alignment = 1
-
-[node name="TitleRow" type="HBoxContainer" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot" unique_id=1812638204]
+[node name="TopRow" type="HBoxContainer" parent="Overlay/TopBar/TopBarMargin/TopBarRoot" unique_id=441923315]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 16
 
-[node name="MissionTitle" type="Label" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot/TitleRow" unique_id=1880515098]
-modulate = Color(0.878431, 0.917647, 1, 0.9)
+[node name="TitleRow" type="VBoxContainer" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow" unique_id=1502191501]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
+theme_override_constants/separation = 2
+
+[node name="MissionTitle" type="Label" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/TitleRow" unique_id=1595563519]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 20
 text = "PRACTICE CONSOLE"
 
-[node name="ProgressLabel" type="Label" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot/TitleRow" unique_id=1701456248]
-modulate = Color(0.768627, 0.819608, 0.956863, 0.9)
+[node name="ProgressLabel" type="Label" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/TitleRow" unique_id=1357812512]
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.74, 0.82, 0.96, 0.92)
+theme_override_font_sizes/font_size = 14
 text = "Progress: --"
 
-[node name="ActionRow" type="HBoxContainer" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot" unique_id=1437692610]
+[node name="ActionRow" type="HBoxContainer" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow" unique_id=146085261]
 layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 2
 
-[node name="RunButton" type="Button" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot/ActionRow" unique_id=2010713258]
-custom_minimum_size = Vector2(104, 32)
+[node name="RunButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=567014198]
+custom_minimum_size = Vector2(82, 36)
 layout_mode = 2
-text = "Run"
-
-[node name="SubmitButton" type="Button" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot/ActionRow" unique_id=1333031705]
-custom_minimum_size = Vector2(104, 32)
-layout_mode = 2
-text = "Submit"
-
-[node name="NextButton" type="Button" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot/ActionRow" unique_id=977566851]
-custom_minimum_size = Vector2(104, 32)
-layout_mode = 2
-disabled = true
-text = "Next"
-
-[node name="BackButton" type="Button" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot/ActionRow" unique_id=1251472760]
-custom_minimum_size = Vector2(132, 32)
-layout_mode = 2
-text = "Back to Map"
-
-[node name="StatusLabel" type="Label" parent="Margin/Root/TopBar/TopBarMargin/TopBarRoot" unique_id=252864945]
-visible = false
-modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Practice flow is idle."
-horizontal_alignment = 1
-
-[node name="Body" type="HBoxContainer" parent="Margin/Root" unique_id=218947452]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 14
-
-[node name="LeftColumn" type="VBoxContainer" parent="Margin/Root/Body" unique_id=393363011]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.92
-theme_override_constants/separation = 14
-
-[node name="MissionPanel" type="PanelContainer" parent="Margin/Root/Body/LeftColumn" unique_id=288450360]
-modulate = Color(0.9, 0.96, 1, 0.9)
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 1.7
-
-[node name="MissionMargin" type="MarginContainer" parent="Margin/Root/Body/LeftColumn/MissionPanel" unique_id=1249674771]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
-
-[node name="MissionRoot" type="VBoxContainer" parent="Margin/Root/Body/LeftColumn/MissionPanel/MissionMargin" unique_id=512364921]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="MissionHeader" type="Label" parent="Margin/Root/Body/LeftColumn/MissionPanel/MissionMargin/MissionRoot" unique_id=1626462523]
-modulate = Color(0.878431, 0.917647, 1, 0.9)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "MISSION READOUT"
-
-[node name="MissionSubhead" type="Label" parent="Margin/Root/Body/LeftColumn/MissionPanel/MissionMargin/MissionRoot" unique_id=1030004]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
-layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
 theme_override_font_sizes/font_size = 13
-text = "Objective and requirements"
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+text = "RUN"
 
-[node name="MissionText" type="RichTextLabel" parent="Margin/Root/Body/LeftColumn/MissionPanel/MissionMargin/MissionRoot" unique_id=199851699]
+[node name="SubmitButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1723222838]
+custom_minimum_size = Vector2(106, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+text = "SUBMIT"
+
+[node name="NextButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1268451318]
+custom_minimum_size = Vector2(88, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+disabled = true
+text = "NEXT"
+
+[node name="BackButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1092770487]
+custom_minimum_size = Vector2(92, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+text = "MAP"
+
+[node name="StatusLabel" type="Label" parent="Overlay/TopBar/TopBarMargin/TopBarRoot" unique_id=1816076639]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.78, 0.9, 0.86)
+theme_override_font_sizes/font_size = 13
+text = "Practice flow is idle."
+
+[node name="MissionPanel" type="PanelContainer" parent="Overlay" unique_id=872967392]
+layout_mode = 0
+offset_left = 31.875
+offset_top = 50.0
+offset_right = 276.562
+offset_bottom = 415.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
+
+[node name="MissionMargin" type="MarginContainer" parent="Overlay/MissionPanel" unique_id=825752849]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 20
+
+[node name="MissionRoot" type="VBoxContainer" parent="Overlay/MissionPanel/MissionMargin" unique_id=1678884270]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="MissionHeader" type="Label" parent="Overlay/MissionPanel/MissionMargin/MissionRoot" unique_id=2062313143]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 18
+text = "MISSION"
+
+[node name="MissionText" type="RichTextLabel" parent="Overlay/MissionPanel/MissionMargin/MissionRoot" unique_id=2147167650]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.89, 0.96, 1, 0.92)
 theme_override_font_sizes/normal_font_size = 16
 text = "No mission loaded yet."
+scroll_active = false
 
-[node name="BatteryPanel" type="PanelContainer" parent="Margin/Root/Body/LeftColumn" unique_id=634340887]
-modulate = Color(0.9, 0.96, 1, 0.9)
-custom_minimum_size = Vector2(0, 148)
-layout_mode = 2
-size_flags_vertical = 0
-
-[node name="BatteryMargin" type="MarginContainer" parent="Margin/Root/Body/LeftColumn/BatteryPanel" unique_id=647335298]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
-
-[node name="BatteryRoot" type="VBoxContainer" parent="Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin" unique_id=181504278]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="BatteryHeader" type="Label" parent="Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=1316184835]
-modulate = Color(0.878431, 0.917647, 1, 0.9)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "BATTERY"
-
-[node name="BatterySubhead" type="Label" parent="Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=1030005]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-text = "Charge required for mission clear"
-
-[node name="BatteryPercent" type="Label" parent="Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=704110929]
-layout_mode = 2
-text = "Battery: 0%"
-
-[node name="BatteryThreshold" type="Label" parent="Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=399433589]
-layout_mode = 2
-text = "Threshold: 80%"
-
-[node name="BatteryBar" type="ProgressBar" parent="Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=1658761805]
-layout_mode = 2
-
-[node name="CenterColumn" type="VBoxContainer" parent="Margin/Root/Body" unique_id=2075731791]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-size_flags_stretch_ratio = 2.1
-theme_override_constants/separation = 14
-
-[node name="PracticePanel" type="PanelContainer" parent="Margin/Root/Body/CenterColumn" unique_id=1545154746]
-modulate = Color(0.9, 0.96, 1, 0.9)
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 2.0
+[node name="PracticePanel" type="PanelContainer" parent="Overlay" unique_id=1684921690]
+layout_mode = 0
+offset_left = 315.0
+offset_top = 141.0
+offset_right = 866.25
+offset_bottom = 441.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 script = ExtResource("2_practice")
 
-[node name="Margin" type="MarginContainer" parent="Margin/Root/Body/CenterColumn/PracticePanel" unique_id=1904554966]
+[node name="Margin" type="MarginContainer" parent="Overlay/PracticePanel" unique_id=847499266]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 18
 
-[node name="Root" type="VBoxContainer" parent="Margin/Root/Body/CenterColumn/PracticePanel/Margin" unique_id=372646464]
+[node name="Root" type="VBoxContainer" parent="Overlay/PracticePanel/Margin" unique_id=244881928]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 6
-
-[node name="Header" type="HBoxContainer" parent="Margin/Root/Body/CenterColumn/PracticePanel/Margin/Root" unique_id=729247103]
-layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="EditorTitle" type="Label" parent="Margin/Root/Body/CenterColumn/PracticePanel/Margin/Root/Header" unique_id=950987185]
-modulate = Color(0.878431, 0.917647, 1, 0.9)
+[node name="Header" type="HBoxContainer" parent="Overlay/PracticePanel/Margin/Root" unique_id=1194143251]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+
+[node name="EditorTitle" type="Label" parent="Overlay/PracticePanel/Margin/Root/Header" unique_id=1225749426]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 18
 text = "EDITOR"
 
-[node name="EditorHint" type="Label" parent="Margin/Root/Body/CenterColumn/PracticePanel/Margin/Root/Header" unique_id=1030006]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+[node name="EditorHint" type="Label" parent="Overlay/PracticePanel/Margin/Root/Header" unique_id=310310683]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 13
-text = "Python / Block workspace"
+theme_override_colors/font_color = Color(0.62, 0.78, 0.92, 0.78)
+theme_override_font_sizes/font_size = 12
+text = "Python workspace"
 horizontal_alignment = 2
 
-[node name="CodeInput" type="TextEdit" parent="Margin/Root/Body/CenterColumn/PracticePanel/Margin/Root" unique_id=1354777734]
-custom_minimum_size = Vector2(0, 280)
+[node name="CodeInput" type="TextEdit" parent="Overlay/PracticePanel/Margin/Root" unique_id=398727511]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.9, 0.97, 1, 0.96)
+theme_override_colors/font_placeholder_color = Color(0.54, 0.67, 0.82, 0.65)
+theme_override_colors/background_color = Color(0.0117647, 0.0352941, 0.0823529, 0.01)
+theme_override_styles/normal = SubResource("StyleBoxFlat_editor")
+theme_override_styles/focus = SubResource("StyleBoxFlat_editor")
 placeholder_text = "Write Python code here."
 
-[node name="OutputPanel" type="PanelContainer" parent="Margin/Root/Body/CenterColumn" unique_id=864563411]
-modulate = Color(0.9, 0.96, 1, 0.9)
-custom_minimum_size = Vector2(0, 170)
-layout_mode = 2
-size_flags_vertical = 0
+[node name="OutputPanel" type="PanelContainer" parent="Overlay" unique_id=1883388541]
+layout_mode = 0
+offset_left = 315.0
+offset_top = 480.0
+offset_right = 868.125
+offset_bottom = 691.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 script = ExtResource("3_feedback")
 
-[node name="FeedbackMargin" type="MarginContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel" unique_id=1869321838]
+[node name="FeedbackMargin" type="MarginContainer" parent="Overlay/OutputPanel" unique_id=1008672706]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 18
 
-[node name="FeedbackRoot" type="VBoxContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin" unique_id=1617371664]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="HeaderRow" type="HBoxContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot" unique_id=1730010001]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="FeedbackTitle" type="Label" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow" unique_id=127090085]
-modulate = Color(0.878431, 0.917647, 1, 0.9)
+[node name="FeedbackRoot" type="VBoxContainer" parent="Overlay/OutputPanel/FeedbackMargin" unique_id=1688487460]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="HeaderRow" type="HBoxContainer" parent="Overlay/OutputPanel/FeedbackMargin/FeedbackRoot" unique_id=892945787]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FeedbackTitle" type="Label" parent="Overlay/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow" unique_id=1413569722]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 18
 text = "DIAGNOSTIC OUTPUT"
 
-[node name="StatusBadge" type="PanelContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow" unique_id=1730010002]
+[node name="StatusBadge" type="PanelContainer" parent="Overlay/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow" unique_id=1056787379]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_button_normal")
 
-[node name="StatusBadgeMargin" type="MarginContainer" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow/StatusBadge" unique_id=1730010003]
+[node name="StatusBadgeMargin" type="MarginContainer" parent="Overlay/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow/StatusBadge" unique_id=1762061631]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 4
 
-[node name="StatusBadgeLabel" type="Label" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow/StatusBadge/StatusBadgeMargin" unique_id=1730010004]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.92)
+[node name="StatusBadgeLabel" type="Label" parent="Overlay/OutputPanel/FeedbackMargin/FeedbackRoot/HeaderRow/StatusBadge/StatusBadgeMargin" unique_id=848295630]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
-text = "待命中"
+theme_override_colors/font_color = Color(0.72, 0.78, 0.9, 0.92)
+theme_override_font_sizes/font_size = 12
+text = "IDLE"
 
-[node name="FeedbackText" type="RichTextLabel" parent="Margin/Root/Body/CenterColumn/OutputPanel/FeedbackMargin/FeedbackRoot" unique_id=527595361]
-custom_minimum_size = Vector2(0, 116)
+[node name="FeedbackText" type="RichTextLabel" parent="Overlay/OutputPanel/FeedbackMargin/FeedbackRoot" unique_id=1471790751]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.89, 0.96, 1, 0.92)
 theme_override_font_sizes/normal_font_size = 15
 text = "Feedback will appear here."
 
-[node name="RightColumn" type="VBoxContainer" parent="Margin/Root/Body" unique_id=658743063]
+[node name="AssistantPanel" type="PanelContainer" parent="Overlay" unique_id=1870165794]
+layout_mode = 0
+offset_left = 896.25
+offset_top = 48.0
+offset_right = 1160.625
+offset_bottom = 503.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
+
+[node name="AssistantMargin" type="MarginContainer" parent="Overlay/AssistantPanel" unique_id=903339469]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 20
+
+[node name="AssistantRoot" type="VBoxContainer" parent="Overlay/AssistantPanel/AssistantMargin" unique_id=1470549561]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.86
-theme_override_constants/separation = 14
+theme_override_constants/separation = 8
 
-[node name="AssistantPanel" type="PanelContainer" parent="Margin/Root/Body/RightColumn" unique_id=763061505]
-modulate = Color(0.9, 0.96, 1, 0.9)
+[node name="AssistantHeader" type="Label" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=739207744]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 18
+text = "COMMS LOG"
+
+[node name="AssistantLog" type="RichTextLabel" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=865983397]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.2
-
-[node name="AssistantMargin" type="MarginContainer" parent="Margin/Root/Body/RightColumn/AssistantPanel" unique_id=1738542169]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
-
-[node name="AssistantRoot" type="VBoxContainer" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin" unique_id=1286174972]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 5
-
-[node name="AssistantHeader" type="Label" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=159750535]
-modulate = Color(0.878431, 0.917647, 1, 0.9)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "AI ASSISTANT"
-
-[node name="AssistantSubhead" type="Label" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1030008]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-text = "Static guidance for the current mission"
-
-[node name="AssistantLog" type="RichTextLabel" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1739294769]
-custom_minimum_size = Vector2(0, 120)
-layout_mode = 2
-size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.89, 0.96, 1, 0.92)
 theme_override_font_sizes/normal_font_size = 15
 text = "Byte: Practice assistant is standing by."
 
-[node name="AssistantInput" type="LineEdit" parent="Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=1606346966]
+[node name="AssistantInput" type="LineEdit" parent="Overlay/AssistantPanel/AssistantMargin/AssistantRoot" unique_id=130366098]
+visible = false
 layout_mode = 2
-placeholder_text = "Chat input is coming in a later iteration."
+placeholder_text = "Chat input is coming later."
 editable = false
 
-[node name="ToolkitPanel" type="PanelContainer" parent="Margin/Root/Body/RightColumn" unique_id=1019384351]
-modulate = Color(0.9, 0.96, 1, 0.9)
-custom_minimum_size = Vector2(0, 136)
-layout_mode = 2
-size_flags_vertical = 0
+[node name="BatteryPanel" type="PanelContainer" parent="Overlay" unique_id=996236317]
+layout_mode = 0
+offset_left = 38.438
+offset_top = 431.0
+offset_right = 236.25
+offset_bottom = 691.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 
-[node name="ToolkitMargin" type="MarginContainer" parent="Margin/Root/Body/RightColumn/ToolkitPanel" unique_id=1946423185]
+[node name="BatteryMargin" type="MarginContainer" parent="Overlay/BatteryPanel" unique_id=1739174633]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 42
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 18
 
-[node name="ToolkitRoot" type="VBoxContainer" parent="Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin" unique_id=381524802]
+[node name="BatteryRoot" type="VBoxContainer" parent="Overlay/BatteryPanel/BatteryMargin" unique_id=1677945360]
 layout_mode = 2
-theme_override_constants/separation = 5
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+alignment = 1
 
-[node name="ToolkitHeader" type="Label" parent="Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot" unique_id=1752006333]
-modulate = Color(0.878431, 0.917647, 1, 0.9)
+[node name="BatteryHeader" type="Label" parent="Overlay/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=194925275]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.96, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
 theme_override_font_sizes/font_size = 16
-text = "TOOL KIT"
+text = "BATTERY"
+horizontal_alignment = 1
 
-[node name="ToolkitSubhead" type="Label" parent="Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot" unique_id=1030009]
-modulate = Color(0.72549, 0.756863, 0.854902, 0.84)
+[node name="BatteryPercent" type="Label" parent="Overlay/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=7288673]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
-text = "Fallback help when code gets stuck"
+theme_override_colors/font_color = Color(0.82, 0.98, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 26
+text = "0%"
+horizontal_alignment = 1
 
-[node name="ToolkitHint" type="RichTextLabel" parent="Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot" unique_id=949541387]
+[node name="BatteryBar" type="ProgressBar" parent="Overlay/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=304577724]
+custom_minimum_size = Vector2(120, 16)
 layout_mode = 2
-size_flags_vertical = 0
-theme_override_font_sizes/normal_font_size = 15
+show_percentage = false
+
+[node name="BatteryThreshold" type="Label" parent="Overlay/BatteryPanel/BatteryMargin/BatteryRoot" unique_id=1789553246]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.74, 0.82, 0.96, 0.88)
+theme_override_font_sizes/font_size = 12
+text = "Threshold: 80%"
+horizontal_alignment = 1
+
+[node name="ToolkitPanel" type="PanelContainer" parent="Overlay" unique_id=214554703]
+layout_mode = 0
+offset_left = 945.0
+offset_top = 531.0
+offset_right = 1140.938
+offset_bottom = 691.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
+
+[node name="ToolkitMargin" type="MarginContainer" parent="Overlay/ToolkitPanel" unique_id=694335427]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 16
+
+[node name="ToolkitRoot" type="VBoxContainer" parent="Overlay/ToolkitPanel/ToolkitMargin" unique_id=2118401904]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ToolkitHint" type="RichTextLabel" parent="Overlay/ToolkitPanel/ToolkitMargin/ToolkitRoot" unique_id=452884529]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
 text = "Open the toolkit when you need help exploring a block-based solution."
 
-[node name="ToolboxButton" type="Button" parent="Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot" unique_id=1180258406]
-custom_minimum_size = Vector2(0, 40)
+[node name="ToolboxButton" type="Button" parent="Overlay/ToolkitPanel/ToolkitMargin/ToolkitRoot" unique_id=445499773]
+custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
-text = "Open Tool Kit"
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.74, 0.97, 1, 0.98)
+theme_override_fonts/font = ExtResource("4_orbitron")
+theme_override_font_sizes/font_size = 26
+text = "TOOLBOX"
+flat = true
