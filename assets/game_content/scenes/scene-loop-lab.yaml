@@ -1,0 +1,31 @@
+﻿scene_id: scene-loop-lab
+title: Loop Lab
+dialogue_blocks:
+  - speaker: Bug King
+    text: 我已經破壞了你們的系統，這顆星球很快就會崩潰。
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-04-destruction-disaster
+    emphasis: alert
+  - speaker: 系統
+    text: 星球多處正在崩解…需要連續修復…
+    portrait_id: system-default
+    expression: glitched
+    speaker_side: left
+    background_id: scene-04-destruction-disaster
+    emphasis: alert
+  - speaker: 玩家
+    text: 那該怎麼辦？
+    portrait_id: player-default
+    expression: thinking
+    speaker_side: right
+    background_id: scene-04-destruction-disaster
+    emphasis: normal
+  - speaker: Byte
+    text: 別急，這次用 for 迴圈批次修復，就能更快穩住星球。
+    portrait_id: byte-default
+    expression: explain
+    speaker_side: left
+    background_id: scene-04-destruction-disaster
+    emphasis: normal
+next_action: goto_demo_loop_lab
