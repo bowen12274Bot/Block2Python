@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bttn14kfe7pm1"
-path="res://.godot/imported/practice_layout_mock.png-9a852db564b2451fa5897cde47eab997.ctex"
+uid="uid://dcs1jmms811nf"
+path="res://.godot/imported/toolbox_button_active.png-e7aedb462475f73785bb6dc1fdf37ec1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/practice/practice_layout_mock.png"
-dest_files=["res://.godot/imported/practice_layout_mock.png-9a852db564b2451fa5897cde47eab997.ctex"]
+source_file="res://art/practice/buttons/toolbox_button_active.png"
+dest_files=["res://.godot/imported/toolbox_button_active.png-e7aedb462475f73785bb6dc1fdf37ec1.ctex"]
 
 [params]
 

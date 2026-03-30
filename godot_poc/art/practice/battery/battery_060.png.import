@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bttn14kfe7pm1"
-path="res://.godot/imported/practice_layout_mock.png-9a852db564b2451fa5897cde47eab997.ctex"
+uid="uid://con2osu5hj0ca"
+path="res://.godot/imported/battery_060.png-4fa09db8f502379b789161dc8c33268d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/practice/practice_layout_mock.png"
-dest_files=["res://.godot/imported/practice_layout_mock.png-9a852db564b2451fa5897cde47eab997.ctex"]
+source_file="res://art/practice/battery/battery_060.png"
+dest_files=["res://.godot/imported/battery_060.png-4fa09db8f502379b789161dc8c33268d.ctex"]
 
 [params]
 

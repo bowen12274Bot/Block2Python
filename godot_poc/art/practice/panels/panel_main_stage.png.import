@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bttn14kfe7pm1"
-path="res://.godot/imported/practice_layout_mock.png-9a852db564b2451fa5897cde47eab997.ctex"
+uid="uid://dpyg8cmo8erm2"
+path="res://.godot/imported/panel_main_stage.png-50a71628ad86018966c165045446e449.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/practice/practice_layout_mock.png"
-dest_files=["res://.godot/imported/practice_layout_mock.png-9a852db564b2451fa5897cde47eab997.ctex"]
+source_file="res://art/practice/panels/panel_main_stage.png"
+dest_files=["res://.godot/imported/panel_main_stage.png-50a71628ad86018966c165045446e449.ctex"]
 
 [params]
 
