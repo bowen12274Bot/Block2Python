@@ -15,6 +15,12 @@ const DEFAULT_OPENAI_ENDPOINT := "https://api.openai.com/v1/chat/completions"
 const DEFAULT_OPENAI_MODEL := "gpt-4o-mini"
 const DEFAULT_OPENAI_TIMEOUT_SEC := 30.0
 const TUTOR_STREAM_INTERVAL_SEC := 0.03
+const TUTOR_REPLY_TYPE_COLOR_DEFAULT := Color(0.72549, 0.756863, 0.854902, 0.84)
+const TUTOR_REPLY_TYPE_COLOR_HINT := Color(0.572549, 0.862745, 0.705882, 0.96)
+const TUTOR_REPLY_TYPE_COLOR_CONCEPT := Color(0.564706, 0.760784, 0.94902, 0.96)
+const TUTOR_REPLY_TYPE_COLOR_DEBUG := Color(0.968627, 0.788235, 0.462745, 0.96)
+const TUTOR_REPLY_TYPE_COLOR_REFUSAL := Color(0.952941, 0.572549, 0.572549, 0.96)
+const TUTOR_REPLY_TYPE_COLOR_ERROR := Color(0.972549, 0.501961, 0.501961, 0.96)
 
 @onready var status_label: Label = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/StatusLabel
 @onready var mission_title_label: Label = $Margin/Root/TopBar/TopBarMargin/TopBarRoot/TitleRow/MissionTitle
@@ -188,7 +194,7 @@ func show_tutor_error(message: String) -> void:
 	_stop_tutor_reply_stream(false)
 	_append_assistant_entry("System", message)
 	status_label.text = "Status: tutor request failed"
-	tutor_reply_type_label.text = "Reply type: error"
+	_apply_reply_type_visual("error")
 	set_tutor_pending(false)
 
 func set_tutor_pending(pending: bool) -> void:
@@ -376,10 +382,11 @@ func _update_tutor_reply_stream_preview() -> void:
 
 
 func _set_tutor_stream_log(message: String) -> void:
+	var speaker: String = _reply_type_speaker_label(_tutor_reply_stream_reply_type)
 	if _tutor_reply_stream_source_log.strip_edges() == "":
-		assistant_log.text = "Byte: %s" % message
+		assistant_log.text = "%s: %s" % [speaker, message]
 		return
-	assistant_log.text = "%s\n\nByte: %s" % [_tutor_reply_stream_source_log, message]
+	assistant_log.text = "%s\n\n%s: %s" % [_tutor_reply_stream_source_log, speaker, message]
 
 
 func _finish_tutor_reply_stream() -> void:
@@ -388,7 +395,7 @@ func _finish_tutor_reply_stream() -> void:
 	if _tutor_reply_streaming:
 		_set_tutor_stream_log(_tutor_reply_stream_content)
 	_tutor_reply_streaming = false
-	tutor_reply_type_label.text = "Reply type: %s" % _tutor_reply_stream_reply_type
+	_apply_reply_type_visual(_tutor_reply_stream_reply_type)
 	_update_cost_labels(_tutor_reply_stream_metadata)
 	status_label.text = "Status: tutor reply received"
 	_refresh_tutor_controls()
@@ -440,7 +447,54 @@ func _try_parse_float(value: Variant, fallback: float) -> float:
 			return float(text_value)
 	return fallback
 
+func _apply_reply_type_visual(reply_type: String) -> void:
+	var normalized: String = reply_type.strip_edges().to_lower()
+	var label_text: String = "-"
+	var color: Color = TUTOR_REPLY_TYPE_COLOR_DEFAULT
+
+	match normalized:
+		"next_step_hint":
+			label_text = "next step hint"
+			color = TUTOR_REPLY_TYPE_COLOR_HINT
+		"concept_explanation":
+			label_text = "concept explanation"
+			color = TUTOR_REPLY_TYPE_COLOR_CONCEPT
+		"debug_hint":
+			label_text = "debug hint"
+			color = TUTOR_REPLY_TYPE_COLOR_DEBUG
+		"scope_refusal":
+			label_text = "scope refusal"
+			color = TUTOR_REPLY_TYPE_COLOR_REFUSAL
+		"solution_refusal":
+			label_text = "solution refusal"
+			color = TUTOR_REPLY_TYPE_COLOR_REFUSAL
+		"error":
+			label_text = "error"
+			color = TUTOR_REPLY_TYPE_COLOR_ERROR
+		_:
+			if normalized != "":
+				label_text = normalized
+
+	tutor_reply_type_label.text = "Reply type: %s" % label_text
+	tutor_reply_type_label.modulate = color
+
+func _reply_type_speaker_label(reply_type: String) -> String:
+	var normalized: String = reply_type.strip_edges().to_lower()
+	match normalized:
+		"concept_explanation":
+			return "Byte [Concept]"
+		"next_step_hint":
+			return "Byte [Hint]"
+		"debug_hint":
+			return "Byte [Debug]"
+		"scope_refusal":
+			return "Byte [Scope]"
+		"solution_refusal":
+			return "Byte [Policy]"
+		_:
+			return "Byte"
+
 func _reset_tutor_stats() -> void:
-	tutor_reply_type_label.text = "Reply type: -"
+	_apply_reply_type_visual("")
 	tutor_request_cost_label.text = "Request cost: N/A"
 	tutor_total_cost_label.text = "Total cost: $0.000000"

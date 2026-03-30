@@ -271,6 +271,7 @@ def serialize_tutor_reply_request(request: TutorReplyRequest) -> dict[str, objec
         "conversation_id": request.conversation_id,
         "conversation_history": [dict(item) for item in request.conversation_history],
         "history_summary": request.history_summary,
+        "recent_feedback": list(request.recent_feedback),
         "provider_options": dict(request.provider_options),
     }
 
@@ -344,6 +345,24 @@ def deserialize_tutor_reply_request(payload: object) -> TutorReplyRequest:
 
         history.append(dict(item))
 
+    recent_feedback_raw = payload.get("recent_feedback")
+    if recent_feedback_raw is None and "submission_history" in payload:
+        recent_feedback_raw = payload.get("submission_history")
+    if recent_feedback_raw is None:
+        recent_feedback_raw = ()
+    if not isinstance(recent_feedback_raw, (list, tuple)):
+        raise IntegrationContractValidationError("TutorReplyRequest.recent_feedback must be an array")
+
+    recent_feedback: list[str] = []
+    for index, item in enumerate(recent_feedback_raw):
+        if not isinstance(item, str):
+            raise IntegrationContractValidationError(
+                f"TutorReplyRequest.recent_feedback[{index}] must be a string"
+            )
+        trimmed_item = item.strip()
+        if trimmed_item:
+            recent_feedback.append(trimmed_item)
+
     provider_options_raw = payload.get("provider_options", {})
     if provider_options_raw is None:
         provider_options_raw = {}
@@ -364,6 +383,7 @@ def deserialize_tutor_reply_request(payload: object) -> TutorReplyRequest:
         conversation_id=conversation_id,
         conversation_history=tuple(history),
         history_summary=history_summary,
+        recent_feedback=tuple(recent_feedback),
         provider_options=provider_options,
     )
 

@@ -48,6 +48,7 @@ class TutorService:
         conversation_id: str | None = None,
         conversation_history: Sequence[ConversationTurn | Mapping[str, object]] | None = None,
         history_summary: str | None = None,
+        submission_history: Sequence[str] | None = None,
     ) -> TutorResponse:
         try:
             skills, missing_skill_ids = self._load_skills_safe(level.teaching_skill_ids)
@@ -65,6 +66,7 @@ class TutorService:
                 conversation_id=conversation_id,
                 conversation_history=compressed_history.history,
                 history_summary=compressed_history.summary,
+                submission_history=submission_history,
             )
 
             reply_type = self.policy.determine_reply_type(context, question)

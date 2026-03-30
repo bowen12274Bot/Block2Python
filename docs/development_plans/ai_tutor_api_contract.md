@@ -76,6 +76,7 @@ Tutor 回傳仍沿用 bridge 統一外層：
 - `conversation_id: str | null`（選填）
 - `conversation_history: array<object>`（選填）
 - `history_summary: str | null`（選填）
+- `recent_feedback: array<string>`（選填，會提供最近一次 analysis/judge 重點摘要）
 - `provider_options: object`（選填，預設 `{}`）
 
 ### 3.2 相容 alias
@@ -84,6 +85,7 @@ Tutor 回傳仍沿用 bridge 統一外層：
 
 - `current_code` -> `python_code`
 - `current_blocks` -> `block_json`
+- `submission_history` -> `recent_feedback`
 
 此外，下列欄位若直接出現在 payload，會併入 `provider_options`（若尚未存在同名鍵）：
 

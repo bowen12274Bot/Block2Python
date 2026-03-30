@@ -184,6 +184,7 @@ class BridgeServer:
                 conversation_id=request.conversation_id,
                 conversation_history=list(request.conversation_history),
                 history_summary=request.history_summary,
+                submission_history=list(request.recent_feedback),
             )
         )
 

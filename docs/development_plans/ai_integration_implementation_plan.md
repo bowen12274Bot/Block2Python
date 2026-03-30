@@ -776,15 +776,17 @@ assets/teaching_skills/
 
 **交付清單**：
 
-- [ ] Godot 端 TutorPanel 場景與腳本
-- [ ] 輸入框、按鈕、輸出區 UI 件連接
-- [ ] API 呼叫邏輯（GDScript）
-- [ ] Provider 選擇 + API KEY 設定頁（本地檔案儲存）
-- [ ] 請求取消（Cancel Request）與串流輸出顯示
-- [ ] 費用顯示（本次/累積）
-- [ ] 回覆類型的 UI 標記與視覺區分
-- [ ] 本機 demo 流程驗證
-- [ ] QA 與使用者體驗測試
+- [x] Godot 端 TutorPanel 場景與腳本（整合於 `PracticeScreen` 的 AssistantPanel）
+- [x] 輸入框、按鈕、輸出區 UI 件連接
+- [x] API 呼叫邏輯（GDScript）
+- [x] Provider 選擇 + API KEY 設定頁（本地檔案儲存）
+- [x] 請求取消（Cancel Request）與串流輸出顯示
+- [x] 費用顯示（本次/累積）
+- [x] 回覆類型的 UI 標記與視覺區分
+- [x] 本機 demo 流程驗證
+- [x] QA 與使用者體驗測試
+
+驗證紀錄：`docs/development_plans/ai_tutor_phase3_demo_qa.md`
 
 **工期估計**：4-6 天
 

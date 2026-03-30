@@ -163,6 +163,7 @@ def test_service_applies_history_compression(tmp_path: Path) -> None:
             question="help",
             conversation_history=history,
             history_summary="old summary",
+            submission_history=["analysis: missing print", "judge: WA on case 2"],
         )
     )
 
@@ -170,6 +171,7 @@ def test_service_applies_history_compression(tmp_path: Path) -> None:
     assert len(called_context.conversation_history) == 1
     assert called_context.history_summary is not None
     assert "Summary of previous conversation" in called_context.history_summary
+    assert called_context.submission_history == ("analysis: missing print", "judge: WA on case 2")
     assert result.metadata["history_compressed"] is True
 
 

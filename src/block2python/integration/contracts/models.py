@@ -261,6 +261,7 @@ class TutorReplyRequest:
     conversation_id: str | None = None
     conversation_history: tuple[dict[str, Any], ...] = ()
     history_summary: str | None = None
+    recent_feedback: tuple[str, ...] = ()
     provider_options: dict[str, Any] = field(default_factory=dict)
 
 

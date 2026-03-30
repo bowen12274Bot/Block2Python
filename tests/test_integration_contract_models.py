@@ -190,6 +190,7 @@ def test_tutor_reply_request_contract_defaults() -> None:
     assert request.provider == "template"
     assert request.python_code == ""
     assert request.block_json is None
+    assert request.recent_feedback == ()
 
 
 def test_tutor_reply_payload_contract_shape() -> None:

@@ -53,6 +53,7 @@ const FlowToolboxControllerScript = preload("res://scripts/flow/toolbox/toolbox_
 const DEFAULT_TUTOR_REQUEST_TIMEOUT_SEC := 30.0
 const TUTOR_REQUEST_TIMEOUT_GRACE_SEC := 5.0
 const MAX_TUTOR_CONVERSATION_MESSAGES := 12
+const MAX_RECENT_TUTOR_FEEDBACK_ITEMS := 4
 
 @onready var python_bridge_client = $PythonBridgeClient
 @onready var entry_screen = $EntryScreen
@@ -297,6 +298,9 @@ func _on_tutor_requested(question: String, provider: String, provider_options: D
 		payload["conversation_id"] = _tutor_conversation_id
 	if not _tutor_conversation_history.is_empty():
 		payload["conversation_history"] = _copy_tutor_conversation_history()
+	var recent_feedback: Array[String] = _build_recent_tutor_feedback(state, level_id)
+	if not recent_feedback.is_empty():
+		payload["recent_feedback"] = recent_feedback
 	if not provider_options.is_empty():
 		payload["provider_options"] = provider_options
 
@@ -619,6 +623,47 @@ func _copy_tutor_conversation_history() -> Array[Dictionary]:
 	for item in _tutor_conversation_history:
 		copied.append(item.duplicate(true))
 	return copied
+
+
+func _build_recent_tutor_feedback(state: Dictionary, level_id: String) -> Array[String]:
+	var last_submission_variant: Variant = state.get("last_submission", null)
+	if not (last_submission_variant is Dictionary):
+		return []
+
+	var last_submission: Dictionary = last_submission_variant
+	if str(last_submission.get("level_id", "")) != level_id:
+		return []
+
+	var summary_lines: Array[String] = []
+	var status_label: String = str(last_submission.get("status_label", "")).strip_edges()
+	if status_label != "":
+		summary_lines.append("status: %s" % status_label)
+
+	var analysis_summary: String = str(last_submission.get("analysis_summary", "")).strip_edges()
+	if analysis_summary != "":
+		summary_lines.append("analysis: %s" % _truncate_tutor_feedback_line(analysis_summary, 180))
+
+	var judge_summary: String = str(last_submission.get("judge_summary", "")).strip_edges()
+	if judge_summary != "":
+		summary_lines.append("judge: %s" % _truncate_tutor_feedback_line(judge_summary, 180))
+
+	var output_text: String = str(last_submission.get("output_text", "")).strip_edges()
+	if output_text != "":
+		var single_line_output: String = output_text.replace("\n", " | ")
+		summary_lines.append("output: %s" % _truncate_tutor_feedback_line(single_line_output, 140))
+
+	if summary_lines.size() > MAX_RECENT_TUTOR_FEEDBACK_ITEMS:
+		summary_lines.resize(MAX_RECENT_TUTOR_FEEDBACK_ITEMS)
+	return summary_lines
+
+
+func _truncate_tutor_feedback_line(text: String, max_length: int) -> String:
+	var trimmed: String = text.strip_edges()
+	if trimmed.length() <= max_length:
+		return trimmed
+	if max_length <= 3:
+		return trimmed.substr(0, max_length)
+	return "%s..." % trimmed.substr(0, max_length - 3)
 
 
 func _resolve_current_level_id(state: Dictionary) -> String:

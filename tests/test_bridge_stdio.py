@@ -204,6 +204,21 @@ def test_bridge_server_tutor_reply_accepts_current_code_alias() -> None:
     assert response["tutor"]["metadata"]["provider"] == "stub"
 
 
+def test_bridge_server_tutor_reply_accepts_recent_feedback() -> None:
+    server = BridgeServer(use_stub_judge=True)
+    instream = io.StringIO(
+        '{"command":"tutor_reply","payload":{"level_id":"group-01-demo","question":"How do I fix this?","python_code":"print(1)\\n","provider":"stub","recent_feedback":["analysis: syntax error","judge: WA on case 2"]}}\n'
+    )
+    outstream = io.StringIO()
+
+    server.serve(instream, outstream)
+
+    response = json.loads(outstream.getvalue().strip())
+    assert response["ok"] is True
+    assert response["tutor"] is not None
+    assert response["tutor"]["metadata"]["provider"] == "stub"
+
+
 def test_bridge_server_tutor_reply_openai_requires_provider_options() -> None:
     server = BridgeServer(use_stub_judge=True)
     instream = io.StringIO(

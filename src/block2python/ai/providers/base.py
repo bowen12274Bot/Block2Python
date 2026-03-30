@@ -68,6 +68,8 @@ class TemplateTutorProvider(TutorProvider):
             return f"Check this issue first: {context.analysis_violations[0]}"
         if context.failed_cases_summary:
             return f"Use the failed case signal: {context.failed_cases_summary}"
+        if context.submission_history:
+            return f"Start from your latest feedback: {context.submission_history[0]}"
         if context.hint_ladder:
             return context.hint_ladder[min(1, len(context.hint_ladder) - 1)]
         return "Re-check your input parsing and output format with one tiny sample."
@@ -211,11 +213,16 @@ def _build_system_prompt(context: TutorContext) -> str:
 
 
 def _build_user_prompt(context: TutorContext, reply_type: TutorReplyType) -> str:
+    recent_feedback_text = "(none)"
+    if context.submission_history:
+        recent_feedback_text = "\n".join(f"- {item}" for item in context.submission_history)
+
     return (
         f"Reply type: {reply_type}\n"
         f"Level: {context.level_id} - {context.level_title}\n"
         f"Question: {context.student_question}\n"
         f"Current code:\n{context.current_code}\n"
+        f"Recent feedback:\n{recent_feedback_text}\n"
         f"Failed case: {context.failed_cases_summary or '(none)'}"
     )
 

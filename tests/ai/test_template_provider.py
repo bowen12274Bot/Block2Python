@@ -47,6 +47,17 @@ def test_template_provider_uses_debug_signal() -> None:
     assert reply.metadata["provider"] == "template"
 
 
+def test_template_provider_debug_hint_uses_recent_feedback_when_no_error_signal() -> None:
+    provider = TemplateTutorProvider()
+    context = _context(submission_history=("judge: WA on case 3",), failed_cases_summary=None)
+
+    reply = asyncio.run(provider.reply(context, "debug_hint"))
+
+    assert reply.reply_type == "debug_hint"
+    assert "latest feedback" in reply.content
+    assert "WA on case 3" in reply.content
+
+
 def test_local_selector_switches_to_concept_explanation() -> None:
     selector = LocalTemplateSelector()
     context = _context(student_question="What is a variable?")

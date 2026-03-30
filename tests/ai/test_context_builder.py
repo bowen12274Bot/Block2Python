@@ -149,3 +149,16 @@ def test_build_normalizes_conversation_history() -> None:
         "fallback role",
         "note",
     ]
+
+
+def test_build_normalizes_submission_history() -> None:
+    level = LevelSpec(level_id="lv-4", title="Level 4")
+    submission = Submission(level_id="lv-4", python_code="print(1)")
+
+    context = TutorContextBuilder().build(
+        level=level,
+        submission=submission,
+        submission_history=["  analysis: syntax error  ", "", "judge: WA on case 2"],
+    )
+
+    assert context.submission_history == ("analysis: syntax error", "judge: WA on case 2")

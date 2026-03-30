@@ -30,6 +30,7 @@ class TutorContextBuilder:
         conversation_id: str | None = None,
         conversation_history: Sequence[ConversationTurn | Mapping[str, object]] | None = None,
         history_summary: str | None = None,
+        submission_history: Sequence[str] | None = None,
     ) -> TutorContext:
         resolved_skills = list(skills or self._load_skills(level.teaching_skill_ids))
         primary_skill = resolved_skills[0] if resolved_skills else None
@@ -75,6 +76,7 @@ class TutorContextBuilder:
         failed_cases_summary = _summarize_failed_case(judge_result)
 
         normalized_history = _normalize_history(conversation_history)
+        normalized_submission_history = _normalize_submission_history(submission_history)
 
         response_tone = answer_style.tone
         if isinstance(tutor_policy.get("response_tone"), str) and tutor_policy["response_tone"].strip():
@@ -106,6 +108,7 @@ class TutorContextBuilder:
             conversation_id=conversation_id,
             conversation_history=normalized_history,
             history_summary=history_summary,
+            submission_history=normalized_submission_history,
         )
 
     def _load_skills(self, skill_ids: Sequence[str]) -> tuple[TeachingSkill, ...]:
@@ -174,6 +177,21 @@ def _normalize_history(
 
         normalized.append(ConversationTurn(role=role, content=content))
 
+    return tuple(normalized)
+
+
+def _normalize_submission_history(submission_history: Sequence[str] | None) -> tuple[str, ...]:
+    if not submission_history:
+        return ()
+
+    normalized: list[str] = []
+    for entry in submission_history:
+        if not isinstance(entry, str):
+            continue
+        trimmed = entry.strip()
+        if not trimmed:
+            continue
+        normalized.append(trimmed)
     return tuple(normalized)
 
 

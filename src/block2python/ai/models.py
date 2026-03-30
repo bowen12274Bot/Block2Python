@@ -109,3 +109,4 @@ class TutorContext:
     conversation_id: str | None = None
     conversation_history: tuple[ConversationTurn, ...] = ()
     history_summary: str | None = None
+    submission_history: tuple[str, ...] = ()
