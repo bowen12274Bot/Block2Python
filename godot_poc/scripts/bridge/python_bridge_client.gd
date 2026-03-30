@@ -125,6 +125,15 @@ func send_tutor_reply(payload: Dictionary) -> void:
 	send_request({
 		"command": "tutor_reply",
 		"payload": payload,
+})
+
+
+func send_confirm_toolbox_open() -> void:
+	send_request({
+		"action": {
+			"action_type": "confirm_toolbox_open",
+			"payload": {},
+		},
 	})
 
 

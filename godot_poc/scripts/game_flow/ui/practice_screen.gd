@@ -8,6 +8,7 @@ signal open_toolbox_requested()
 signal tutor_requested(question: String, provider: String, provider_options: Dictionary)
 signal tutor_cancel_requested()
 signal tutor_config_saved(config: Dictionary)
+signal toolbox_confirmation_accepted()
 signal back_requested()
 
 const DEFAULT_OPENAI_ENDPOINT := "https://api.openai.com/v1/chat/completions"
@@ -25,8 +26,8 @@ const DEFAULT_OPENAI_TIMEOUT_SEC := 30.0
 @onready var battery_percent_label: Label = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryPercent
 @onready var battery_threshold_label: Label = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryThreshold
 @onready var battery_bar: ProgressBar = $Margin/Root/Body/LeftColumn/BatteryPanel/BatteryMargin/BatteryRoot/BatteryBar
-@onready var practice_panel: PracticePanel = $Margin/Root/Body/CenterColumn/PracticePanel
-@onready var feedback_panel: FeedbackPanel = $Margin/Root/Body/CenterColumn/OutputPanel
+@onready var practice_panel = $Margin/Root/Body/CenterColumn/PracticePanel
+@onready var feedback_panel = $Margin/Root/Body/CenterColumn/OutputPanel
 @onready var assistant_log: RichTextLabel = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantLog
 @onready var assistant_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantInput
 @onready var provider_option: OptionButton = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow/ProviderOption
@@ -40,12 +41,14 @@ const DEFAULT_OPENAI_TIMEOUT_SEC := 30.0
 @onready var toolkit_hint: RichTextLabel = $Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolkitHint
 @onready var toolbox_button: Button = $Margin/Root/Body/RightColumn/ToolkitPanel/ToolkitMargin/ToolkitRoot/ToolboxButton
 
+var _toolbox_confirmation_dialog: ConfirmationDialog
 var _base_can_run: bool = false
 var _base_can_submit: bool = false
 var _base_can_next: bool = false
 var _base_can_open_toolbox: bool = false
 var _base_code_editable: bool = false
 var _toolbox_locked: bool = false
+var _current_view: Dictionary = {}
 var _toolbox_status_message: String = ""
 var _assistant_enabled: bool = false
 var _tutor_request_pending: bool = false
@@ -68,12 +71,18 @@ func _ready() -> void:
 	provider_option.item_selected.connect(_on_provider_option_selected)
 	_setup_provider_options()
 	_reset_tutor_stats()
+	assistant_input.editable = false
+	_toolbox_confirmation_dialog = ConfirmationDialog.new()
+	_toolbox_confirmation_dialog.title = "Tool Kit Warning"
+	_toolbox_confirmation_dialog.confirmed.connect(_on_toolbox_confirmation_confirmed)
+	add_child(_toolbox_confirmation_dialog)
 	_refresh_tutor_controls()
 
 func initialize(default_code: String) -> void:
 	practice_panel.initialize(default_code)
 
 func show_practice(practice_view: Dictionary) -> void:
+	_current_view = practice_view.duplicate(true)
 	_base_code_editable = bool(practice_view.get("code_editable", false))
 	_base_can_open_toolbox = bool(practice_view.get("toolbox_allowed", false))
 	_base_can_run = bool(practice_view.get("can_run", false))
@@ -93,6 +102,9 @@ func show_practice(practice_view: Dictionary) -> void:
 	_apply_toolbox_lock_state()
 	_refresh_tutor_controls()
 
+func current_view() -> Dictionary:
+	return _current_view.duplicate(true)
+
 func show_feedback(feedback_view: Dictionary) -> void:
 	feedback_panel.show_feedback(feedback_view)
 
@@ -111,6 +123,10 @@ func set_can_next(can_next: bool) -> void:
 	_base_can_next = can_next
 	_apply_toolbox_lock_state()
 
+func prompt_toolbox_confirmation(penalty_percent: int) -> void:
+	_toolbox_confirmation_dialog.dialog_text = "Opening Tool Kit for this level will reduce the battery reward to %d%%. Continue?" % penalty_percent
+	_toolbox_confirmation_dialog.popup_centered()
+
 func set_toolbox_lock(active: bool, status_message: String = "") -> void:
 	_toolbox_locked = active
 	_toolbox_status_message = status_message
@@ -123,6 +139,8 @@ func set_toolbox_lock(active: bool, status_message: String = "") -> void:
 
 func focus_code_editor() -> void:
 	if _toolbox_locked:
+		return
+	if not is_inside_tree():
 		return
 	practice_panel.focus_code_input()
 
@@ -235,6 +253,10 @@ func _on_save_tutor_config_button_pressed() -> void:
 
 func _on_provider_option_selected(_index: int) -> void:
 	_refresh_tutor_controls()
+
+func _on_toolbox_confirmation_confirmed() -> void:
+	status_label.text = "Status: confirming toolbox penalty..."
+	toolbox_confirmation_accepted.emit()
 
 func _on_back_button_pressed() -> void:
 	status_label.text = "Status: returning to map..."
