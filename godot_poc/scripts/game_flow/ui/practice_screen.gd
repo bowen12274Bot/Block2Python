@@ -41,7 +41,9 @@ const TUTOR_REPLY_TYPE_COLOR_ERROR := Color(0.972549, 0.501961, 0.501961, 0.96)
 @onready var practice_panel = $Margin/Root/Body/CenterColumn/PracticePanel
 @onready var feedback_panel = $Margin/Root/Body/CenterColumn/OutputPanel
 @onready var assistant_log: RichTextLabel = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantLog
+@onready var assistant_subhead_label: Label = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantSubhead
 @onready var assistant_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/AssistantInput
+@onready var config_row: HBoxContainer = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow
 @onready var provider_option: OptionButton = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow/ProviderOption
 @onready var assistant_api_key_input: LineEdit = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow/ApiKeyInput
 @onready var api_key_visibility_button: Button = $Margin/Root/Body/RightColumn/AssistantPanel/AssistantMargin/AssistantRoot/ConfigRow/ApiKeyVisibilityButton
@@ -77,6 +79,7 @@ var _provider_model: String = DEFAULT_LOCAL_OLLAMA_MODEL
 var _provider_timeout_sec: float = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
 var _provider_system_prompt: String = ""
 var _api_key_visible: bool = false
+var _embedded_tutor_settings_visible: bool = false
 var _tutor_reply_stream_timer: Timer
 var _tutor_reply_streaming: bool = false
 var _tutor_reply_stream_source_log: String = ""
@@ -104,9 +107,11 @@ func _ready() -> void:
 	api_key_visibility_button.pressed.connect(_on_api_key_visibility_button_pressed)
 	provider_option.item_selected.connect(_on_provider_option_selected)
 	_setup_provider_options()
+	_apply_embedded_tutor_settings_visibility()
 	_apply_api_key_visibility()
 	_sync_provider_form_inputs()
 	_refresh_provider_form()
+	assistant_subhead_label.text = "Tutor settings are managed from Map > Gear."
 	_reset_tutor_stats()
 	assistant_input.editable = false
 	_tutor_reply_stream_timer = Timer.new()
@@ -386,11 +391,14 @@ func _refresh_tutor_controls() -> void:
 
 func _refresh_provider_form() -> void:
 	var provider: String = _selected_provider()
+	var show_embedded_settings: bool = _embedded_tutor_settings_visible
 	var needs_provider_form: bool = provider == "api_skill" or provider == "temple"
 	var show_api_key_controls: bool = provider == "api_skill" or provider == "temple"
-	provider_form.visible = needs_provider_form
-	assistant_api_key_input.visible = show_api_key_controls
-	api_key_visibility_button.visible = show_api_key_controls
+	config_row.visible = show_embedded_settings
+	provider_form.visible = needs_provider_form and show_embedded_settings
+	assistant_api_key_input.visible = show_api_key_controls and show_embedded_settings
+	api_key_visibility_button.visible = show_api_key_controls and show_embedded_settings
+	save_tutor_config_button.visible = show_embedded_settings
 
 	if provider == "temple":
 		if _provider_endpoint_url.strip_edges() == "" or _provider_endpoint_url == DEFAULT_OPENAI_ENDPOINT:
@@ -415,6 +423,12 @@ func _refresh_provider_form() -> void:
 		provider_form_hint_label.text = "Stub is test-only and not suitable for real gameplay tutoring."
 
 	_sync_provider_form_inputs()
+
+
+func _apply_embedded_tutor_settings_visibility() -> void:
+	config_row.visible = _embedded_tutor_settings_visible
+	provider_form.visible = _embedded_tutor_settings_visible
+	save_tutor_config_button.visible = _embedded_tutor_settings_visible
 
 
 func _sync_provider_form_inputs() -> void:
