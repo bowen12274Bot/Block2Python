@@ -1,0 +1,46 @@
+﻿scene_id: scene-variable-base
+title: Variable Base
+dialogue_blocks:
+  - speaker: 系統
+    text: 咦…我剛剛說了什麼…？
+    portrait_id: system-default
+    expression: confused
+    speaker_side: center
+    background_id: scene-02-memory-loss
+    emphasis: alert
+  - speaker: 玩家
+    text: 剛剛不是修好了嗎？怎麼又忘記了？
+    portrait_id: player-default
+    expression: thinking
+    speaker_side: right
+    background_id: scene-02-memory-loss
+    emphasis: normal
+  - speaker: Byte
+    text: 輸入系統已經正常了，但資料沒有被記住。
+    portrait_id: byte-default
+    expression: explain
+    speaker_side: left
+    background_id: scene-02-memory-loss
+    emphasis: normal
+  - speaker: Byte
+    text: 我們要建立變數，讓系統記住對話與數值。
+    portrait_id: byte-default
+    expression: explain
+    speaker_side: left
+    background_id: scene-02-memory-loss
+    emphasis: normal
+  - speaker: 玩家
+    text: 難道只要一個變數就夠了嗎？
+    portrait_id: player-default
+    expression: thinking
+    speaker_side: right
+    background_id: scene-02-memory-loss
+    emphasis: normal
+  - speaker: Byte
+    text: 不夠，這關要學會 int 和 str，讓系統能正確儲存不同型態的資料。
+    portrait_id: byte-default
+    expression: alert
+    speaker_side: left
+    background_id: scene-02-memory-loss
+    emphasis: alert
+next_action: goto_demo_variable_base

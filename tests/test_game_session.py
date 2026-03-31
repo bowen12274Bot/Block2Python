@@ -297,6 +297,32 @@ def test_game_session_start_group_practice_jumps_to_challenge() -> None:
 
 
 
+
+def test_start_group_practice_after_demo_seen_keeps_first_level_unlocked() -> None:
+    levels = load_levels(load_levels_dir())
+    for level in levels.values():
+        level.metadata["stub_judge"] = {"status": "AC"}
+    app = AppCore(levels, judge=StubJudge())
+    assembled = assemble_game_slice(game_content=load_game_content(game_content_dir()), levels=levels)
+    session = GameSession.start(app=app, game_slice=assembled, quest_id="quest-main-map")
+    session.create_player_profile(name="Test Player", gender="male")
+    session.complete_intro()
+
+    session.start_group_story("group-01")
+    session.advance()
+    session.start_group_demo("group-01")
+    state = session.start_group_practice("group-01")
+    assert state.mode is SessionMode.CHALLENGE
+    assert state.current_level_id == "group-01-practice-01"
+
+    state, outcome = session.submit_current_level(
+        python_code='name = input()\nprint("Hello, " + name + "!")\n',
+    )
+    assert state.mode is SessionMode.CHALLENGE
+    assert outcome.cleared is True
+    assert outcome.analysis.summary != "Level is locked"
+    assert outcome.judge.summary != "Level is locked"
+
 def test_game_session_can_complete_all_five_groups() -> None:
     session = build_session()
 
@@ -319,7 +345,6 @@ def test_game_session_can_complete_all_five_groups() -> None:
     for group_number in range(1, 6):
         for level_number in range(1, 6):
             expected_cleared_levels.append("group-%02d-practice-%02d" % (group_number, level_number))
-    expected_cleared_levels.append("group-05-bonus-signal-scan-01")
     assert contract_state.progress.cleared_level_ids == tuple(expected_cleared_levels)
 
     assert contract_state.map_route is not None

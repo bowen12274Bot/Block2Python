@@ -1,22 +1,32 @@
-scene_id: scene-city-alarm
-title: City Alarm
+﻿scene_id: scene-city-alarm
+title: Input Gate
 dialogue_blocks:
-  - speaker: Byte
-    text: The city alarm is broken. We need basic input and output to repair it.
-    portrait_id: byte-default
-    expression: alert
-    background_id: scene-00-normal-city
-    emphasis: normal
-  - speaker: Player
-    text: What should I fix first?
+  - speaker: 系統
+    text: 你好你好你好你好你好你好……
+    portrait_id: system-default
+    expression: glitched
+    speaker_side: center
+    background_id: scene-01-broken-io
+    emphasis: alert
+  - speaker: 玩家
+    text: 連對話都壞掉了…
     portrait_id: player-default
     expression: thinking
-    background_id: scene-00-normal-city
+    speaker_side: right
+    background_id: scene-01-broken-io
     emphasis: normal
   - speaker: Byte
-    text: Start with a short demo challenge so we can verify the signal path.
+    text: 輸入系統壞掉了，我們先從最基礎的 input() 和 output 開始修復。
     portrait_id: byte-default
     expression: explain
-    background_id: scene-00-normal-city
+    speaker_side: left
+    background_id: scene-01-broken-io
     emphasis: normal
+  - speaker: Byte
+    text: 跟著我完成示範，系統就能重新聽懂你輸入的訊號。
+    portrait_id: byte-default
+    expression: alert
+    speaker_side: left
+    background_id: scene-01-broken-io
+    emphasis: alert
 next_action: goto_demo_basic_io

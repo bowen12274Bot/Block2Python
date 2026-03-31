@@ -1,3 +1,4 @@
+@tool
 extends Control
 class_name QuestMapStageOverlay
 
@@ -8,20 +9,28 @@ signal story_requested()
 signal demo_requested()
 signal practice_requested()
 
-@onready var stage_title_label: Label = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn/StageTitle")
-@onready var stage_subtitle_label: Label = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Header/TitleColumn/StageSubtitle")
-@onready var stage_description_label: Label = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/StageDescription")
-@onready var stage_action_note_label: Label = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/ActionNote")
-@onready var unlock_blocks_container: HFlowContainer = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/UnlockBlocks")
-@onready var stage_story_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartStoryButton")
-@onready var stage_demo_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartDemoButton")
-@onready var stage_practice_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Buttons/StartPracticeButton")
-@onready var stage_close_button: Button = get_node_or_null("Center/Panel/OverlayMargin/OverlayRoot/Header/CloseNudge/CloseButton")
+@export_group("Overlay Art")
+@export_file("*.png", "*.jpg", "*.jpeg", "*.webp") var floating_page_background_source_path: String = "res://art/floating_pages/background.png":
+	set(value):
+		floating_page_background_source_path = value
+		_refresh_overlay_art()
+
+@onready var stage_title_label: Label = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/Header/StageTitle")
+@onready var stage_subtitle_label: Label = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/Header/StageSubtitle")
+@onready var stage_description_label: Label = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/StageDescription")
+@onready var stage_action_note_label: Label = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/ActionNote")
+@onready var unlock_blocks_container: HFlowContainer = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/UnlockBlocks")
+@onready var stage_story_button: Button = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/Buttons/StartStoryButton")
+@onready var stage_demo_button: Button = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/Buttons/StartDemoButton")
+@onready var stage_practice_button: Button = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/Buttons/StartPracticeButton")
+@onready var stage_close_button: Button = get_node_or_null("Center/Panel/OverlayContent/OverlayRoot/Header/CloseButton")
+@onready var floating_page_background: TextureRect = get_node_or_null("Center/Panel/FloatingPageBackground")
 
 
 func _ready() -> void:
 	z_index = 100
 	visible = false
+	_refresh_overlay_art()
 	if stage_close_button != null:
 		stage_close_button.pressed.connect(func() -> void:
 			close_requested.emit()
@@ -86,3 +95,30 @@ func _apply_actions(overlay_view: Dictionary) -> void:
 		stage_practice_button.text = str(overlay_view.get("practice_button_text", "Practice"))
 	if stage_action_note_label != null:
 		stage_action_note_label.text = str(overlay_view.get("action_note", ""))
+
+
+func _apply_panel_background() -> void:
+	if floating_page_background == null:
+		return
+
+	if floating_page_background_source_path.strip_edges() == "":
+		floating_page_background.texture = null
+		return
+
+	var absolute_path: String = ProjectSettings.globalize_path(floating_page_background_source_path)
+	if not FileAccess.file_exists(absolute_path):
+		return
+
+	var image: Image = Image.load_from_file(absolute_path)
+	if image == null or image.is_empty():
+		if ResourceLoader.exists(floating_page_background_source_path):
+			floating_page_background.texture = load(floating_page_background_source_path)
+		return
+
+	floating_page_background.texture = ImageTexture.create_from_image(image)
+
+
+func _refresh_overlay_art() -> void:
+	if not is_node_ready():
+		return
+	_apply_panel_background()

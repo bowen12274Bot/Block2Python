@@ -1,22 +1,60 @@
-scene_id: opening-intro
-title: Opening Mission
+﻿scene_id: opening-intro
+title: 開場任務
 dialogue_blocks:
-  - speaker: Byte
-    text: Welcome to Code Planet. The system core is unstable.
-    portrait_id: byte-default
-    expression: alert
+  - speaker: 系統
+    text: 警告…警告…程式能量不穩定…系統正在崩潰中…
+    portrait_id: system-default
+    expression: glitched
+    speaker_side: center
+    background_id: scene-00-normal-city
+    emphasis: alert
+  - speaker: 玩家
+    text: 這裡是…哪裡？
+    portrait_id: player-default
+    expression: thinking
+    speaker_side: right
     background_id: scene-00-normal-city
     emphasis: normal
-  - speaker: Narrator
-    text: Your explorer profile is registered. The first mission is about to begin.
-    portrait_id: narrator-default
-    expression: neutral
-    background_id: scene-00-normal-city
-    emphasis: normal
   - speaker: Byte
-    text: Finish this opening briefing, then head to the main map and begin repairs.
+    text: 歡迎來到 Code Planet。
     portrait_id: byte-default
     expression: explain
+    speaker_side: left
     background_id: scene-00-normal-city
     emphasis: normal
+  - speaker: Byte
+    text: 這顆星球的一切，都是由程式維持運作。
+    portrait_id: byte-default
+    expression: explain
+    speaker_side: left
+    background_id: scene-00-normal-city
+    emphasis: normal
+  - speaker: Byte
+    text: 但現在出問題了，輸入系統失效、資料開始錯亂，整個城市正在崩壞。
+    portrait_id: byte-default
+    expression: alert
+    speaker_side: left
+    background_id: scene-00-normal-city
+    emphasis: alert
+  - speaker: 玩家
+    text: 是誰造成的？
+    portrait_id: player-default
+    expression: thinking
+    speaker_side: right
+    background_id: scene-00-normal-city
+    emphasis: normal
+  - speaker: Byte
+    text: 現在還不知道，但我們沒有時間了。
+    portrait_id: byte-default
+    expression: alert
+    speaker_side: left
+    background_id: scene-00-normal-city
+    emphasis: alert
+  - speaker: Byte
+    text: 你是被選中的修復者，只有學會程式邏輯，才能讓這顆星球恢復正常。
+    portrait_id: byte-default
+    expression: happy
+    speaker_side: left
+    background_id: scene-00-normal-city
+    emphasis: success
 next_action: complete_intro
