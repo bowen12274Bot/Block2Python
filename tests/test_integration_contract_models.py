@@ -187,7 +187,7 @@ def test_player_action_contract_supports_create_profile_payload() -> None:
 def test_tutor_reply_request_contract_defaults() -> None:
     request = TutorReplyRequest(question="How to start?")
 
-    assert request.provider == "template"
+    assert request.provider == "temple"
     assert request.python_code == ""
     assert request.block_json is None
     assert request.recent_feedback == ()
@@ -197,9 +197,9 @@ def test_tutor_reply_payload_contract_shape() -> None:
     payload = TutorReplyPayload(
         reply_type="next_step_hint",
         content="Try one small step first.",
-        metadata={"provider": "template"},
+        metadata={"provider": "temple"},
     )
 
     assert payload.reply_type == "next_step_hint"
     assert payload.content.startswith("Try")
-    assert payload.metadata["provider"] == "template"
+    assert payload.metadata["provider"] == "temple"

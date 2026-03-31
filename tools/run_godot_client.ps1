@@ -82,13 +82,18 @@ try {
     throw "Godot project file not found: $projectFile"
   }
 
+  $logDir = Join-Path $repoRoot "log"
+  New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+  $godotLogFile = Join-Path $logDir "godot_client.log"
+
   Write-Host "Launching Godot project..."
   Write-Host "Executable: $godotExe"
   Write-Host "Project: $projectPath"
+  Write-Host "Log file: $godotLogFile"
 
   Ensure-GodotImports -GodotExecutable $godotExe -ProjectPath $projectPath
 
-  & $godotExe --path $projectPath
+  & $godotExe --path $projectPath --log-file $godotLogFile
 }
 finally {
   Set-Location $pwdPath

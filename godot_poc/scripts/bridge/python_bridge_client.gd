@@ -11,8 +11,12 @@ const BridgeLaunchConfigScript = preload("res://scripts/bridge/python_bridge_lau
 const DEFAULT_PYTHON_REL_PATH := "../.venv/Scripts/python.exe"
 const DEFAULT_LEVELS_REL_PATH := "../assets/levels"
 const DEFAULT_GAME_CONTENT_REL_PATH := "../assets/game_content"
+const DEFAULT_TEACHING_SKILLS_REL_PATH := "../assets/teaching_skills"
 const DEFAULT_PYTHONPATH_REL_PATH := "../src"
 const DEFAULT_WASM_REL_PATH := "../assets/wasm/python.wasm"
+const DEFAULT_BRIDGE_LOG_REL_PATH := "../log/bridge_stdio.log"
+const DEFAULT_TUTOR_THINKING_LOG_REL_PATH := "../log/tutor_thinking.log"
+const DEFAULT_BRIDGE_CLIENT_LOG_REL_PATH := "../log/godot_bridge_client.log"
 const DEFAULT_WASMTIME_CANDIDATE_REL_PATHS := [
 	"../.block2python/tools/wasmtime/wasmtime.exe",
 	"../wasmtime.exe",
@@ -24,8 +28,12 @@ const DEFAULT_WASMTIME_CANDIDATE_REL_PATHS := [
 @export var python_rel_path: String = DEFAULT_PYTHON_REL_PATH
 @export var levels_rel_path: String = DEFAULT_LEVELS_REL_PATH
 @export var game_content_rel_path: String = DEFAULT_GAME_CONTENT_REL_PATH
+@export var teaching_skills_rel_path: String = DEFAULT_TEACHING_SKILLS_REL_PATH
 @export var pythonpath_rel_path: String = DEFAULT_PYTHONPATH_REL_PATH
 @export var wasm_rel_path: String = DEFAULT_WASM_REL_PATH
+@export var bridge_log_rel_path: String = DEFAULT_BRIDGE_LOG_REL_PATH
+@export var tutor_thinking_log_rel_path: String = DEFAULT_TUTOR_THINKING_LOG_REL_PATH
+@export var bridge_client_log_rel_path: String = DEFAULT_BRIDGE_CLIENT_LOG_REL_PATH
 @export var wasmtime_candidate_rel_paths: PackedStringArray = PackedStringArray(DEFAULT_WASMTIME_CANDIDATE_REL_PATHS)
 
 var _pipe: Dictionary = {}
@@ -62,6 +70,7 @@ func start_bridge() -> bool:
 	_stdio = _pipe.get("stdio")
 	_stderr = _pipe.get("stderr")
 	_pid = int(_pipe.get("pid", -1))
+	_append_bridge_client_log("Bridge started (pid=%d)" % _pid)
 	bridge_started.emit()
 	return true
 
@@ -251,6 +260,7 @@ func send_request(payload: Dictionary) -> void:
 
 func stop_bridge() -> void:
 	if _pid > 0:
+		_append_bridge_client_log("Stopping bridge process (pid=%d)" % _pid)
 		OS.kill(_pid)
 	_wait_async_threads()
 	_clear_process_state()
@@ -264,6 +274,9 @@ func _build_launch_config() -> Dictionary:
 		wasm_rel_path,
 		levels_rel_path,
 		game_content_rel_path,
+		teaching_skills_rel_path,
+		bridge_log_rel_path,
+		tutor_thinking_log_rel_path,
 		wasmtime_candidate_rel_paths
 	)
 	if not launch_config.is_empty():
@@ -394,7 +407,29 @@ func _clear_process_state() -> void:
 
 
 func _fail_bridge(message: String) -> void:
+	_append_bridge_client_log("Bridge failure: %s" % message)
+	var stderr_snapshot: String = _read_stderr_text().strip_edges()
+	if stderr_snapshot != "":
+		_append_bridge_client_log("Bridge stderr snapshot:\n%s" % stderr_snapshot)
 	bridge_failed.emit(message)
+
+
+func _append_bridge_client_log(message: String) -> void:
+	var log_path: String = _resolve_project_path(bridge_client_log_rel_path)
+	var log_dir: String = log_path.get_base_dir()
+	if log_dir != "":
+		DirAccess.make_dir_recursive_absolute(log_dir)
+
+	var handle: FileAccess = FileAccess.open(log_path, FileAccess.READ_WRITE)
+	if handle == null:
+		handle = FileAccess.open(log_path, FileAccess.WRITE_READ)
+	if handle == null:
+		return
+
+	handle.seek_end()
+	handle.store_line("[%s] %s" % [Time.get_datetime_string_from_system(), message])
+	handle.flush()
+	handle.close()
 
 
 func _notification(what: int) -> void:

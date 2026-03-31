@@ -1,23 +1,40 @@
 level_id: group-01-practice-05
-title: Input Gate
+title: "Input Gate: Gate Equation"
 chapter_id: map-groups
 order_index: 1005
 prerequisite_level_ids:
   - group-01-practice-04
+teaching_skill_ids:
+  - variables
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 prompt: |
-  Read one integer n from standard input.
-  Print `Go` on its own line exactly n times.
+  劇情：
+  最後一道門啟動線性控制鎖，
+  你必須輸出正確控制值才能離開 Input Gate 區域。
+
+  任務：
+  從標準輸入依序讀入三個整數 a、b、x（每行一個），輸出：
+  a * x + b
 learning_markdown: |
-  Practice a simple `for` loop with `range(n)` and repeated output.
+  目標：整合多個變數與線性公式計算。
+  建議流程：
+  1. 讀入 a、b、x。
+  2. 計算 a * x + b。
+  3. 輸出結果。
+story_intro_markdown: |
+  終端顯示：`Final control formula required.`
+  Byte：「把公式算對，這關就正式修復完成。」
+story_outro_markdown: |
+  厚重的金屬門緩緩打開。
+  你完成 Input Gate 全部修復，主線前往 Variable Base。
 testcase_dir: cases/group-01-practice-05
 judge_policy:
   time_limit_ms: 3000
   memory_limit_mb: 256
 metadata:
-  stage: group-01-foundation
+  stage: input-gate
   group_id: group-01
   slot: practice-05
-  analysis:
-    required_keywords:
-      - for
-      - range

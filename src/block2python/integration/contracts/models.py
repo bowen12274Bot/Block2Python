@@ -254,7 +254,7 @@ class PlayerAction:
 @dataclass(frozen=True, slots=True)
 class TutorReplyRequest:
     question: str
-    provider: str = "template"
+    provider: str = "temple"
     level_id: str | None = None
     python_code: str = ""
     block_json: dict[str, Any] | None = None

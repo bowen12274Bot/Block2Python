@@ -11,16 +11,34 @@ from block2python.clients.cli.game_session_demo import DEFAULT_QUEST_ID
 from block2python.integration.bridge_stdio import BridgeServer
 
 DEFAULT_TUTOR_CONFIG_PATH = Path(".block2python") / "tutor_config.json"
-SUPPORTED_TUTOR_PROVIDERS = frozenset({"template", "stub", "local", "openai_compatible"})
+SUPPORTED_TUTOR_PROVIDERS = frozenset({"stub", "temple", "api_skill"})
+TUTOR_PROVIDER_ALIASES: dict[str, str] = {
+    "stub": "stub",
+    "temple": "temple",
+    "template": "temple",
+    "local": "temple",
+    "api_skill": "api_skill",
+    "api+skill": "api_skill",
+    "api-skill": "api_skill",
+    "openai_compatible": "api_skill",
+}
+DEFAULT_OPENAI_ENDPOINT_URL = "https://api.openai.com/v1/chat/completions"
+DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+DEFAULT_OPENAI_TIMEOUT_SEC = 30.0
+DEFAULT_LOCAL_OLLAMA_ENDPOINT = "http://127.0.0.1:11434/v1/chat/completions"
+DEFAULT_LOCAL_OLLAMA_MODEL = "qwen3.5:0.8b"
+DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC = 20.0
+DEFAULT_LOCAL_OLLAMA_API_SKILL_MODEL = "qwen3.5:9b"
+DEFAULT_LOCAL_OLLAMA_API_SKILL_TIMEOUT_SEC = 45.0
 
 
 @dataclass(frozen=True, slots=True)
 class TutorUserConfig:
-    provider: str = "template"
-    endpoint_url: str = "https://api.openai.com/v1/chat/completions"
-    model: str = "gpt-4o-mini"
+    provider: str = "temple"
+    endpoint_url: str = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+    model: str = DEFAULT_LOCAL_OLLAMA_MODEL
     api_key: str = ""
-    timeout_sec: float = 30.0
+    timeout_sec: float = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
     system_prompt: str | None = None
 
     def to_dict(self) -> dict[str, object]:
@@ -152,10 +170,7 @@ def tutor_user_config_from_payload(
     provider_raw = _pick_config_value(source, options, "provider", current.provider)
     if not isinstance(provider_raw, str) or not provider_raw.strip():
         raise ValueError("Tutor config provider must be a non-empty string")
-    provider = provider_raw.strip().lower()
-    if provider not in SUPPORTED_TUTOR_PROVIDERS:
-        supported = ", ".join(sorted(SUPPORTED_TUTOR_PROVIDERS))
-        raise ValueError(f"Unsupported tutor provider: {provider}. Supported: {supported}")
+    provider = _normalize_tutor_provider(provider_raw)
 
     endpoint_url = _parse_optional_str(
         _pick_config_value(source, options, "endpoint_url", current.endpoint_url),
@@ -176,6 +191,13 @@ def tutor_user_config_from_payload(
     system_prompt_raw = _pick_config_value(source, options, "system_prompt", current.system_prompt)
     if system_prompt_raw is not None and not isinstance(system_prompt_raw, str):
         raise ValueError("Tutor config system_prompt must be a string or null")
+
+    endpoint_url, model, timeout_sec = _apply_provider_defaults(
+        provider=provider,
+        endpoint_url=endpoint_url,
+        model=model,
+        timeout_sec=timeout_sec,
+    )
 
     return TutorUserConfig(
         provider=provider,
@@ -206,17 +228,13 @@ def prepare_tutor_reply_payload(
     if provider_raw is None:
         provider = config.provider
     elif isinstance(provider_raw, str) and provider_raw.strip():
-        provider = provider_raw.strip().lower()
+        provider = _normalize_tutor_provider(provider_raw)
     else:
         raise ValueError("Tutor request provider must be a non-empty string")
 
-    if provider not in SUPPORTED_TUTOR_PROVIDERS:
-        supported = ", ".join(sorted(SUPPORTED_TUTOR_PROVIDERS))
-        raise ValueError(f"Unsupported tutor provider: {provider}. Supported: {supported}")
-
     source["provider"] = provider
 
-    if provider == "openai_compatible":
+    if provider == "api_skill" or provider == "temple":
         options_raw = source.get("provider_options")
         if options_raw is None:
             options_raw = {}
@@ -344,6 +362,43 @@ def _parse_positive_float(value: object, *, field_name: str) -> float:
     if parsed <= 0:
         raise ValueError(f"Tutor config {field_name} must be a positive number")
     return parsed
+
+
+def _apply_provider_defaults(
+    *,
+    provider: str,
+    endpoint_url: str,
+    model: str,
+    timeout_sec: float,
+) -> tuple[str, str, float]:
+    if provider == "temple":
+        if endpoint_url == "" or endpoint_url == DEFAULT_OPENAI_ENDPOINT_URL:
+            endpoint_url = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+        if model == "" or model == DEFAULT_OPENAI_MODEL:
+            model = DEFAULT_LOCAL_OLLAMA_MODEL
+        if timeout_sec <= 0:
+            timeout_sec = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
+        return endpoint_url, model, timeout_sec
+
+    if provider == "api_skill":
+        if endpoint_url == "" or endpoint_url == DEFAULT_OPENAI_ENDPOINT_URL:
+            endpoint_url = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+        if model == "" or model in {DEFAULT_OPENAI_MODEL, DEFAULT_LOCAL_OLLAMA_MODEL}:
+            model = DEFAULT_LOCAL_OLLAMA_API_SKILL_MODEL
+        if timeout_sec <= 0:
+            timeout_sec = DEFAULT_LOCAL_OLLAMA_API_SKILL_TIMEOUT_SEC
+        return endpoint_url, model, timeout_sec
+
+    return endpoint_url, model, timeout_sec
+
+
+def _normalize_tutor_provider(provider_raw: str) -> str:
+    provider = provider_raw.strip().lower()
+    mapped = TUTOR_PROVIDER_ALIASES.get(provider)
+    if mapped is None:
+        supported = ", ".join(sorted(SUPPORTED_TUTOR_PROVIDERS))
+        raise ValueError(f"Unsupported tutor provider: {provider_raw}. Supported: {supported}")
+    return mapped
 
 
 def main(argv: list[str] | None = None) -> int:

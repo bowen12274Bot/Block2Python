@@ -17,7 +17,7 @@ def test_deserialize_tutor_reply_request_with_defaults() -> None:
     request = deserialize_tutor_reply_request({"question": "  How to start?  "})
 
     assert request.question == "How to start?"
-    assert request.provider == "template"
+    assert request.provider == "temple"
     assert request.level_id is None
     assert request.python_code == ""
     assert request.block_json is None
@@ -43,7 +43,7 @@ def test_deserialize_tutor_reply_request_supports_alias_fields_and_openai_option
         }
     )
 
-    assert request.provider == "openai_compatible"
+    assert request.provider == "api_skill"
     assert request.level_id == "group-01-demo"
     assert request.python_code == "print(1)\n"
     assert request.block_json == {"kind": "workspace"}
@@ -91,7 +91,7 @@ def test_deserialize_tutor_reply_request_accepts_submission_history_alias() -> N
 def test_tutor_reply_request_round_trip_serialization() -> None:
     request = TutorReplyRequest(
         question="Explain",
-        provider="template",
+        provider="temple",
         level_id="group-01-demo",
         python_code="print(1)",
         block_json={"kind": "workspace"},
@@ -112,7 +112,7 @@ def test_tutor_reply_payload_round_trip_serialization() -> None:
     payload = TutorReplyPayload(
         reply_type="next_step_hint",
         content="Try reading input first.",
-        metadata={"provider": "template"},
+        metadata={"provider": "temple"},
     )
 
     serialized = serialize_tutor_reply_payload(payload)

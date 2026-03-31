@@ -1,20 +1,40 @@
 level_id: group-01-practice-03
-title: Input Gate
+title: "Input Gate: Relay Amplifier"
 chapter_id: map-groups
 order_index: 1003
 prerequisite_level_ids:
   - group-01-practice-02
 next_level_ids:
   - group-01-practice-04
+teaching_skill_ids:
+  - variables
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 prompt: |
-  Read one integer from standard input and print its doubled value.
+  劇情：
+  遠端中繼站回報訊號太弱。你要先把輸入值放大兩倍，
+  才能讓下一段節點接收成功。
+
+  任務：
+  從標準輸入讀入一個整數 x，輸出 2 * x。
 learning_markdown: |
-  Practice basic arithmetic with one input value.
+  目標：練習單一整數輸入與乘法運算。
+  建議流程：
+  1. 讀入整數 x。
+  2. 計算 2 * x。
+  3. 輸出結果。
+story_intro_markdown: |
+  Byte：「主幹線電壓太低了，先把這組訊號放大兩倍。」
+story_outro_markdown: |
+  放大器穩定運作，遠端節點燈號從紅轉綠。
+  你離 Input Gate 核心控制區更近一步。
 testcase_dir: cases/group-01-practice-03
 judge_policy:
   time_limit_ms: 3000
   memory_limit_mb: 256
 metadata:
-  stage: group-01-foundation
+  stage: input-gate
   group_id: group-01
   slot: practice-03

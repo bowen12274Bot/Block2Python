@@ -97,6 +97,7 @@ func _ready() -> void:
 	map_screen.stage_story_requested.connect(_on_stage_story_requested)
 	map_screen.stage_demo_requested.connect(_on_stage_demo_requested)
 	map_screen.stage_practice_requested.connect(_on_stage_practice_requested)
+	map_screen.tutor_settings_saved.connect(_on_tutor_config_saved)
 	scene_screen.advance_requested.connect(_on_advance_requested)
 	scene_screen.back_requested.connect(_show_map_page)
 	demo_screen.advance_requested.connect(_on_demo_advance_requested)
@@ -142,7 +143,9 @@ func _ready() -> void:
 	practice_screen.set_can_run(false)
 	practice_screen.set_can_submit(false)
 	practice_screen.set_can_next(false)
-	practice_screen.set_tutor_config(TutorUserConfigScript.load_config())
+	var tutor_config: Dictionary = TutorUserConfigScript.load_config()
+	practice_screen.set_tutor_config(tutor_config)
+	map_screen.set_tutor_config(tutor_config)
 	_set_debug_visible(false)
 	_show_page("entry")
 	set_process(true)
@@ -329,8 +332,14 @@ func _on_tutor_cancel_requested() -> void:
 func _on_tutor_config_saved(config: Dictionary) -> void:
 	var saved: bool = TutorUserConfigScript.save_config(config)
 	if not saved:
+		map_screen.set_status("Status: failed to save tutor settings.")
 		practice_screen.set_status("Status: failed to save tutor settings.")
 		return
+
+	var refreshed_config: Dictionary = TutorUserConfigScript.load_config()
+	map_screen.set_tutor_config(refreshed_config)
+	practice_screen.set_tutor_config(refreshed_config)
+	map_screen.set_status("Status: tutor settings saved locally.")
 	practice_screen.set_status("Status: tutor settings saved locally.")
 
 
