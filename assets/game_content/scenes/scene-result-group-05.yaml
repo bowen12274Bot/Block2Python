@@ -1,0 +1,52 @@
+scene_id: scene-result-group-05
+title: Bug King Castle 關後劇
+dialogue_blocks:
+  - speaker: Bug King
+    text: 什麼？人類竟然可以在沒有 AI 的情況下修復程式。
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: 玩家
+    text: 這也多虧了 AI 在我學習的路上給我許多幫助，讓我能更快學會技巧來拯救星球。
+    portrait_id: player-default
+    speaker_side: right
+    background_id: scene-05-bug-king-castle
+    emphasis: normal
+  - speaker: Bug King
+    text: （進入回憶）在 Code Planet 過去的輝煌時期，我曾是負責建設與維護城市系統的首席工程師。
+    background_id: GC1
+    emphasis: normal
+  - speaker: Bug King
+    text: 我深信每一行程式碼都該由人類親手雕琢。
+    background_id: GC1
+    emphasis: normal
+  - speaker: Bug King
+    text: 但 AI 科技爆發後，世界開始盲目追求效率。
+    background_id: GC2
+    emphasis: normal
+  - speaker: Bug King
+    text: 人們不再學習程式邏輯，把開發與維護全交給 AI 代理，最後留下充滿漏洞的黑箱程式碼。
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: Bug King
+    text: 那場災難裡，我在永無止盡的 Debug 中崩潰，才選擇癱瘓城市向 AI 復仇。
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-05-bug-king-castle
+    emphasis: alert
+  - speaker: Bug King
+    text: 我一直以為，AI 的出現會讓人類不再需要思考。
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-05-bug-king-castle
+    emphasis: normal
+  - speaker: Bug King
+    text: 但你證明了一件事，AI 不該取代思考，而是幫助人類走得更遠的夥伴。
+    portrait_id: bug-king-default
+    speaker_side: center
+    background_id: scene-05-bug-king-castle
+    emphasis: success
+next_action: unlock_next_main_node

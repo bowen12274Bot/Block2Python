@@ -16,6 +16,10 @@ scenes:
   - file: scenes/scene-mission-statement-05.yaml
   - file: scenes/scene-practice-unlock.yaml
   - file: scenes/scene-result-group-01.yaml
+  - file: scenes/scene-result-group-02.yaml
+  - file: scenes/scene-result-group-03.yaml
+  - file: scenes/scene-result-group-04.yaml
+  - file: scenes/scene-result-group-05.yaml
   - file: scenes/scene-result-success.yaml
   - file: scenes/scene-result-fail.yaml
 challenges:

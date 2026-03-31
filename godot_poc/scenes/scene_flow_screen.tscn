@@ -139,6 +139,8 @@ background_texture_paths = {
 "scene-04-destruction-disaster": ExtResource("7_bg_scene_04"),
 "scene-05-bug-king-castle": ExtResource("8_bg_scene_05"),
 "scene-05-bug-king-castle-fixed": ExtResource("9_bg_scene_05_fixed"),
+"GC1": ExtResource("17_bg_scene_gc"),
+"GC2": ExtResource("18_bg_scene_gc_broken"),
 "scene-gc-control-room": ExtResource("17_bg_scene_gc"),
 "scene-gc-control-room-broken": ExtResource("18_bg_scene_gc_broken")
 }

@@ -8,6 +8,7 @@ const WindowAlignmentHelperScript = preload("res://scripts/bridge/window_alignme
 @onready var code_input: TextEdit = $Margin/Root/CodeInput
 
 func initialize(default_code: String) -> void:
+	code_input.gutters_draw_line_numbers = true
 	code_input.text = default_code
 	show_practice({})
 

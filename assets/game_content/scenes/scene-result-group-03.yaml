@@ -1,0 +1,18 @@
+scene_id: scene-result-group-03
+title: If Canyon 關後劇
+dialogue_blocks:
+  - speaker: 系統
+    text: 條件判斷正常…邏輯分支正常…
+    portrait_id: system-default
+    expression: happy
+    speaker_side: center
+    background_id: scene-03-logic-breakdown
+    emphasis: success
+  - speaker: 🤖 Byte（AI夥伴）
+    text: 恭喜你讓系統的判斷恢復正常了，距離成功又近一步了。
+    portrait_id: byte-default
+    expression: happy
+    speaker_side: left
+    background_id: scene-03-logic-breakdown
+    emphasis: success
+next_action: unlock_next_main_node
