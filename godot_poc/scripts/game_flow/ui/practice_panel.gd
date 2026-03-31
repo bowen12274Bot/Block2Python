@@ -5,7 +5,7 @@ const TOOLBOX_ATTACH_PADDING := Rect2i(0, 0, 0, 0)
 const WindowAlignmentHelperScript = preload("res://scripts/bridge/window_alignment.gd")
 
 @onready var editor_title: Label = $Margin/Root/EditorTitle
-@onready var code_input: TextEdit = $Margin/Root/CodeInput
+@onready var code_input: CodeEdit = $Margin/Root/CodeInput
 
 func initialize(default_code: String) -> void:
 	code_input.gutters_draw_line_numbers = true
