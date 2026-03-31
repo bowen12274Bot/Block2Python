@@ -189,6 +189,7 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
         group = self._route_group(group_id)
         if group is None:
             raise GameSessionError(f"Unknown group_id: {group_id}")
+        self._ensure_group_demo_level_cleared(group_id)
         progress = self._progress_state()
         self._sync_group_runtime_states(progress, self.current_state())
         self._enable_practice_review_if_completed(group_id)
@@ -388,6 +389,21 @@ class GameSession(MapRouteProjectionMixin, PracticeReviewMixin, SceneProgressPro
                 continue
             return self.runtime.game_slice.challenges.get(step.challenge_id)
         return None
+
+    def _ensure_group_demo_level_cleared(self, group_id: str) -> None:
+        group = self._route_group(group_id)
+        if group is None:
+            return
+        for step in group.demo_route:
+            if step.challenge_id is None:
+                continue
+            challenge = self.runtime.game_slice.challenges.get(step.challenge_id)
+            if challenge is None or not challenge.levels:
+                continue
+            demo_level_id = challenge.levels[0].level_id
+            if not self.app.is_cleared(demo_level_id):
+                self.app.mark_cleared(demo_level_id)
+            return
 
     def current_practice_toolbox_penalty_percent(self, group_id: str | None) -> int | None:
         if group_id is None:

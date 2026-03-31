@@ -1,0 +1,25 @@
+scene_id: scene-result-group-01
+title: Input Gate 關後劇
+dialogue_blocks:
+  - speaker: 系統
+    text: 玩家({player_name}),你好......
+    portrait_id: system-default
+    expression: happy
+    speaker_side: center
+    background_id: scene-01-broken-io
+    emphasis: success
+  - speaker: 玩家
+    text: 竟然可以說話了
+    portrait_id: player-default
+    expression: happy
+    speaker_side: right
+    background_id: scene-01-broken-io
+    emphasis: success
+  - speaker: 🤖 Byte（AI夥伴）
+    text: 恭喜你喚醒系統的意識了，距離成功又近一步了
+    portrait_id: byte-default
+    expression: happy
+    speaker_side: left
+    background_id: scene-01-broken-io
+    emphasis: success
+next_action: unlock_next_main_node
