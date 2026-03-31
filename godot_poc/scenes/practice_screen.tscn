@@ -2,18 +2,39 @@
 
 [ext_resource type="Script" uid="uid://b6ifa4143whak" path="res://scripts/game_flow/ui/practice_screen.gd" id="1_screen"]
 [ext_resource type="Script" uid="uid://c7kk7l42csuep" path="res://scripts/game_flow/ui/practice_panel.gd" id="2_practice"]
-[ext_resource type="Texture2D" uid="uid://c4fad12ucxsqj" path="res://art/map/main_map_background.png" id="2_s5sdt"]
+[ext_resource type="Texture2D" uid="uid://ciuu3cysex0bu" path="res://art/practice/practice_background.png" id="2_s5sdt"]
 [ext_resource type="Script" uid="uid://dxq6acgmm6ha5" path="res://scripts/game_flow/ui/feedback_panel.gd" id="3_feedback"]
 [ext_resource type="Texture2D" uid="uid://b6a6ng7oj4b18" path="res://art/practice/panels/panel_top_bar.png" id="3_s5sdt"]
 [ext_resource type="Texture2D" uid="uid://gy35ingkler2" path="res://art/practice/panels/panel_left_sidebar.png" id="4_kcjmg"]
 [ext_resource type="FontFile" uid="uid://chorfjnqa8soa" path="res://art/fonts/Orbitron-Bold.ttf" id="4_orbitron"]
 [ext_resource type="Texture2D" uid="uid://dpyg8cmo8erm2" path="res://art/practice/panels/panel_main_stage.png" id="5_h2lt8"]
+[ext_resource type="Texture2D" uid="uid://by387fdxtey3g" path="res://art/practice/buttons/run_code_button.png" id="5_kv2jc"]
+[ext_resource type="Texture2D" uid="uid://b0vat0o3nasik" path="res://art/practice/buttons/submit_code_button.png" id="6_dlvey"]
 [ext_resource type="Texture2D" uid="uid://dflkm0k124jsp" path="res://art/practice/panels/panel_bottom_output.png" id="6_kv2jc"]
 [ext_resource type="Texture2D" uid="uid://cdgxqc5q3t2c4" path="res://art/practice/panels/panel_right_sidebar.png" id="7_a06rc"]
+[ext_resource type="Texture2D" uid="uid://dgrh75j4eoyed" path="res://art/practice/buttons/next_level_button.png" id="7_j6xt8"]
+[ext_resource type="Texture2D" uid="uid://bk7w2q087xhds" path="res://art/practice/buttons/back_to_map_button.png" id="8_8fhbi"]
 [ext_resource type="Texture2D" uid="uid://b4cusprhoav3a" path="res://art/practice/battery/battery_000.png" id="8_h2lt8"]
+[ext_resource type="Texture2D" uid="uid://bv0as4ef3cyju" path="res://art/practice/buttons/settings_button.png" id="9_i4vjc"]
 [ext_resource type="Texture2D" uid="uid://g1573ntluxgm" path="res://art/practice/buttons/toolbox_button_idle.png" id="9_kv2jc"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_editor"]
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+bg_color = Color(0.0117647, 0.0352941, 0.0823529, 0.86)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.211765, 0.72549, 0.917647, 0.55)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
 content_margin_left = 12.0
@@ -32,58 +53,6 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 shadow_color = Color(0, 0, 0, 0.25)
 shadow_size = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
-content_margin_left = 12.0
-content_margin_top = 6.0
-content_margin_right = 12.0
-content_margin_bottom = 6.0
-bg_color = Color(0.054902, 0.180392, 0.286275, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.501961, 0.968627, 1, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0.14902, 0.658824, 0.956863, 0.25)
-shadow_size = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
-content_margin_left = 12.0
-content_margin_top = 6.0
-content_margin_right = 12.0
-content_margin_bottom = 6.0
-bg_color = Color(0.0509804, 0.14902, 0.25098, 0.94)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.423529, 0.929412, 1, 0.95)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0.14902, 0.658824, 0.956863, 0.25)
-shadow_size = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_editor"]
-content_margin_left = 16.0
-content_margin_top = 14.0
-content_margin_right = 16.0
-content_margin_bottom = 14.0
-bg_color = Color(0.0117647, 0.0352941, 0.0823529, 0.86)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.211765, 0.72549, 0.917647, 0.55)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
 
 [node name="PracticeScreen" type="Control" unique_id=1816694972]
 custom_minimum_size = Vector2(1200, 720)
@@ -199,24 +168,18 @@ text = "Progress: --"
 
 [node name="ActionRow" type="Control" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow" unique_id=146085261]
 anchors_preset = 0
-offset_left = 335.0
-offset_top = 14.0
-offset_right = 542.0
-offset_bottom = 56.0
+offset_left = 385.0
+offset_top = 26.0
+offset_right = 660.0
+offset_bottom = 68.0
 
 [node name="RunButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=567014198]
 layout_mode = 0
-offset_left = 48.93799
-offset_top = 15.0
-offset_right = 105.93799
-offset_bottom = 51.0
-theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
-theme_override_fonts/font = ExtResource("4_orbitron")
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-text = "RUN"
+offset_left = 67.93799
+offset_top = 1.0
+offset_right = 112.93799
+offset_bottom = 46.0
+flat = true
 
 [node name="RunIconArt" type="TextureRect" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/RunButton" unique_id=1219025577]
 layout_mode = 1
@@ -225,25 +188,24 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -26.5
+offset_top = -24.5
+offset_right = 13.5
+offset_bottom = 20.5
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("5_kv2jc")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="SubmitButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1723222838]
 layout_mode = 0
 offset_left = 110.93799
-offset_top = 15.0
-offset_right = 192.93799
-offset_bottom = 51.0
-theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
-theme_override_fonts/font = ExtResource("4_orbitron")
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-text = "SUBMIT"
+offset_top = 1.0
+offset_right = 155.93799
+offset_bottom = 46.0
+flat = true
 
 [node name="SubmitIconArt" type="TextureRect" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/SubmitButton" unique_id=1219025578]
 layout_mode = 1
@@ -252,25 +214,24 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -26.5
+offset_top = -24.5
+offset_right = 13.5
+offset_bottom = 20.5
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("6_dlvey")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="NextButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1268451318]
 layout_mode = 0
-offset_left = 197.93799
-offset_top = 15.0
-offset_right = 263.938
-offset_bottom = 51.0
-theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
-theme_override_fonts/font = ExtResource("4_orbitron")
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-text = "NEXT"
+offset_left = 152.93799
+offset_top = 1.0
+offset_right = 197.93799
+offset_bottom = 46.0
+flat = true
 
 [node name="NextIconArt" type="TextureRect" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/NextButton" unique_id=1219025579]
 layout_mode = 1
@@ -279,25 +240,24 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -25.5
+offset_top = -24.5
+offset_right = 14.5
+offset_bottom = 20.5
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("7_j6xt8")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="BackButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1092770487]
 layout_mode = 0
-offset_left = 267.938
-offset_top = 15.0
-offset_right = 325.938
-offset_bottom = 51.0
-theme_override_colors/font_color = Color(0.76, 0.96, 1, 0.98)
-theme_override_fonts/font = ExtResource("4_orbitron")
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-text = "MAP"
+offset_left = 194.93799
+offset_top = 1.0
+offset_right = 239.93799
+offset_bottom = 46.0
+flat = true
 
 [node name="MapIconArt" type="TextureRect" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/BackButton" unique_id=1219025580]
 layout_mode = 1
@@ -306,9 +266,40 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -24.5
+offset_top = -24.5
+offset_right = 15.5
+offset_bottom = 20.5
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("8_8fhbi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ExtraButton" type="Button" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow" unique_id=1092770488]
+layout_mode = 0
+offset_left = 235.93799
+offset_top = 1.0
+offset_right = 280.938
+offset_bottom = 46.0
+flat = true
+
+[node name="ExtraIconArt" type="TextureRect" parent="Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/ExtraButton" unique_id=1219025581]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.5
+offset_top = -24.5
+offset_right = 17.5
+offset_bottom = 20.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("9_i4vjc")
 expand_mode = 1
 stretch_mode = 5
 
@@ -370,7 +361,7 @@ offset_bottom = 327.0
 theme_override_colors/default_color = Color(0.89, 0.96, 1, 0.92)
 theme_override_font_sizes/normal_font_size = 16
 text = "No mission loaded yet."
-scroll_active = false
+scroll_active = true
 
 [node name="PracticePanel" type="PanelContainer" parent="Overlay" unique_id=1684921690]
 layout_mode = 0
@@ -410,7 +401,7 @@ theme_override_font_sizes/font_size = 18
 text = "EDITOR"
 horizontal_alignment = 1
 
-[node name="CodeInput" type="TextEdit" parent="Overlay/PracticePanel/Margin/Root" unique_id=398727511]
+[node name="CodeInput" type="CodeEdit" parent="Overlay/PracticePanel/Margin/Root" unique_id=398727511]
 layout_mode = 0
 offset_top = 17.0
 offset_right = 525.0
