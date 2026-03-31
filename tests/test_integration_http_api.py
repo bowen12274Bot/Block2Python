@@ -9,6 +9,7 @@ from block2python.integration.http_api import (
     load_tutor_user_config,
     prepare_tutor_reply_payload,
     save_tutor_user_config,
+    tutor_user_config_from_payload,
 )
 
 
@@ -17,7 +18,7 @@ def test_load_tutor_user_config_returns_defaults_when_file_missing(tmp_path: Pat
 
     config = load_tutor_user_config(config_path=config_path)
 
-    assert config.provider == "local"
+    assert config.provider == "temple"
     assert config.endpoint_url == "http://127.0.0.1:11434/v1/chat/completions"
     assert config.model == "qwen3.5:0.8b"
     assert config.api_key == ""
@@ -26,7 +27,7 @@ def test_load_tutor_user_config_returns_defaults_when_file_missing(tmp_path: Pat
 def test_save_and_load_tutor_user_config_round_trip(tmp_path: Path) -> None:
     config_path = tmp_path / "tutor_config.json"
     expected = TutorUserConfig(
-        provider="openai_compatible",
+        provider="api_skill",
         endpoint_url="https://example.invalid/v1/chat/completions",
         model="gpt-x",
         api_key="secret",
@@ -93,7 +94,7 @@ def test_tutor_api_router_reply_uses_configured_provider_when_missing_in_payload
 
 def test_prepare_tutor_reply_payload_injects_openai_defaults_from_user_config() -> None:
     config = TutorUserConfig(
-        provider="openai_compatible",
+        provider="api_skill",
         endpoint_url="https://example.invalid/v1/chat/completions",
         model="gpt-x",
         api_key="secret",
@@ -103,7 +104,7 @@ def test_prepare_tutor_reply_payload_injects_openai_defaults_from_user_config() 
 
     payload = prepare_tutor_reply_payload({"question": "Explain this"}, config=config)
 
-    assert payload["provider"] == "openai_compatible"
+    assert payload["provider"] == "api_skill"
     options = payload["provider_options"]
     assert isinstance(options, dict)
     assert options["endpoint_url"] == "https://example.invalid/v1/chat/completions"
@@ -113,9 +114,9 @@ def test_prepare_tutor_reply_payload_injects_openai_defaults_from_user_config() 
     assert options["system_prompt"] == "You are Byte"
 
 
-def test_prepare_tutor_reply_payload_injects_local_defaults_from_user_config() -> None:
+def test_prepare_tutor_reply_payload_injects_temple_defaults_from_user_config() -> None:
     config = TutorUserConfig(
-        provider="local",
+        provider="temple",
         endpoint_url="http://127.0.0.1:11434/v1/chat/completions",
         model="qwen3.5:0.8b",
         api_key="",
@@ -125,13 +126,31 @@ def test_prepare_tutor_reply_payload_injects_local_defaults_from_user_config() -
 
     payload = prepare_tutor_reply_payload({"question": "Explain this"}, config=config)
 
-    assert payload["provider"] == "local"
+    assert payload["provider"] == "temple"
     options = payload["provider_options"]
     assert isinstance(options, dict)
     assert options["endpoint_url"] == "http://127.0.0.1:11434/v1/chat/completions"
     assert options["model"] == "qwen3.5:0.8b"
     assert options["timeout_sec"] == 18.0
     assert options["system_prompt"] == "Select the best tutoring style"
+
+
+def test_tutor_user_config_from_payload_applies_local_defaults_for_api_skill() -> None:
+    config = tutor_user_config_from_payload(
+        {
+            "provider": "api_skill",
+            "endpoint_url": "",
+            "model": "",
+            "timeout_sec": 10.0,
+            "api_key": "",
+        },
+        base=TutorUserConfig(),
+    )
+
+    assert config.provider == "api_skill"
+    assert config.endpoint_url == "http://127.0.0.1:11434/v1/chat/completions"
+    assert config.model == "qwen3.5:9b"
+    assert config.timeout_sec == 10.0
 
 
 def test_tutor_api_router_reply_rejects_invalid_request_shape(tmp_path: Path) -> None:

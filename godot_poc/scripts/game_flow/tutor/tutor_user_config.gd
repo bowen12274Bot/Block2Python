@@ -2,13 +2,15 @@ extends RefCounted
 class_name TutorUserConfig
 
 const CONFIG_PATH := "user://tutor_config.json"
-const DEFAULT_PROVIDER := "local"
+const DEFAULT_PROVIDER := "temple"
 const DEFAULT_OPENAI_ENDPOINT_URL := "https://api.openai.com/v1/chat/completions"
 const DEFAULT_OPENAI_MODEL := "gpt-4o-mini"
 const DEFAULT_OPENAI_TIMEOUT_SEC := 30.0
 const DEFAULT_LOCAL_OLLAMA_ENDPOINT := "http://127.0.0.1:11434/v1/chat/completions"
 const DEFAULT_LOCAL_OLLAMA_MODEL := "qwen3.5:0.8b"
 const DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC := 20.0
+const DEFAULT_LOCAL_OLLAMA_API_SKILL_MODEL := "qwen3.5:9b"
+const DEFAULT_LOCAL_OLLAMA_API_SKILL_TIMEOUT_SEC := 45.0
 const DEFAULT_ENDPOINT_URL := DEFAULT_LOCAL_OLLAMA_ENDPOINT
 const DEFAULT_MODEL := DEFAULT_LOCAL_OLLAMA_MODEL
 const DEFAULT_TIMEOUT_SEC := DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
@@ -74,7 +76,7 @@ static func _normalize_config(raw: Dictionary, defaults: Dictionary) -> Dictiona
 
 	var provider_raw: Variant = raw.get("provider", merged.get("provider", DEFAULT_PROVIDER))
 	if provider_raw is String and String(provider_raw).strip_edges() != "":
-		merged["provider"] = String(provider_raw).strip_edges().to_lower()
+		merged["provider"] = _normalize_provider_name(String(provider_raw).strip_edges().to_lower())
 
 	var endpoint_raw: Variant = raw.get("endpoint_url", merged.get("endpoint_url", DEFAULT_ENDPOINT_URL))
 	if endpoint_raw is String:
@@ -98,7 +100,7 @@ static func _normalize_config(raw: Dictionary, defaults: Dictionary) -> Dictiona
 	if system_prompt_raw is String:
 		merged["system_prompt"] = String(system_prompt_raw).strip_edges()
 
-	if merged.get("provider", DEFAULT_PROVIDER) == "local":
+	if merged.get("provider", DEFAULT_PROVIDER) == "temple":
 		if String(merged.get("endpoint_url", "")).strip_edges() == "" or String(merged.get("endpoint_url", "")).strip_edges() == DEFAULT_OPENAI_ENDPOINT_URL:
 			merged["endpoint_url"] = DEFAULT_LOCAL_OLLAMA_ENDPOINT
 		if String(merged.get("model", "")).strip_edges() == "" or String(merged.get("model", "")).strip_edges() == DEFAULT_OPENAI_MODEL:
@@ -106,12 +108,24 @@ static func _normalize_config(raw: Dictionary, defaults: Dictionary) -> Dictiona
 		if float(merged.get("timeout_sec", DEFAULT_TIMEOUT_SEC)) <= 0.0:
 			merged["timeout_sec"] = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
 
-	if merged.get("provider", DEFAULT_PROVIDER) == "openai_compatible":
-		if String(merged.get("endpoint_url", "")).strip_edges() == "":
-			merged["endpoint_url"] = DEFAULT_OPENAI_ENDPOINT_URL
-		if String(merged.get("model", "")).strip_edges() == "":
-			merged["model"] = DEFAULT_OPENAI_MODEL
+	if merged.get("provider", DEFAULT_PROVIDER) == "api_skill":
+		if String(merged.get("endpoint_url", "")).strip_edges() == "" or String(merged.get("endpoint_url", "")).strip_edges() == DEFAULT_OPENAI_ENDPOINT_URL:
+			merged["endpoint_url"] = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+		if String(merged.get("model", "")).strip_edges() == "" or String(merged.get("model", "")).strip_edges() == DEFAULT_OPENAI_MODEL or String(merged.get("model", "")).strip_edges() == DEFAULT_LOCAL_OLLAMA_MODEL:
+			merged["model"] = DEFAULT_LOCAL_OLLAMA_API_SKILL_MODEL
 		if float(merged.get("timeout_sec", DEFAULT_TIMEOUT_SEC)) <= 0.0:
-			merged["timeout_sec"] = DEFAULT_OPENAI_TIMEOUT_SEC
+			merged["timeout_sec"] = DEFAULT_LOCAL_OLLAMA_API_SKILL_TIMEOUT_SEC
 
 	return merged
+
+
+static func _normalize_provider_name(provider: String) -> String:
+	match provider:
+		"stub":
+			return "stub"
+		"temple", "template", "local":
+			return "temple"
+		"api_skill", "api+skill", "api-skill", "openai_compatible":
+			return "api_skill"
+		_:
+			return DEFAULT_PROVIDER

@@ -11,6 +11,18 @@ from .models import (
 )
 
 
+_TUTOR_PROVIDER_ALIASES: dict[str, str] = {
+    "stub": "stub",
+    "temple": "temple",
+    "template": "temple",
+    "local": "temple",
+    "api_skill": "api_skill",
+    "api+skill": "api_skill",
+    "api-skill": "api_skill",
+    "openai_compatible": "api_skill",
+}
+
+
 def _serialize_actor_cue(actor: ActorCueState | None) -> dict[str, object] | None:
     if actor is None:
         return None
@@ -284,10 +296,10 @@ def deserialize_tutor_reply_request(payload: object) -> TutorReplyRequest:
     if not isinstance(question, str) or not question.strip():
         raise IntegrationContractValidationError("TutorReplyRequest.question must be a non-empty string")
 
-    provider_raw = payload.get("provider", "template")
+    provider_raw = payload.get("provider", "temple")
     if not isinstance(provider_raw, str) or not provider_raw.strip():
         raise IntegrationContractValidationError("TutorReplyRequest.provider must be a non-empty string")
-    provider = provider_raw.strip().lower()
+    provider = _normalize_tutor_provider(provider_raw)
 
     level_id_raw = payload.get("level_id")
     level_id: str | None = None
@@ -415,3 +427,14 @@ def deserialize_tutor_reply_payload(payload: object) -> TutorReplyPayload:
         raise IntegrationContractValidationError("TutorReplyPayload.metadata must be a dict")
 
     return TutorReplyPayload(reply_type=reply_type.strip(), content=content, metadata=dict(metadata))
+
+
+def _normalize_tutor_provider(provider_raw: str) -> str:
+    normalized = provider_raw.strip().lower()
+    mapped = _TUTOR_PROVIDER_ALIASES.get(normalized)
+    if mapped is None:
+        supported = ", ".join(sorted({"stub", "temple", "api_skill"}))
+        raise IntegrationContractValidationError(
+            f"TutorReplyRequest.provider has unsupported value: {provider_raw}. Supported: {supported}"
+        )
+    return mapped

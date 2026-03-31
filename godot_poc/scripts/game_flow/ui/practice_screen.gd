@@ -17,6 +17,8 @@ const DEFAULT_OPENAI_TIMEOUT_SEC := 30.0
 const DEFAULT_LOCAL_OLLAMA_ENDPOINT := "http://127.0.0.1:11434/v1/chat/completions"
 const DEFAULT_LOCAL_OLLAMA_MODEL := "qwen3.5:0.8b"
 const DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC := 20.0
+const DEFAULT_LOCAL_OLLAMA_API_SKILL_MODEL := "qwen3.5:9b"
+const DEFAULT_LOCAL_OLLAMA_API_SKILL_TIMEOUT_SEC := 45.0
 const TUTOR_STREAM_INTERVAL_SEC := 0.03
 const TUTOR_REPLY_TYPE_COLOR_DEFAULT := Color(0.72549, 0.756863, 0.854902, 0.84)
 const TUTOR_REPLY_TYPE_COLOR_HINT := Color(0.572549, 0.862745, 0.705882, 0.96)
@@ -188,7 +190,7 @@ func current_python_code() -> String:
 	return practice_panel.get_python_code()
 
 func set_tutor_config(config: Dictionary) -> void:
-	_select_provider(str(config.get("provider", "local")))
+	_select_provider(_normalize_provider_name(str(config.get("provider", "temple"))))
 	assistant_api_key_input.text = str(config.get("api_key", ""))
 	_provider_endpoint_url = str(config.get("endpoint_url", DEFAULT_LOCAL_OLLAMA_ENDPOINT))
 	_provider_model = str(config.get("model", DEFAULT_LOCAL_OLLAMA_MODEL))
@@ -272,15 +274,11 @@ func _on_ask_tutor_button_pressed() -> void:
 
 	var provider: String = _selected_provider()
 	_read_provider_form_values()
-	if provider == "openai_compatible" or provider == "local":
+	if provider == "api_skill" or provider == "temple":
 		if _provider_endpoint_url == "" or _provider_model == "":
 			status_label.text = "Status: endpoint and model are required for this provider."
 			_refresh_tutor_controls()
 			return
-	if provider == "openai_compatible" and assistant_api_key_input.text.strip_edges() == "":
-		status_label.text = "Status: API key is required for OpenAI-compatible provider."
-		_refresh_tutor_controls()
-		return
 
 	_append_assistant_entry("You", question)
 	assistant_input.text = ""
@@ -325,18 +323,16 @@ func _on_back_button_pressed() -> void:
 
 func _setup_provider_options() -> void:
 	provider_option.clear()
-	provider_option.add_item("Local Ollama Selector")
-	provider_option.set_item_metadata(0, "local")
-	provider_option.add_item("OpenAI Compatible")
-	provider_option.set_item_metadata(1, "openai_compatible")
-	provider_option.add_item("Template")
-	provider_option.set_item_metadata(2, "template")
+	provider_option.add_item("Temple (Local Template Selector)")
+	provider_option.set_item_metadata(0, "temple")
+	provider_option.add_item("API+Skill (Remote LLM)")
+	provider_option.set_item_metadata(1, "api_skill")
 	provider_option.add_item("Stub")
-	provider_option.set_item_metadata(3, "stub")
+	provider_option.set_item_metadata(2, "stub")
 	provider_option.select(0)
 
 func _select_provider(provider: String) -> void:
-	var normalized: String = provider.strip_edges().to_lower()
+	var normalized: String = _normalize_provider_name(provider)
 	for index in range(provider_option.item_count):
 		var metadata: Variant = provider_option.get_item_metadata(index)
 		if metadata is String and String(metadata) == normalized:
@@ -346,15 +342,15 @@ func _select_provider(provider: String) -> void:
 func _selected_provider() -> String:
 	var index: int = provider_option.selected
 	if index < 0:
-		return "local"
+		return "temple"
 	var metadata: Variant = provider_option.get_item_metadata(index)
 	if metadata is String:
 		return String(metadata)
-	return "local"
+	return "temple"
 
 func _build_provider_options(provider: String) -> Dictionary:
 	_read_provider_form_values()
-	if provider != "openai_compatible" and provider != "local":
+	if provider != "api_skill" and provider != "temple":
 		return {}
 
 	var options: Dictionary = {
@@ -372,9 +368,7 @@ func _build_provider_options(provider: String) -> Dictionary:
 func _refresh_tutor_controls() -> void:
 	var provider: String = _selected_provider()
 	var has_question: bool = assistant_input.text.strip_edges() != ""
-	var requires_api_key: bool = provider == "openai_compatible"
-	var requires_provider_form: bool = provider == "openai_compatible" or provider == "local"
-	var has_api_key: bool = assistant_api_key_input.text.strip_edges() != ""
+	var requires_provider_form: bool = provider == "api_skill" or provider == "temple"
 	var has_endpoint_model: bool = true
 	if requires_provider_form:
 		has_endpoint_model = endpoint_input.text.strip_edges() != "" and model_input.text.strip_edges() != ""
@@ -386,20 +380,19 @@ func _refresh_tutor_controls() -> void:
 		or _tutor_reply_streaming
 		or not has_question
 		or not has_endpoint_model
-		or (requires_api_key and not has_api_key)
 	)
 	cancel_tutor_button.disabled = not _tutor_request_pending
 
 
 func _refresh_provider_form() -> void:
 	var provider: String = _selected_provider()
-	var needs_provider_form: bool = provider == "openai_compatible" or provider == "local"
-	var show_api_key_controls: bool = provider == "openai_compatible" or provider == "local"
+	var needs_provider_form: bool = provider == "api_skill" or provider == "temple"
+	var show_api_key_controls: bool = provider == "api_skill" or provider == "temple"
 	provider_form.visible = needs_provider_form
 	assistant_api_key_input.visible = show_api_key_controls
 	api_key_visibility_button.visible = show_api_key_controls
 
-	if provider == "local":
+	if provider == "temple":
 		if _provider_endpoint_url.strip_edges() == "" or _provider_endpoint_url == DEFAULT_OPENAI_ENDPOINT:
 			_provider_endpoint_url = DEFAULT_LOCAL_OLLAMA_ENDPOINT
 		if _provider_model.strip_edges() == "" or _provider_model == DEFAULT_OPENAI_MODEL:
@@ -407,19 +400,19 @@ func _refresh_provider_form() -> void:
 		if _provider_timeout_sec <= 0:
 			_provider_timeout_sec = DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
 		assistant_api_key_input.placeholder_text = "Ollama API key (optional)"
-		provider_form_hint_label.text = "Local selector uses Ollama (OpenAI-compatible endpoint)."
-	elif provider == "openai_compatible":
-		if _provider_endpoint_url.strip_edges() == "":
-			_provider_endpoint_url = DEFAULT_OPENAI_ENDPOINT
-		if _provider_model.strip_edges() == "":
-			_provider_model = DEFAULT_OPENAI_MODEL
+		provider_form_hint_label.text = "Temple uses local lightweight model + templates for predictable tutoring output."
+	elif provider == "api_skill":
+		if _provider_endpoint_url.strip_edges() == "" or _provider_endpoint_url == DEFAULT_OPENAI_ENDPOINT:
+			_provider_endpoint_url = DEFAULT_LOCAL_OLLAMA_ENDPOINT
+		if _provider_model.strip_edges() == "" or _provider_model == DEFAULT_OPENAI_MODEL or _provider_model == DEFAULT_LOCAL_OLLAMA_MODEL:
+			_provider_model = DEFAULT_LOCAL_OLLAMA_API_SKILL_MODEL
 		if _provider_timeout_sec <= 0:
-			_provider_timeout_sec = DEFAULT_OPENAI_TIMEOUT_SEC
-		assistant_api_key_input.placeholder_text = "API key (required)"
-		provider_form_hint_label.text = "Remote provider requires API key and endpoint credentials."
+			_provider_timeout_sec = DEFAULT_LOCAL_OLLAMA_API_SKILL_TIMEOUT_SEC
+		assistant_api_key_input.placeholder_text = "API key (optional for local Ollama)"
+		provider_form_hint_label.text = "API+Skill runs a full LLM with real teaching skills context. Local default uses Ollama qwen3.5:9b."
 	else:
 		assistant_api_key_input.placeholder_text = "API key"
-		provider_form_hint_label.text = "Template/Stub use built-in reply flow and do not require provider credentials."
+		provider_form_hint_label.text = "Stub is test-only and not suitable for real gameplay tutoring."
 
 	_sync_provider_form_inputs()
 
@@ -612,3 +605,14 @@ func _reset_tutor_stats() -> void:
 	_apply_reply_type_visual("")
 	tutor_request_cost_label.text = "Request cost: N/A"
 	tutor_total_cost_label.text = "Total cost: $0.000000"
+
+
+func _normalize_provider_name(provider: String) -> String:
+	var normalized: String = provider.strip_edges().to_lower()
+	if normalized == "stub":
+		return "stub"
+	if normalized == "temple" or normalized == "template" or normalized == "local":
+		return "temple"
+	if normalized == "api_skill" or normalized == "api+skill" or normalized == "api-skill" or normalized == "openai_compatible":
+		return "api_skill"
+	return "temple"

@@ -77,7 +77,7 @@
 
 | Phase | 方案 | 用途 | 特點 |
 |-------|------|------|------|
-| 1-2 | `TemplateTutorProvider` + `LocalTemplateSelector (Qwen3.5:0.6b)` | 保持可預期回覆，且可接聊天框 | 模板輸出穩定；本地模型只負責選模板/提示層級 |
+| 1-2 | `TemplateTutorProvider` + `LocalTemplateSelector (Qwen3.5:0.8b)` | 保持可預期回覆，且可接聊天框 | 模板輸出穩定；本地模型只負責選模板/提示層級 |
 | 2-3 | `OpenAICompatibleProvider` | 使用 OpenAI API 相容格式 | 可切 OpenAI/其他相容供應商 |
 | 4+ | 多供應商路由 | 供應商備援與品質優化 | 可動態切換模型與端點 |
 
@@ -263,7 +263,11 @@ tutor_service = TutorService(
     skill_loader=skill_loader,
     context_builder=context_builder,
     policy=TutorPolicy(),
-    provider=TemplateTutorProvider(selector=LocalTemplateSelector(model="qwen3.5:0.6b"))
+    provider=LocalTemplateSelector(
+        template_provider=TemplateTutorProvider(),
+        model_name="qwen3.5:0.8b",
+        endpoint_url="http://127.0.0.1:11434/v1/chat/completions",
+    )
 )
 ```
 
@@ -373,7 +377,7 @@ class TemplateTutorProvider(TutorProvider):
     async def reply(...) -> TutorResponse: ...
 
 class LocalTemplateSelector(TutorProvider):
-    """本地輕模型（例如 qwen3.5:0.6b）只負責選模板 ID / hint 層級"""
+    """本地輕模型（例如 qwen3.5:0.8b）只負責選模板 ID / hint 層級"""
     async def reply(...) -> TutorResponse: ...
 
 class OpenAICompatibleProvider(TutorProvider):
@@ -994,7 +998,7 @@ tests/ai/
 
 ### 決策 D2: 導入順序（模板可預期輸出 + 本地模型選模板）
 
-**決策**：Phase 1-2 以 Template 輸出為主；本地輕模型（qwen3.5:0.6b）只負責選模板；同步建立 OpenAI API 相容 provider
+**決策**：Phase 1-2 以 Template 輸出為主；本地輕模型（qwen3.5:0.8b）只負責選模板；同步建立 OpenAI API 相容 provider
 
 **理由**：
 - 模板輸出可保持教學口徑一致且可預期
@@ -1025,7 +1029,7 @@ A: 暫時未決，待後續商務/技術評估。建議先完成 Phase 1-3，再
 
 **Q3: 能否在 Phase 1 就接 LLM？**
 
-A: 可以，而且本計畫已採用。Phase 1 會先接本地輕模型（qwen3.5:0.6b）作為模板選擇器，最終回覆仍由 Template provider 產生；並保留 OpenAI API 相容 provider 介面。
+A: 可以，而且本計畫已採用。Phase 1 會先接本地輕模型（qwen3.5:0.8b）作為模板選擇器，最終回覆仍由 Template provider 產生；並保留 OpenAI API 相容 provider 介面。
 
 **Q4: Teaching skill 檔案格式能改嗎？**
 
