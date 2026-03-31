@@ -1,15 +1,29 @@
 level_id: group-01-demo
-title: Group 01 Demo Placeholder
+title: "Input Gate: Signal Calibration"
 chapter_id: map-groups
 order_index: 1000
 prompt: |
-  Placeholder demo level for group-01.
+  劇情：
+  Input Gate 的主控台仍在雜訊狀態，Byte 要你先做最小校準，
+  讓系統重新學會「接收一行訊號並正確回顯」。
+
+  任務：
+  讀取一整行字串 codename（可能包含空白），輸出：
+  Signal: <codename>
+
+  注意：大小寫、空白、標點都必須完全一致。
 learning_markdown: |
-  Placeholder content scaffold for future demo content.
+  目標：熟悉一行字串輸入與精確輸出格式。
+  你需要：
+  1. 用一次 input()/getline 讀入完整字串。
+  2. 依指定格式輸出 Signal: <codename>。
+  3. 保留原本字串內容，不自行裁切中間空白。
 story_intro_markdown: |
-  Placeholder intro for group-01 demo.
+  Byte 指著閃爍的終端：「先把校準訊號送進去，主控台才會信任我們。」
+  螢幕顯示：`Transmit codename for calibration.`
 story_outro_markdown: |
-  Placeholder outro for group-01 demo.
+  主控台回覆 `Signal accepted.`。
+  第一層校準完成，開始修復 Input Gate 的實戰流程。
 next_level_ids:
   - group-01-practice-01
 teaching_skill_ids:
@@ -20,10 +34,9 @@ tutor_policy:
   response_tone: clear
 testcase_dir: cases/group-01-demo
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: input-gate
   group_id: group-01
   slot: demo
-  placeholder_auto_ac: true

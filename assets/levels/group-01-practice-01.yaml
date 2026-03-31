@@ -1,5 +1,5 @@
 level_id: group-01-practice-01
-title: Input Gate
+title: "Input Gate: Greeting Handshake"
 chapter_id: map-groups
 order_index: 1001
 prerequisite_level_ids:
@@ -14,26 +14,27 @@ tutor_policy:
   response_tone: clear
 prompt: |
   劇情：
-  你抵達了「輸入之門」，門禁終端要求一句正確格式的問候，才會開門。
+  校準完成後，門禁終端要求標準問候封包，
+  通過後才會開啟下一段走廊。
 
   任務：
   讀取一行字串 name（可能包含空白），並輸出：
   Hello, <name>!
 
-  例如輸入為 Ada Lovelace，輸出必須是：
-  Hello, Ada Lovelace!
+  例如輸入 `Ada Lovelace`，輸出必須是：
+  `Hello, Ada Lovelace!`
 learning_markdown: |
-  目標：練習最基本的字串輸入與格式化輸出。
+  目標：練習基本字串輸入、變數儲存與格式化輸出。
   重點是「完整讀入一整行」並保留原字串內容（包含空白）。
   建議流程：
   1. 用 input() 讀取 name。
   2. 依照指定格式輸出 Hello, <name>!。
 story_intro_markdown: |
   終端亮起紅字：
-  「識別語未輸入。請以標準問候格式驗證通行權限。」
+  「識別語缺失。請以標準問候格式驗證通行權限。」
 story_outro_markdown: |
   門鎖解除，走廊燈光逐格亮起。
-  你成功完成第一道輸入協定，前往下一個節點。
+  第一個實戰握手完成，前往下一個節點。
 testcase_dir: cases/group-01-practice-01
 judge_policy:
   time_limit_ms: 3000

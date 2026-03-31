@@ -1,25 +1,45 @@
 level_id: group-01-practice-04
-title: Input Gate
+title: "Input Gate: Rect Scan"
 chapter_id: map-groups
 order_index: 1004
 prerequisite_level_ids:
   - group-01-practice-03
 next_level_ids:
   - group-01-practice-05
+teaching_skill_ids:
+  - variables
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 prompt: |
-  Read one integer score from standard input.
-  If the score is greater than or equal to 60, print `Pass`.
-  Otherwise, print `Retry`.
+  劇情：
+  你在主通道掃描到一塊矩形維修區，
+  系統要求你同時回報面積與周長，才能完成區域標記。
+
+  任務：
+  從標準輸入依序讀入兩個正整數 w、h（每行一個）。
+  輸出兩個整數：
+  1. 面積 w * h
+  2. 周長 2 * (w + h)
+
+  請以同一行輸出，兩個數字以單一空白分隔。
 learning_markdown: |
-  Practice a simple `if` condition with one comparison and two possible outputs.
+  目標：練習同時使用多個變數與多個算式。
+  建議流程：
+  1. 讀入 w、h。
+  2. 計算 area 與 perimeter。
+  3. 依格式輸出兩個結果。
+story_intro_markdown: |
+  控制台提示：`Upload rectangle scan report: area, perimeter.`
+story_outro_markdown: |
+  掃描報告通過，維修區地圖成功寫入主控台。
+  Input Gate 的路徑圖已接近完整。
 testcase_dir: cases/group-01-practice-04
 judge_policy:
   time_limit_ms: 3000
   memory_limit_mb: 256
 metadata:
-  stage: group-01-foundation
+  stage: input-gate
   group_id: group-01
   slot: practice-04
-  analysis:
-    required_keywords:
-      - if
