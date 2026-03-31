@@ -173,7 +173,7 @@ nodes:
       - group-04-practice
     next_node_ids:
       - main-map-entry
-    scene_id: scene-result-success
+    scene_id: scene-result-group-04
     challenge_group_id: null
 
   - node_id: group-05-story
