@@ -214,5 +214,5 @@ nodes:
       - group-05-practice
     next_node_ids:
       - main-map-entry
-    scene_id: scene-result-success
+    scene_id: scene-result-group-05
     challenge_group_id: null
