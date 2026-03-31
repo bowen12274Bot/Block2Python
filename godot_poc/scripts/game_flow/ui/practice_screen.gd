@@ -25,6 +25,18 @@ const TUTOR_REPLY_TYPE_COLOR_CONCEPT := Color(0.564706, 0.760784, 0.94902, 0.96)
 const TUTOR_REPLY_TYPE_COLOR_DEBUG := Color(0.968627, 0.788235, 0.462745, 0.96)
 const TUTOR_REPLY_TYPE_COLOR_REFUSAL := Color(0.952941, 0.572549, 0.572549, 0.96)
 const TUTOR_REPLY_TYPE_COLOR_ERROR := Color(0.972549, 0.501961, 0.501961, 0.96)
+const ACTION_BUTTON_IDLE_MODULATE := Color(0.88, 0.95, 1.0, 0.92)
+const ACTION_BUTTON_HOVER_MODULATE := Color(1.0, 1.0, 1.0, 1.0)
+const ACTION_BUTTON_PRESSED_MODULATE := Color(0.76, 0.92, 1.0, 1.0)
+const ACTION_BUTTON_DISABLED_MODULATE := Color(0.45, 0.52, 0.6, 0.68)
+const ACTION_BUTTON_IDLE_SCALE := Vector2.ONE
+const ACTION_BUTTON_HOVER_SCALE := Vector2(1.04, 1.04)
+const ACTION_BUTTON_PRESSED_SCALE := Vector2(0.96, 0.96)
+const TOOLBOX_IDLE_PYTHON_MODULATE := Color(1.0, 1.0, 1.0, 1.0)
+const TOOLBOX_HOVER_PYTHON_MODULATE := Color(0.86, 0.9, 0.96, 0.92)
+const TOOLBOX_IDLE_TOOLBOX_MODULATE := Color(1.0, 1.0, 1.0, 1.0)
+const TOOLBOX_HOVER_TOOLBOX_MODULATE := Color(1.06, 1.08, 1.1, 1.0)
+const TOOLBOX_DISABLED_MODULATE := Color(0.42, 0.48, 0.56, 0.6)
 
 signal run_requested(python_code: String)
 signal submit_requested(python_code: String)
@@ -43,7 +55,13 @@ signal back_requested()
 @onready var submit_button: Button = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/SubmitButton
 @onready var next_button: Button = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/NextButton
 @onready var back_button: Button = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/BackButton
+@onready var extra_button: Button = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/ExtraButton
 @onready var mission_text: RichTextLabel = $Overlay/MissionPanel/MissionMargin/MissionRoot/MissionText
+@onready var run_icon_art: TextureRect = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/RunButton/RunIconArt
+@onready var submit_icon_art: TextureRect = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/SubmitButton/SubmitIconArt
+@onready var next_icon_art: TextureRect = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/NextButton/NextIconArt
+@onready var map_icon_art: TextureRect = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/BackButton/MapIconArt
+@onready var extra_icon_art: TextureRect = $Overlay/TopBar/TopBarMargin/TopBarRoot/TopRow/ActionRow/ExtraButton/ExtraIconArt
 @onready var battery_panel_art: TextureRect = $Overlay/BatteryPanel/BatteryPanelArt
 @onready var battery_header_label: Label = get_node_or_null("Overlay/BatteryPanel/BatteryMargin/BatteryRoot/BatteryHeader")
 @onready var battery_percent_label: Label = get_node_or_null("Overlay/BatteryPanel/BatteryMargin/BatteryRoot/BatteryPercent")
@@ -76,6 +94,8 @@ var _toolbox_status_message: String = ""
 var _battery_textures: Dictionary = {}
 var _toolbox_button_idle_texture: Texture2D
 var _toolbox_button_active_texture: Texture2D
+var _toolbox_button_hovered: bool = false
+var _action_button_icons: Dictionary = {}
 var _tutor_config: Dictionary = {
 	"provider": "template",
 	"endpoint_url": DEFAULT_OPENAI_ENDPOINT,
@@ -88,11 +108,20 @@ var _total_tutor_cost: float = 0.0
 
 func _ready() -> void:
 	_load_art_textures()
+	_setup_action_button_feedback()
 	run_button.pressed.connect(_on_run_button_pressed)
 	submit_button.pressed.connect(_on_submit_button_pressed)
 	next_button.pressed.connect(_on_next_button_pressed)
 	toolbox_button.pressed.connect(_on_toolbox_button_pressed)
+	toolbox_button.mouse_entered.connect(_on_toolbox_button_mouse_entered)
+	toolbox_button.mouse_exited.connect(_on_toolbox_button_mouse_exited)
 	back_button.pressed.connect(_on_back_button_pressed)
+	extra_button.disabled = true
+	run_button.tooltip_text = "Run"
+	submit_button.tooltip_text = "Submit"
+	next_button.tooltip_text = "Next"
+	back_button.tooltip_text = "Back to Map"
+	extra_button.tooltip_text = "Extra"
 	assistant_input.text_submitted.connect(_on_assistant_input_submitted)
 	ask_tutor_button.pressed.connect(_on_ask_tutor_button_pressed)
 	cancel_tutor_button.pressed.connect(_on_cancel_tutor_button_pressed)
@@ -227,6 +256,7 @@ func _apply_toolbox_lock_state() -> void:
 	next_button.disabled = (not _base_can_next) or _toolbox_locked
 	toolbox_button.disabled = not _base_can_open_toolbox
 	_update_toolbox_visual()
+	_refresh_action_button_feedback()
 	if _toolbox_locked and _toolbox_status_message != "":
 		status_label.text = _toolbox_status_message
 
@@ -337,6 +367,57 @@ func _update_toolbox_visual() -> void:
 		toolbox_button.text = ""
 	elif toolbox_button != null:
 		toolbox_button.text = "CLOSE" if _toolbox_locked else "TOOLBOX"
+	_apply_toolbox_hover_visual(_toolbox_button_hovered)
+
+func _setup_action_button_feedback() -> void:
+	_action_button_icons = {
+		run_button: run_icon_art,
+		submit_button: submit_icon_art,
+		next_button: next_icon_art,
+		back_button: map_icon_art,
+		extra_button: extra_icon_art,
+	}
+	for button_variant in _action_button_icons.keys():
+		var button := button_variant as Button
+		if button == null:
+			continue
+		button.pivot_offset = button.size * 0.5
+		button.mouse_entered.connect(func() -> void: _set_action_button_visual(button, "hover"))
+		button.mouse_exited.connect(func() -> void: _set_action_button_visual(button, "idle"))
+		button.button_down.connect(func() -> void: _set_action_button_visual(button, "pressed"))
+		button.button_up.connect(func() -> void: _set_action_button_visual(button, "hover"))
+	_refresh_action_button_feedback()
+
+func _refresh_action_button_feedback() -> void:
+	for button_variant in _action_button_icons.keys():
+		var button := button_variant as Button
+		if button == null:
+			continue
+		_set_action_button_visual(button, "disabled" if button.disabled else "idle")
+
+func _set_action_button_visual(button: Button, state: String) -> void:
+	if button == null:
+		return
+	if button.disabled:
+		state = "disabled"
+	button.pivot_offset = button.size * 0.5
+	var icon := _action_button_icons.get(button, null) as TextureRect
+	var modulate := ACTION_BUTTON_IDLE_MODULATE
+	var scale := ACTION_BUTTON_IDLE_SCALE
+	match state:
+		"hover":
+			modulate = ACTION_BUTTON_HOVER_MODULATE
+			scale = ACTION_BUTTON_HOVER_SCALE
+		"pressed":
+			modulate = ACTION_BUTTON_PRESSED_MODULATE
+			scale = ACTION_BUTTON_PRESSED_SCALE
+		"disabled":
+			modulate = ACTION_BUTTON_DISABLED_MODULATE
+			scale = ACTION_BUTTON_IDLE_SCALE
+	button.modulate = modulate
+	if icon != null:
+		icon.modulate = modulate
+	button.scale = scale
 
 func _refresh_tutor_input_state() -> void:
 	var has_active_level: bool = str(_current_view.get("current_level_id", "")) != ""
@@ -457,3 +538,31 @@ func _reset_tutor_stats() -> void:
 	_apply_reply_type_visual("")
 	tutor_request_cost_label.text = "Request cost: N/A"
 	tutor_total_cost_label.text = "Total cost: $0.000000"
+
+func _on_toolbox_button_mouse_entered() -> void:
+	_toolbox_button_hovered = true
+	_apply_toolbox_hover_visual(true)
+
+func _on_toolbox_button_mouse_exited() -> void:
+	_toolbox_button_hovered = false
+	_apply_toolbox_hover_visual(false)
+
+func _apply_toolbox_hover_visual(hovered: bool) -> void:
+	if toolbox_button == null:
+		return
+	var modulate := TOOLBOX_DISABLED_MODULATE if toolbox_button.disabled else TOOLBOX_IDLE_PYTHON_MODULATE
+	var texture: Texture2D = null
+	if toolbox_button.disabled:
+		texture = _toolbox_button_active_texture if _toolbox_locked else _toolbox_button_idle_texture
+	else:
+		if _toolbox_locked:
+			texture = _toolbox_button_idle_texture if hovered else _toolbox_button_active_texture
+			modulate = TOOLBOX_HOVER_TOOLBOX_MODULATE if hovered else TOOLBOX_IDLE_TOOLBOX_MODULATE
+		else:
+			texture = _toolbox_button_active_texture if hovered else _toolbox_button_idle_texture
+			modulate = TOOLBOX_HOVER_PYTHON_MODULATE if hovered else TOOLBOX_IDLE_PYTHON_MODULATE
+	toolbox_button.modulate = modulate
+	if toolbox_panel_art != null:
+		if texture != null:
+			toolbox_panel_art.texture = texture
+		toolbox_panel_art.modulate = modulate
