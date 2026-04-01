@@ -14,7 +14,7 @@ dialogue_blocks:
     speaker_side: left
     background_id: scene-04-destruction-disaster
     emphasis: alert
-  - speaker: 玩家
+  - speaker: 玩家({player_name})
     text: 那該怎麼辦？
     portrait_id: player-default
     expression: thinking
@@ -29,3 +29,4 @@ dialogue_blocks:
     background_id: scene-04-destruction-disaster
     emphasis: normal
 next_action: goto_demo_loop_lab
+mission_statement_scene_id: scene-mission-statement-04

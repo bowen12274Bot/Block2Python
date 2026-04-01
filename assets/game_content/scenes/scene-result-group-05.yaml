@@ -7,14 +7,18 @@ dialogue_blocks:
     speaker_side: center
     background_id: scene-05-bug-king-castle
     emphasis: alert
-  - speaker: 玩家
+  - speaker: 玩家({player_name})
     text: 這也多虧了 AI 在我學習的路上給我許多幫助，讓我能更快學會技巧來拯救星球。
     portrait_id: player-default
     speaker_side: right
     background_id: scene-05-bug-king-castle
     emphasis: normal
   - speaker: Bug King
-    text: （進入回憶）在 Code Planet 過去的輝煌時期，我曾是負責建設與維護城市系統的首席工程師。
+    text: （進入回憶）
+    background_id: GC1
+    emphasis: normal
+  - speaker: Bug King
+    text: 在 Code Planet 過去的輝煌時期，我曾是負責建設與維護城市系統的首席工程師。
     background_id: GC1
     emphasis: normal
   - speaker: Bug King
@@ -27,16 +31,16 @@ dialogue_blocks:
     emphasis: normal
   - speaker: Bug King
     text: 人們不再學習程式邏輯，把開發與維護全交給 AI 代理，最後留下充滿漏洞的黑箱程式碼。
-    portrait_id: bug-king-default
-    speaker_side: center
-    background_id: scene-05-bug-king-castle
+    background_id: GC2
     emphasis: alert
   - speaker: Bug King
     text: 那場災難裡，我在永無止盡的 Debug 中崩潰，才選擇癱瘓城市向 AI 復仇。
-    portrait_id: bug-king-default
-    speaker_side: center
-    background_id: scene-05-bug-king-castle
+    background_id: GC2
     emphasis: alert
+  - speaker: Bug King
+    text: （結束回憶）
+    background_id: scene-05-bug-king-castle
+    emphasis: normal
   - speaker: Bug King
     text: 我一直以為，AI 的出現會讓人類不再需要思考。
     portrait_id: bug-king-default

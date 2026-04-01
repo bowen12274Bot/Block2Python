@@ -6,34 +6,34 @@ dialogue_blocks:
     portrait_id: system-default
     expression: happy
     speaker_side: center
-    background_id: scene-04-destruction-disaster
+    background_id: scene-00-normal-city
     emphasis: success
-  - speaker: 🤖 Byte（AI夥伴）
+  - speaker: Byte
     text: 恭喜你讓星球恢復正常了，距離成功又近一步了。
     portrait_id: byte-default
     expression: happy
     speaker_side: left
-    background_id: scene-04-destruction-disaster
+    background_id: scene-00-normal-city
     emphasis: success
   - speaker: 系統
     text: 接收到外來訊息，你惹怒BugKing，他在5號星球等你，如果不赴約的話，他將再次破壞前面的星球。
     portrait_id: system-default
     expression: glitched
     speaker_side: center
-    background_id: scene-04-destruction-disaster
+    background_id: scene-00-normal-city
     emphasis: alert
-  - speaker: 🤖 Byte（AI夥伴）
+  - speaker: Byte
     text: 之前的努力都要白費了！
     portrait_id: byte-default
     expression: alert
     speaker_side: left
-    background_id: scene-04-destruction-disaster
+    background_id: scene-00-normal-city
     emphasis: alert
-  - speaker: 玩家
+  - speaker: 玩家({player_name})
     text: 別擔心！讓我來會會他。
     portrait_id: player-default
     expression: happy
     speaker_side: right
-    background_id: scene-04-destruction-disaster
+    background_id: scene-00-normal-city
     emphasis: normal
 next_action: unlock_next_main_node

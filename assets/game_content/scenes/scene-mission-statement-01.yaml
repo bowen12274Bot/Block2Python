@@ -2,7 +2,7 @@
 title: 任務書：Input Gate
 dialogue_blocks:
   - speaker: 任務書
-    text: 學習目標：input()
+    text: 學習目標：input()、print()
   - speaker: 任務書
     text: 完成 Demo 後，進入 5 題練習，修復輸入系統。
 next_action: inline_overlay

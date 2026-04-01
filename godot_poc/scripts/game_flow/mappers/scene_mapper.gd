@@ -86,7 +86,9 @@ static func _should_show_mission_brief(state: Dictionary, meta: Dictionary) -> b
         return false
     var scene: Variant = state.get("scene", null)
     if scene is Dictionary:
-        return str(scene.get("mission_statement_scene_id", "")) != ""
+        var mission_statement_scene_id: Variant = scene.get("mission_statement_scene_id", null)
+        if mission_statement_scene_id is String:
+            return String(mission_statement_scene_id).strip_edges() != ""
     return false
 
 

@@ -6,27 +6,27 @@ dialogue_blocks:
     portrait_id: system-default
     expression: happy
     speaker_side: center
-    background_id: scene-02-memory-loss
+    background_id: scene-00-normal-city
     emphasis: success
-  - speaker: 玩家
+  - speaker: 玩家({player_name})
     text: 這次應該沒問題了吧！
     portrait_id: player-default
     expression: happy
     speaker_side: right
-    background_id: scene-02-memory-loss
+    background_id: scene-00-normal-city
     emphasis: success
   - speaker: 系統
     text: 已恢復正常。
     portrait_id: system-default
     expression: happy
     speaker_side: center
-    background_id: scene-02-memory-loss
+    background_id: scene-00-normal-city
     emphasis: success
-  - speaker: 🤖 Byte（AI夥伴）
+  - speaker: Byte
     text: 恭喜你讓系統恢復正常了，距離成功又近一步了。
     portrait_id: byte-default
     expression: happy
     speaker_side: left
-    background_id: scene-02-memory-loss
+    background_id: scene-00-normal-city
     emphasis: success
 next_action: unlock_next_main_node

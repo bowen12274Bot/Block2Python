@@ -18,14 +18,14 @@ class SceneProgressProjectionMixin:
     def _scene_state(self, scene: SceneSpec | None, node: NodeSpec | None = None) -> SceneState | None:
         if scene is None:
             return None
-        mission_statement = self._mission_statement_scene(node)
+        mission_statement = self._mission_statement_scene(scene)
         return SceneState(
             scene_id=scene.scene_id,
             title=scene.title,
             dialogue_blocks=tuple(
                 DialogueBlockState(
-                    speaker=block.speaker,
-                    text=block.text,
+                    speaker=self._render_scene_text(block.speaker),
+                    text=self._render_scene_text(block.text),
                     portrait_id=block.portrait_id,
                     expression=block.expression,
                     background_id=block.background_id,
@@ -42,13 +42,12 @@ class SceneProgressProjectionMixin:
             mission_statement_text=self._mission_statement_text(mission_statement),
         )
 
-    @staticmethod
-    def _actor_cue_state(actor: ActorCue | None) -> ActorCueState | None:
+    def _actor_cue_state(self, actor: ActorCue | None) -> ActorCueState | None:
         if actor is None:
             return None
         return ActorCueState(
             actor_id=actor.actor_id,
-            display_name=actor.display_name,
+            display_name=self._render_scene_text(actor.display_name),
             portrait_id=actor.portrait_id,
             expression_id=actor.expression_id,
             pose_id=actor.pose_id,
@@ -56,17 +55,28 @@ class SceneProgressProjectionMixin:
             image_path=actor.image_path,
         )
 
-    def _mission_statement_scene(self, node: NodeSpec | None) -> SceneSpec | None:
-        if node is None or node.mission_statement_scene_id is None:
+    def _mission_statement_scene(self, scene: SceneSpec | None) -> SceneSpec | None:
+        if scene is None or scene.mission_statement_scene_id is None:
             return None
-        return self.runtime.game_slice.scenes.get(node.mission_statement_scene_id)
+        return self.runtime.game_slice.scenes.get(scene.mission_statement_scene_id)
 
-    @staticmethod
-    def _mission_statement_text(scene: SceneSpec | None) -> str:
+    def _mission_statement_text(self, scene: SceneSpec | None) -> str:
         if scene is None:
             return ""
-        lines = [block.text.strip() for block in scene.dialogue_blocks if block.text.strip() != ""]
+        lines = [
+            self._render_scene_text(block.text).strip()
+            for block in scene.dialogue_blocks
+            if self._render_scene_text(block.text).strip() != ""
+        ]
         return "\n\n".join(lines)
+
+    def _render_scene_text(self, text: str | None) -> str:
+        if text is None:
+            return ""
+        player_name: str = self.player_profile.name.strip()
+        if player_name == "":
+            player_name = "Player"
+        return text.replace("{player_name}", player_name)
 
     def _progress_state(self) -> ProgressState:
         completed_node_ids = tuple(

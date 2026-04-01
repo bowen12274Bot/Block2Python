@@ -2,7 +2,7 @@
 title: 任務書：Loop Lab
 dialogue_blocks:
   - speaker: 任務書
-    text: 學習目標：for
+    text: 學習目標：for迴圈
   - speaker: 任務書
     text: 用迴圈快速修復多處故障，穩定星球。
 next_action: inline_overlay

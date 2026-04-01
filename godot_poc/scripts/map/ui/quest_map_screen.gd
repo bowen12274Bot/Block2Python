@@ -50,6 +50,7 @@ var _provider_model: String = TutorUserConfigScript.DEFAULT_LOCAL_OLLAMA_MODEL
 var _provider_timeout_sec: float = TutorUserConfigScript.DEFAULT_LOCAL_OLLAMA_TIMEOUT_SEC
 var _provider_system_prompt: String = ""
 var _api_key_visible: bool = false
+var _base_note_text: String = ""
 
 
 func _ready() -> void:
@@ -167,6 +168,7 @@ func tutor_config() -> Dictionary:
 
 
 func set_note(text: String) -> void:
+	_base_note_text = text
 	if quest_map_stage != null:
 		quest_map_stage.set_helper_text(text)
 
@@ -210,6 +212,8 @@ func hide_stage_overlay() -> void:
 		stage_overlay.hide_overlay()
 	if quest_map_stage != null and quest_map_stage.has_method("set_overlay_active"):
 		quest_map_stage.call("set_overlay_active", false)
+	if quest_map_stage != null:
+		quest_map_stage.set_helper_text(_base_note_text)
 	_selected_group_id = ""
 
 
@@ -411,7 +415,8 @@ func _on_group_pressed(group_id: String) -> void:
 		set_note("This group is still locked.")
 		return
 
-	set_note(QuestMapGroupNotePresenterScript.build_group_selection_note(group_view))
+	if quest_map_stage != null:
+		quest_map_stage.set_helper_text(QuestMapGroupNotePresenterScript.build_group_selection_note(group_view))
 	show_stage_overlay(group_view)
 
 

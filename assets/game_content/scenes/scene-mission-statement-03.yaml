@@ -2,7 +2,7 @@
 title: 任務書：If Canyon
 dialogue_blocks:
   - speaker: 任務書
-    text: 學習目標：if
+    text: 學習目標：if、邏輯分支
   - speaker: 任務書
     text: 修復條件判斷與邏輯分支，避免系統誤判。
 next_action: inline_overlay

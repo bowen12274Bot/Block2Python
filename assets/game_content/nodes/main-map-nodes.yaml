@@ -15,7 +15,6 @@ nodes:
   - node_id: group-01-story
     node_type: story
     title: Group 01 Story
-    mission_statement_scene_id: scene-mission-statement-01
     prerequisite_node_ids:
       - main-map-entry
     next_node_ids:
@@ -56,7 +55,6 @@ nodes:
   - node_id: group-02-story
     node_type: story
     title: Group 02 Story
-    mission_statement_scene_id: scene-mission-statement-02
     prerequisite_node_ids:
       - group-01-result
     next_node_ids:
@@ -97,7 +95,6 @@ nodes:
   - node_id: group-03-story
     node_type: story
     title: Group 03 Story
-    mission_statement_scene_id: scene-mission-statement-03
     prerequisite_node_ids:
       - group-02-result
     next_node_ids:
@@ -138,7 +135,6 @@ nodes:
   - node_id: group-04-story
     node_type: story
     title: Group 04 Story
-    mission_statement_scene_id: scene-mission-statement-04
     prerequisite_node_ids:
       - group-03-result
     next_node_ids:
@@ -179,7 +175,6 @@ nodes:
   - node_id: group-05-story
     node_type: story
     title: Group 05 Story
-    mission_statement_scene_id: scene-mission-statement-05
     prerequisite_node_ids:
       - group-04-result
     next_node_ids:

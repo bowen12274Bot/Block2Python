@@ -6,13 +6,13 @@ dialogue_blocks:
     portrait_id: system-default
     expression: happy
     speaker_side: center
-    background_id: scene-03-logic-breakdown
+    background_id: scene-00-normal-city
     emphasis: success
-  - speaker: 🤖 Byte（AI夥伴）
+  - speaker: Byte
     text: 恭喜你讓系統的判斷恢復正常了，距離成功又近一步了。
     portrait_id: byte-default
     expression: happy
     speaker_side: left
-    background_id: scene-03-logic-breakdown
+    background_id: scene-00-normal-city
     emphasis: success
 next_action: unlock_next_main_node
