@@ -18,4 +18,6 @@ godot_poc/addons/godot_wry/
 .vscode
 *.egg-info/
 godot_poc/blockly_assets/
+log/
+godot_poc/log/
 

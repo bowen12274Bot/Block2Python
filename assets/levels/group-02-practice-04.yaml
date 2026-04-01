@@ -1,5 +1,5 @@
 level_id: group-02-practice-04
-title: Variable Base
+title: "Variable Base: Refuel Rate"
 chapter_id: map-groups
 order_index: 2004
 prerequisite_level_ids:
@@ -7,15 +7,38 @@ prerequisite_level_ids:
 next_level_ids:
   - group-02-practice-05
 prompt: |
-  Placeholder practice level 04 for group-02.
+  劇情：
+  基地要補能量，主槽目前有 base，
+  第一段補了 add1，第二段補了 add2。
+
+  任務：
+  第一行輸入整數 base。
+  第二行輸入整數 add1。
+  第三行輸入整數 add2。
+
+  依序輸出兩行：
+  tank=<base+add1+add2>
+  delta=<add2-add1>
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：把多步驟運算拆成變數，讓程式更容易檢查。
+  你可以先算 tank，再算 delta。
+story_intro_markdown: |
+  系統提示：「補能紀錄不一致。」
+  Byte 說：「把兩段補給都記進變數，我們才能追查差值。」
+story_outro_markdown: |
+  補能紀錄完成重算，控制台顯示 `Refuel report confirmed.`
+teaching_skill_ids:
+  - variable-assignment
+  - arithmetic-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-02-practice-04
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: variable-base
   group_id: group-02
   slot: practice-04
-  placeholder_auto_ac: true

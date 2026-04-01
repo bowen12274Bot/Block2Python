@@ -1,5 +1,5 @@
 level_id: group-02-practice-02
-title: Variable Base
+title: "Variable Base: Core Allocation"
 chapter_id: map-groups
 order_index: 2002
 prerequisite_level_ids:
@@ -7,15 +7,40 @@ prerequisite_level_ids:
 next_level_ids:
   - group-02-practice-03
 prompt: |
-  Placeholder practice level 02 for group-02.
+  劇情：
+  變數基地有一個容量槽 total，已用空間是 used。
+  你要算出剩餘空間，並回報目前已用量的兩倍。
+
+  任務：
+  第一行輸入整數 total。
+  第二行輸入整數 used。
+
+  依序輸出兩行：
+  free=<total-used>
+  double_used=<used*2>
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：從輸入建立中間變數，避免把公式硬寫在 print 內。
+  你需要：
+  1. 讀入 total 與 used。
+  2. 建立 free_space 和 double_used 變數。
+  3. 輸出固定格式字串。
+story_intro_markdown: |
+  系統警報：「儲存槽占用率異常。」
+  Byte 說：「先把剩餘容量算對，基地才不會再次斷線。」
+story_outro_markdown: |
+  占用率儀表恢復綠燈，系統低聲說：`Allocation stable.`
+teaching_skill_ids:
+  - variable-assignment
+  - arithmetic-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-02-practice-02
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: variable-base
   group_id: group-02
   slot: practice-02
-  placeholder_auto_ac: true

@@ -1,23 +1,45 @@
 level_id: group-02-demo
-title: Group 02 Demo Placeholder
+title: "Variable Base: Memory Ledger Boot"
 chapter_id: map-groups
 order_index: 2000
 prompt: |
-  Placeholder demo level for group-02.
+  劇情：
+  Input Gate 修好後，系統終於能聽懂輸入，
+  但 Byte 發現它還是不會「記住」資料。
+
+  任務：
+  第一行輸入一個代號 callsign（只含英文字母）。
+  第二行輸入一個整數 charge。
+
+  依序輸出兩行：
+  callsign=<callsign>
+  charge=<charge>
 learning_markdown: |
-  Placeholder content scaffold for future demo content.
+  目標：把輸入存進變數，再依格式輸出。
+  你需要：
+  1. 把字串輸入存到一個變數。
+  2. 把整數輸入存到另一個變數。
+  3. 用指定格式輸出，避免多餘空白。
 story_intro_markdown: |
-  Placeholder intro for group-02 demo.
+  系統低聲重播：「我剛剛說了什麼...？」
+  Byte 說：「訊號進得來，但記憶還沒接上，先啟動 Memory Ledger。」
 story_outro_markdown: |
-  Placeholder outro for group-02 demo.
+  控制台顯示 `Ledger online.`
+  變數基地的第一個記憶槽恢復運作。
 next_level_ids:
   - group-02-practice-01
+teaching_skill_ids:
+  - variable-assignment
+  - input-output-basics
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-02-demo
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: variable-base
   group_id: group-02
   slot: demo
-  placeholder_auto_ac: true
