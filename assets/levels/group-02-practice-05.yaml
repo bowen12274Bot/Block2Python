@@ -1,19 +1,48 @@
 level_id: group-02-practice-05
-title: Variable Base
+title: "Variable Base: Reactor Reset"
 chapter_id: map-groups
 order_index: 2005
 prerequisite_level_ids:
   - group-02-practice-04
 prompt: |
-  Placeholder practice level 05 for group-02.
+  劇情：
+  變數基地核心即將重啟，系統要求你同時計算主輸出與備援輸出。
+
+  任務：
+  第一行輸入整數 a。
+  第二行輸入整數 b。
+  第三行輸入整數 c。
+
+  設：
+  main = (a + b) * c
+  backup = a * c + b * c
+
+  依序輸出兩行：
+  main=<main>
+  backup=<backup>
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：把多個中繼變數串起來，完成較長的計算鏈。
+  建議：
+  1. 先算 sum_ab = a + b。
+  2. 再算 main_value 與 backup_value。
+  3. 最後依格式輸出。
+story_intro_markdown: |
+  Byte 提醒：「這一題是 Variable Base 的最終校驗，主輸出與備援都要一致。」
+story_outro_markdown: |
+  核心重啟完成，系統廣播 `Variable Base restored.`
+  下一站將進入 If Canyon。
+teaching_skill_ids:
+  - variable-assignment
+  - arithmetic-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-02-practice-05
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: variable-base
   group_id: group-02
   slot: practice-05
-  placeholder_auto_ac: true

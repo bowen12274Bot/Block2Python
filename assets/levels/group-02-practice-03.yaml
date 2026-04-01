@@ -1,5 +1,5 @@
 level_id: group-02-practice-03
-title: Variable Base
+title: "Variable Base: Swap Fix"
 chapter_id: map-groups
 order_index: 2003
 prerequisite_level_ids:
@@ -7,15 +7,37 @@ prerequisite_level_ids:
 next_level_ids:
   - group-02-practice-04
 prompt: |
-  Placeholder practice level 03 for group-02.
+  劇情：
+  左右記憶槽接線反了。
+  你需要把兩個值交換後再回報。
+
+  任務：
+  第一行輸入整數 left。
+  第二行輸入整數 right。
+
+  依序輸出兩行：
+  left=<right>
+  right=<left>
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：理解「變數存值」和「變數覆寫」的順序。
+  建議：先用 temp 暫存其中一個值，再完成交換。
+story_intro_markdown: |
+  Byte 說：「這不是運算錯誤，是資料槽位放反了。」
+  「把左右值交換回來，記憶鏈路才會正常。」
+story_outro_markdown: |
+  線路圖重新對齊，系統回覆 `Channel mapping repaired.`
+teaching_skill_ids:
+  - variable-assignment
+  - arithmetic-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-02-practice-03
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: variable-base
   group_id: group-02
   slot: practice-03
-  placeholder_auto_ac: true

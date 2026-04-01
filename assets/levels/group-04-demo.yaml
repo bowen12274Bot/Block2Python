@@ -1,23 +1,35 @@
 level_id: group-04-demo
-title: Group 04 Demo Placeholder
+title: "Loop Lab: Loop Boot"
 chapter_id: map-groups
 order_index: 4000
-prompt: |
-  Placeholder demo level for group-04.
-learning_markdown: |
-  Placeholder content scaffold for future demo content.
-story_intro_markdown: |
-  Placeholder intro for group-04 demo.
-story_outro_markdown: |
-  Placeholder outro for group-04 demo.
 next_level_ids:
   - group-04-practice-01
+prompt: |
+  劇情：
+  你進入 Loop Lab，中央終端要求先完成重複輸出校準。
+
+  任務：
+  讀入整數 n。
+  請從 1 到 n 逐行輸出，每行一個數字。
+learning_markdown: |
+  目標：建立迴圈最基本的「重複執行」直覺。
+  先確認起點、終點與每次遞增量。
+story_intro_markdown: |
+  Byte 提醒：「這一區不靠一次算完，而是要讓程序重複工作。」
+story_outro_markdown: |
+  輸出節奏穩定後，控制台回報 `Loop core synchronized.`
+teaching_skill_ids:
+  - loop-iteration
+  - sequence-output
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-04-demo
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: loop-lab
   group_id: group-04
   slot: demo
-  placeholder_auto_ac: true

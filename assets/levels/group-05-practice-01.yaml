@@ -1,5 +1,5 @@
 level_id: group-05-practice-01
-title: Bug King Castle
+title: "Bug King Castle: Scout Counts"
 chapter_id: map-groups
 order_index: 5001
 prerequisite_level_ids:
@@ -7,23 +7,31 @@ prerequisite_level_ids:
 next_level_ids:
   - group-05-practice-02
 prompt: |
-  Read an integer n.
-  Then read n integers, one per line.
+  劇情：
+  你踏進城堡外圍偵查區，必須快速統計巡邏訊號的特徵，
+  才能開啟第一道機關門。
 
-  Print two numbers:
-  1. how many numbers are greater than or equal to 0
-  2. how many numbers are odd
+  任務：
+  第一行輸入整數 n。
+  接著輸入 n 個整數（每行一個）。
+
+  請輸出兩個整數（同一行，以空白分隔）：
+  1) 大於等於 0 的數量
+  2) 奇數的數量
 learning_markdown: |
-  You can solve this with a loop and int(input()) only.
-  No map(), split(), or list() is needed.
-  Example structure:
-  n = int(input())
-  non_negative_count = 0
-  odd_count = 0
-  for _ in range(n):
-      x = int(input())
-      ...
-  print(non_negative_count, odd_count)
+  目標：同時維護兩個計數器。
+  每讀到一個值，就分別檢查是否符合兩個條件。
+story_intro_markdown: |
+  Byte 說：「先學會快速盤點，後面才有機會攻進主塔。」
+story_outro_markdown: |
+  第一扇機關門打開，監控面板顯示 `Scout report accepted.`
+teaching_skill_ids:
+  - loop-iteration
+  - multi-counter
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-05-practice-01
 judge_policy:
   time_limit_ms: 3000

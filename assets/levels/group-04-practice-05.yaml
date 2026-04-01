@@ -1,19 +1,38 @@
 level_id: group-04-practice-05
-title: Loop Lab
+title: "Loop Lab: First Alert"
 chapter_id: map-groups
 order_index: 4005
 prerequisite_level_ids:
   - group-04-practice-04
 prompt: |
-  Placeholder practice level 05 for group-04.
+  劇情：
+  最後一段通道要你掃描警報序列，找出第一個異常值位置。
+
+  任務：
+  第一行輸入整數 n。
+  接著輸入 n 個整數（每行一個）。
+
+  請輸出第一個負數出現的 1-based 位置。
+  若沒有負數，輸出 0。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習迴圈掃描與條件判斷結合。
+  你可以維護答案變數，在第一次命中時記錄索引。
+story_intro_markdown: |
+  守門 AI 發出警告：「先找到第一個異常點，才能進入下一章。」
+story_outro_markdown: |
+  掃描完成，Loop Lab 關卡標記為 `Cleared`。
+teaching_skill_ids:
+  - loop-iteration
+  - condition-in-loop
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-04-practice-05
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: loop-lab
   group_id: group-04
   slot: practice-05
-  placeholder_auto_ac: true

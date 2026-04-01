@@ -1,5 +1,5 @@
 level_id: group-03-practice-01
-title: If Canyon
+title: "If Canyon: Pass Check"
 chapter_id: map-groups
 order_index: 3001
 prerequisite_level_ids:
@@ -7,11 +7,26 @@ prerequisite_level_ids:
 next_level_ids:
   - group-03-practice-02
 prompt: |
-  讀入一個整數 score。
-  如果 score >= 60，輸出 PASS；否則輸出 FAIL。
+  劇情：
+  峽谷守衛要求先做最基本的通行分數判定。
+
+  任務：
+  讀入整數 score。
+  若 score >= 60，輸出 PASS；否則輸出 FAIL。
 learning_markdown: |
-  目標：練習 if/else 條件分支。
-  只需要輸出單一判斷結果。
+  目標：熟悉單條件 if/else。
+  這題只需要二分判斷，但要注意輸出字串大小寫必須完全正確。
+story_intro_markdown: |
+  守衛終端彈出規則：「分數達標才可通過。」
+story_outro_markdown: |
+  判定完成，牆面浮現下一段路線座標。
+teaching_skill_ids:
+  - condition-branching
+  - comparison-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-03-practice-01
 judge_policy:
   time_limit_ms: 3000

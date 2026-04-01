@@ -1,23 +1,36 @@
 level_id: group-03-demo
-title: Group 03 Demo Placeholder
+title: "If Canyon: Signal Gate"
 chapter_id: map-groups
 order_index: 3000
-prompt: |
-  Placeholder demo level for group-03.
-learning_markdown: |
-  Placeholder content scaffold for future demo content.
-story_intro_markdown: |
-  Placeholder intro for group-03 demo.
-story_outro_markdown: |
-  Placeholder outro for group-03 demo.
 next_level_ids:
   - group-03-practice-01
+prompt: |
+  劇情：
+  進入 If Canyon 後，第一道門只看單一訊號值。
+  你需要根據訊號正負決定是否放行。
+
+  任務：
+  讀入一個整數 signal。
+  如果 signal >= 0，輸出 OPEN；否則輸出 BLOCK。
+learning_markdown: |
+  目標：理解最基礎的 if/else 判斷。
+  重點是先讀入資料，再依條件輸出唯一結果。
+story_intro_markdown: |
+  Byte 指著峽谷閘門：「這裡開始，每一步都要先判斷再行動。」
+story_outro_markdown: |
+  閘門亮起綠燈，訊息顯示 `Condition branch online.`
+teaching_skill_ids:
+  - condition-branching
+  - comparison-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-03-demo
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: if-canyon
   group_id: group-03
   slot: demo
-  placeholder_auto_ac: true

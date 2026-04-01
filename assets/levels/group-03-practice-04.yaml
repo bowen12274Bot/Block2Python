@@ -1,5 +1,5 @@
 level_id: group-03-practice-04
-title: If Canyon
+title: "If Canyon: Leap Bridge"
 chapter_id: map-groups
 order_index: 3004
 prerequisite_level_ids:
@@ -7,15 +7,35 @@ prerequisite_level_ids:
 next_level_ids:
   - group-03-practice-05
 prompt: |
-  Placeholder practice level 04 for group-03.
+  劇情：
+  你抵達峽谷吊橋控制台，橋面更新週期採用閏年規則。
+
+  任務：
+  讀入整數 year。
+  若 year 為閏年輸出 LEAP，否則輸出 COMMON。
+
+  規則：
+  - 可被 400 整除，或
+  - 可被 4 整除且不可被 100 整除。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習複合條件（and / or）判斷。
+  建議先拆成兩段布林條件，再合併輸出。
+story_intro_markdown: |
+  Byte 說：「橋面重置週期很挑剔，少一個條件都會判錯。」
+story_outro_markdown: |
+  橋面機構啟動，控制台顯示 `Calendar lock matched.`
+teaching_skill_ids:
+  - condition-branching
+  - logical-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-03-practice-04
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: if-canyon
   group_id: group-03
   slot: practice-04
-  placeholder_auto_ac: true

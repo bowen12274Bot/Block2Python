@@ -1,5 +1,5 @@
 level_id: group-03-practice-03
-title: If Canyon
+title: "If Canyon: Temp Zones"
 chapter_id: map-groups
 order_index: 3003
 prerequisite_level_ids:
@@ -7,15 +7,33 @@ prerequisite_level_ids:
 next_level_ids:
   - group-03-practice-04
 prompt: |
-  Placeholder practice level 03 for group-03.
+  劇情：
+  峽谷氣流不穩，先判斷溫度區間才能選擇通道。
+
+  任務：
+  讀入整數 temp。
+  - 若 temp < 0，輸出 ICE
+  - 否則若 temp <= 30，輸出 OK
+  - 否則輸出 HEAT
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習多區間條件分支。
+  思路是先處理最小範圍，再往外擴展。
+story_intro_markdown: |
+  牆面顯示警告：「請先判定氣流狀態，再決定前進路線。」
+story_outro_markdown: |
+  區間判定完成，風場模組回報 `Path stabilized.`
+teaching_skill_ids:
+  - condition-branching
+  - comparison-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-03-practice-03
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: if-canyon
   group_id: group-03
   slot: practice-03
-  placeholder_auto_ac: true

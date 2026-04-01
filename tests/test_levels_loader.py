@@ -196,7 +196,7 @@ class TestLevelsLoader:
         assert level.tutor_policy == {"max_hint_steps": 4, "response_tone": "clear"}
 
 
-def test_assets_levels_include_five_group_scaffolds() -> None:
+def test_assets_levels_include_five_group_groups() -> None:
     levels = load_levels(Path("assets/levels"))
 
     assert "group-01-demo" in levels
@@ -210,6 +210,6 @@ def test_assets_levels_include_five_group_scaffolds() -> None:
     assert levels["group-01-practice-05"].next_level_ids == ()
 
     assert levels["group-02-practice-01"].prerequisite_level_ids == ("group-02-demo",)
-    assert len(levels["group-03-demo"].testcases) == 1
+    assert len(levels["group-03-demo"].testcases) == 10
     assert levels["group-01-demo"].teaching_skill_ids == ("input-output-basics",)
     assert levels["group-01-practice-01"].teaching_skill_ids == ("variables",)

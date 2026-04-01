@@ -1,5 +1,5 @@
 level_id: group-04-practice-01
-title: Loop Lab
+title: "Loop Lab: Sum Route"
 chapter_id: map-groups
 order_index: 4001
 prerequisite_level_ids:
@@ -7,10 +7,26 @@ prerequisite_level_ids:
 next_level_ids:
   - group-04-practice-02
 prompt: |
-  輸入一個整數 n，輸出 1 到 n 的總和。
+  劇情：
+  路由核心要求你累加每個節點能量，才能繼續前進。
+
+  任務：
+  讀入整數 n。
+  輸出 1 到 n 的總和。
 learning_markdown: |
-  目標：練習迴圈累加。
-  你可以用 for 或 while 完成。
+  目標：練習迴圈累加模式（accumulator）。
+  先初始化總和，再在每輪迴圈把當前值加進去。
+story_intro_markdown: |
+  終端提示：「所有節點都要計入，不能漏算任何一步。」
+story_outro_markdown: |
+  核心亮起藍光，路由通道成功開啟。
+teaching_skill_ids:
+  - loop-iteration
+  - accumulator-pattern
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-04-practice-01
 judge_policy:
   time_limit_ms: 3000

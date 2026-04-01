@@ -1,5 +1,5 @@
 level_id: group-02-practice-01
-title: Variable Base
+title: "Variable Base: Dual Metrics"
 chapter_id: map-groups
 order_index: 2001
 prerequisite_level_ids:
@@ -7,20 +7,33 @@ prerequisite_level_ids:
 next_level_ids:
   - group-02-practice-02
 prompt: |
-  Read two integers.
-  The first line is a.
-  The second line is b.
+  劇情：
+  Memory Ledger 接上後，你需要讓系統同時保存兩個數值。
 
-  Print:
+  任務：
+  第一行輸入整數 a。
+  第二行輸入整數 b。
+
+  依序輸出兩行：
   sum=<a+b>
   diff=<a-b>
 learning_markdown: |
-  You can solve this without f-string or split().
-  Example:
-  a = int(input())
-  b = int(input())
-  print("sum=" + str(a + b))
-  print("diff=" + str(a - b))
+  目標：用變數保存資料，並進行基本運算。
+  建議步驟：
+  1. 讀入 a、b。
+  2. 建立 sum_value 與 diff_value 變數。
+  3. 依指定格式輸出。
+story_intro_markdown: |
+  Byte 指著兩條跳動曲線：「系統要同時記錄總量和差值，不能只存一個數。」
+story_outro_markdown: |
+  雙指標面板亮起，系統回覆 `Metrics synchronized.`
+teaching_skill_ids:
+  - variable-assignment
+  - arithmetic-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-02-practice-01
 judge_policy:
   time_limit_ms: 3000

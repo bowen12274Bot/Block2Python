@@ -1,5 +1,5 @@
 level_id: group-04-practice-03
-title: Loop Lab
+title: "Loop Lab: Factorial Gate"
 chapter_id: map-groups
 order_index: 4003
 prerequisite_level_ids:
@@ -7,15 +7,31 @@ prerequisite_level_ids:
 next_level_ids:
   - group-04-practice-04
 prompt: |
-  Placeholder practice level 03 for group-04.
+  劇情：
+  Factorial Gate 需要連乘結果作為解鎖碼。
+
+  任務：
+  讀入整數 n。
+  輸出 n!（n 的階乘）。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習迴圈中的連乘更新。
+  注意 0! = 1，並且每輪都要把當前值乘進結果。
+story_intro_markdown: |
+  牆面符文閃爍：「通行碼需要完整乘積序列。」
+story_outro_markdown: |
+  大門解鎖，系統顯示 `Product chain accepted.`
+teaching_skill_ids:
+  - loop-iteration
+  - accumulator-pattern
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-04-practice-03
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: loop-lab
   group_id: group-04
   slot: practice-03
-  placeholder_auto_ac: true

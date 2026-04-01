@@ -1,5 +1,5 @@
 level_id: group-03-practice-02
-title: If Canyon
+title: "If Canyon: Compare Beacon"
 chapter_id: map-groups
 order_index: 3002
 prerequisite_level_ids:
@@ -7,15 +7,33 @@ prerequisite_level_ids:
 next_level_ids:
   - group-03-practice-03
 prompt: |
-  Placeholder practice level 02 for group-03.
+  劇情：
+  兩座訊號塔同時回報數值，系統要你判斷哪一邊更高。
+
+  任務：
+  讀入兩個整數 a、b。
+  - 若 a > b，輸出 A
+  - 若 a < b，輸出 B
+  - 若 a == b，輸出 EQUAL
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習 if / else if / else 三分支判斷。
+  先處理大於與小於，再補上相等情況會最清楚。
+story_intro_markdown: |
+  Byte 說：「這不是算術題，是判斷路由優先權。」
+story_outro_markdown: |
+  優先塔台被鎖定，導航箭頭穩定指向前方。
+teaching_skill_ids:
+  - condition-branching
+  - comparison-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-03-practice-02
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: if-canyon
   group_id: group-03
   slot: practice-02
-  placeholder_auto_ac: true
