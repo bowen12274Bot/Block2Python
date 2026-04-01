@@ -1,19 +1,40 @@
 level_id: group-03-practice-05
-title: If Canyon
+title: "If Canyon: Gate Protocol"
 chapter_id: map-groups
 order_index: 3005
 prerequisite_level_ids:
   - group-03-practice-04
 prompt: |
-  Placeholder practice level 05 for group-03.
+  劇情：
+  你抵達 If Canyon 終點閘門，系統要求你依優先規則做最終判斷。
+
+  任務：
+  讀入三個整數（分三行）：
+  hp（0..100）、key（0 或 1）、alarm（0 或 1）。
+
+  判斷規則：
+  - 若 key == 1 且 alarm == 0，輸出 OPEN
+  - 否則若 hp >= 80 且 alarm == 0，輸出 OVERRIDE
+  - 否則輸出 LOCKDOWN
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習多條件且有優先序的分支判斷。
+  先寫最高優先條件，再寫次優先條件，最後留 else 收尾。
+story_intro_markdown: |
+  守門 AI 發出提示：「同時滿足多條件時，請遵循既定優先順序。」
+story_outro_markdown: |
+  閘門打開，螢幕顯示 `If Canyon cleared.`
+teaching_skill_ids:
+  - condition-branching
+  - logical-operators
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-03-practice-05
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: if-canyon
   group_id: group-03
   slot: practice-05
-  placeholder_auto_ac: true
