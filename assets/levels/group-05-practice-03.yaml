@@ -1,5 +1,5 @@
 level_id: group-05-practice-03
-title: Bug King Castle
+title: "Bug King Castle: Threshold Scan"
 chapter_id: map-groups
 order_index: 5003
 prerequisite_level_ids:
@@ -7,15 +7,35 @@ prerequisite_level_ids:
 next_level_ids:
   - group-05-practice-04
 prompt: |
-  Placeholder practice level 03 for group-05.
+  劇情：
+  城堡次核心要求你統計「達到警戒門檻」的訊號數量，
+  用來估算防禦系統的強度。
+
+  任務：
+  第一行輸入整數 n。
+  第二行輸入整數 k（警戒門檻）。
+  接著輸入 n 個整數（每行一個）。
+
+  請輸出有多少個數值大於等於 k。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：把條件判斷放進迴圈，進行條件計數。
+  只有在 `x >= k` 時才更新計數器。
+story_intro_markdown: |
+  Byte 提醒：「門檻統計是王城防線的關鍵參數。」
+story_outro_markdown: |
+  次核心防線被你成功解構，控制室燈號轉為綠色。
+teaching_skill_ids:
+  - loop-iteration
+  - condition-in-loop
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-05-practice-03
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: bug-king-castle
   group_id: group-05
   slot: practice-03
-  placeholder_auto_ac: true

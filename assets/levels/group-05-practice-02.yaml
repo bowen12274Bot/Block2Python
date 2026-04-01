@@ -1,5 +1,5 @@
 level_id: group-05-practice-02
-title: Bug King Castle
+title: "Bug King Castle: Crown Peak"
 chapter_id: map-groups
 order_index: 5002
 prerequisite_level_ids:
@@ -7,15 +7,34 @@ prerequisite_level_ids:
 next_level_ids:
   - group-05-practice-03
 prompt: |
-  Placeholder practice level 02 for group-05.
+  劇情：
+  你駭入主塔訊號牆，要找出當前最強訊號值，
+  才能鎖定王座核心的座標。
+
+  任務：
+  第一行輸入整數 n。
+  接著輸入 n 個整數（每行一個）。
+
+  請輸出其中的最大值。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習在迴圈中持續更新「目前最大值」。
+  先把第一個值當作初始最大值，再逐步比較更新。
+story_intro_markdown: |
+  守門程式警告：「找不到峰值，就無法進入下一層。」
+story_outro_markdown: |
+  峰值座標已標記，地圖浮現前往次核心的路線。
+teaching_skill_ids:
+  - loop-iteration
+  - max-tracking
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-05-practice-02
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: bug-king-castle
   group_id: group-05
   slot: practice-02
-  placeholder_auto_ac: true

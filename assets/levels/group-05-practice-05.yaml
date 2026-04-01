@@ -1,19 +1,38 @@
 level_id: group-05-practice-05
-title: Bug King Castle
+title: "Bug King Castle: Crown Signal"
 chapter_id: map-groups
 order_index: 5005
 prerequisite_level_ids:
   - group-05-practice-04
 prompt: |
-  Placeholder practice level 05 for group-05.
+  劇情：
+  你抵達 Bug King Castle 的中控塔，牆上亮起一排訊號值。
+  只有找到「最強訊號最早出現的位置」，才能打開王座大門。
+
+  任務：
+  第一行輸入整數 n。
+  接著輸入 n 個整數（每行一個），代表訊號強度。
+
+  請輸出最大值第一次出現的 1-based 位置。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習在迴圈中維護「目前最佳值」與「最佳位置」。
+  關鍵是只在遇到更大的值時更新答案，這樣能保留最大值第一次出現的位置。
+story_intro_markdown: |
+  Byte 低聲說：「別被雜訊干擾，先鎖定最強訊號第一次出現點。」
+story_outro_markdown: |
+  王座大門解除封印，主控台回報 `Crown signal captured.`
+teaching_skill_ids:
+  - loop-iteration
+  - max-tracking
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-05-practice-05
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: bug-king-castle
   group_id: group-05
   slot: practice-05
-  placeholder_auto_ac: true

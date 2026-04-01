@@ -1,5 +1,5 @@
 level_id: group-05-practice-04
-title: Bug King Castle
+title: "Bug King Castle: Last Guard"
 chapter_id: map-groups
 order_index: 5004
 prerequisite_level_ids:
@@ -7,15 +7,35 @@ prerequisite_level_ids:
 next_level_ids:
   - group-05-practice-05
 prompt: |
-  Placeholder practice level 04 for group-05.
+  劇情：
+  王座前最後一層防線會紀錄每名守衛的編號值。
+  你要找出最後一個「偶數編號」守衛的位置，才能避開巡邏路線。
+
+  任務：
+  第一行輸入整數 n。
+  接著輸入 n 個整數（每行一個）。
+
+  請輸出最後一個偶數出現的 1-based 位置。
+  若沒有偶數，輸出 0。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習在迴圈中持續覆寫答案。
+  每次遇到偶數就更新位置，最後留下的就是最末位置。
+story_intro_markdown: |
+  守門 AI 倒數中：「只剩最後一道巡邏網，定位最後守衛！」
+story_outro_markdown: |
+  巡邏路線破解完成，你已站上王座入口階梯。
+teaching_skill_ids:
+  - loop-iteration
+  - index-tracking
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-05-practice-04
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: bug-king-castle
   group_id: group-05
   slot: practice-04
-  placeholder_auto_ac: true
