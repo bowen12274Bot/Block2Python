@@ -64,6 +64,7 @@ def parse_scene_file(path: Path, raw: Any) -> tuple[str, SceneSpec]:
             dialogue_block_from_raw(path, item) for item in require_list(data, "dialogue_blocks", path)
         ),
         next_action=require_str(data, "next_action", context=path.name),
+        mission_statement_scene_id=optional_str(data.get("mission_statement_scene_id")),
         metadata=metadata_from_raw(data),
     )
     return scene.scene_id, scene
@@ -168,7 +169,6 @@ def node_from_raw(path: Path, raw: Any) -> NodeSpec:
         ),
         next_node_ids=tuple(require_str_list(data.get("next_node_ids", []), field_name="next_node_ids", context=path.name)),
         scene_id=optional_str(data.get("scene_id")),
-        mission_statement_scene_id=optional_str(data.get("mission_statement_scene_id")),
         challenge_group_id=optional_str(data.get("challenge_group_id")),
         metadata=metadata_from_raw(data),
     )

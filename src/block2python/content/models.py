@@ -37,6 +37,7 @@ class SceneSpec:
     title: str
     dialogue_blocks: tuple[DialogueBlock, ...] = ()
     next_action: str = ""
+    mission_statement_scene_id: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -48,7 +49,6 @@ class NodeSpec:
     prerequisite_node_ids: tuple[str, ...] = ()
     next_node_ids: tuple[str, ...] = ()
     scene_id: str | None = None
-    mission_statement_scene_id: str | None = None
     challenge_group_id: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 

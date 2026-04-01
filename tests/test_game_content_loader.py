@@ -242,27 +242,23 @@ def _write_game_content_fixture(
                 "    prerequisite_node_ids: []",
                 "    next_node_ids: []",
                 f"    scene_id: {scene_id}",
-                f"    mission_statement_scene_id: {mission_statement_scene_id}" if mission_statement_scene_id is not None else "    mission_statement_scene_id: null",
                 "    challenge_group_id: challenge-1",
             ]
         )
         + "\n",
         encoding="utf-8",
     )
-    (base_dir / "scenes" / "s.yaml").write_text(
-        "\n".join(
-            [
-                "scene_id: scene-1",
-                "title: Scene",
-                "dialogue_blocks:",
-                "  - speaker: Byte",
-                "    text: hello",
-                "next_action: next",
-            ]
-        )
-        + "\n",
-        encoding="utf-8",
-    )
+    scene_lines = [
+        "scene_id: scene-1",
+        "title: Scene",
+        "dialogue_blocks:",
+        "  - speaker: Byte",
+        "    text: hello",
+        "next_action: next",
+    ]
+    if mission_statement_scene_id is not None:
+        scene_lines.append(f"mission_statement_scene_id: {mission_statement_scene_id}")
+    (base_dir / "scenes" / "s.yaml").write_text("\n".join(scene_lines) + "\n", encoding="utf-8")
     level_ids = challenge_level_ids or ["l1"]
     challenge_lines = [
         "challenge_id: challenge-1",

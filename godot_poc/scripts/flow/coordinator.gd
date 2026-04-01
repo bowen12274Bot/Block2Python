@@ -76,6 +76,8 @@ var _tutor_timeout_timer: Timer
 var _tutor_conversation_id: String = ""
 var _tutor_conversation_level_id: String = ""
 var _tutor_conversation_history: Array[Dictionary] = []
+var _pending_profile_name: String = ""
+var _pending_profile_gender: String = ""
 
 
 func _ready() -> void:
@@ -172,6 +174,13 @@ func _on_reset_requested() -> void:
 
 func _on_create_profile_requested(player_name: String, gender: String) -> void:
 	entry_screen.set_status("Status: creating profile...")
+	if not python_bridge_client.is_running():
+		_pending_profile_name = player_name
+		_pending_profile_gender = gender
+		entry_screen.set_status("Status: starting bridge for profile creation...")
+		map_screen.set_status("Status: starting bridge...")
+		python_bridge_client.start_bridge()
+		return
 	python_bridge_client.send_create_player_profile(player_name, gender)
 
 
@@ -365,9 +374,16 @@ func _on_bridge_started() -> void:
 	response_text.text = "Bridge started. Click Reset to fetch current state."
 	if _ensure_toolbox_controller():
 		_toolbox_controller.prewarm_helper()
+	if _pending_profile_name != "" and _pending_profile_gender != "":
+		entry_screen.set_status("Status: creating profile...")
+		python_bridge_client.send_create_player_profile(_pending_profile_name, _pending_profile_gender)
+		_pending_profile_name = ""
+		_pending_profile_gender = ""
 
 
 func _on_bridge_failed(message: String) -> void:
+	_pending_profile_name = ""
+	_pending_profile_gender = ""
 	if _awaiting_tutor_reply:
 		_stop_tutor_timeout()
 		_awaiting_tutor_reply = false

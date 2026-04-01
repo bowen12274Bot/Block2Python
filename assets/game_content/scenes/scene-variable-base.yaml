@@ -8,7 +8,7 @@ dialogue_blocks:
     speaker_side: center
     background_id: scene-02-memory-loss
     emphasis: alert
-  - speaker: 玩家
+  - speaker: 玩家({player_name})
     text: 剛剛不是修好了嗎？怎麼又忘記了？
     portrait_id: player-default
     expression: thinking
@@ -29,7 +29,7 @@ dialogue_blocks:
     speaker_side: left
     background_id: scene-02-memory-loss
     emphasis: normal
-  - speaker: 玩家
+  - speaker: 玩家({player_name})
     text: 難道只要一個變數就夠了嗎？
     portrait_id: player-default
     expression: thinking
@@ -44,3 +44,4 @@ dialogue_blocks:
     background_id: scene-02-memory-loss
     emphasis: alert
 next_action: goto_demo_variable_base
+mission_statement_scene_id: scene-mission-statement-02

@@ -2,7 +2,7 @@
 title: 任務書：Bug King Castle
 dialogue_blocks:
   - speaker: 任務書
-    text: 學習目標：input()、int、str、運算子、if、for
+    text: 學習目標：input()、print()、int、str、運算子、if分支、for迴圈
   - speaker: 任務書
     text: 綜合運用所有技巧，修復 Byte 並擊退 Bug King。
 next_action: inline_overlay
