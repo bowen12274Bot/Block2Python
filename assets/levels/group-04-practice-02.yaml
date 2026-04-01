@@ -1,5 +1,5 @@
 level_id: group-04-practice-02
-title: Loop Lab
+title: "Loop Lab: Even Count"
 chapter_id: map-groups
 order_index: 4002
 prerequisite_level_ids:
@@ -7,15 +7,31 @@ prerequisite_level_ids:
 next_level_ids:
   - group-04-practice-03
 prompt: |
-  Placeholder practice level 02 for group-04.
+  劇情：
+  偵測器只記錄偶數脈衝，你要統計有效脈衝數量。
+
+  任務：
+  讀入整數 n。
+  計算 1 到 n 之間有幾個偶數，並輸出該數量。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習在迴圈中加入條件，並更新計數器。
+  你可以逐一判斷，或用固定步長走訪偶數。
+story_intro_markdown: |
+  Byte 說：「不是每個訊號都有效，先過濾再計數。」
+story_outro_markdown: |
+  偵測器回傳 `Even pulse map complete.`
+teaching_skill_ids:
+  - loop-iteration
+  - condition-in-loop
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-04-practice-02
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: loop-lab
   group_id: group-04
   slot: practice-02
-  placeholder_auto_ac: true

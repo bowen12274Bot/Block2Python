@@ -1,5 +1,5 @@
 level_id: group-04-practice-04
-title: Loop Lab
+title: "Loop Lab: Batch Energy"
 chapter_id: map-groups
 order_index: 4004
 prerequisite_level_ids:
@@ -7,15 +7,32 @@ prerequisite_level_ids:
 next_level_ids:
   - group-04-practice-05
 prompt: |
-  Placeholder practice level 04 for group-04.
+  劇情：
+  你要一次讀取一批能量數據，計算總能量以穩定實驗艙。
+
+  任務：
+  第一行輸入整數 n。
+  接著輸入 n 個整數（每行一個）。
+  輸出這 n 個整數的總和。
 learning_markdown: |
-  Placeholder practice scaffold.
+  目標：練習「先讀筆數，再迴圈讀資料」的常見模式。
+  先讀 n，再讓迴圈跑 n 次累加。
+story_intro_markdown: |
+  Byte 說：「這是批次資料，不是固定兩三筆，必須用迴圈吃完整包。」
+story_outro_markdown: |
+  實驗艙壓力回穩，面板顯示 `Batch aggregation complete.`
+teaching_skill_ids:
+  - loop-iteration
+  - accumulator-pattern
+tutor_policy:
+  allow_full_solution: false
+  max_hint_steps: 3
+  response_tone: clear
 testcase_dir: cases/group-04-practice-04
 judge_policy:
-  time_limit_ms: 1000
-  memory_limit_mb: 64
+  time_limit_ms: 3000
+  memory_limit_mb: 256
 metadata:
-  stage: map-format-skeleton
+  stage: loop-lab
   group_id: group-04
   slot: practice-04
-  placeholder_auto_ac: true
