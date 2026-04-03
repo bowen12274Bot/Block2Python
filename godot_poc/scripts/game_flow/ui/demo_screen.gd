@@ -28,6 +28,7 @@ signal back_requested()
 @onready var extra_icon_art: TextureRect = $Overlay/TopBar/TopBarRoot/ActionRow/ExtraButton/ExtraIconArt
 @onready var prompt_text: RichTextLabel = $Overlay/LeftInfoPanel/InfoScroll/InfoContent/PromptText
 @onready var learning_text: RichTextLabel = $Overlay/LeftInfoPanel/InfoScroll/InfoContent/LearningText
+@onready var unlock_header: Label = $Overlay/LeftInfoPanel/InfoScroll/InfoContent/UnlockHeader
 @onready var unlock_blocks_container: HFlowContainer = $Overlay/LeftInfoPanel/InfoScroll/InfoContent/UnlockBlocks
 @onready var workspace_hint: Label = $Overlay/WorkspacePanel/WorkspaceRoot/WorkspaceSurface/WorkspaceHint
 @onready var workspace_surface: PanelContainer = $Overlay/WorkspacePanel/WorkspaceRoot/WorkspaceSurface
@@ -51,6 +52,8 @@ func _ready() -> void:
 	python_preview.placeholder_text = EMPTY_PREVIEW_TEXT
 	python_preview.text = EMPTY_PREVIEW_TEXT
 	workspace_hint.text = EMPTY_WORKSPACE_TEXT
+	unlock_header.visible = false
+	unlock_blocks_container.visible = false
 
 func show_demo(demo_view: Dictionary) -> void:
 	var previous_level_id: String = str(_current_view.get("current_level_id", ""))

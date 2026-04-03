@@ -4,26 +4,37 @@ chapter_id: map-groups
 order_index: 1000
 prompt: |
   劇情：
-  Input Gate 的主控台仍在雜訊狀態，Byte 要你先做最小校準，
-  讓系統重新學會「接收一行訊號並正確回顯」。
-
-  任務：
-  讀取一整行字串 codename（可能包含空白），輸出：
-  Signal: <codename>
-
-  注意：大小寫、空白、標點都必須完全一致。
+  這一關的重點，是學會積木對應到的 Python 程式碼是什麼。
 learning_markdown: |
-  目標：熟悉一行字串輸入與精確輸出格式。
-  你需要：
-  1. 用一次 input()/getline 讀入完整字串。
-  2. 依指定格式輸出 Signal: <codename>。
-  3. 保留原本字串內容，不自行裁切中間空白。
+  目標：認識這兩個積木會變成什麼 Python。
+
+  1. input 積木
+  作用：讀入一行文字
+  對應的 Python 寫法：
+  input()
+
+  2. print 積木
+  作用：把內容輸出到畫面上
+  對應的 Python 寫法：
+  print(...)
+
+  在這個右側工作區，你會看到「input text」和「輸出」積木。
+  你可以將積木拖出來，再按 Convert 就能看到下方轉換成 Python 的程式了。
+
+  記住：
+  - input 是「讀進來」
+  - print 是「印出去」
+  - 積木拼出的流程，可以轉成對應的 Python 程式
 story_intro_markdown: |
-  Byte 指著閃爍的終端：「先把校準訊號送進去，主控台才會信任我們。」
-  螢幕顯示：`Transmit codename for calibration.`
+  Byte 發現 Input Gate 的主控台終於重新連上了，但訊號還不穩定。
+  在正式開門之前，必須先送出一組校準代號，確認系統還能正確接收與回傳資料。
+
+  Transmit codename for calibration.`
 story_outro_markdown: |
-  主控台回覆 `Signal accepted.`。
-  第一層校準完成，開始修復 Input Gate 的實戰流程。
+  控制台回傳：`Signal accepted.`
+
+  代表這組校準訊號已經成功送達。
+  Input Gate 的基本通訊流程恢復正常，可以繼續進入下一步訓練。
 next_level_ids:
   - group-01-practice-01
 teaching_skill_ids:
